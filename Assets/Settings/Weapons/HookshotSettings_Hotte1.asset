@@ -1,0 +1,101 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66c7e3e357fff28449bfd31e19d7c8eb, type: 3}
+  m_Name: HookshotSettings_Hotte1
+  m_EditorClassIdentifier: 
+  hookResourceName: GrapplingHook
+  bounceLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  lineCheckLayers:
+    serializedVersion: 2
+    m_Bits: 257
+  travelIntersectBehavior: 2
+  hookedIntersectBehavior: 2
+  basePullSpeed: 50
+  baseRetractSpeed: 600
+  retractAcceleration: 300
+  lateralManeuverForce: 75
+  yankForce: 85
+  maneuverForceCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: -1
+      outSlope: -1
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: -0.04546188
+      outSlope: -0.04546188
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.041818857
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  deployThreshold: 1
+  releaseThreshold: 0.5
+  punchWhipSpeed: 1.9
+  minPunchWhipDist: 5
+  punchWhipBoost: 2
+  punchWhipCooldown: 0
+  launchHaptics:
+    amplitude: 1
+    duration: 0.1
+    behaviorCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  reelHaptics:
+    amplitude: 0
+    duration: 0
+    behaviorCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  hitHaptics:
+    amplitude: 0
+    duration: 0
+    behaviorCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  releaseHaptics:
+    amplitude: 0
+    duration: 0
+    behaviorCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  launchSound: {fileID: 0}
+  whipSound: {fileID: 8300000, guid: 0a1f0db4823577d4bb7b69d63b9ac65f, type: 3}
+  reelSound: {fileID: 0}
+  releaseSound: {fileID: 0}
+  hitSound: {fileID: 0}
+  playerHitSound: {fileID: 0}
+  bounceSound: {fileID: 0}

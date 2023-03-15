@@ -1,0 +1,164 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75231b2903c64f74bbd587426850c128, type: 3}
+  m_Name: ChainsawSettings_Hotte1
+  m_EditorClassIdentifier: 
+  grindSpeed: 55
+  grindLayers:
+    serializedVersion: 2
+    m_Bits: 257
+  triggerGrindMultiplier: 1.5
+  grindSweetSpot: {x: 0.11164844, y: 0.2250574}
+  bladeWidth: 0.17
+  bladePreRetractDistance: 0.08
+  bladePreRetractCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.001159668
+      inSlope: 0.4788914
+      outSlope: 0.4788914
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.030131482
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  bladeTraverseDistance: 1.6
+  bladeExtendTime: 0.155
+  bladeExtendCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  bladeRetractCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.001159668
+      inSlope: 0.17937474
+      outSlope: 0.17937474
+      tangentMode: 0
+      weightedMode: 3
+      inWeight: 0
+      outWeight: 0.38568297
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 8.258449
+      outSlope: 8.258449
+      tangentMode: 0
+      weightedMode: 1
+      inWeight: 0.115534365
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  wristExtendDistance: 0.0662
+  wristDeployPeriod: 0.5
+  wristDeployCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  maxWristAngle: 80
+  wristLerpRate: 7.7
+  wristRotReturnRate: 400
+  reverseGripAngle: 105
+  reverseGripLerpRate: 7
+  reverseGripReturnRate: 500
+  triggerThreshold: 0.9
+  releaseThreshold: 0.5
+  swingSpeedRange: {x: 0.5, y: 2}
+  extendSound: {fileID: 8300000, guid: f7a515930a8dc6741a608db1e42a190c, type: 3}
+  runningSound: {fileID: 0}
+  runningWallSound: {fileID: 0}
+  sheathSound: {fileID: 8300000, guid: ba699daa1a77ff547b65b08e06538eca, type: 3}
+  extendHaptics:
+    amplitude: 1
+    duration: 0.15
+    behaviorCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  retractHaptics:
+    amplitude: 0.8
+    duration: 0.15
+    behaviorCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  activeHapticPulse:
+    amplitude: 0.7
+    duration: 0.045
+    behaviorCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  activeHapticMagnitudeVariance: 0.1
+  activeHapticFrequencyVariance: 0.023
