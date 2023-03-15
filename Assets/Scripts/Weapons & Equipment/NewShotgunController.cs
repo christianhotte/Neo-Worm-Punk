@@ -267,11 +267,22 @@ public class NewShotgunController : PlayerEquipment
     public Projectile Fire()
     {
         //Validation & initialization:
-        Projectile projectile = null;                                             //Initialize reference to projectile
-        if (loadedShots <= 0) { DryFire(); return projectile; }                   //Dry-fire if weapon is out of shots
-        if (breachOpen) { DryFire(); return projectile; }                         //Dry-fire if weapon breach is open
-        if (locked) return projectile;                                            //Return if locked by another weapon
-        Transform currentBarrel = barrels[currentBarrelIndex];                    //Get reference to active barrel
+        Projectile projectile = null;                           //Initialize reference to projectile
+        if (loadedShots <= 0) { DryFire(); return projectile; } //Dry-fire if weapon is out of shots
+        if (breachOpen) { DryFire(); return projectile; }       //Dry-fire if weapon breach is open
+        if (locked) return projectile;                          //Return if locked by another weapon
+        Transform currentBarrel = barrels[currentBarrelIndex];  //Get reference to active barrel
+
+        //Put weapon at default position:
+        if (reverseFireStage == 0) //Only snap weapon while in normal fire mode
+        {
+            currentAddOffset = Vector3.zero;                      //Reset positional offset
+            recoilRotOffset = 0;                                  //Reset rotational offset (due to recoil)
+            transform.localScale = baseScale;                     //Set shotgun back to base scale
+            reciprocatingAssembly.localPosition = baseReciproPos; //Return reciprocating barrels to base position
+            transform.position = targetTransform.position;        //Move to exact position of target transform
+            transform.rotation = targetTransform.rotation;        //Rotate to exact orientation of target transform
+        }
 
         //Fire projectile:
         if (debugFireLocal) //Weapon is in local fire mode
