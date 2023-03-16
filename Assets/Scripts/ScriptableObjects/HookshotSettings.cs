@@ -35,6 +35,7 @@ public class HookshotSettings : ScriptableObject
     [Header("Feel:")]
     [Range(0, 1), Tooltip("How much the player must squeeze the grip in order to launch the grappling hook.")] public float deployThreshold = 1;
     [Range(0, 1), Tooltip("How much the player must release the grip for the grappling hook to reel back.")]   public float releaseThreshold = 0.5f;
+    [Min(1), Tooltip("Scale hook grows to when not stowed.")]                                                  public float hookTravelScale;
     [Header("Extras:")]
     [Min(0), Tooltip("How much velocity player must punch with to trigger Insta-Hook system.")]                                              public float punchWhipSpeed;
     [Min(0), Tooltip("Minimum distance at which full punch whip can be triggered on an object (also distance at which hook will release).")] public float minPunchWhipDist;
