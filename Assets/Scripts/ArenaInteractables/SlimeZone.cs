@@ -8,6 +8,7 @@ public class SlimeZone : MonoBehaviour
     internal bool playerinSlime = false;
     internal PlayerController PlayerScript;
     internal HoopBoost Hoopscript;
+    public MeshRenderer SlimeModel;
     internal Rigidbody playerRb;
     void Start()
     {
@@ -40,9 +41,18 @@ public class SlimeZone : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (Hoopscript.slimed)
+        {
+            SlimeModel.enabled = true;
+        }
+        else
+        {
+            SlimeModel.enabled = false;
+        }
         if (playerinSlime && Hoopscript.slimed)
         {
             playerRb.drag = 4f;
         }
     }
+
 }
