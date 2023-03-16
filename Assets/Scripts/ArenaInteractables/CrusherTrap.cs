@@ -46,10 +46,12 @@ public class CrusherTrap : MonoBehaviour
     }
     public void ActivateCrusher()
     {
+        Debug.Log("Activated");
         cooldown = true;
         foreach (NetworkPlayer player in PlayersInTrap)
         {
             player.RPC_Hit(100, triggerScript.ActivatingPlayer.photonView.ViewID);
+            Debug.Log("BOOSH");
         }
         PlayersInTrap.Clear();
         StartCoroutine(CrusherCooldown());
@@ -57,6 +59,7 @@ public class CrusherTrap : MonoBehaviour
     public IEnumerator CrusherCooldown()
     {
         yield return new WaitForSeconds(5.0f);
+        Debug.Log("CooldownDone");
         cooldown = false;
         PlayersInTrap.Clear();
         triggerScript.cooldown = false;

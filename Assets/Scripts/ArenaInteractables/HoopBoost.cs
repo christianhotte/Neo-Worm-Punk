@@ -5,11 +5,12 @@ using UnityEngine;
 public class HoopBoost : MonoBehaviour
 {
     public Transform hoopCenter;
+    public TrapTrigger triggerScript;
     private PlayerController PC;
     private Rigidbody playerRB;
     public float boostAmount;
     public bool maintainsOtherVelocity;
-    internal bool launchin = false;
+    internal bool launchin = false,slimed=false;
     // Start is called before the first frame update
     void Start()
     {        
@@ -23,6 +24,11 @@ public class HoopBoost : MonoBehaviour
         launchin = true;
         PC = PlayerController.instance;
         playerRB = PC.bodyRb;
+        if (slimed)
+        {
+            yield return null;
+        }
+
         if(maintainsOtherVelocity)
         {
             //just add the boostAmount to the velocity of the player

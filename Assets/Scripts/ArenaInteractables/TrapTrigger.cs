@@ -8,8 +8,10 @@ using UnityEngine.Events;
 public class TrapTrigger : Targetable
 {
     private CrusherTrap crushScript;
+    private HoopBoost hoopScript;
     public GameObject indicatorLight,attatchedTrap;
-    internal bool cooldown = false;
+    public GameObject[] MultiTrapsAttacthed;
+    internal bool cooldown = false,multiTrigger=false;
     internal NetworkPlayer ActivatingPlayer;
     public UnityEvent onTrapActivated;
 
@@ -18,7 +20,6 @@ public class TrapTrigger : Targetable
     {
 
     }
-
     // Update is called once per frame
     void Update()
     {
@@ -29,7 +30,6 @@ public class TrapTrigger : Targetable
         }
         else
         {
-
             indicatorLight.SetActive(false);
             this.active = false;
         }
@@ -44,7 +44,6 @@ public class TrapTrigger : Targetable
             {
                 onTrapActivated.Invoke();
             }
-
       }
   }
     public void CrusherTrap()
@@ -53,6 +52,24 @@ public class TrapTrigger : Targetable
         crushScript = attatchedTrap.GetComponent<CrusherTrap>();
         crushScript.triggerScript = this.GetComponent<TrapTrigger>();
         crushScript.ActivateCrusher();
-
+    }
+    public void SlimeHoop()
+    {
+        cooldown = true;
+        if (multiTrigger)
+        {
+            foreach(GameObject trap in MultiTrapsAttacthed)
+            {
+                hoopScript = trap.GetComponent<HoopBoost>();
+                hoopScript.triggerScript = this.GetComponent<TrapTrigger>();
+                hoopScript.slimed = true;
+            }
+        }
+        else
+        {
+            hoopScript = attatchedTrap.GetComponent<HoopBoost>();
+            hoopScript.triggerScript = this.GetComponent<TrapTrigger>();
+            hoopScript.slimed = true;
+        }
     }
 }
