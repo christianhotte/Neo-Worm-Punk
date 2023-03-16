@@ -8,13 +8,14 @@ public class DoorTrigger : MonoBehaviour
     [SerializeField, Tooltip("The animator for the door.")] private Animator DoorAnimator;
     public UnityEvent OnDoorClose;
 
-    private void OnTriggerEnter(Collider other)
+    public void CloseDoor()
     {
-        //If the trigger collides with the player, raise the tube door
-        if (other.CompareTag("Player"))
-        {
-            DoorAnimator.Play("Tube_Door_Up");
-            OnDoorClose.Invoke();
-        }
+        DoorAnimator.Play("Tube_Door_Up");
+        Invoke("CallInvoke", 1f);
+    }
+
+    private void CallInvoke()
+    {
+        OnDoorClose.Invoke();
     }
 }
