@@ -5,25 +5,32 @@ using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.SceneManagement;
 using TMPro;
+using UnityEngine.Events;
 
 public class ReadyUpManager : MonoBehaviourPunCallbacks
 {
     // Can probably have a button that lights up green or red to show if a player is ready through the network.
     //[SerializeField] private GameObject readyButton;
+    public static ReadyUpManager instance;
 
     [SerializeField] private TextMeshProUGUI playerReadyText;
-
-    [SerializeField] private LockerTubeController[] lockerTubes;
+    [SerializeField] private string sceneToLoad = "DM_0.13_Arena";
 
     private const int MINIMUM_PLAYERS_NEEDED = 2;   // The minimum number of players needed for a round to start
-    [SerializeField] private string sceneToLoad = "DM_0.11_Arena";
 
     private int playersReady, playersInRoom;
-    
-    // Is called upon the first frame.
-    private void Start()
+    internal LockerTubeController localPlayerTube;
+
+    private void OnDestroy()
     {
-        UpdateReadyText();
+        instance = null;
+    }
+    public void LeverStateChanged()
+    {
+        LeverController localLever = localPlayerTube.GetComponentInChildren<LeverController>();
+        NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().isReady = localLever.GetLeverValue() == 1;
+        NetworkManagerScript.localNetworkPlayer.SyncStats();
+        UpdateStatus(localPlayerTube.tubeNumber);
     }
 
     // Once the room is joined.
@@ -57,13 +64,6 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
         }*/
     }
 
-    // Once the level is pulled to signify that the player is ready...
-    public void ReadyLeverPulled(LeverController currentLever)
-    {
-        NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().isReady = currentLever.GetLeverValue() == 1;
-        NetworkManagerScript.localNetworkPlayer.SyncStats();
-    }
-
     public void UpdateStatus(int tubeID)
     {
         Debug.Log("Updating RPC...");
@@ -74,7 +74,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     [PunRPC]
     public void RPC_UpdateReadyStatus(int tubeID, bool updatedPlayerReady)
     {
-        lockerTubes[tubeID].UpdateLights(updatedPlayerReady);
+        LockerTubeController.GetTubeByNumber(tubeID).UpdateLights(updatedPlayerReady);
 
         // Get the number of players that have readied up
         playersReady = GetAllPlayersReady();
@@ -89,7 +89,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
             foreach (var player in NetworkPlayer.instances)
                 player.networkPlayerStats = new PlayerStats();
 
-            NetworkManagerScript.instance.LoadSceneWithFade(sceneToLoad);
+            //NetworkManagerScript.instance.LoadSceneWithFade(sceneToLoad);
         }
     }
 
@@ -98,6 +98,15 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     /// </summary>
     private void UpdateReadyText()
     {
+        if (playerReadyText == null)
+        {
+            foreach (TextMeshProUGUI tmp in FindObjectsOfType<TextMeshProUGUI>())
+            {
+                if (tmp.gameObject.name == "PlayerReadyText") { playerReadyText = tmp; break; }
+            }
+            if (playerReadyText == null) return;
+        }
+
         string message = "Players Ready: " + playersReady.ToString() + "/" + playersInRoom;
 
         if (playersInRoom < MINIMUM_PLAYERS_NEEDED && !GameSettings.debugMode)
