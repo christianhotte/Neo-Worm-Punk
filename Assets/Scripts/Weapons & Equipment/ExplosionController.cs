@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
 public class ExplosionController : MonoBehaviour
 {
@@ -62,8 +63,8 @@ public class ExplosionController : MonoBehaviour
                 launchForce *= (distance / (newScale / 2)) * maxLaunchForce;                //Modify launch force based on how close player is to epicenter of explosion
 
                 //Send signals:
-                player.photonView.RPC("RPC_Launch", Photon.Pun.RpcTarget.All, launchForce);                  //Launch player using calculated force
-                if (distance <= damageRadius) player.photonView.RPC("RPC_Hit", Photon.Pun.RpcTarget.All, 1); //Damage player if inside radius
+                player.photonView.RPC("RPC_Launch", RpcTarget.All, launchForce);                                   //Launch player using calculated force
+                if (distance <= damageRadius) player.photonView.RPC("RPC_Hit", RpcTarget.All, new object[] { 1 }); //Damage player if inside radius
 
                 //Cleanup:
                 hitPlayers.Add(player); //Add player to list to make sure that it does not get hit multiple times by the same explosion

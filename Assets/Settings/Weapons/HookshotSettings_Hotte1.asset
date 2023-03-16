@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66c7e3e357fff28449bfd31e19d7c8eb, type: 3}
   m_Name: HookshotSettings_Hotte1
   m_EditorClassIdentifier: 
-  hookResourceName: GrapplingHook
+  hookResourceName: GrapplingHook2
   bounceLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -26,36 +26,14 @@ MonoBehaviour:
   retractAcceleration: 300
   lateralManeuverForce: 75
   yankForce: 85
-  maneuverForceCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: -1
-      outSlope: -1
-      tangentMode: 34
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 0
-      inSlope: -0.04546188
-      outSlope: -0.04546188
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.041818857
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
   deployThreshold: 1
   releaseThreshold: 0.5
+  hookTravelScale: 3
   punchWhipSpeed: 1.9
   minPunchWhipDist: 5
   punchWhipBoost: 2
   punchWhipCooldown: 0
+  holstersWeapon: 0
   launchHaptics:
     amplitude: 1
     duration: 0.1
