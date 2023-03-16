@@ -26,7 +26,7 @@ public class Projectile : MonoBehaviourPunCallbacks
     internal int originPlayerID;        //PhotonID of player which last fired this projectile
     private protected Vector3 velocity; //Speed and direction at which projectile is traveling
     private protected Transform target; //Transform which projectile is currently homing toward
-
+    
     internal float totalDistance;              //Total travel distance covered by this projectile
     private float timeAlive;                   //How much time this projectile has been alive for
     private protected float estimatedLifeTime; //Approximate projectile lifetime calculated based on velocity and range
@@ -62,6 +62,7 @@ public class Projectile : MonoBehaviourPunCallbacks
         foreach (Targetable targetable in Targetable.instances) //Iterate through list of targetables
         {
             //Eliminate non-viable targets:
+            if (!targetable.active) continue; //Disregard inactive targets
             if (targetable.type == Targetable.TargetType.BulletsOnly && isHook || //Targetable object is only targetable by bullets
                 targetable.type == Targetable.TargetType.HooksOnly && !isHook)    //Targetable object is only targetable by hooks
             {
@@ -441,8 +442,8 @@ public class Projectile : MonoBehaviourPunCallbacks
         else //Hit object is not a player
         {
             //Hit through targetable:
-            Targetable targetObject = hitInfo.collider.GetComponent<Targetable>(); //Try to get targetable script from target
-            if (targetObject != null) targetObject.IsHit(settings.damage);         //Indicate to targetable that it has been hit
+            Targetable targetObject = hitInfo.collider.GetComponent<Targetable>();         //Try to get targetable script from target
+            if (targetObject != null) targetObject.IsHit(settings.damage, originPlayerID); //Indicate to targetable that it has been hit
 
             //Surface explosion:
             if (settings.explosionPrefab != null) //Only explode if projectile has an explosion prefab

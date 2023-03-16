@@ -405,7 +405,7 @@ public class PlayerEquipment : MonoBehaviour
     /// <summary>
     /// Updates position of rigidbody follower to match position of target.
     /// </summary>
-    private void PerformFollowerUpdate()
+    private protected void PerformFollowerUpdate()
     {
         //Calculate follower position:
         Vector3 targetPos = holstered ? preferredHolster.position : targetTransform.position;                                                     //Get base target position for rigidbody follower (either hand or holster)
