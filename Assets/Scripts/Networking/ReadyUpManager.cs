@@ -21,6 +21,12 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     private int playersReady, playersInRoom;
     internal LockerTubeController localPlayerTube;
 
+    private void Awake()
+    {
+        if (instance != null) { Destroy(gameObject); } else { instance = this; }
+        DontDestroyOnLoad(gameObject);
+    }
+
     private void OnDestroy()
     {
         instance = null;
@@ -28,7 +34,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     public void LeverStateChanged()
     {
         LeverController localLever = localPlayerTube.GetComponentInChildren<LeverController>();
-        NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().isReady = localLever.GetLeverValue() == 1;
+        NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().isReady = localLever.GetLeverState() == LeverController.HingeJointState.Max;
         NetworkManagerScript.localNetworkPlayer.SyncStats();
         UpdateStatus(localPlayerTube.tubeNumber);
     }
@@ -36,6 +42,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     // Once the room is joined.
     public override void OnJoinedRoom()
     {
+        playersInRoom = NetworkManagerScript.instance.GetMostRecentRoom().PlayerCount;
         UpdateReadyText();
 
         // If the amount of players in the room is maxed out, close the room so no more people are able to join.
@@ -67,14 +74,15 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     public void UpdateStatus(int tubeID)
     {
         Debug.Log("Updating RPC...");
-        photonView.RPC("RPC_UpdateReadyStatus", RpcTarget.AllBuffered, tubeID, NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().isReady);
+        photonView.RPC("RPC_UpdateReadyStatus", RpcTarget.All, tubeID, NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().isReady);
     }
 
     // Tells the master server the amount of players that are ready to start the match.
     [PunRPC]
     public void RPC_UpdateReadyStatus(int tubeID, bool updatedPlayerReady)
     {
-        LockerTubeController.GetTubeByNumber(tubeID).UpdateLights(updatedPlayerReady);
+        LockerTubeController tube = LockerTubeController.GetTubeByNumber(tubeID);
+        if (tube != null) tube.UpdateLights(updatedPlayerReady);
 
         // Get the number of players that have readied up
         playersReady = GetAllPlayersReady();
@@ -111,7 +119,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
 
         if (playersInRoom < MINIMUM_PLAYERS_NEEDED && !GameSettings.debugMode)
         {
-            message += "\n<size=500>Not Enough Players To Start.</size>";
+            message += "\n<size=25>Not Enough Players To Start.</size>";
         }
 
         Debug.Log(message);
