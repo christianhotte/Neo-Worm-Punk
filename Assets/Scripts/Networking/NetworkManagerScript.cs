@@ -29,7 +29,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
     private Room mostRecentRoom;
 
-
     //RUNTIME METHODS:
     private void Awake()
     {
@@ -49,8 +48,10 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     }
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        // If we are loaded into the Network Locker scene, and we are the master client
         if (scene.name == roomScene)
         {
+            // The master client is only spawning 1 ReadyUpManager.
             if (PhotonNetwork.IsMasterClient)
             {
                 PhotonNetwork.Instantiate(readyUpManagerName, Vector3.zero, Quaternion.identity);
@@ -73,7 +74,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         RoomOptions roomOptions = new RoomOptions();
         Hashtable customRoomSettings = new Hashtable();
 
-        customRoomSettings.Add("RoundLength", 300);
+        customRoomSettings.Add("RoundLength", 600);
 
         roomOptions.IsVisible = true; // The player is able to see the room
         roomOptions.IsOpen = true; // The room is open.
@@ -155,7 +156,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     private readonly string[] wormAdjectives = { "Unfortunate", "Sad", "Despairing", "Grotesque", "Despicable", "Abhorrent", "Regrettable", "Incorrigible", "Greasy", "Platonic", "Sinister", "Hideous", "Glum", "Blasphemous", "Malignant", "Undulating", "Treacherous", "Hostile", "Slimy", "Squirming", "Blubbering", "Twisted", "Manic", "Slippery", "Wet", "Moist", "Lugubrious", "Tubular", "Little", "Erratic", "Pathetic" };
     private readonly string[] wormNouns = { "Invertebrate", "Wormlet", "Creature", "Critter", "Fool", "Goon", "Specimen", "Homonculus", "Grubling", "Wormling", "Nightcrawler", "Stinker", "Rapscallion", "Scalliwag", "Beastling", "Crawler", "Larva", "Dingus", "Freak", "Blighter", "Cretin", "Dink", "Unit", "Denizen", "Creepy-Crawlie", "Parasite", "Organism" };
     private readonly string[] wormAdjectivesBad = { "Guzzling", "Fleshy", "Sopping", "Throbbing", "Promiscuous", "Flaccid", "Erect" };
-    private readonly string[] wormNounsBad = { "Guzzler", "Pervert", "Fucko" };
+    private readonly string[] wormNounsBad = { "Guzzler", "Pervert", "Fucko", "Pissbaby" };
 
     /// <summary>
     /// Generates a random nickname for the player.
@@ -263,7 +264,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         }
 
         //Cleanup:
-        localNetworkPlayer.LeftRoom();
         DeSpawnNetworkPlayer(); //De-spawn local network player whenever player leaves a room
     }
     public override void OnRoomListUpdate(List<RoomInfo> roomList)

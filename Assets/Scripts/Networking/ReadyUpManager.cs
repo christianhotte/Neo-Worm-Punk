@@ -14,7 +14,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     public static ReadyUpManager instance;
 
     [SerializeField] private TextMeshProUGUI playerReadyText;
-    [SerializeField] private string sceneToLoad = "DM_0.13_Arena";
+    [SerializeField] private string sceneToLoad = "DM_0.14_Arena";
 
     private const int MINIMUM_PLAYERS_NEEDED = 2;   // The minimum number of players needed for a round to start
 
@@ -34,7 +34,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     public void LeverStateChanged()
     {
         LeverController localLever = localPlayerTube.GetComponentInChildren<LeverController>();
-        NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().isReady = localLever.GetLeverState() == LeverController.HingeJointState.Max;
+        NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().isReady = (localLever.GetLeverState() == LeverController.HingeJointState.Max);
         NetworkManagerScript.localNetworkPlayer.SyncStats();
         UpdateStatus(localPlayerTube.tubeNumber);
     }
@@ -63,18 +63,13 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
                 UpdateReadyText();
             }
         }
-
-        // The room becomes open to let more people come in.
-/*        if (PhotonNetwork.CurrentRoom.PlayerCount < PhotonNetwork.CurrentRoom.MaxPlayers)
-        {
-            if (PhotonNetwork.InRoom) PhotonNetwork.CurrentRoom.IsOpen = true;
-        }*/
+        UpdateReadyText();
     }
 
     public void UpdateStatus(int tubeID)
     {
         Debug.Log("Updating RPC...");
-        photonView.RPC("RPC_UpdateReadyStatus", RpcTarget.All, tubeID, NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().isReady);
+        photonView.RPC("RPC_UpdateReadyStatus", RpcTarget.AllBuffered, tubeID, NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().isReady);
     }
 
     // Tells the master server the amount of players that are ready to start the match.
@@ -87,8 +82,12 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
         // Get the number of players that have readied up
         playersReady = GetAllPlayersReady();
         playersInRoom = PhotonNetwork.CurrentRoom.PlayerCount;
-
+        
         UpdateReadyText();
+        foreach (var player in NetworkPlayer.instances)
+        {
+            print("Player " + player.photonView.ViewID + " ready status: " + (player.networkPlayerStats.isReady ? "READY" : "NOT READY"));
+        }
 
         // If all players are ready, load the game scene
         if (playersReady == playersInRoom && (playersInRoom >= MINIMUM_PLAYERS_NEEDED || GameSettings.debugMode))
@@ -97,14 +96,24 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
             foreach (var player in NetworkPlayer.instances)
                 player.networkPlayerStats = new PlayerStats();
 
-            //NetworkManagerScript.instance.LoadSceneWithFade(sceneToLoad);
+            NetworkManagerScript.instance.LoadSceneWithFade(sceneToLoad);
         }
     }
+
+    [PunRPC]
+    public void RPC_UpdateTubeOccupation(bool[] tubeStates)
+    {
+        for (int i = 0; i < 6; i++)
+        {
+
+        }
+    }
+
 
     /// <summary>
     /// Updates the text in the center of the room.
     /// </summary>
-    private void UpdateReadyText()
+    public void UpdateReadyText()
     {
         if (playerReadyText == null)
         {

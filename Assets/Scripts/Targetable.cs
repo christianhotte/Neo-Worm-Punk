@@ -33,7 +33,7 @@ public class Targetable : MonoBehaviour
     [Tooltip("Which projectiles will be able to lock on to this targetable instance.")]                            public TargetType type = TargetType.All;
 
     //Runtime Variables:
-    internal bool active;
+    internal bool active = true;
 
     //RUNTIME VARIABLES:
     private protected virtual void Awake()

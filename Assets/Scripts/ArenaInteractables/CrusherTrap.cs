@@ -8,7 +8,7 @@ public class CrusherTrap : MonoBehaviour
     public bool cooldown = false;
     internal TrapTrigger triggerScript;
     public GameObject IndicatorLight;
-    static List<NetworkPlayer> PlayersInTrap = new List<NetworkPlayer>();
+    List<NetworkPlayer> PlayersInTrap = new List<NetworkPlayer>();
 
     // Start is called before the first frame update
     void Start()
@@ -34,7 +34,10 @@ public class CrusherTrap : MonoBehaviour
     {
         if (other.name == "XR Origin" && !cooldown)
         {
-            PlayersInTrap.Add(other.GetComponent<NetworkPlayer>());
+            if (!PlayersInTrap.Contains(other.GetComponent<NetworkPlayer>()))
+            {
+                PlayersInTrap.Add(other.GetComponent<NetworkPlayer>());
+            }
         }
     }
     private void OnTriggerExit(Collider other)
@@ -50,6 +53,9 @@ public class CrusherTrap : MonoBehaviour
         cooldown = true;
         foreach (NetworkPlayer player in PlayersInTrap)
         {
+            Debug.Log(triggerScript.ActivatingPlayer.photonView.ViewID);
+            Debug.Log(player.name);
+
             player.RPC_Hit(100, triggerScript.ActivatingPlayer.photonView.ViewID);
             Debug.Log("BOOSH");
         }

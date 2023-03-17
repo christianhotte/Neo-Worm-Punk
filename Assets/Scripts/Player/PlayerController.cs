@@ -253,6 +253,8 @@ public class PlayerController : MonoBehaviour
         switch (context.action.name) //Determine behavior based on input action
         {
             case "RightStickPress": if (context.started) { CenterCamera(); } break; //Center camera when player presses the right stick
+            case "RightStick":
+                break;
         }
     }
     /// <summary>

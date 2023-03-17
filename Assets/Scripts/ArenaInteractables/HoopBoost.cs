@@ -11,14 +11,25 @@ public class HoopBoost : MonoBehaviour
     public float boostAmount;
     public bool maintainsOtherVelocity;
     internal bool launchin = false,slimed=false;
+    public Transform hoopInner;
+    public Transform hoopOuter;
     // Start is called before the first frame update
     void Start()
     {        
     }
     // Update is called once per frame
     void Update()
-    {          
+    {
+        RotateHoop(hoopInner, new Vector3(0.75f, 0, 0));
+        RotateHoop(hoopOuter, new Vector3(0f, 0, 0));
     }
+
+
+    private void RotateHoop(Transform hoopPart, Vector3 hoopRotateAmount)
+    {
+        hoopPart.Rotate(hoopRotateAmount);
+    }
+
     public IEnumerator HoopLaunch(Collider hitPlayer)
     {
         launchin = true;
@@ -46,6 +57,11 @@ public class HoopBoost : MonoBehaviour
         
         yield return new WaitForSeconds(0.2f);//cooldown so only one boost given
         launchin = false;
+    }
+    public IEnumerator SlimeTime()
+    {
+        yield return new WaitForSeconds(10.0f);
+        slimed = false;
     }
 
 }
