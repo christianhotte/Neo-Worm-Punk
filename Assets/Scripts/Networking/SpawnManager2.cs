@@ -40,33 +40,44 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
     }
 
     // Moves the local demo player to a spawn point.
-    private void MoveDemoPlayerToSpawnPoint()
+    public void MoveDemoPlayerToSpawnPoint()
     {
-        //int spawnPointIndex = PhotonNetwork.LocalPlayer.ActorNumber - 1;
-        //Debug.Log("Actor Number: " + spawnPointIndex);
-        //Transform spawnPoint = spawnPoints[spawnPointIndex];
-
-        //demoPlayer.transform.position = spawnPoint.position;
-        //demoPlayer.transform.rotation = spawnPoint.rotation;
-
-
-
-        /*Player[] playerList = PhotonNetwork.PlayerList;
-          for (int x = 0; x < playerList.Length; x++)
-        {
-            if (playerList[x].IsLocal)
-            {
-                Transform spawnPoint = spawnPoints[x];
-                demoPlayer.transform.position = spawnPoint.position;
-            }
-        }*/
-
         LockerTubeController spawnTube = GetEmptyTube();
         if (spawnTube != null)
         {
             spawnTube.occupied = true;
             PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
             PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
+
+            LeverController lever = spawnTube.GetComponentInChildren<LeverController>();
+            lever.OnStateChanged.AddListener(ReadyUpManager.instance.LeverStateChanged);
+
+            if (ReadyUpManager.instance != null)
+            {
+                ReadyUpManager.instance.UpdateStatus(spawnTube.tubeNumber);
+                ReadyUpManager.instance.localPlayerTube = spawnTube;
+            }
+            
+        }
+    }
+    public void MoveDemoPlayerToSpawnPoint(int tubeIndex)
+    {
+        LockerTubeController spawnTube = LockerTubeController.GetTubeByNumber(tubeIndex);
+        if (spawnTube != null)
+        {
+            spawnTube.occupied = true;
+            PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
+            PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
+
+            //Add lever listener:
+            LeverController lever = spawnTube.GetComponentInChildren<LeverController>();
+            lever.OnStateChanged.AddListener(ReadyUpManager.instance.LeverStateChanged);
+
+            if (ReadyUpManager.instance != null)
+            {
+                ReadyUpManager.instance.UpdateStatus(spawnTube.tubeNumber);
+                ReadyUpManager.instance.localPlayerTube = spawnTube;
+            }
         }
     }
 

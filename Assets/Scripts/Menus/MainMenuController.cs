@@ -49,6 +49,7 @@ public class MainMenuController : MonoBehaviour
         Panel2Animator.SetBool("Activated", false);
         Panel3Animator.SetBool("Activated", false);
         StartCoroutine(MovePlayerInMenu(MenuArea.FINAL, speed));
+        Invoke("WaitOnCloseDoor", speed);
     }
 
     /// <summary>
@@ -58,6 +59,11 @@ public class MainMenuController : MonoBehaviour
     public void TransportToTube(float speed)
     {
         StartCoroutine(MovePlayerInMenu(MenuArea.TUBE, speed));
+    }
+
+    private void WaitOnCloseDoor()
+    {
+        FindObjectOfType<DoorTrigger>().CloseDoor();
     }
 
     private IEnumerator MovePlayerInMenu(MenuArea menuArea, float speed)

@@ -9,11 +9,11 @@ public class IgnorePlayerCollision : MonoBehaviour
         if (!collision.collider.CompareTag("PlayerHand"))
         {
             Physics.IgnoreCollision(GetComponent<Collider>(), collision.collider, true);
-            Debug.Log(gameObject.name + " Ignoring Collision Of " + collision.collider + "...");
+            //Debug.Log(gameObject.name + " Ignoring Collision Of " + collision.collider + "...");
         }
         else
         {
-            Debug.Log(gameObject.name + "Colliding With " + collision.collider + "...");
+            //Debug.Log(gameObject.name + "Colliding With " + collision.collider + "...");
         }
     }
 }

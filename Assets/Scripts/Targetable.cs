@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
 /// <summary>
 /// Place this on objects to make them (or parts of them) targetable by certain projectiles.
@@ -32,6 +33,7 @@ public class Targetable : MonoBehaviour
     [Tooltip("Which projectiles will be able to lock on to this targetable instance.")]                            public TargetType type = TargetType.All;
 
     //Runtime Variables:
+    internal bool active = true;
 
     //RUNTIME VARIABLES:
     private protected virtual void Awake()
@@ -50,8 +52,7 @@ public class Targetable : MonoBehaviour
     }
 
     //FUNCTIONALITY METHODS:
-    /// <summary>
-    /// Called on targetable whenever it is hit.
-    /// </summary>
     public virtual void IsHit(int damage) { }
+    public virtual void IsHit(int damage, int playerID) { }
+  
 }

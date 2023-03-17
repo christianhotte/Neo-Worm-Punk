@@ -113,6 +113,8 @@ public class NetworkPlayer : MonoBehaviour
     }
     private void OnDestroy()
     {
+        photonView.RPC("RPC_TubeVacated", RpcTarget.All, lastTubeNumber);
+
         //Reference cleanup:
         instances.Remove(this);                                                                                 //Remove from instance list
         if (photonView.IsMine && PlayerController.photonView == photonView) PlayerController.photonView = null; //Clear client photonView reference
@@ -198,13 +200,6 @@ public class NetworkPlayer : MonoBehaviour
         string characterData = PlayerSettingsController.Instance.CharDataToString();          //Encode data to a string so that it can be sent over the network
         photonView.RPC("LoadPlayerSettings", RpcTarget.AllBuffered, characterData); //Send data to every player on the network (including this one)
     }
-    public void LeftRoom()
-    {
-        if (SpawnManager2.instance != null)
-        {
-            photonView.RPC("RPC_TubeVacated", RpcTarget.MasterClient, lastTubeNumber);
-        }
-    }
 
     //REMOTE METHODS:
     [PunRPC]
@@ -254,7 +249,7 @@ public class NetworkPlayer : MonoBehaviour
                 PlayerController.instance.combatHUD.UpdatePlayerStats(networkPlayerStats);
                 SyncStats();
                 AddToKillBoard(PhotonNetwork.GetPhotonView(enemyID).Owner.NickName, PhotonNetwork.LocalPlayer.NickName);
-                PhotonNetwork.GetPhotonView(enemyID).RPC("RPC_KilledEnemy", RpcTarget.AllBuffered, photonView.ViewID);
+                if (enemyID != photonView.ViewID) PhotonNetwork.GetPhotonView(enemyID).RPC("RPC_KilledEnemy", RpcTarget.AllBuffered, photonView.ViewID);
             }
         }
     }
@@ -339,11 +334,24 @@ public class NetworkPlayer : MonoBehaviour
         lastTubeNumber = tubeNumber;
         if (SpawnManager2.instance != null)
         {
-            LockerTubeController spawnTube = LockerTubeController.GetTubeByNumber(tubeNumber);
-            spawnTube.occupied = true;
-            PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
-            PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
+            SpawnManager2.instance.MoveDemoPlayerToSpawnPoint(tubeNumber);
         }
+    }
+    [PunRPC]
+    public void RPC_TubeVacated(int tubeNumber)
+    {
+        if (SpawnManager2.instance != null)
+        {
+            LockerTubeController tube = LockerTubeController.GetTubeByNumber(tubeNumber);
+            tube.occupied = false;
+            tube.UpdateLights(false);
+        }
+        if (ReadyUpManager.instance != null)
+        {
+            ReadyUpManager.instance.OnLeftRoom();
+            ReadyUpManager.instance.UpdateReadyText();
+        }
+        
     }
 
     //BELOW METHODS ONLY GET CALLED ON MASTER CLIENT
@@ -359,15 +367,6 @@ public class NetworkPlayer : MonoBehaviour
                 Player targetPlayer = PhotonNetwork.GetPhotonView(myViewID).Owner;
                 photonView.RPC("RPC_RemoteSpawnPlayer", targetPlayer, spawnTube.tubeNumber);
             }
-        }
-    }
-    [PunRPC]
-    public void RPC_TubeVacated(int tubeNumber)
-    {
-        if (SpawnManager2.instance != null)
-        {
-            LockerTubeController tube = LockerTubeController.GetTubeByNumber(tubeNumber);
-            tube.occupied = false;
         }
     }
 

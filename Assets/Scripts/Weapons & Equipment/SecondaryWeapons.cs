@@ -80,7 +80,7 @@ public class SecondaryWeapons : PlayerEquipment
             rayHitDistance = Vector3.Distance(rayStartPoint.position, checkBlade.point);
             if (rayHitDistance < sawDistance&&checkBlade.collider.tag!="Blade"&&checkBlade.collider.tag!="Player"&&checkBlade.collider.tag!="Barrel"&&checkBlade.collider.name != "RightHand Controller"&& checkBlade.collider.name != "LeftHand Controller") // The detection for chainsaw movement
             {
-               Debug.Log(checkBlade.collider.name);
+              // Debug.Log(checkBlade.collider.name);
                 grindin = true;
             }
             else if (rayHitDistance > sawDistance)

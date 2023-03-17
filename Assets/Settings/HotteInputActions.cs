@@ -356,6 +356,15 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Joystick"",
+                    ""type"": ""Value"",
+                    ""id"": ""cd85dd63-40fb-4210-9e6a-575584df213f"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -488,6 +497,17 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
                     ""processors"": ""ScaleVector2(x=0),StickDeadzone"",
                     ""groups"": ""Generic XR Controller"",
                     ""action"": ""Translate Anchor"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""27479b83-2362-4060-b436-5b69c65c7fc4"",
+                    ""path"": ""<XRController>{LeftHand}/joystick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Generic XR Controller"",
+                    ""action"": ""Joystick"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -758,6 +778,15 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Joystick"",
+                    ""type"": ""Value"",
+                    ""id"": ""dde5967b-e496-4e85-929d-6cae67ab1421"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -892,6 +921,17 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
                     ""action"": ""Translate Anchor"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""fdc47e5f-7104-45b7-8bbf-3f6ec012c4f0"",
+                    ""path"": ""<XRController>{RightHand}/joystick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Generic XR Controller"",
+                    ""action"": ""Joystick"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -907,6 +947,15 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""RightStick"",
+                    ""type"": ""Value"",
+                    ""id"": ""459fb52d-950f-4b18-bb8a-a9b183ebd88e"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -918,6 +967,17 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""Generic XR Controller"",
                     ""action"": ""RightStickPress"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1c3b611b-5809-4868-8903-ac52dae46cef"",
+                    ""path"": ""<XRController>{LeftHand}/joystick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Generic XR Controller"",
+                    ""action"": ""RightStick"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1519,6 +1579,7 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
         m_XRILeftHandInteraction_Grip = m_XRILeftHandInteraction.FindAction("Grip", throwIfNotFound: true);
         m_XRILeftHandInteraction_AButton = m_XRILeftHandInteraction.FindAction("AButton", throwIfNotFound: true);
         m_XRILeftHandInteraction_BButton = m_XRILeftHandInteraction.FindAction("BButton", throwIfNotFound: true);
+        m_XRILeftHandInteraction_Joystick = m_XRILeftHandInteraction.FindAction("Joystick", throwIfNotFound: true);
         // XRI RightHand
         m_XRIRightHand = asset.FindActionMap("XRI RightHand", throwIfNotFound: true);
         m_XRIRightHand_Position = m_XRIRightHand.FindAction("Position", throwIfNotFound: true);
@@ -1539,9 +1600,11 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
         m_XRIRightHandInteraction_Grip = m_XRIRightHandInteraction.FindAction("Grip", throwIfNotFound: true);
         m_XRIRightHandInteraction_AButton = m_XRIRightHandInteraction.FindAction("AButton", throwIfNotFound: true);
         m_XRIRightHandInteraction_BButton = m_XRIRightHandInteraction.FindAction("BButton", throwIfNotFound: true);
+        m_XRIRightHandInteraction_Joystick = m_XRIRightHandInteraction.FindAction("Joystick", throwIfNotFound: true);
         // XRI Generic Interaction
         m_XRIGenericInteraction = asset.FindActionMap("XRI Generic Interaction", throwIfNotFound: true);
         m_XRIGenericInteraction_RightStickPress = m_XRIGenericInteraction.FindAction("RightStickPress", throwIfNotFound: true);
+        m_XRIGenericInteraction_RightStick = m_XRIGenericInteraction.FindAction("RightStick", throwIfNotFound: true);
         // XRI UI
         m_XRIUI = asset.FindActionMap("XRI UI", throwIfNotFound: true);
         m_XRIUI_Navigate = m_XRIUI.FindAction("Navigate", throwIfNotFound: true);
@@ -1757,6 +1820,7 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_XRILeftHandInteraction_Grip;
     private readonly InputAction m_XRILeftHandInteraction_AButton;
     private readonly InputAction m_XRILeftHandInteraction_BButton;
+    private readonly InputAction m_XRILeftHandInteraction_Joystick;
     public struct XRILeftHandInteractionActions
     {
         private @HotteInputActions m_Wrapper;
@@ -1773,6 +1837,7 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
         public InputAction @Grip => m_Wrapper.m_XRILeftHandInteraction_Grip;
         public InputAction @AButton => m_Wrapper.m_XRILeftHandInteraction_AButton;
         public InputAction @BButton => m_Wrapper.m_XRILeftHandInteraction_BButton;
+        public InputAction @Joystick => m_Wrapper.m_XRILeftHandInteraction_Joystick;
         public InputActionMap Get() { return m_Wrapper.m_XRILeftHandInteraction; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -1818,6 +1883,9 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
             @BButton.started += instance.OnBButton;
             @BButton.performed += instance.OnBButton;
             @BButton.canceled += instance.OnBButton;
+            @Joystick.started += instance.OnJoystick;
+            @Joystick.performed += instance.OnJoystick;
+            @Joystick.canceled += instance.OnJoystick;
         }
 
         private void UnregisterCallbacks(IXRILeftHandInteractionActions instance)
@@ -1858,6 +1926,9 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
             @BButton.started -= instance.OnBButton;
             @BButton.performed -= instance.OnBButton;
             @BButton.canceled -= instance.OnBButton;
+            @Joystick.started -= instance.OnJoystick;
+            @Joystick.performed -= instance.OnJoystick;
+            @Joystick.canceled -= instance.OnJoystick;
         }
 
         public void RemoveCallbacks(IXRILeftHandInteractionActions instance)
@@ -1961,6 +2032,7 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_XRIRightHandInteraction_Grip;
     private readonly InputAction m_XRIRightHandInteraction_AButton;
     private readonly InputAction m_XRIRightHandInteraction_BButton;
+    private readonly InputAction m_XRIRightHandInteraction_Joystick;
     public struct XRIRightHandInteractionActions
     {
         private @HotteInputActions m_Wrapper;
@@ -1977,6 +2049,7 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
         public InputAction @Grip => m_Wrapper.m_XRIRightHandInteraction_Grip;
         public InputAction @AButton => m_Wrapper.m_XRIRightHandInteraction_AButton;
         public InputAction @BButton => m_Wrapper.m_XRIRightHandInteraction_BButton;
+        public InputAction @Joystick => m_Wrapper.m_XRIRightHandInteraction_Joystick;
         public InputActionMap Get() { return m_Wrapper.m_XRIRightHandInteraction; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -2022,6 +2095,9 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
             @BButton.started += instance.OnBButton;
             @BButton.performed += instance.OnBButton;
             @BButton.canceled += instance.OnBButton;
+            @Joystick.started += instance.OnJoystick;
+            @Joystick.performed += instance.OnJoystick;
+            @Joystick.canceled += instance.OnJoystick;
         }
 
         private void UnregisterCallbacks(IXRIRightHandInteractionActions instance)
@@ -2062,6 +2138,9 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
             @BButton.started -= instance.OnBButton;
             @BButton.performed -= instance.OnBButton;
             @BButton.canceled -= instance.OnBButton;
+            @Joystick.started -= instance.OnJoystick;
+            @Joystick.performed -= instance.OnJoystick;
+            @Joystick.canceled -= instance.OnJoystick;
         }
 
         public void RemoveCallbacks(IXRIRightHandInteractionActions instance)
@@ -2084,11 +2163,13 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
     private readonly InputActionMap m_XRIGenericInteraction;
     private List<IXRIGenericInteractionActions> m_XRIGenericInteractionActionsCallbackInterfaces = new List<IXRIGenericInteractionActions>();
     private readonly InputAction m_XRIGenericInteraction_RightStickPress;
+    private readonly InputAction m_XRIGenericInteraction_RightStick;
     public struct XRIGenericInteractionActions
     {
         private @HotteInputActions m_Wrapper;
         public XRIGenericInteractionActions(@HotteInputActions wrapper) { m_Wrapper = wrapper; }
         public InputAction @RightStickPress => m_Wrapper.m_XRIGenericInteraction_RightStickPress;
+        public InputAction @RightStick => m_Wrapper.m_XRIGenericInteraction_RightStick;
         public InputActionMap Get() { return m_Wrapper.m_XRIGenericInteraction; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -2101,6 +2182,9 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
             @RightStickPress.started += instance.OnRightStickPress;
             @RightStickPress.performed += instance.OnRightStickPress;
             @RightStickPress.canceled += instance.OnRightStickPress;
+            @RightStick.started += instance.OnRightStick;
+            @RightStick.performed += instance.OnRightStick;
+            @RightStick.canceled += instance.OnRightStick;
         }
 
         private void UnregisterCallbacks(IXRIGenericInteractionActions instance)
@@ -2108,6 +2192,9 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
             @RightStickPress.started -= instance.OnRightStickPress;
             @RightStickPress.performed -= instance.OnRightStickPress;
             @RightStickPress.canceled -= instance.OnRightStickPress;
+            @RightStick.started -= instance.OnRightStick;
+            @RightStick.performed -= instance.OnRightStick;
+            @RightStick.canceled -= instance.OnRightStick;
         }
 
         public void RemoveCallbacks(IXRIGenericInteractionActions instance)
@@ -2281,6 +2368,7 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
         void OnGrip(InputAction.CallbackContext context);
         void OnAButton(InputAction.CallbackContext context);
         void OnBButton(InputAction.CallbackContext context);
+        void OnJoystick(InputAction.CallbackContext context);
     }
     public interface IXRIRightHandActions
     {
@@ -2303,10 +2391,12 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
         void OnGrip(InputAction.CallbackContext context);
         void OnAButton(InputAction.CallbackContext context);
         void OnBButton(InputAction.CallbackContext context);
+        void OnJoystick(InputAction.CallbackContext context);
     }
     public interface IXRIGenericInteractionActions
     {
         void OnRightStickPress(InputAction.CallbackContext context);
+        void OnRightStick(InputAction.CallbackContext context);
     }
     public interface IXRIUIActions
     {
