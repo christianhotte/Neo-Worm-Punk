@@ -113,6 +113,8 @@ public class NetworkPlayer : MonoBehaviour
     }
     private void OnDestroy()
     {
+        photonView.RPC("RPC_TubeVacated", RpcTarget.All, lastTubeNumber);
+
         //Reference cleanup:
         instances.Remove(this);                                                                                 //Remove from instance list
         if (photonView.IsMine && PlayerController.photonView == photonView) PlayerController.photonView = null; //Clear client photonView reference
@@ -197,10 +199,6 @@ public class NetworkPlayer : MonoBehaviour
         Debug.Log("Syncing Player Data...");                                        //Indicate that data is being synced
         string characterData = PlayerSettingsController.Instance.CharDataToString();          //Encode data to a string so that it can be sent over the network
         photonView.RPC("LoadPlayerSettings", RpcTarget.AllBuffered, characterData); //Send data to every player on the network (including this one)
-    }
-    public void LeftRoom()
-    {
-        photonView.RPC("RPC_TubeVacated", RpcTarget.All, lastTubeNumber);
     }
 
     //REMOTE METHODS:
@@ -351,7 +349,9 @@ public class NetworkPlayer : MonoBehaviour
         if (ReadyUpManager.instance != null)
         {
             ReadyUpManager.instance.OnLeftRoom();
+            ReadyUpManager.instance.UpdateReadyText();
         }
+        
     }
 
     //BELOW METHODS ONLY GET CALLED ON MASTER CLIENT

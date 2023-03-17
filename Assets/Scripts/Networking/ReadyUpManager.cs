@@ -60,15 +60,10 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
             if (NetworkManagerScript.instance.GetMostRecentRoom().PlayerCount > 0)
             {
                 playersInRoom = NetworkManagerScript.instance.GetMostRecentRoom().PlayerCount;
-                UpdateReadyText();
+                UpdateReadyText(); UpdateReadyText(); UpdateReadyText(); UpdateReadyText(); UpdateReadyText(); UpdateReadyText(); //David wrote this
             }
         }
-
-        // The room becomes open to let more people come in.
-/*        if (PhotonNetwork.CurrentRoom.PlayerCount < PhotonNetwork.CurrentRoom.MaxPlayers)
-        {
-            if (PhotonNetwork.InRoom) PhotonNetwork.CurrentRoom.IsOpen = true;
-        }*/
+        UpdateReadyText();
     }
 
     public void UpdateStatus(int tubeID)
@@ -109,10 +104,12 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
         }
     }
 
+
+
     /// <summary>
     /// Updates the text in the center of the room.
     /// </summary>
-    private void UpdateReadyText()
+    public void UpdateReadyText()
     {
         if (playerReadyText == null)
         {
