@@ -64,6 +64,7 @@ public class PlayerController : MonoBehaviour
     private float timeUntilRegen; //Time (in seconds) until health regeneration can begin
     private bool centeredInScene; //Made false whenever player loads into a scene, triggers camera centering in the first update
     internal bool isDead;         //True while player is dead and is kinda in limbo
+    private float baseDrag;
 
     //Misc:
     internal bool Launchin = false; //NOTE: What references this and where is it modified?
@@ -115,6 +116,7 @@ public class PlayerController : MonoBehaviour
 
         //Setup runtime variables:
         currentHealth = healthSettings.defaultHealth; //Set base health value
+        baseDrag = bodyRb.drag;                       //Store base drag value
 
         weapons = GameObject.FindGameObjectsWithTag("PlayerEquipment");
         tools = GameObject.FindGameObjectsWithTag("Wall");
@@ -335,4 +337,5 @@ public class PlayerController : MonoBehaviour
     /// Generic method to make sure UnityActions always have something subscribed to them.
     /// </summary>
     private void SubscriptionDummy() { }
+    public void ResetDrag() { if (bodyRb != null) bodyRb.drag = baseDrag; }
 }
