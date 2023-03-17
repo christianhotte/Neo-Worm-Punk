@@ -8,7 +8,7 @@ public class LockerTubeController : MonoBehaviour
 
     [SerializeField, Tooltip("The parent that holds all of the ready lights.")] private Transform readyLights;
     internal int tubeNumber;
-    internal bool occupied = false;
+    public bool occupied = false;
     internal Transform spawnPoint;
 
     private void Awake()

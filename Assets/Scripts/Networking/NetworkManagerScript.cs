@@ -23,6 +23,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     [Tooltip("Name of primary menu scene.")]                                            public string mainMenuScene;
     [Tooltip("Name of primary multiplayer room scene.")]                                public string roomScene;
     [SerializeField, Tooltip("Name of network player prefab in Resources folder.")]     private string networkPlayerName;
+    [SerializeField, Tooltip("fuk")]                                                    private string readyUpManagerName = "ReadyUpManager";
     [SerializeField, Tooltip("Allow use of some of the worse words in our vocabulary")] private bool useFunnyWords;
 
     private Room mostRecentRoom;
@@ -35,10 +36,22 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         if (instance == null) { instance = this; } else Destroy(gameObject); //Singleton-ize this script instance
 
         //Get objects & components:
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
     void Start()
     {
         ConnectAndGiveDavidYourIPAddress(); //Immediately start trying to connect to master server
+    }
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+    public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == roomScene)
+        {
+            PhotonNetwork.Instantiate(readyUpManagerName, Vector3.zero, Quaternion.identity);
+        }
     }
 
     //NETWORK FUNCTIONS:

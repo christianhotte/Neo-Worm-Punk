@@ -31,6 +31,7 @@ public class LeverController : MonoBehaviour
     [Tooltip("The event called when the minimum limit of the lever is reached.")] public UnityEvent OnMinLimitReached;
     [Tooltip("The event called when the maximum limit of the lever is reached.")] public UnityEvent OnMaxLimitReached;
     [Tooltip("The event called when the lever is moved.")] public UnityEvent<float> OnValueChanged;
+    [Tooltip("The event called when the lever is moved.")] public UnityEvent OnStateChanged;
 
     private Transform pivot;
 
@@ -80,6 +81,7 @@ public class LeverController : MonoBehaviour
             return;
 
         //If the lever is not locked, check its angle
+        HingeJointState prevState = hingeJointState;
         if (!isLocked)
         {
             float angleWithMinLimit = Mathf.Abs(handle.GetAngle() - minimumAngle);
@@ -139,6 +141,7 @@ public class LeverController : MonoBehaviour
             OnValueChanged.Invoke(currentValue);
             previousValue = currentValue;
         }
+        if (prevState != hingeJointState) OnStateChanged.Invoke();
     }
 
     /// <summary>
