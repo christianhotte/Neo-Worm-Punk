@@ -94,7 +94,7 @@ public class LeverController : MonoBehaviour
                     handle.transform.localEulerAngles = new Vector3(minimumAngle, handle.transform.localEulerAngles.y, handle.transform.localEulerAngles.z);
 
                     if (onClickSoundEffect != null)
-                        GetComponent<AudioSource>().PlayOneShot(onClickSoundEffect, PlayerPrefs.GetFloat("SFXVolume", 0.5f) * PlayerPrefs.GetFloat("MasterVolume", 0.5f));
+                        GetComponent<AudioSource>().PlayOneShot(onClickSoundEffect, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
 
                     if (lockOnMinimumLimit)
                     {
@@ -116,7 +116,7 @@ public class LeverController : MonoBehaviour
                     handle.transform.localEulerAngles = new Vector3(maximumAngle, handle.transform.localEulerAngles.y, handle.transform.localEulerAngles.z);
 
                     if (onClickSoundEffect != null)
-                        GetComponent<AudioSource>().PlayOneShot(onClickSoundEffect, PlayerPrefs.GetFloat("SFXVolume", 0.5f) * PlayerPrefs.GetFloat("MasterVolume", 0.5f));
+                        GetComponent<AudioSource>().PlayOneShot(onClickSoundEffect, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
 
                     if (lockOnMaximumLimit)
                     {
@@ -146,7 +146,7 @@ public class LeverController : MonoBehaviour
             {
                 if (!GetComponent<AudioSource>().isPlaying)
                 {
-                    GetComponent<AudioSource>().PlayOneShot(onMoveSoundEffect, PlayerPrefs.GetFloat("SFXVolume", 0.5f) * PlayerPrefs.GetFloat("MasterVolume", 0.5f));
+                    GetComponent<AudioSource>().PlayOneShot(onMoveSoundEffect, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
                 }
             }
         }

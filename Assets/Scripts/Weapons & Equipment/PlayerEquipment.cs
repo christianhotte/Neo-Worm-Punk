@@ -459,5 +459,5 @@ public class PlayerEquipment : MonoBehaviour
     /// <summary>
     /// Plays one-shot of given sound, taking into account current volume settings (specific to SFX) (also checks if sound is null so you don't have to).
     /// </summary>
-    public void PlaySFX(AudioClip sound) { if (sound != null) audioSource.PlayOneShot(sound, PlayerPrefs.GetFloat("MasterVolume") * PlayerPrefs.GetFloat("SFXVolume")); }
+    public void PlaySFX(AudioClip sound) { if (sound != null) audioSource.PlayOneShot(sound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); }
 }

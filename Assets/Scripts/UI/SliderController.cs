@@ -66,7 +66,7 @@ public class SliderController : MonoBehaviour
         {
             if (!GetComponent<AudioSource>().isPlaying)
             {
-                GetComponent<AudioSource>().PlayOneShot(onMoveSoundEffect, PlayerPrefs.GetFloat("SFXVolume", 0.5f) * PlayerPrefs.GetFloat("MasterVolume", 0.5f));
+                GetComponent<AudioSource>().PlayOneShot(onMoveSoundEffect, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
             }
         }
     }
@@ -111,7 +111,7 @@ public class SliderController : MonoBehaviour
             {
                 if (!GetComponent<AudioSource>().isPlaying)
                 {
-                    GetComponent<AudioSource>().PlayOneShot(onMoveSoundEffect, PlayerPrefs.GetFloat("SFXVolume", 0.5f) * PlayerPrefs.GetFloat("MasterVolume", 0.5f));
+                    GetComponent<AudioSource>().PlayOneShot(onMoveSoundEffect, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
                 }
             }
         }

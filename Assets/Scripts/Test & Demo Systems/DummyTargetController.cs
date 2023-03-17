@@ -58,7 +58,7 @@ public class DummyTargetController : Targetable
     //FUNCTIONALITY METHODS:
     public override void IsHit(int damage)
     {
-        audioSource.PlayOneShot((AudioClip)Resources.Load("Sounds/Default_Hurt_Sound"), PlayerPrefs.GetFloat("SFXVolume", 0.5f) * PlayerPrefs.GetFloat("MasterVolume", 0.5f)); //Play hurt sound
+        audioSource.PlayOneShot((AudioClip)Resources.Load("Sounds/Default_Hurt_Sound"), PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play hurt sound
         print("Target hit!");                                                            //Indicate that target was hit
     }
 }
