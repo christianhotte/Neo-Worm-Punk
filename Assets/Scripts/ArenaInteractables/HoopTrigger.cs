@@ -18,11 +18,9 @@ public class HoopTrigger : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("SomethingHit");
         if (other.name == "XR Origin"&&!HoopScript.launchin)
         {
             StartCoroutine(HoopScript.HoopLaunch(other));
-            Debug.Log("CallingBoost");
         }
     }
 }

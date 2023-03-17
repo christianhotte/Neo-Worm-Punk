@@ -47,5 +47,10 @@ public class HoopBoost : MonoBehaviour
         yield return new WaitForSeconds(0.2f);//cooldown so only one boost given
         launchin = false;
     }
+    public IEnumerator SlimeTime()
+    {
+        yield return new WaitForSeconds(10.0f);
+        slimed = false;
+    }
 
 }
