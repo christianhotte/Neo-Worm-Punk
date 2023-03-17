@@ -19,7 +19,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     private const int MINIMUM_PLAYERS_NEEDED = 2;   // The minimum number of players needed for a round to start
 
     private int playersReady, playersInRoom;
-    internal LockerTubeController localPlayerTube;
+    public LockerTubeController localPlayerTube;
 
     private void Awake()
     {

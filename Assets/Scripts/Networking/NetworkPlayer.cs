@@ -336,11 +336,7 @@ public class NetworkPlayer : MonoBehaviour
         lastTubeNumber = tubeNumber;
         if (SpawnManager2.instance != null)
         {
-            LockerTubeController spawnTube = LockerTubeController.GetTubeByNumber(tubeNumber);
-            spawnTube.occupied = true;
-            PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
-            PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
-            if (ReadyUpManager.instance != null) ReadyUpManager.instance.UpdateStatus(tubeNumber);
+            SpawnManager2.instance.MoveDemoPlayerToSpawnPoint(tubeNumber);
         }
     }
     [PunRPC]
