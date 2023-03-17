@@ -5,8 +5,6 @@ using UnityEngine.Events;
 
 public class LeverController : MonoBehaviour
 {
-    private HotteInputActions inputActions;
-
     public enum HingeJointState { Min, Max, None }
 
     [SerializeField, Tooltip("Angle Threshold If Limit Is Reached")] float angleBetweenThreshold = 8f;
@@ -42,25 +40,10 @@ public class LeverController : MonoBehaviour
 
     public bool debugActivate;
 
-    private void Awake()
-    {
-        inputActions = new HotteInputActions();
-        inputActions.XRILeftHandInteraction.Grip.performed += _ => GrabLever();
-        inputActions.XRIRightHandInteraction.Grip.performed += _ => GrabLever();
-        inputActions.XRILeftHandInteraction.Grip.canceled += _ => ReleaseLever();
-        inputActions.XRIRightHandInteraction.Grip.canceled += _ => ReleaseLever();
-    }
-
     private void OnEnable()
     {
-        inputActions.Enable();
         handle = GetComponentInChildren<HandleController>();
         handle.MoveToAngle(startingAngle);
-    }
-
-    private void OnDisable()
-    {
-        inputActions.Disable();
     }
 
     private void SetHandParent(Transform hand)
@@ -72,10 +55,6 @@ public class LeverController : MonoBehaviour
     {
         activeHandPos = null;
     }
-
-    private void GrabLever() => handle.StartGrabLever();
-    private void ReleaseLever() => handle.StopGrabLever();
-
     private void FixedUpdate()
     {
         if  (debugActivate)
