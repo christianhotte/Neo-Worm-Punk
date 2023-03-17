@@ -947,6 +947,15 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""RightStick"",
+                    ""type"": ""Value"",
+                    ""id"": ""459fb52d-950f-4b18-bb8a-a9b183ebd88e"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -958,6 +967,17 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""Generic XR Controller"",
                     ""action"": ""RightStickPress"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1c3b611b-5809-4868-8903-ac52dae46cef"",
+                    ""path"": ""<XRController>{LeftHand}/joystick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Generic XR Controller"",
+                    ""action"": ""RightStick"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1584,6 +1604,7 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
         // XRI Generic Interaction
         m_XRIGenericInteraction = asset.FindActionMap("XRI Generic Interaction", throwIfNotFound: true);
         m_XRIGenericInteraction_RightStickPress = m_XRIGenericInteraction.FindAction("RightStickPress", throwIfNotFound: true);
+        m_XRIGenericInteraction_RightStick = m_XRIGenericInteraction.FindAction("RightStick", throwIfNotFound: true);
         // XRI UI
         m_XRIUI = asset.FindActionMap("XRI UI", throwIfNotFound: true);
         m_XRIUI_Navigate = m_XRIUI.FindAction("Navigate", throwIfNotFound: true);
@@ -2142,11 +2163,13 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
     private readonly InputActionMap m_XRIGenericInteraction;
     private List<IXRIGenericInteractionActions> m_XRIGenericInteractionActionsCallbackInterfaces = new List<IXRIGenericInteractionActions>();
     private readonly InputAction m_XRIGenericInteraction_RightStickPress;
+    private readonly InputAction m_XRIGenericInteraction_RightStick;
     public struct XRIGenericInteractionActions
     {
         private @HotteInputActions m_Wrapper;
         public XRIGenericInteractionActions(@HotteInputActions wrapper) { m_Wrapper = wrapper; }
         public InputAction @RightStickPress => m_Wrapper.m_XRIGenericInteraction_RightStickPress;
+        public InputAction @RightStick => m_Wrapper.m_XRIGenericInteraction_RightStick;
         public InputActionMap Get() { return m_Wrapper.m_XRIGenericInteraction; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -2159,6 +2182,9 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
             @RightStickPress.started += instance.OnRightStickPress;
             @RightStickPress.performed += instance.OnRightStickPress;
             @RightStickPress.canceled += instance.OnRightStickPress;
+            @RightStick.started += instance.OnRightStick;
+            @RightStick.performed += instance.OnRightStick;
+            @RightStick.canceled += instance.OnRightStick;
         }
 
         private void UnregisterCallbacks(IXRIGenericInteractionActions instance)
@@ -2166,6 +2192,9 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
             @RightStickPress.started -= instance.OnRightStickPress;
             @RightStickPress.performed -= instance.OnRightStickPress;
             @RightStickPress.canceled -= instance.OnRightStickPress;
+            @RightStick.started -= instance.OnRightStick;
+            @RightStick.performed -= instance.OnRightStick;
+            @RightStick.canceled -= instance.OnRightStick;
         }
 
         public void RemoveCallbacks(IXRIGenericInteractionActions instance)
@@ -2367,6 +2396,7 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
     public interface IXRIGenericInteractionActions
     {
         void OnRightStickPress(InputAction.CallbackContext context);
+        void OnRightStick(InputAction.CallbackContext context);
     }
     public interface IXRIUIActions
     {
