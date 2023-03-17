@@ -2,11 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
-public class HandleController : GrabbableUI
+public class LeverHandleController : GrabbableUI
 {
-    [SerializeField, Tooltip("The bounds that keeps the handle within the slider.")] private Transform handleSnapPointLeft, handleSnapPointRight;
     private LeverController leverController;
     private Vector3 startingVector;
 
@@ -42,7 +40,6 @@ public class HandleController : GrabbableUI
     }
 
     public float GetAngle() => (transform.localEulerAngles.x > 180) ? transform.localEulerAngles.x - 360 : transform.localEulerAngles.x;
-    public bool IsGrabbed => IsGrabbed;
 
     private void OnDrawGizmosSelected()
     {

@@ -106,4 +106,6 @@ public class GrabbableUI : MonoBehaviour
             handleRenderers[i].material = defaultMats[i];
         }
     }
+
+    public bool IsGrabbed() => isGrabbed;
 }
