@@ -340,6 +340,7 @@ public class NetworkPlayer : MonoBehaviour
             spawnTube.occupied = true;
             PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
             PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
+            if (ReadyUpManager.instance != null) ReadyUpManager.instance.UpdateStatus(tubeNumber);
         }
     }
     [PunRPC]

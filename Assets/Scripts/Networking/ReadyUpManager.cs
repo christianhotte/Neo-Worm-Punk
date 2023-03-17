@@ -81,7 +81,8 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     [PunRPC]
     public void RPC_UpdateReadyStatus(int tubeID, bool updatedPlayerReady)
     {
-        LockerTubeController.GetTubeByNumber(tubeID).UpdateLights(updatedPlayerReady);
+        LockerTubeController tube = LockerTubeController.GetTubeByNumber(tubeID);
+        if (tube != null) tube.UpdateLights(updatedPlayerReady);
 
         // Get the number of players that have readied up
         playersReady = GetAllPlayersReady();

@@ -40,6 +40,8 @@ public class LeverController : MonoBehaviour
 
     private Transform activeHandPos;
 
+    public bool debugActivate;
+
     private void Awake()
     {
         inputActions = new HotteInputActions();
@@ -76,6 +78,12 @@ public class LeverController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if  (debugActivate)
+        {
+            debugActivate = false;
+            currentValue = maximumAngle;
+        }
+
         //If there is an active level transition, don't do anything
         if (GameManager.Instance != null && GameManager.Instance.levelTransitionActive)
             return;
