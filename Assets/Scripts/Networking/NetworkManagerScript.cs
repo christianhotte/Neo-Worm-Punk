@@ -28,7 +28,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
     private Room mostRecentRoom;
 
-
     //RUNTIME METHODS:
     private void Awake()
     {
@@ -48,8 +47,10 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     }
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        // If we are loaded into the Network Locker scene, and we are the master client
         if (scene.name == roomScene)
         {
+            // The master client is only spawning 1 ReadyUpManager.
             if (PhotonNetwork.IsMasterClient)
             {
                 PhotonNetwork.Instantiate(readyUpManagerName, Vector3.zero, Quaternion.identity);
@@ -72,7 +73,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         RoomOptions roomOptions = new RoomOptions();
         Hashtable customRoomSettings = new Hashtable();
 
-        customRoomSettings.Add("RoundLength", 300);
+        customRoomSettings.Add("RoundLength", 60);
 
         roomOptions.IsVisible = true; // The player is able to see the room
         roomOptions.IsOpen = true; // The room is open.
