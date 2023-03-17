@@ -31,10 +31,10 @@ public class LeverController : MonoBehaviour
     [Tooltip("The event called when the lever is moved.")] public UnityEvent<float> OnValueChanged;
     [Tooltip("The event called when the lever is moved.")] public UnityEvent OnStateChanged;
 
-    private Transform pivot;
-
     private float previousValue, currentValue;  //The previous and current frame's value of the lever
     private HandleController handle;
+
+    private IEnumerator leverAutoCoroutine;
 
     private Transform activeHandPos;
 
@@ -43,7 +43,6 @@ public class LeverController : MonoBehaviour
     private void OnEnable()
     {
         handle = GetComponentInChildren<HandleController>();
-        handle.MoveToAngle(startingAngle);
     }
 
     private void SetHandParent(Transform hand)
@@ -60,7 +59,7 @@ public class LeverController : MonoBehaviour
         if  (debugActivate)
         {
             debugActivate = false;
-            currentValue = maximumAngle;
+            handle.MoveToAngle(maximumAngle);
         }
 
         //If there is an active level transition, don't do anything
@@ -128,11 +127,47 @@ public class LeverController : MonoBehaviour
             OnValueChanged.Invoke(currentValue);
             previousValue = currentValue;
         }
+/*        else if (snapToLimit && !leverAutomaticallyMoving)
+        {
+            if (handle.GetAngle() < 0)
+                MoveToLimit(minimumAngle);
+            else
+                MoveToLimit(maximumAngle);
+        }*/
+
         if (prevState != hingeJointState)
         {
             Debug.Log("Lever State Changed Invoked.");
             OnStateChanged.Invoke();
         }
+    }
+
+    private void MoveToLimit(float limit)
+    {
+        if (leverAutoCoroutine != null)
+            StopCoroutine(leverAutoCoroutine);
+
+        leverAutoCoroutine = MoveLeverAutomatic(limit);
+        StartCoroutine(MoveLeverAutomatic(limit));
+    }
+
+    private IEnumerator MoveLeverAutomatic(float newPos)
+    {
+        leverAutomaticallyMoving = true;
+        float timeElapsed = 0f;
+
+        while (timeElapsed < snapMovementSpeed)
+        {
+            float t = timeElapsed / snapMovementSpeed;
+
+            handle.MoveToAngle(Mathf.Lerp(handle.GetAngle(), newPos, t));
+
+            timeElapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        handle.MoveToAngle(newPos);
+        leverAutomaticallyMoving = false;
     }
 
     /// <summary>
