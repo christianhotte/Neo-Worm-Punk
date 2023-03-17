@@ -200,10 +200,7 @@ public class NetworkPlayer : MonoBehaviour
     }
     public void LeftRoom()
     {
-        if (SpawnManager2.instance != null)
-        {
-            photonView.RPC("RPC_TubeVacated", RpcTarget.MasterClient, lastTubeNumber);
-        }
+        photonView.RPC("RPC_TubeVacated", RpcTarget.All, lastTubeNumber);
     }
 
     //REMOTE METHODS:
@@ -339,10 +336,21 @@ public class NetworkPlayer : MonoBehaviour
         lastTubeNumber = tubeNumber;
         if (SpawnManager2.instance != null)
         {
-            LockerTubeController spawnTube = LockerTubeController.GetTubeByNumber(tubeNumber);
-            spawnTube.occupied = true;
-            PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
-            PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
+            SpawnManager2.instance.MoveDemoPlayerToSpawnPoint(tubeNumber);
+        }
+    }
+    [PunRPC]
+    public void RPC_TubeVacated(int tubeNumber)
+    {
+        if (SpawnManager2.instance != null)
+        {
+            LockerTubeController tube = LockerTubeController.GetTubeByNumber(tubeNumber);
+            tube.occupied = false;
+            tube.UpdateLights(false);
+        }
+        if (ReadyUpManager.instance != null)
+        {
+            ReadyUpManager.instance.OnLeftRoom();
         }
     }
 
@@ -359,15 +367,6 @@ public class NetworkPlayer : MonoBehaviour
                 Player targetPlayer = PhotonNetwork.GetPhotonView(myViewID).Owner;
                 photonView.RPC("RPC_RemoteSpawnPlayer", targetPlayer, spawnTube.tubeNumber);
             }
-        }
-    }
-    [PunRPC]
-    public void RPC_TubeVacated(int tubeNumber)
-    {
-        if (SpawnManager2.instance != null)
-        {
-            LockerTubeController tube = LockerTubeController.GetTubeByNumber(tubeNumber);
-            tube.occupied = false;
         }
     }
 

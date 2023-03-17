@@ -31,6 +31,7 @@ public class LeverController : MonoBehaviour
     [Tooltip("The event called when the minimum limit of the lever is reached.")] public UnityEvent OnMinLimitReached;
     [Tooltip("The event called when the maximum limit of the lever is reached.")] public UnityEvent OnMaxLimitReached;
     [Tooltip("The event called when the lever is moved.")] public UnityEvent<float> OnValueChanged;
+    [Tooltip("The event called when the lever is moved.")] public UnityEvent OnStateChanged;
 
     private Transform pivot;
 
@@ -38,6 +39,8 @@ public class LeverController : MonoBehaviour
     private HandleController handle;
 
     private Transform activeHandPos;
+
+    public bool debugActivate;
 
     private void Awake()
     {
@@ -75,11 +78,18 @@ public class LeverController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if  (debugActivate)
+        {
+            debugActivate = false;
+            currentValue = maximumAngle;
+        }
+
         //If there is an active level transition, don't do anything
         if (GameManager.Instance != null && GameManager.Instance.levelTransitionActive)
             return;
 
         //If the lever is not locked, check its angle
+        HingeJointState prevState = hingeJointState;
         if (!isLocked)
         {
             float angleWithMinLimit = Mathf.Abs(handle.GetAngle() - minimumAngle);
@@ -139,6 +149,11 @@ public class LeverController : MonoBehaviour
             OnValueChanged.Invoke(currentValue);
             previousValue = currentValue;
         }
+        if (prevState != hingeJointState)
+        {
+            Debug.Log("Lever State Changed Invoked.");
+            OnStateChanged.Invoke();
+        }
     }
 
     /// <summary>
@@ -169,4 +184,5 @@ public class LeverController : MonoBehaviour
     public float GetMinimumAngle() => minimumAngle;
     public float GetMaximumAngle() => maximumAngle;
     public float GetLeverMovementSpeed() => leverMovementSpeed;
+    public HingeJointState GetLeverState() => hingeJointState;
 }

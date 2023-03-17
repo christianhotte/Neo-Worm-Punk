@@ -5,30 +5,44 @@ using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.SceneManagement;
 using TMPro;
+using UnityEngine.Events;
 
 public class ReadyUpManager : MonoBehaviourPunCallbacks
 {
     // Can probably have a button that lights up green or red to show if a player is ready through the network.
     //[SerializeField] private GameObject readyButton;
+    public static ReadyUpManager instance;
 
     [SerializeField] private TextMeshProUGUI playerReadyText;
-
-    [SerializeField] private LockerTubeController[] lockerTubes;
+    [SerializeField] private string sceneToLoad = "DM_0.14_Arena";
 
     private const int MINIMUM_PLAYERS_NEEDED = 2;   // The minimum number of players needed for a round to start
-    [SerializeField] private string sceneToLoad = "DM_0.11_Arena";
 
     private int playersReady, playersInRoom;
-    
-    // Is called upon the first frame.
-    private void Start()
+    internal LockerTubeController localPlayerTube;
+
+    private void Awake()
     {
-        UpdateReadyText();
+        if (instance != null) { Destroy(gameObject); } else { instance = this; }
+        DontDestroyOnLoad(gameObject);
+    }
+
+    private void OnDestroy()
+    {
+        instance = null;
+    }
+    public void LeverStateChanged()
+    {
+        LeverController localLever = localPlayerTube.GetComponentInChildren<LeverController>();
+        NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().isReady = (localLever.GetLeverState() == LeverController.HingeJointState.Max);
+        NetworkManagerScript.localNetworkPlayer.SyncStats();
+        UpdateStatus(localPlayerTube.tubeNumber);
     }
 
     // Once the room is joined.
     public override void OnJoinedRoom()
     {
+        playersInRoom = NetworkManagerScript.instance.GetMostRecentRoom().PlayerCount;
         UpdateReadyText();
 
         // If the amount of players in the room is maxed out, close the room so no more people are able to join.
@@ -57,13 +71,6 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
         }*/
     }
 
-    // Once the level is pulled to signify that the player is ready...
-    public void ReadyLeverPulled(LeverController currentLever)
-    {
-        NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().isReady = currentLever.GetLeverValue() == 1;
-        NetworkManagerScript.localNetworkPlayer.SyncStats();
-    }
-
     public void UpdateStatus(int tubeID)
     {
         Debug.Log("Updating RPC...");
@@ -74,7 +81,8 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     [PunRPC]
     public void RPC_UpdateReadyStatus(int tubeID, bool updatedPlayerReady)
     {
-        lockerTubes[tubeID].UpdateLights(updatedPlayerReady);
+        LockerTubeController tube = LockerTubeController.GetTubeByNumber(tubeID);
+        if (tube != null) tube.UpdateLights(updatedPlayerReady);
 
         // Get the number of players that have readied up
         playersReady = GetAllPlayersReady();
@@ -92,17 +100,34 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
             NetworkManagerScript.instance.LoadSceneWithFade(sceneToLoad);
         }
     }
+    [PunRPC]
+    public void RPC_UpdateTubeOccupation(bool[] tubeStates)
+    {
+        for (int i = 0; i < 6; i++)
+        {
+
+        }
+    }
 
     /// <summary>
     /// Updates the text in the center of the room.
     /// </summary>
     private void UpdateReadyText()
     {
+        if (playerReadyText == null)
+        {
+            foreach (TextMeshProUGUI tmp in FindObjectsOfType<TextMeshProUGUI>())
+            {
+                if (tmp.gameObject.name == "PlayerReadyText") { playerReadyText = tmp; break; }
+            }
+            if (playerReadyText == null) return;
+        }
+
         string message = "Players Ready: " + playersReady.ToString() + "/" + playersInRoom;
 
         if (playersInRoom < MINIMUM_PLAYERS_NEEDED && !GameSettings.debugMode)
         {
-            message += "\n<size=500>Not Enough Players To Start.</size>";
+            message += "\n<size=25>Not Enough Players To Start.</size>";
         }
 
         Debug.Log(message);
