@@ -141,7 +141,11 @@ public class LeverController : MonoBehaviour
             OnValueChanged.Invoke(currentValue);
             previousValue = currentValue;
         }
-        if (prevState != hingeJointState) OnStateChanged.Invoke();
+        if (prevState != hingeJointState)
+        {
+            Debug.Log("Lever State Changed Invoked.");
+            OnStateChanged.Invoke();
+        }
     }
 
     /// <summary>
@@ -172,4 +176,5 @@ public class LeverController : MonoBehaviour
     public float GetMinimumAngle() => minimumAngle;
     public float GetMaximumAngle() => maximumAngle;
     public float GetLeverMovementSpeed() => leverMovementSpeed;
+    public HingeJointState GetLeverState() => hingeJointState;
 }
