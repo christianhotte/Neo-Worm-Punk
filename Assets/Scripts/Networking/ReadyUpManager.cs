@@ -34,7 +34,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     public void LeverStateChanged()
     {
         LeverController localLever = localPlayerTube.GetComponentInChildren<LeverController>();
-        NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().isReady = localLever.GetLeverState() == LeverController.HingeJointState.Max;
+        NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().isReady = (localLever.GetLeverState() == LeverController.HingeJointState.Max);
         NetworkManagerScript.localNetworkPlayer.SyncStats();
         UpdateStatus(localPlayerTube.tubeNumber);
     }
@@ -74,7 +74,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     public void UpdateStatus(int tubeID)
     {
         Debug.Log("Updating RPC...");
-        photonView.RPC("RPC_UpdateReadyStatus", RpcTarget.All, tubeID, NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().isReady);
+        photonView.RPC("RPC_UpdateReadyStatus", RpcTarget.AllBuffered, tubeID, NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().isReady);
     }
 
     // Tells the master server the amount of players that are ready to start the match.
@@ -97,7 +97,15 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
             foreach (var player in NetworkPlayer.instances)
                 player.networkPlayerStats = new PlayerStats();
 
-            //NetworkManagerScript.instance.LoadSceneWithFade(sceneToLoad);
+            NetworkManagerScript.instance.LoadSceneWithFade(sceneToLoad);
+        }
+    }
+    [PunRPC]
+    public void RPC_UpdateTubeOccupation(bool[] tubeStates)
+    {
+        for (int i = 0; i < 6; i++)
+        {
+
         }
     }
 
