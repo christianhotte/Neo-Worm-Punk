@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
@@ -172,6 +173,17 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
         string currentWormName = realWormAdjectives[Random.Range(0, realWormAdjectives.Count)] + " " + realWormNouns[Random.Range(0, realWormNouns.Count)];
         SetPlayerNickname(currentWormName + " #" + Random.Range(0, 1000).ToString("0000"));
+    }
+
+    /// <summary>
+    /// Adds death information to the jumbotron.
+    /// </summary>
+    /// <param name="killerName">The killer's user name.</param>
+    /// <param name="victimName">The victim's user name.</param>
+    public void AddDeathToJumbotron(string killerName, string victimName)
+    {
+        foreach(var jumbotron in FindObjectsOfType<Jumbotron>())
+            jumbotron.AddToDeathInfoBoard(killerName, victimName);
     }
 
     public override void OnCreatedRoom()
