@@ -14,7 +14,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     public static ReadyUpManager instance;
 
     [SerializeField] private TextMeshProUGUI playerReadyText;
-    [SerializeField] private string sceneToLoad = "DM_0.13_Arena";
+    [SerializeField] private string sceneToLoad = "DM_0.14_Arena";
 
     private const int MINIMUM_PLAYERS_NEEDED = 2;   // The minimum number of players needed for a round to start
 
@@ -23,7 +23,8 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
 
     private void Awake()
     {
-        instance = this;
+        if (instance != null) { Destroy(gameObject); } else { instance = this; }
+        DontDestroyOnLoad(gameObject);
     }
 
     private void OnDestroy()
@@ -33,7 +34,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     public void LeverStateChanged()
     {
         LeverController localLever = localPlayerTube.GetComponentInChildren<LeverController>();
-        NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().isReady = localLever.GetLeverValue() == 1;
+        NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().isReady = (localLever.GetLeverState() == LeverController.HingeJointState.Max);
         NetworkManagerScript.localNetworkPlayer.SyncStats();
         UpdateStatus(localPlayerTube.tubeNumber);
     }
@@ -41,6 +42,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     // Once the room is joined.
     public override void OnJoinedRoom()
     {
+        playersInRoom = NetworkManagerScript.instance.GetMostRecentRoom().PlayerCount;
         UpdateReadyText();
 
         // If the amount of players in the room is maxed out, close the room so no more people are able to join.
@@ -79,7 +81,8 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     [PunRPC]
     public void RPC_UpdateReadyStatus(int tubeID, bool updatedPlayerReady)
     {
-        LockerTubeController.GetTubeByNumber(tubeID).UpdateLights(updatedPlayerReady);
+        LockerTubeController tube = LockerTubeController.GetTubeByNumber(tubeID);
+        if (tube != null) tube.UpdateLights(updatedPlayerReady);
 
         // Get the number of players that have readied up
         playersReady = GetAllPlayersReady();
@@ -94,7 +97,15 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
             foreach (var player in NetworkPlayer.instances)
                 player.networkPlayerStats = new PlayerStats();
 
-            //NetworkManagerScript.instance.LoadSceneWithFade(sceneToLoad);
+            NetworkManagerScript.instance.LoadSceneWithFade(sceneToLoad);
+        }
+    }
+    [PunRPC]
+    public void RPC_UpdateTubeOccupation(bool[] tubeStates)
+    {
+        for (int i = 0; i < 6; i++)
+        {
+
         }
     }
 

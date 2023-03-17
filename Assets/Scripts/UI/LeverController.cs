@@ -40,6 +40,8 @@ public class LeverController : MonoBehaviour
 
     private Transform activeHandPos;
 
+    public bool debugActivate;
+
     private void Awake()
     {
         inputActions = new HotteInputActions();
@@ -76,6 +78,12 @@ public class LeverController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if  (debugActivate)
+        {
+            debugActivate = false;
+            currentValue = maximumAngle;
+        }
+
         //If there is an active level transition, don't do anything
         if (GameManager.Instance != null && GameManager.Instance.levelTransitionActive)
             return;
@@ -141,7 +149,11 @@ public class LeverController : MonoBehaviour
             OnValueChanged.Invoke(currentValue);
             previousValue = currentValue;
         }
-        if (prevState != hingeJointState) OnStateChanged.Invoke();
+        if (prevState != hingeJointState)
+        {
+            Debug.Log("Lever State Changed Invoked.");
+            OnStateChanged.Invoke();
+        }
     }
 
     /// <summary>
@@ -172,4 +184,5 @@ public class LeverController : MonoBehaviour
     public float GetMinimumAngle() => minimumAngle;
     public float GetMaximumAngle() => maximumAngle;
     public float GetLeverMovementSpeed() => leverMovementSpeed;
+    public HingeJointState GetLeverState() => hingeJointState;
 }
