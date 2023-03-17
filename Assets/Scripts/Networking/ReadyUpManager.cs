@@ -60,7 +60,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
             if (NetworkManagerScript.instance.GetMostRecentRoom().PlayerCount > 0)
             {
                 playersInRoom = NetworkManagerScript.instance.GetMostRecentRoom().PlayerCount;
-                UpdateReadyText(); UpdateReadyText(); UpdateReadyText(); UpdateReadyText(); UpdateReadyText(); UpdateReadyText(); //David wrote this
+                UpdateReadyText();
             }
         }
         UpdateReadyText();
