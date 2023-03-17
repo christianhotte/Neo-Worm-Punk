@@ -60,7 +60,7 @@ public class PhysicalButtonController : MonoBehaviour
                 StartCoroutine(buttonCoroutine);
             }
             //If nothing applies, play the disabled sound effect
-            else
+            else if(!isInteractable || isLocked)
             {
                 if (onDisabledSoundEffect != null)
                     GetComponent<AudioSource>().PlayOneShot(onDisabledSoundEffect, PlayerPrefs.GetFloat("SFXVolume", 0.5f) * PlayerPrefs.GetFloat("MasterVolume", 0.5f));
