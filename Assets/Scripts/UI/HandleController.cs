@@ -4,64 +4,27 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class HandleController : MonoBehaviour
+public class HandleController : GrabbableUI
 {
     [SerializeField, Tooltip("The bounds that keeps the handle within the slider.")] private Transform handleSnapPointLeft, handleSnapPointRight;
-
-    private MeshRenderer[] handleRenderers;
-    private List<Material> defaultMats = new List<Material>();
-    [SerializeField] private Material inRangeMat, closestOneMat, grabbedMat;
-
-    private bool isGrabbable = false;
-    private bool isGrabbed = false;
-
-    private Transform followObject;
     private LeverController leverController;
-
     private Vector3 startingVector;
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         leverController = GetComponentInParent<LeverController>();
         startingVector = transform.up;
-
-        handleRenderers = GetComponentsInChildren<MeshRenderer>();
-        for (int i = 0; i < handleRenderers.Length; i++)
-            defaultMats.Add(handleRenderers[i].material);
-
-        SetDefaultMaterials();
     }
 
-    private void OnTriggerEnter(Collider other)
+    public override void OnGrab()
     {
-        if (other.CompareTag("PlayerHand") && !isGrabbable)
-        {
-            isGrabbable = true;
-            followObject = other.transform;
-            SetAllMaterials(inRangeMat);
-        }
+        base.OnGrab();
     }
 
-    private void OnTriggerExit(Collider other)
+    public override void OnRelease()
     {
-        if (other.CompareTag("PlayerHand") && isGrabbable && !isGrabbed)
-        {
-            isGrabbable = false;
-            StopGrabLever();
-        }
-    }
-
-    public void StartGrabLever()
-    {
-        isGrabbed = true;
-        SetAllMaterials(grabbedMat);
-    }
-
-    public void StopGrabLever()
-    {
-        isGrabbed = false;
-        followObject = null;
-        SetDefaultMaterials();
+        base.OnRelease();
     }
 
     private void Update()
@@ -70,22 +33,6 @@ public class HandleController : MonoBehaviour
         {
             Quaternion lookAngle = Quaternion.Euler(Mathf.Clamp(Vector2.SignedAngle(followObject.position - transform.position, startingVector), leverController.GetMinimumAngle(), leverController.GetMaximumAngle()), 0, 0);
             transform.localRotation = lookAngle;
-        }
-    }
-
-    private void SetAllMaterials(Material newMat)
-    {
-        for (int i = 0; i < handleRenderers.Length; i++)
-        {
-            handleRenderers[i].material = newMat;
-        }
-    }
-
-    private void SetDefaultMaterials()
-    {
-        for (int i = 0; i < handleRenderers.Length; i++)
-        {
-            handleRenderers[i].material = defaultMats[i];
         }
     }
 
