@@ -14,12 +14,12 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     public static ReadyUpManager instance;
 
     [SerializeField] private TextMeshProUGUI playerReadyText;
-    [SerializeField] private string sceneToLoad = "DM_0.13_Arena";
+    [SerializeField] private string sceneToLoad = "DM_0.14_Arena";
 
     private const int MINIMUM_PLAYERS_NEEDED = 2;   // The minimum number of players needed for a round to start
 
     private int playersReady, playersInRoom;
-    public LockerTubeController localPlayerTube;
+    internal LockerTubeController localPlayerTube;
 
     private void Awake()
     {
