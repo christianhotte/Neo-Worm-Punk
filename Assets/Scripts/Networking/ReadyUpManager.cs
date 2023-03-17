@@ -23,7 +23,8 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
 
     private void Awake()
     {
-        instance = this;
+        if (instance != null) { Destroy(gameObject); } else { instance = this; }
+        DontDestroyOnLoad(gameObject);
     }
 
     private void OnDestroy()

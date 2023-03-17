@@ -23,7 +23,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     [Tooltip("Name of primary menu scene.")]                                            public string mainMenuScene;
     [Tooltip("Name of primary multiplayer room scene.")]                                public string roomScene;
     [SerializeField, Tooltip("Name of network player prefab in Resources folder.")]     private string networkPlayerName;
-    [SerializeField, Tooltip("fuk")]                                                    private string readyUpManagerName = "ReadyUpManager";
+    [SerializeField]                                                                    private string readyUpManagerName = "ReadyUpManager";
     [SerializeField, Tooltip("Allow use of some of the worse words in our vocabulary")] private bool useFunnyWords;
 
     private Room mostRecentRoom;
@@ -50,7 +50,10 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     {
         if (scene.name == roomScene)
         {
-            PhotonNetwork.Instantiate(readyUpManagerName, Vector3.zero, Quaternion.identity);
+            if (PhotonNetwork.IsMasterClient)
+            {
+                PhotonNetwork.Instantiate(readyUpManagerName, Vector3.zero, Quaternion.identity);
+            }
         }
     }
 
