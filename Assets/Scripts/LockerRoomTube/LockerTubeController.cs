@@ -5,10 +5,23 @@ using UnityEngine;
 public class LockerTubeController : MonoBehaviour
 {
     public static List<LockerTubeController> tubes = new List<LockerTubeController>();
+    public static int OccupiedTubes
+    {
+        get
+        {
+            int x = 0;
+            foreach (LockerTubeController tube in tubes) if (tube.occupied) x++;
+            return x;
+        }
+    }
 
     [SerializeField, Tooltip("The parent that holds all of the ready lights.")] private Transform readyLights;
     internal int tubeNumber;
     public bool occupied = false;
+    /// <summary>
+    /// ID of player which is currently in this tube.
+    /// </summary>
+    internal int currentPlayerID;
     internal Transform spawnPoint;
 
     private void Awake()

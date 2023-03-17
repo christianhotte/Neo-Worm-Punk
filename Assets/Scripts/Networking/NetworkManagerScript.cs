@@ -251,7 +251,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         }
 
         //Cleanup:
-        localNetworkPlayer.LeftRoom();
         DeSpawnNetworkPlayer(); //De-spawn local network player whenever player leaves a room
     }
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
