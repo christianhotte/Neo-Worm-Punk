@@ -251,7 +251,7 @@ public class NetworkPlayer : MonoBehaviour
                 PlayerController.instance.combatHUD.UpdatePlayerStats(networkPlayerStats);
                 SyncStats();
                 AddToKillBoard(PhotonNetwork.GetPhotonView(enemyID).Owner.NickName, PhotonNetwork.LocalPlayer.NickName);
-                PhotonNetwork.GetPhotonView(enemyID).RPC("RPC_KilledEnemy", RpcTarget.AllBuffered, photonView.ViewID);
+                if (enemyID != photonView.ViewID) PhotonNetwork.GetPhotonView(enemyID).RPC("RPC_KilledEnemy", RpcTarget.AllBuffered, photonView.ViewID);
             }
         }
     }
