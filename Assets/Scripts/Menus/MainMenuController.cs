@@ -45,10 +45,11 @@ public class MainMenuController : MonoBehaviour
     public void TransportToFinal(float speed)
     {
         //NetworkManagerScript.instance.JoinLobby();
+        Panel1Animator.SetBool("Activated", false);
+        Panel2Animator.SetBool("Activated", false);
+        Panel3Animator.SetBool("Activated", false);
         StartCoroutine(MovePlayerInMenu(MenuArea.FINAL, speed));
-        Panel1Animator.Play("Panel_1_Rev");
-        Panel2Animator.Play("Panel_2_Rev");
-        Panel3Animator.Play("Panel_3_Rev");
+        Invoke("WaitOnCloseDoor", speed);
     }
 
     /// <summary>
@@ -58,6 +59,11 @@ public class MainMenuController : MonoBehaviour
     public void TransportToTube(float speed)
     {
         StartCoroutine(MovePlayerInMenu(MenuArea.TUBE, speed));
+    }
+
+    private void WaitOnCloseDoor()
+    {
+        FindObjectOfType<DoorTrigger>().CloseDoor();
     }
 
     private IEnumerator MovePlayerInMenu(MenuArea menuArea, float speed)
@@ -90,6 +96,7 @@ public class MainMenuController : MonoBehaviour
 
     private IEnumerator TeleportPlayerToLobby()
     {
+        yield return new WaitForSeconds(2.0f);
         NetworkManagerScript.instance.JoinLobby();
         FadeScreen playerScreenFader = PlayerController.instance.GetComponentInChildren<FadeScreen>();
         playerScreenFader.FadeOut();

@@ -21,6 +21,11 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     private int playersReady, playersInRoom;
     internal LockerTubeController localPlayerTube;
 
+    private void Awake()
+    {
+        instance = this;
+    }
+
     private void OnDestroy()
     {
         instance = null;
@@ -111,7 +116,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
 
         if (playersInRoom < MINIMUM_PLAYERS_NEEDED && !GameSettings.debugMode)
         {
-            message += "\n<size=500>Not Enough Players To Start.</size>";
+            message += "\n<size=25>Not Enough Players To Start.</size>";
         }
 
         Debug.Log(message);
