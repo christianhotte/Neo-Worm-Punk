@@ -43,6 +43,12 @@ public class PhysicalButtonController : MonoBehaviour
         isPressed = false;
     }
 
+    private void OnDisable()
+    {
+        isPressed = false;
+        isPressing = false;
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("PlayerHand"))
