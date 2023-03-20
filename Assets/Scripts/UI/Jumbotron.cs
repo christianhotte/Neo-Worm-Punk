@@ -9,13 +9,33 @@ public class Jumbotron : MonoBehaviour
     [SerializeField, Tooltip("The container for the information that displays the player stats information.")] private Transform deathInfoContainer;
     [SerializeField, Tooltip("The death information prefab.")] private DeathInfo deathInfoPrefab;
     [SerializeField, Tooltip("The most recent kill text.")] private TextMeshProUGUI mostRecentDeathText;
-
+    private AudioSource jumboAud;
+    private bool cooldown = false;
+    public AudioClip oonge, bees;
     private LevelTimer currentLevelTimer;
     private void Start()
     {
         currentLevelTimer = GetComponentInChildren<LevelTimer>();
+        jumboAud = this.GetComponent<AudioSource>();
     }
-
+    private void Update()
+    {
+        if (currentLevelTimer.GetTotalSecondsLeft() <= 10.0f&&!cooldown)
+        {
+            if (currentLevelTimer.GetTotalSecondsLeft() < 2.0f)
+            {
+                jumboAud.PlayOneShot(bees);
+                cooldown = true;
+                StartCoroutine(CountdownCooldown());
+            }
+            else
+            {
+                jumboAud.PlayOneShot(oonge);
+                cooldown = true;
+                StartCoroutine(CountdownCooldown());
+            }
+        }
+    }
     private DeathInfo mostRecentDeath;  //The most recent death recorded
 
     /// <summary>
@@ -42,6 +62,11 @@ public class Jumbotron : MonoBehaviour
 
         //Scale the death info gameObject from 0 to 1 with an EaseOutCirc ease type.
         LeanTween.scale(mostRecentDeath.gameObject, Vector3.one, 0.5f).setEaseOutCirc();
+    }
+    public IEnumerator CountdownCooldown()
+    {
+        yield return new WaitForSeconds(1.0f);
+        cooldown = false;
     }
 
     public LevelTimer GetLevelTimer() => currentLevelTimer;
