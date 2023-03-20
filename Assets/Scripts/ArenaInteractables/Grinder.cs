@@ -11,10 +11,14 @@ public class Grinder : MonoBehaviour
     private NetworkPlayer netPlayer;
     public bool Activated = false, Closed = true;
     public float doorSpeed = 3;
+    public float LevelTimePercent;
+
+    private Jumbotron jumbotronObject;
+
     // Start is called before the first frame update
     void Start()
     {
-        
+        jumbotronObject = FindObjectOfType<Jumbotron>();
     }
 
     // Update is called once per frame
@@ -28,6 +32,14 @@ public class Grinder : MonoBehaviour
         if (leftDoorStart.transform.position == leftDoorEnd.transform.position)
         {
             Closed = true;
+        }
+        if (!Activated && Closed)
+        {
+            LevelTimePercent = jumbotronObject.GetLevelTimer().LevelTimePercentage();
+            if (LevelTimePercent >= 75)
+            {
+                Activated = true;
+            }
         }
     }
     private void OnTriggerEnter(Collider other)
