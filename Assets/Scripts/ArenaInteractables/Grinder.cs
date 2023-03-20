@@ -7,7 +7,10 @@ using Unity.XR.CoreUtils;
 public class Grinder : MonoBehaviour
 {
     private PlayerController hitPlayer;
+    public GameObject leftDoorStart, rightDoorStart, leftDoorEnd, rightDoorEnd;
     private NetworkPlayer netPlayer;
+    public bool Activated = false, Closed = true;
+    public float doorSpeed = 3;
     // Start is called before the first frame update
     void Start()
     {
@@ -17,12 +20,20 @@ public class Grinder : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if (Activated && Closed)
+        {
+            rightDoorStart.transform.position = Vector3.MoveTowards(rightDoorStart.transform.position, rightDoorEnd.transform.position, doorSpeed);
+            leftDoorStart.transform.position = Vector3.MoveTowards(leftDoorStart.transform.position,leftDoorEnd.transform.position,doorSpeed);
+        }
+        if (leftDoorStart.transform.position == leftDoorEnd.transform.position)
+        {
+            Closed = true;
+        }
     }
     private void OnTriggerEnter(Collider other)
     {
         //PlayerController.photonView.ViewID;
-        if (other.name == "XR Origin")
+        if (other.name == "XR Origin"&& Activated)
         {
             // hitPlayer = other.GetComponent<PlayerController>();
             netPlayer = PlayerController.photonView.GetComponent<NetworkPlayer>();
@@ -30,4 +41,5 @@ public class Grinder : MonoBehaviour
             netPlayer.photonView.RPC("RPC_Hit", RpcTarget.All, 100, netPlayer.photonView.ViewID);
         }
     }
+
 }
