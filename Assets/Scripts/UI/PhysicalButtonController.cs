@@ -63,7 +63,7 @@ public class PhysicalButtonController : MonoBehaviour
             else if(!isInteractable || isLocked)
             {
                 if (onDisabledSoundEffect != null)
-                    GetComponent<AudioSource>().PlayOneShot(onDisabledSoundEffect, PlayerPrefs.GetFloat("SFXVolume", 0.5f) * PlayerPrefs.GetFloat("MasterVolume", 0.5f));
+                    GetComponent<AudioSource>().PlayOneShot(onDisabledSoundEffect, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
             }
         }
     }
@@ -110,7 +110,7 @@ public class PhysicalButtonController : MonoBehaviour
             isPressed = true;
 
             if (onPressedSoundEffect != null)
-                GetComponent<AudioSource>().PlayOneShot(onPressedSoundEffect, PlayerPrefs.GetFloat("SFXVolume", 0.5f) * PlayerPrefs.GetFloat("MasterVolume", 0.5f));
+                GetComponent<AudioSource>().PlayOneShot(onPressedSoundEffect, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
 
             onPressed.Invoke();
             Debug.Log(gameObject.name + " Pressed.");

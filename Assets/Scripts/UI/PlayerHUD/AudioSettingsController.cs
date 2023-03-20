@@ -21,10 +21,10 @@ public class AudioSettingsController : MonoBehaviour
     /// </summary>
     private void UpdateSettings()
     {
-        masterSlider.value = PlayerPrefs.GetFloat("MasterVolume", 0.5f) * 10f;
-        musicSlider.value = PlayerPrefs.GetFloat("MusicVolume", 0.5f) * 10f;
-        sfxSlider.value = PlayerPrefs.GetFloat("SFXVolume", 0.5f) * PlayerPrefs.GetFloat("MasterVolume", 0.5f) * 10f;
-        voiceChatSlider.value = PlayerPrefs.GetFloat("VoiceChatVolume", 0.5f) * 10f;
+        masterSlider.value = PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound) * 10f;
+        musicSlider.value = PlayerPrefs.GetFloat("MusicVolume", GameSettings.defaultMusicSound) * 10f;
+        sfxSlider.value = PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * 10f;
+        voiceChatSlider.value = PlayerPrefs.GetFloat("VoiceChatVolume", GameSettings.defaultVoiceSound) * 10f;
         muteMicToggle.isOn = PlayerPrefs.GetInt("MuteMic", 0) == 1? true: false;
     }
 
