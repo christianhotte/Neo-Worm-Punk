@@ -124,9 +124,10 @@ public class MainMenuController : MonoBehaviour
         playerScreenFader.FadeOut();
         yield return new WaitForSeconds(playerScreenFader.GetFadeDuration());
 
-        playerObject.transform.position = lobbyLocation.localPosition;
+        playerObject.transform.position = lobbyLocation.position;
         yield return new WaitForSeconds(0.5f);
         playerScreenFader.FadeIn();
+        StopAllCoroutines();
     }
 
     public void FadeToLockerRoom()
