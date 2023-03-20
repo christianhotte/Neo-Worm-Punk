@@ -10,6 +10,12 @@ public class Jumbotron : MonoBehaviour
     [SerializeField, Tooltip("The death information prefab.")] private DeathInfo deathInfoPrefab;
     [SerializeField, Tooltip("The most recent kill text.")] private TextMeshProUGUI mostRecentDeathText;
 
+    private LevelTimer currentLevelTimer;
+    private void Start()
+    {
+        currentLevelTimer = GetComponentInChildren<LevelTimer>();
+    }
+
     private DeathInfo mostRecentDeath;  //The most recent death recorded
 
     /// <summary>
@@ -37,4 +43,6 @@ public class Jumbotron : MonoBehaviour
         //Scale the death info gameObject from 0 to 1 with an EaseOutCirc ease type.
         LeanTween.scale(mostRecentDeath.gameObject, Vector3.one, 0.5f).setEaseOutCirc();
     }
+
+    public LevelTimer GetLevelTimer() => currentLevelTimer;
 }
