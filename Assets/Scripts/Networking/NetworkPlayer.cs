@@ -139,12 +139,71 @@ public class NetworkPlayer : MonoBehaviour
         else
         {
             trail.enabled = !GameManager.Instance.InMenu();               //Disable trail while in menus
-            if (scene.name == "NetworkLockerRoom") trail.enabled = false; //Super disable trail if in the locker room
+            if (scene.name == GameSettings.roomScene) trail.enabled = false; //Super disable trail if in the locker room
         }
 
         //Generic scene load checks:
         foreach (Collider c in transform.GetComponentsInChildren<Collider>()) c.enabled = !GameManager.Instance.InMenu(); //Always disable colliders if networkPlayer is in a menu scene
         
+    }
+
+    public enum ColorOptions { WHITE, RED, ORANGE, YELLOW, GREEN, BLUE, TEAL, VIOLET, MAGENTA, BLACK }
+
+    public void ChangePlayerColor(float colorOption)
+    {
+        Color newColor;
+        string newColorText;
+
+        Debug.Log("Float: " + colorOption);
+        Debug.Log((int)colorOption);
+
+        switch (Mathf.RoundToInt(colorOption))
+        {
+            case (int)ColorOptions.RED:
+                newColor = new Color(197f / 255f, 17f / 255f, 17f / 255f);
+                newColorText = "RED";
+                break;
+            case (int)ColorOptions.ORANGE:
+                newColor = new Color(232f / 255f, 131f / 255f, 23f / 255f);
+                newColorText = "ORANGE";
+                break;
+            case (int)ColorOptions.YELLOW:
+                newColor = new Color(253f / 255f, 253f / 255f, 150f / 255f);
+                newColorText = "YELLOW";
+                break;
+            case (int)ColorOptions.GREEN:
+                newColor = Color.green;
+                newColorText = "GREEN";
+                break;
+            case (int)ColorOptions.BLUE:
+                newColor = Color.blue;
+                newColorText = "BLUE";
+                break;
+            case (int)ColorOptions.TEAL:
+                newColor = new Color(46f / 255f, 200f / 255f, 209f / 255f);
+                newColorText = "TEAL";
+                break;
+            case (int)ColorOptions.VIOLET:
+                newColor = new Color(52f / 255f, 31f / 255f, 224f / 255f);
+                newColorText = "VIOLET";
+                break;
+            case (int)ColorOptions.MAGENTA:
+                newColor = Color.magenta;
+                newColorText = "MAGENTA";
+                break;
+            case (int)ColorOptions.BLACK:
+                newColor = Color.black;
+                newColorText = "BLACK";
+                break;
+            default:
+                newColor = Color.white;
+                newColorText = "DEFAULT";
+                break;
+        }
+
+        PlayerSettingsController.Instance.charData.testColor = newColor;   //Set the player color in the character data
+        PlayerController.instance.ApplyAndSyncSettings(); //Apply settings to player (NOTE TO PETER: Call this whenever you want to change a setting and sync it across the network)
+        Debug.Log("Changing Player Color To " + newColorText);
     }
 
     //FUNCTIONALITY METHODS:

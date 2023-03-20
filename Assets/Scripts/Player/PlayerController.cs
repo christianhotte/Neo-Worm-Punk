@@ -240,6 +240,8 @@ public class PlayerController : MonoBehaviour
             inCombat = false;
         }
 
+        bodyRb.isKinematic = !inCombat;
+
         foreach (var weapon in attachedEquipment)
             foreach (var renderer in weapon.GetComponentsInChildren<Renderer>())
                 renderer.enabled = inCombat;
