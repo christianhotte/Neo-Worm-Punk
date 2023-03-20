@@ -27,7 +27,7 @@ public class EnergyBlade : MonoBehaviour
         {
             if (targetPlayer.photonView.IsMine) { print("Hit myself"); return; }
             targetPlayer.photonView.RPC("RPC_Hit", RpcTarget.All, 5);
-            sawAud.PlayOneShot(laserSwordCut, PlayerPrefs.GetFloat("SFXVolume", 0.5f) * PlayerPrefs.GetFloat("MasterVolume", 0.5f));
+            sawAud.PlayOneShot(laserSwordCut, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
         }
     }
 }

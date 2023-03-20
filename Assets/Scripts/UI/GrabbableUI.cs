@@ -108,4 +108,5 @@ public class GrabbableUI : MonoBehaviour
     }
 
     public bool IsGrabbed() => isGrabbed;
+    public Transform GetFollowObject() => followObject;
 }

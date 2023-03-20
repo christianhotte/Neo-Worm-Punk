@@ -15,6 +15,8 @@ public class MainMenuController : MonoBehaviour
     [SerializeField, Tooltip("The animator for 1st Panel.")] private Animator Panel2Animator;
     [SerializeField, Tooltip("The animator for 1st Panel.")] private Animator Panel3Animator;
 
+    [SerializeField, Tooltip("Wormpunk Sound")] private AudioClip wormPunkSound;
+
     private void Start()
     {
         /// Move the player forward on the conveyor once the game starts
@@ -87,6 +89,11 @@ public class MainMenuController : MonoBehaviour
 
             yield return null;
         }
+    }
+
+    public void PlayWormpunkSound()
+    {
+        GetComponent<AudioSource>().PlayOneShot(wormPunkSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
     }
 
     public void GoToLobby()

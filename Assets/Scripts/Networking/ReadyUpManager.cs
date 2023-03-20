@@ -60,7 +60,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
             if (NetworkManagerScript.instance.GetMostRecentRoom().PlayerCount > 0)
             {
                 playersInRoom = NetworkManagerScript.instance.GetMostRecentRoom().PlayerCount;
-                UpdateReadyText(); UpdateReadyText(); UpdateReadyText(); UpdateReadyText(); UpdateReadyText(); UpdateReadyText(); //David wrote this
+                UpdateReadyText();
             }
         }
         UpdateReadyText();
@@ -82,8 +82,12 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
         // Get the number of players that have readied up
         playersReady = GetAllPlayersReady();
         playersInRoom = PhotonNetwork.CurrentRoom.PlayerCount;
-
+        
         UpdateReadyText();
+        foreach (var player in NetworkPlayer.instances)
+        {
+            print("Player " + player.photonView.ViewID + " ready status: " + (player.networkPlayerStats.isReady ? "READY" : "NOT READY"));
+        }
 
         // If all players are ready, load the game scene
         if (playersReady == playersInRoom && (playersInRoom >= MINIMUM_PLAYERS_NEEDED || GameSettings.debugMode))
@@ -95,6 +99,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
             NetworkManagerScript.instance.LoadSceneWithFade(sceneToLoad);
         }
     }
+
     [PunRPC]
     public void RPC_UpdateTubeOccupation(bool[] tubeStates)
     {
@@ -103,7 +108,6 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
 
         }
     }
-
 
 
     /// <summary>
