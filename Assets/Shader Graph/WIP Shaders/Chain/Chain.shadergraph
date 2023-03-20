@@ -2,7 +2,11 @@
     "m_SGVersion": 3,
     "m_Type": "UnityEditor.ShaderGraph.GraphData",
     "m_ObjectId": "7aaf2ae7909749848c3c601ad9021674",
-    "m_Properties": [],
+    "m_Properties": [
+        {
+            "m_Id": "b388b2ee9cfd4cdaae3724a900c6402b"
+        }
+    ],
     "m_Keywords": [],
     "m_Dropdowns": [],
     "m_CategoryData": [
@@ -61,6 +65,9 @@
         },
         {
             "m_Id": "cba697d5acc9468c84aeb68b5da0c6b0"
+        },
+        {
+            "m_Id": "3ac38d9036414f1bb6ed7c76700891f6"
         }
     ],
     "m_GroupDatas": [
@@ -110,6 +117,20 @@
                     "m_Id": "e3b6524deb88448a8ffad88ff587a62c"
                 },
                 "m_SlotId": 2
+            }
+        },
+        {
+            "m_OutputSlot": {
+                "m_Node": {
+                    "m_Id": "3ac38d9036414f1bb6ed7c76700891f6"
+                },
+                "m_SlotId": 0
+            },
+            "m_InputSlot": {
+                "m_Node": {
+                    "m_Id": "df2dda58d4df464b9133f0d7f4d0b009"
+                },
+                "m_SlotId": 1
             }
         },
         {
@@ -242,7 +263,7 @@
     },
     "m_PreviewData": {
         "serializedMesh": {
-            "m_SerializedMesh": "{\"mesh\":{\"instanceID\":0}}",
+            "m_SerializedMesh": "{\"mesh\":{\"fileID\":10200,\"guid\":\"0000000000000000e000000000000000\",\"type\":0}}",
             "m_Guid": ""
         },
         "preventRotation": false
@@ -620,6 +641,56 @@
     },
     "m_Labels": [],
     "m_Channel": 0
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
+    "m_ObjectId": "360680c06b1d44388c0cf8f9f0a3b5fa",
+    "m_Id": 0,
+    "m_DisplayName": "Speed",
+    "m_SlotType": 1,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "Out",
+    "m_StageCapability": 3,
+    "m_Value": 0.0,
+    "m_DefaultValue": 0.0,
+    "m_Labels": []
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.PropertyNode",
+    "m_ObjectId": "3ac38d9036414f1bb6ed7c76700891f6",
+    "m_Group": {
+        "m_Id": "1cbc5b6fb9d14fec9ba74b9299eac131"
+    },
+    "m_Name": "Property",
+    "m_DrawState": {
+        "m_Expanded": true,
+        "m_Position": {
+            "serializedVersion": "2",
+            "x": -1678.6666259765625,
+            "y": 476.0000305175781,
+            "width": 110.0,
+            "height": 35.999969482421878
+        }
+    },
+    "m_Slots": [
+        {
+            "m_Id": "360680c06b1d44388c0cf8f9f0a3b5fa"
+        }
+    ],
+    "synonyms": [],
+    "m_Precision": 0,
+    "m_PreviewExpanded": true,
+    "m_PreviewMode": 0,
+    "m_CustomColors": {
+        "m_SerializableColors": []
+    },
+    "m_Property": {
+        "m_Id": "b388b2ee9cfd4cdaae3724a900c6402b"
+    }
 }
 
 {
@@ -1386,6 +1457,33 @@
 }
 
 {
+    "m_SGVersion": 1,
+    "m_Type": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty",
+    "m_ObjectId": "b388b2ee9cfd4cdaae3724a900c6402b",
+    "m_Guid": {
+        "m_GuidSerialized": "13ab851b-37e7-41d9-bd80-e5aaac26b15c"
+    },
+    "m_Name": "Speed",
+    "m_DefaultRefNameVersion": 1,
+    "m_RefNameGeneratedByDisplayName": "Speed",
+    "m_DefaultReferenceName": "_Speed",
+    "m_OverrideReferenceName": "",
+    "m_GeneratePropertyBlock": true,
+    "m_UseCustomSlotLabel": false,
+    "m_CustomSlotLabel": "",
+    "m_Precision": 0,
+    "overrideHLSLDeclaration": false,
+    "hlslDeclarationOverride": 0,
+    "m_Hidden": false,
+    "m_Value": 0.5,
+    "m_FloatType": 0,
+    "m_RangeValues": {
+        "x": 0.0,
+        "y": 1.0
+    }
+}
+
+{
     "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.Vector2Node",
     "m_ObjectId": "b52f2c4aea3f4717b6cc89c5446086f0",
@@ -1660,10 +1758,10 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": -1685.9998779296875,
-            "y": 373.3333435058594,
+            "x": -1749.3333740234375,
+            "y": 151.3333282470703,
             "width": 125.3333740234375,
-            "height": 174.66671752929688
+            "height": 174.6666717529297
         }
     },
     "m_Slots": [
@@ -1861,7 +1959,11 @@
     "m_Type": "UnityEditor.ShaderGraph.CategoryData",
     "m_ObjectId": "efa7cedd869a4232b7e5609096946418",
     "m_Name": "",
-    "m_ChildObjectList": []
+    "m_ChildObjectList": [
+        {
+            "m_Id": "b388b2ee9cfd4cdaae3724a900c6402b"
+        }
+    ]
 }
 
 {
