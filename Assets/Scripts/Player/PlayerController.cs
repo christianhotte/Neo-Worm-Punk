@@ -38,6 +38,7 @@ public class PlayerController : MonoBehaviour
     private InputActionMap inputMap;           //Input map which player uses
     private ScreenShakeVR screenShaker;        //Component used to safely shake player's screen without causing nausea
     private Volume healthVolume;               //Post-processing volume used to visualize player health
+    private Transform playerModel;             //Top component in player body hierarchy, contains VRIK component
 
     //Settings:
     [Header("Components:")]
@@ -47,6 +48,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField, Tooltip("Settings determining player health properties.")] private HealthSettings healthSettings;
     [Space()]
     [SerializeField, Tooltip("How far player head can get from body before it is sent back to center.")] private float maxHeadDistance;
+    [SerializeField, Tooltip("Makes sure that player torso is always below player head.")]               private bool keepTorsoCentered = true;
     [Header("Sound Settings:")]
     [SerializeField, Tooltip("SFX played when player strikes a target.")] private AudioClip targetHitSound;
     [Header("Debug Options:")]
@@ -95,6 +97,7 @@ public class PlayerController : MonoBehaviour
         inputMap = GetComponent<PlayerInput>().actions.FindActionMap("XRI Generic Interaction");                                                                               //Get generic input map from PlayerInput component
         combatHUD = GetComponentInChildren<CombatHUDController>();                                                                                                             //Get the combat HUD canvas
         screenShaker = cam.GetComponent<ScreenShakeVR>();                                                                                                                      //Get screenshaker script from camera object
+        playerModel = GetComponentInChildren<VRIK>().transform;                                                                                                                //Get player model component
         foreach (Volume volume in GetComponentsInChildren<Volume>()) //Iterate through Volume components in children
         {
             if (volume.name.Contains("Health")) healthVolume = volume; //Get health volume
@@ -159,7 +162,9 @@ public class PlayerController : MonoBehaviour
             centeredInScene = true; //Indicate that player has been centered
             CenterCamera();         //Make sure player camera is in dead center of rigidbody
         }
+        if (keepTorsoCentered) playerModel.transform.position = Vector3.ProjectOnPlane(cam.transform.position, Vector3.up); //Center model to player body position
 
+        //Debug functions:
         if (debugUpdateSettings && Application.isEditor) //Debug settings updates are enabled (only necessary while running in Unity Editor)
         {
             if (debugSpawnNetworkPlayer)
