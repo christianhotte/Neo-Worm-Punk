@@ -15,6 +15,8 @@ public class MainMenuController : MonoBehaviour
     [SerializeField, Tooltip("The animator for 1st Panel.")] private Animator Panel2Animator;
     [SerializeField, Tooltip("The animator for 1st Panel.")] private Animator Panel3Animator;
 
+    [SerializeField, Tooltip("Wormpunk Sound")] private AudioClip wormPunkSound;
+
     private void Start()
     {
         /// Move the player forward on the conveyor once the game starts
@@ -45,10 +47,11 @@ public class MainMenuController : MonoBehaviour
     public void TransportToFinal(float speed)
     {
         //NetworkManagerScript.instance.JoinLobby();
+        Panel1Animator.SetBool("Activated", false);
+        Panel2Animator.SetBool("Activated", false);
+        Panel3Animator.SetBool("Activated", false);
         StartCoroutine(MovePlayerInMenu(MenuArea.FINAL, speed));
-        Panel1Animator.Play("Panel_1_Rev");
-        Panel2Animator.Play("Panel_2_Rev");
-        Panel3Animator.Play("Panel_3_Rev");
+        Invoke("WaitOnCloseDoor", speed);
     }
 
     /// <summary>
@@ -58,6 +61,11 @@ public class MainMenuController : MonoBehaviour
     public void TransportToTube(float speed)
     {
         StartCoroutine(MovePlayerInMenu(MenuArea.TUBE, speed));
+    }
+
+    private void WaitOnCloseDoor()
+    {
+        FindObjectOfType<DoorTrigger>().CloseDoor();
     }
 
     private IEnumerator MovePlayerInMenu(MenuArea menuArea, float speed)
@@ -83,6 +91,11 @@ public class MainMenuController : MonoBehaviour
         }
     }
 
+    public void PlayWormpunkSound()
+    {
+        GetComponent<AudioSource>().PlayOneShot(wormPunkSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
+    }
+
     public void GoToLobby()
     {
         StartCoroutine(TeleportPlayerToLobby());
@@ -90,6 +103,7 @@ public class MainMenuController : MonoBehaviour
 
     private IEnumerator TeleportPlayerToLobby()
     {
+        yield return new WaitForSeconds(2.0f);
         NetworkManagerScript.instance.JoinLobby();
         FadeScreen playerScreenFader = PlayerController.instance.GetComponentInChildren<FadeScreen>();
         playerScreenFader.FadeOut();

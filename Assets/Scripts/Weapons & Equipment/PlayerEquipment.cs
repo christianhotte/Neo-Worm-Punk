@@ -405,7 +405,7 @@ public class PlayerEquipment : MonoBehaviour
     /// <summary>
     /// Updates position of rigidbody follower to match position of target.
     /// </summary>
-    private void PerformFollowerUpdate()
+    private protected void PerformFollowerUpdate()
     {
         //Calculate follower position:
         Vector3 targetPos = holstered ? preferredHolster.position : targetTransform.position;                                                     //Get base target position for rigidbody follower (either hand or holster)
@@ -459,5 +459,5 @@ public class PlayerEquipment : MonoBehaviour
     /// <summary>
     /// Plays one-shot of given sound, taking into account current volume settings (specific to SFX) (also checks if sound is null so you don't have to).
     /// </summary>
-    public void PlaySFX(AudioClip sound) { if (sound != null) audioSource.PlayOneShot(sound, PlayerPrefs.GetFloat("MasterVolume") * PlayerPrefs.GetFloat("SFXVolume")); }
+    public void PlaySFX(AudioClip sound) { if (sound != null) audioSource.PlayOneShot(sound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); }
 }

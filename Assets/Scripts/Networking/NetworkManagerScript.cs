@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
@@ -23,10 +24,10 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     [Tooltip("Name of primary menu scene.")]                                            public string mainMenuScene;
     [Tooltip("Name of primary multiplayer room scene.")]                                public string roomScene;
     [SerializeField, Tooltip("Name of network player prefab in Resources folder.")]     private string networkPlayerName;
+    [SerializeField]                                                                    private string readyUpManagerName = "ReadyUpManager";
     [SerializeField, Tooltip("Allow use of some of the worse words in our vocabulary")] private bool useFunnyWords;
 
     private Room mostRecentRoom;
-
 
     //RUNTIME METHODS:
     private void Awake()
@@ -35,10 +36,27 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         if (instance == null) { instance = this; } else Destroy(gameObject); //Singleton-ize this script instance
 
         //Get objects & components:
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
     void Start()
     {
         ConnectAndGiveDavidYourIPAddress(); //Immediately start trying to connect to master server
+    }
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+    public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // If we are loaded into the Network Locker scene, and we are the master client
+        if (scene.name == roomScene)
+        {
+            // The master client is only spawning 1 ReadyUpManager.
+            if (PhotonNetwork.IsMasterClient)
+            {
+                PhotonNetwork.Instantiate(readyUpManagerName, Vector3.zero, Quaternion.identity);
+            }
+        }
     }
 
     //NETWORK FUNCTIONS:
@@ -56,7 +74,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         RoomOptions roomOptions = new RoomOptions();
         Hashtable customRoomSettings = new Hashtable();
 
-        customRoomSettings.Add("RoundLength", 300);
+        customRoomSettings.Add("RoundLength", 600);
 
         roomOptions.IsVisible = true; // The player is able to see the room
         roomOptions.IsOpen = true; // The room is open.
@@ -136,9 +154,9 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
     //List of random adjectives and nouns to name random players
     private readonly string[] wormAdjectives = { "Unfortunate", "Sad", "Despairing", "Grotesque", "Despicable", "Abhorrent", "Regrettable", "Incorrigible", "Greasy", "Platonic", "Sinister", "Hideous", "Glum", "Blasphemous", "Malignant", "Undulating", "Treacherous", "Hostile", "Slimy", "Squirming", "Blubbering", "Twisted", "Manic", "Slippery", "Wet", "Moist", "Lugubrious", "Tubular", "Little", "Erratic", "Pathetic" };
-    private readonly string[] wormNouns = { "Invertebrate", "Creature", "Critter", "Fool", "Goon", "Specimen", "Homonculus", "Grubling", "Wormling", "Nightcrawler", "Stinker", "Rapscallion", "Scalliwag", "Beastling", "Crawler", "Larva", "Dingus", "Freak", "Blighter", "Cretin", "Dink", "Unit", "Denizen", "Creepy-Crawlie", "Parasite", "Organism" };
+    private readonly string[] wormNouns = { "Invertebrate", "Wormlet", "Creature", "Critter", "Fool", "Goon", "Specimen", "Homonculus", "Grubling", "Wormling", "Nightcrawler", "Stinker", "Rapscallion", "Scalliwag", "Beastling", "Crawler", "Larva", "Dingus", "Freak", "Blighter", "Cretin", "Dink", "Unit", "Denizen", "Creepy-Crawlie", "Parasite", "Organism" };
     private readonly string[] wormAdjectivesBad = { "Guzzling", "Fleshy", "Sopping", "Throbbing", "Promiscuous", "Flaccid", "Erect" };
-    private readonly string[] wormNounsBad = { "Guzzler", "Pervert", "Fucko" };
+    private readonly string[] wormNounsBad = { "Guzzler", "Pervert", "Fucko", "Pissbaby" };
 
     /// <summary>
     /// Generates a random nickname for the player.
@@ -156,6 +174,17 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
         string currentWormName = realWormAdjectives[Random.Range(0, realWormAdjectives.Count)] + " " + realWormNouns[Random.Range(0, realWormNouns.Count)];
         SetPlayerNickname(currentWormName + " #" + Random.Range(0, 1000).ToString("0000"));
+    }
+
+    /// <summary>
+    /// Adds death information to the jumbotron.
+    /// </summary>
+    /// <param name="killerName">The killer's user name.</param>
+    /// <param name="victimName">The victim's user name.</param>
+    public void AddDeathToJumbotron(string killerName, string victimName)
+    {
+        foreach(var jumbotron in FindObjectsOfType<Jumbotron>())
+            jumbotron.AddToDeathInfoBoard(killerName, victimName);
     }
 
     public override void OnCreatedRoom()
@@ -235,7 +264,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         }
 
         //Cleanup:
-        localNetworkPlayer.LeftRoom();
         DeSpawnNetworkPlayer(); //De-spawn local network player whenever player leaves a room
     }
     public override void OnRoomListUpdate(List<RoomInfo> roomList)

@@ -25,6 +25,7 @@ public class PhysicalButtonController : MonoBehaviour
     private Vector3 endPos;     //End position of button
 
     private Transform buttonTransform;  //The button transform that moves when the button is pressed
+    private IEnumerator buttonCoroutine; //The button coroutine
 
     private void Start()
     {
@@ -42,6 +43,12 @@ public class PhysicalButtonController : MonoBehaviour
         isPressed = false;
     }
 
+    private void OnDisable()
+    {
+        isPressed = false;
+        isPressing = false;
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("PlayerHand"))
@@ -49,13 +56,14 @@ public class PhysicalButtonController : MonoBehaviour
             //If the button is interactable, not currently being pressed, and is not locked, press the button
             if (isInteractable && !isPressing && !isLocked)
             {
-                StartCoroutine(PlayButtonAni());
+                buttonCoroutine = PlayButtonAni();
+                StartCoroutine(buttonCoroutine);
             }
             //If nothing applies, play the disabled sound effect
-            else
+            else if(!isInteractable || isLocked)
             {
                 if (onDisabledSoundEffect != null)
-                    GetComponent<AudioSource>().PlayOneShot(onDisabledSoundEffect, PlayerPrefs.GetFloat("SFXVolume", 0.5f) * PlayerPrefs.GetFloat("MasterVolume", 0.5f));
+                    GetComponent<AudioSource>().PlayOneShot(onDisabledSoundEffect, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
             }
         }
     }
@@ -102,7 +110,7 @@ public class PhysicalButtonController : MonoBehaviour
             isPressed = true;
 
             if (onPressedSoundEffect != null)
-                GetComponent<AudioSource>().PlayOneShot(onPressedSoundEffect, PlayerPrefs.GetFloat("SFXVolume", 0.5f) * PlayerPrefs.GetFloat("MasterVolume", 0.5f));
+                GetComponent<AudioSource>().PlayOneShot(onPressedSoundEffect, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
 
             onPressed.Invoke();
             Debug.Log(gameObject.name + " Pressed.");

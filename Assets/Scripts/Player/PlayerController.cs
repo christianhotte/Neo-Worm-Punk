@@ -64,6 +64,7 @@ public class PlayerController : MonoBehaviour
     private float timeUntilRegen; //Time (in seconds) until health regeneration can begin
     private bool centeredInScene; //Made false whenever player loads into a scene, triggers camera centering in the first update
     internal bool isDead;         //True while player is dead and is kinda in limbo
+    private float baseDrag;
 
     //Misc:
     internal bool Launchin = false; //NOTE: What references this and where is it modified?
@@ -115,6 +116,7 @@ public class PlayerController : MonoBehaviour
 
         //Setup runtime variables:
         currentHealth = healthSettings.defaultHealth; //Set base health value
+        baseDrag = bodyRb.drag;                       //Store base drag value
 
         weapons = GameObject.FindGameObjectsWithTag("PlayerEquipment");
         tools = GameObject.FindGameObjectsWithTag("Wall");
@@ -251,6 +253,8 @@ public class PlayerController : MonoBehaviour
         switch (context.action.name) //Determine behavior based on input action
         {
             case "RightStickPress": if (context.started) { CenterCamera(); } break; //Center camera when player presses the right stick
+            case "RightStick":
+                break;
         }
     }
     /// <summary>
@@ -258,7 +262,7 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     public void HitEnemy()
     {
-        if (targetHitSound != null) audioSource.PlayOneShot(targetHitSound, PlayerPrefs.GetFloat("SFXVolume", 0.5f) * PlayerPrefs.GetFloat("MasterVolume", 0.5f)); //Play hit sound when player shoots (or damages) a target
+        if (targetHitSound != null) audioSource.PlayOneShot(targetHitSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play hit sound when player shoots (or damages) a target
     }
     /// <summary>
     /// Method called when this player is hit by a projectile.
@@ -278,7 +282,7 @@ public class PlayerController : MonoBehaviour
         }
         else //Player is being hurt by this projectile hit
         {
-            audioSource.PlayOneShot(healthSettings.hurtSound != null ? healthSettings.hurtSound : (AudioClip)Resources.Load("Sounds/Default_Hurt_Sound"), PlayerPrefs.GetFloat("SFXVolume", 0.5f) * PlayerPrefs.GetFloat("MasterVolume", 0.5f)); //Play hurt sound
+            audioSource.PlayOneShot(healthSettings.hurtSound != null ? healthSettings.hurtSound : (AudioClip)Resources.Load("Sounds/Default_Hurt_Sound"), PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play hurt sound
             if (healthSettings.regenSpeed > 0) timeUntilRegen = healthSettings.regenPauseTime;                                                             //Optionally begin regeneration sequence
             return false;
         }
@@ -289,7 +293,7 @@ public class PlayerController : MonoBehaviour
     public void IsKilled()
     {
         //Effects:
-        audioSource.PlayOneShot(healthSettings.deathSound != null ? healthSettings.deathSound : (AudioClip)Resources.Load("Sounds/Temp_Death_Sound"), PlayerPrefs.GetFloat("SFXVolume", 0.5f) * PlayerPrefs.GetFloat("MasterVolume", 0.5f)); //Play death sound
+        audioSource.PlayOneShot(healthSettings.deathSound != null ? healthSettings.deathSound : (AudioClip)Resources.Load("Sounds/Temp_Death_Sound"), PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play death sound
         
         //Weapon cleanup:
         foreach (NewGrapplerController hookShot in GetComponentsInChildren<NewGrapplerController>()) //Iterate through any hookshots player may have equipped
@@ -335,4 +339,5 @@ public class PlayerController : MonoBehaviour
     /// Generic method to make sure UnityActions always have something subscribed to them.
     /// </summary>
     private void SubscriptionDummy() { }
+    public void ResetDrag() { if (bodyRb != null) bodyRb.drag = baseDrag; }
 }

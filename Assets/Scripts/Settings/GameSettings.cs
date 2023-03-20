@@ -9,4 +9,9 @@ public static class GameSettings
     public static bool toggleTest = false;
     public static float testDialValue = 0f;
     public static float testSliderValue = 0f;
+
+    public static float defaultMasterSound = 0.5f;
+    public static float defaultMusicSound = 0.5f;
+    public static float defaultSFXSound = 0.5f;
+    public static float defaultVoiceSound = 0.5f;
 }
