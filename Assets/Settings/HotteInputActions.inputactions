@@ -925,6 +925,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "RightStick",
+                    "type": "Value",
+                    "id": "459fb52d-950f-4b18-bb8a-a9b183ebd88e",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -936,6 +945,17 @@
                     "processors": "",
                     "groups": "Generic XR Controller",
                     "action": "RightStickPress",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1c3b611b-5809-4868-8903-ac52dae46cef",
+                    "path": "<XRController>{LeftHand}/joystick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Generic XR Controller",
+                    "action": "RightStick",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
