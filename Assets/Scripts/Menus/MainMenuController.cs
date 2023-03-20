@@ -8,6 +8,7 @@ public class MainMenuController : MonoBehaviour
 {
     public enum MenuArea { SETTINGS, FINAL, TUBE }
 
+    [SerializeField, Tooltip("The platform that moves on the conveyor belt.")] private Transform platform;
     private PlayerController playerObject;
     [SerializeField, Tooltip("The positions for where the player moves to in the menu areas.")] private Transform[] menuLocations;
     [SerializeField, Tooltip("The location of the lobby.")] private Transform lobbyLocation;
@@ -78,9 +79,14 @@ public class MainMenuController : MonoBehaviour
 
     private IEnumerator MovePlayerInMenu(MenuArea menuArea, float speed)
     {
-        //Get the starting position and ending position based on the area the player is moving to
-        Vector3 startingPos = playerObject.transform.localPosition;
-        Vector3 endingPos = menuLocations[(int)menuArea].position;
+        //Get the starting position and ending position based on the area the platform and player are moving to
+        Vector3 startingPlatformPos = platform.position;
+        Vector3 endingPlatformPos = platform.position;
+        endingPlatformPos.z = menuLocations[(int)menuArea].position.z;
+
+        Vector3 startingPlayerPos = playerObject.transform.position;
+        Vector3 endingPlayerPos = playerObject.transform.position;
+        endingPlayerPos.z = menuLocations[(int)menuArea].position.z;
 
         //Move the player with a lerp
         float timeElapsed = 0;
@@ -91,7 +97,8 @@ public class MainMenuController : MonoBehaviour
             float t = timeElapsed / speed;
             t = t * t * (3f - 2f * t);
 
-            playerObject.transform.localPosition = Vector3.Lerp(startingPos, endingPos, t);    //Lerp the player's movement
+            platform.position = Vector3.Lerp(startingPlatformPos, endingPlatformPos, t);    //Lerp the platform's movement
+            playerObject.transform.position = Vector3.Lerp(startingPlayerPos, endingPlayerPos, t);    //Lerp the player's movement
 
             timeElapsed += Time.deltaTime;
 
@@ -116,7 +123,8 @@ public class MainMenuController : MonoBehaviour
         FadeScreen playerScreenFader = PlayerController.instance.GetComponentInChildren<FadeScreen>();
         playerScreenFader.FadeOut();
         yield return new WaitForSeconds(playerScreenFader.GetFadeDuration());
-        PlayerController.instance.transform.position = lobbyLocation.position;
+
+        playerObject.transform.position = lobbyLocation.localPosition;
         yield return new WaitForSeconds(0.5f);
         playerScreenFader.FadeIn();
     }
