@@ -9,7 +9,7 @@ public class MainMenuController : MonoBehaviour
     public enum MenuArea { SETTINGS, FINAL, TUBE }
 
     [SerializeField, Tooltip("The platform that moves on the conveyor belt.")] private Transform platform;
-    private PlayerController playerObject;
+    private Transform playerObject;
     [SerializeField, Tooltip("The positions for where the player moves to in the menu areas.")] private Transform[] menuLocations;
     [SerializeField, Tooltip("The location of the lobby.")] private Transform lobbyLocation;
     [SerializeField, Tooltip("The animator for 1st Panel.")] private Animator Panel1Animator;
@@ -29,7 +29,7 @@ public class MainMenuController : MonoBehaviour
         menuAudioSource.volume = PlayerPrefs.GetFloat("MusicVolume", GameSettings.defaultMusicSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound);
 
         // Move the player forward on the conveyor once the game starts
-        playerObject = FindObjectOfType<PlayerController>();
+        playerObject = PlayerController.instance.xrOrigin.transform;
         Invoke("TransportToSettings", 3);
     }
 
@@ -84,8 +84,8 @@ public class MainMenuController : MonoBehaviour
         Vector3 endingPlatformPos = platform.position;
         endingPlatformPos.z = menuLocations[(int)menuArea].position.z;
 
-        Vector3 startingPlayerPos = playerObject.transform.position;
-        Vector3 endingPlayerPos = playerObject.transform.position;
+        Vector3 startingPlayerPos = playerObject.position;
+        Vector3 endingPlayerPos = playerObject.position;
         endingPlayerPos.z = menuLocations[(int)menuArea].position.z;
 
         //Move the player with a lerp
@@ -98,7 +98,7 @@ public class MainMenuController : MonoBehaviour
             t = t * t * (3f - 2f * t);
 
             platform.position = Vector3.Lerp(startingPlatformPos, endingPlatformPos, t);    //Lerp the platform's movement
-            playerObject.transform.position = Vector3.Lerp(startingPlayerPos, endingPlayerPos, t);    //Lerp the player's movement
+            playerObject.position = Vector3.Lerp(startingPlayerPos, endingPlayerPos, t);    //Lerp the player's movement
 
             timeElapsed += Time.deltaTime;
 
@@ -124,9 +124,10 @@ public class MainMenuController : MonoBehaviour
         playerScreenFader.FadeOut();
         yield return new WaitForSeconds(playerScreenFader.GetFadeDuration());
 
-        playerObject.transform.position = lobbyLocation.localPosition;
+        playerObject.position = lobbyLocation.position;
         yield return new WaitForSeconds(0.5f);
         playerScreenFader.FadeIn();
+        StopAllCoroutines();
     }
 
     public void FadeToLockerRoom()
