@@ -69,7 +69,7 @@ public class TestMainMenuController : MonoBehaviour
         yield return new WaitForSeconds(playerObject.GetComponentInChildren<FadeScreen>().GetFadeDuration());
         yield return null;
 
-        GameManager.Instance.LoadGame(SceneIndexes.NETWORKLOCKERROOM);
+        GameManager.Instance.LoadGame(GameSettings.roomScene);
     }
 
     private IEnumerator MovePlayerInMenu(MenuArea menuArea, float speed)

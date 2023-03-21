@@ -38,6 +38,7 @@ public class PlayerController : MonoBehaviour
     private InputActionMap inputMap;           //Input map which player uses
     private ScreenShakeVR screenShaker;        //Component used to safely shake player's screen without causing nausea
     private Volume healthVolume;               //Post-processing volume used to visualize player health
+    private Transform playerModel;             //Top component in player body hierarchy, contains VRIK component
 
     //Settings:
     [Header("Components:")]
@@ -46,7 +47,10 @@ public class PlayerController : MonoBehaviour
     [Header("Settings:")]
     [SerializeField, Tooltip("Settings determining player health properties.")] private HealthSettings healthSettings;
     [Space()]
-    [SerializeField, Tooltip("How far player head can get from body before it is sent back to center.")] private float maxHeadDistance;
+    [SerializeField, Tooltip("How far player head can get from body before it is sent back to center.")]                private float maxHeadDistance;
+    [SerializeField, Tooltip("Amount by which to move torso down (allows player to collapse more naturally).")]         private float torsoVerticalOffset = 10f;
+    [SerializeField, Tooltip("Makes sure that player torso is always below player head.")]                              private bool keepTorsoCentered = true;
+    [SerializeField, Range(0, 1), Tooltip("Amount by which player has to pull the thumb stick in order to snap-turn.")] private float flickStickThreshold;
     [Header("Sound Settings:")]
     [SerializeField, Tooltip("SFX played when player strikes a target.")] private AudioClip targetHitSound;
     [Header("Debug Options:")]
@@ -65,6 +69,7 @@ public class PlayerController : MonoBehaviour
     private bool centeredInScene; //Made false whenever player loads into a scene, triggers camera centering in the first update
     internal bool isDead;         //True while player is dead and is kinda in limbo
     private float baseDrag;
+    private Vector2 prevRightStick; //Previous position of the right stick
 
     //Misc:
     internal bool Launchin = false; //NOTE: What references this and where is it modified?
@@ -95,6 +100,7 @@ public class PlayerController : MonoBehaviour
         inputMap = GetComponent<PlayerInput>().actions.FindActionMap("XRI Generic Interaction");                                                                               //Get generic input map from PlayerInput component
         combatHUD = GetComponentInChildren<CombatHUDController>();                                                                                                             //Get the combat HUD canvas
         screenShaker = cam.GetComponent<ScreenShakeVR>();                                                                                                                      //Get screenshaker script from camera object
+        playerModel = GetComponentInChildren<VRIK>().transform;                                                                                                                //Get player model component
         foreach (Volume volume in GetComponentsInChildren<Volume>()) //Iterate through Volume components in children
         {
             if (volume.name.Contains("Health")) healthVolume = volume; //Get health volume
@@ -150,6 +156,7 @@ public class PlayerController : MonoBehaviour
         {
             inMenu = false;
         }
+            
     }
     private void Update()
     {
@@ -159,7 +166,9 @@ public class PlayerController : MonoBehaviour
             centeredInScene = true; //Indicate that player has been centered
             CenterCamera();         //Make sure player camera is in dead center of rigidbody
         }
+        if (keepTorsoCentered) playerModel.transform.position = cam.transform.position + (Vector3.down * torsoVerticalOffset); //Center model to player body position and apply vertical offset
 
+        //Debug functions:
         if (debugUpdateSettings && Application.isEditor) //Debug settings updates are enabled (only necessary while running in Unity Editor)
         {
             if (debugSpawnNetworkPlayer)
@@ -240,6 +249,8 @@ public class PlayerController : MonoBehaviour
             inCombat = false;
         }
 
+        bodyRb.isKinematic = !inCombat;
+
         foreach (var weapon in attachedEquipment)
             foreach (var renderer in weapon.GetComponentsInChildren<Renderer>())
                 renderer.enabled = inCombat;
@@ -254,6 +265,14 @@ public class PlayerController : MonoBehaviour
         {
             case "RightStickPress": if (context.started) { CenterCamera(); } break; //Center camera when player presses the right stick
             case "RightStick":
+                Vector2 stickValue = context.ReadValue<Vector2>(); //Get input value from thumbstick
+                if (stickValue.magnitude > flickStickThreshold && prevRightStick.magnitude < flickStickThreshold) //Flick stick action has just begun
+                {
+                    Vector3 stickDir = new Vector3(stickValue.x, 0, stickValue.y);                   //Convert stick value to a flat vector3
+                    Quaternion playerRotator = Quaternion.FromToRotation(Vector3.forward, stickDir); //Get a rotation that points the player in the direction of the stick
+                    bodyRb.transform.rotation = playerRotator * bodyRb.transform.rotation;           //Rotate the player
+                }
+                prevRightStick = stickValue; //Store stick value for later
                 break;
         }
     }

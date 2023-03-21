@@ -76,7 +76,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         RoomOptions roomOptions = new RoomOptions();
         Hashtable customRoomSettings = new Hashtable();
 
-        customRoomSettings.Add("RoundLength", 600);
+        customRoomSettings.Add("RoundLength", 300);
 
         roomOptions.IsVisible = true; // The player is able to see the room
         roomOptions.IsOpen = true; // The room is open.
@@ -219,6 +219,11 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     }
     public override void OnJoinedRoom()
     {
+        //Automatically load the player into the locker room if the auto join script calls for it
+        AutoJoinRoom autoJoin = FindObjectOfType<AutoJoinRoom>();
+        if (autoJoin != null && autoJoin.GoToLockerRoom())
+            autoJoin.AutoLoadScene(GameSettings.roomScene);
+
         //Update lobby UI:
         LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
         if (lobbyUI != null) //If there is a lobby in the scene, display room information

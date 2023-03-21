@@ -323,21 +323,31 @@ public class NewShotgunController : PlayerEquipment
             SendHapticImpulse(gunSettings.fireHaptics);      //Play haptic impulse
             player.ShakeScreen(gunSettings.fireScreenShake); //Shake screen (gently)
 
-            //Exit velocity modifiers:
-            if (!gunSettings.wallBoostOnly || reverseFireStage == 2) //Player is using normal fire velocity system
+            //Generic exit velocity modifiers:
+            float effectiveFireVel = gunSettings.fireVelocity;                                                  //Store fire velocity so it can be optionally modified
+            if (otherGun != null && otherGun.doubleFireWindow > 0 &&                                            //Player is firing both weapons simultaneously...
+                otherGun.reverseFireStage == reverseFireStage) effectiveFireVel *= gunSettings.doubleFireBoost; //And both weapons are in the same firing mode, apply double-fire boost
+            if (reverseFireStage == 2) effectiveFireVel *= gunSettings.reverseFireBoost;                        //Add reverse firing boost
+
+            //Wall boost calculations
+            bool hitWall = Physics.Raycast(currentBarrel.position, currentBarrel.forward, out RaycastHit hit, gunSettings.maxWallBoostDist, gunSettings.wallBoostLayers); //Determine whether or not play is shooting at a wall
+            if (hitWall) //Weapon is firing at a nearby wall
             {
-                //Calculate exit velocity:
-                float effectiveFireVel = gunSettings.fireVelocity;                                                  //Store fire velocity so it can be optionally modified
-                if (otherGun != null && otherGun.doubleFireWindow > 0 &&                                            //Player is firing both weapons simultaneously...
-                    otherGun.reverseFireStage == reverseFireStage) effectiveFireVel *= gunSettings.doubleFireBoost; //And both weapons are in the same firing mode, apply double-fire boost
-                if (reverseFireStage == 2) effectiveFireVel *= gunSettings.reverseFireBoost;                        //Add reverse firing boost
-                if (Physics.Raycast(currentBarrel.position, currentBarrel.forward, out RaycastHit hit, gunSettings.maxWallBoostDist, gunSettings.wallBoostLayers)) //Weapon is firing at a nearby wall
+                effectiveFireVel *= gunSettings.maxWallBoost; //Apply multiplier to shot power based on how close player is to the wall
+                if (!gunSettings.alwaysMaxWallBoost) //Wall boost power is being interpolated based on proximity to the wall
                 {
                     float distInterpolant = 1 - (hit.distance / gunSettings.maxWallBoostDist); //Get interpolant value representing how close weapon barrel is to a wall (the closer the higher)
-                    effectiveFireVel *= gunSettings.maxWallBoost * distInterpolant;             //Apply multiplier to shot power based on how close player is to the wall
+                    effectiveFireVel *= distInterpolant;                                       //Apply distance interpolant
                 }
+            }
 
-                //Apply velocity to player
+            //Apply velocity to player
+            if (!hitWall && gunSettings.wallBoostOnly && reverseFireStage != 2) //Additive boost system is being used
+            {
+                player.bodyRb.AddForce(-currentBarrel.forward * effectiveFireVel, ForceMode.Impulse); //Add impulse force to player's existing velocity
+            }
+            else //Override boost system is being used
+            {
                 Vector3 newVelocity = -currentBarrel.forward * effectiveFireVel;               //Store new velocity for player (always directly away from barrel that fired latest shot, unless reverse firing)
                 float velocityAngleDelta = Vector3.Angle(newVelocity, player.bodyRb.velocity); //Get angle between current velocity and new velocity
                 if (velocityAngleDelta <= gunSettings.additiveVelocityMaxAngle) //Player is firing to push themself in the direction they are generally already going
@@ -348,19 +358,6 @@ public class NewShotgunController : PlayerEquipment
                     newVelocity = newVelocity.normalized * (player.bodyRb.velocity.magnitude + addVel);          //Keep exact direction of new velocity but use existing speed and add some previous speed
                 }
                 player.bodyRb.velocity = newVelocity; //Launch player instantaneously (no acceleration)
-            }
-            else //Player is using wall boost velocity only
-            {
-                if (Physics.Raycast(currentBarrel.position, currentBarrel.forward, out RaycastHit hit, gunSettings.maxWallBoostDist, gunSettings.wallBoostLayers)) //Weapon is firing at a nearby wall
-                {
-                    float effectiveFireVel = gunSettings.fireVelocity;                                                  //Store fire velocity so it can be optionally modified
-                    if (otherGun != null && otherGun.doubleFireWindow > 0 &&                                            //Player is firing both weapons simultaneously...
-                        otherGun.reverseFireStage == reverseFireStage) effectiveFireVel *= gunSettings.doubleFireBoost; //And both weapons are in the same firing mode, apply double-fire boost
-                    if (reverseFireStage == 2) effectiveFireVel *= gunSettings.reverseFireBoost;                        //Add reverse firing boost
-                    float distInterpolant = 1 - (hit.distance / gunSettings.maxWallBoostDist);                          //Get interpolant value representing how close weapon barrel is to a wall (the closer the higher)
-                    effectiveFireVel *= gunSettings.maxWallBoost * distInterpolant;                                     //Apply multiplier to shot power based on how close player is to the wall
-                    player.bodyRb.velocity = -currentBarrel.forward * effectiveFireVel;
-                }
             }
         }
 
