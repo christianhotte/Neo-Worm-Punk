@@ -113,10 +113,6 @@ public class NetworkPlayer : MonoBehaviour
     }
     private void OnDestroy()
     {
-        //Remove the player's color from the list of colors
-        NetworkManagerScript.instance.RemoveColor((int)PlayerSettingsController.ColorToColorOptions(PlayerSettingsController.Instance.charData.playerColor));
-        SyncColors();
-
         photonView.RPC("RPC_TubeVacated", RpcTarget.All, lastTubeNumber);
 
         //Reference cleanup:

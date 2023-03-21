@@ -177,7 +177,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         }
 
         string currentWormName = realWormAdjectives[Random.Range(0, realWormAdjectives.Count)] + " " + realWormNouns[Random.Range(0, realWormNouns.Count)];
-        SetPlayerNickname(currentWormName + " #" + Random.Range(0, 1000).ToString("0000"));
+        SetPlayerNickname(currentWormName);
     }
 
     /// <summary>
@@ -304,14 +304,37 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
         Debug.Log("Actor Number For " + GetLocalPlayerName() + ": " + PhotonNetwork.LocalPlayer.ActorNumber);
     }
+
     public void DeSpawnNetworkPlayer()
     {
+        //Remove the player's color from the list of colors
+        RemoveColor((int)PlayerSettingsController.ColorToColorOptions(PlayerSettingsController.Instance.charData.playerColor));
+        localNetworkPlayer.SyncColors();
+
         if (localNetworkPlayer != null) PhotonNetwork.Destroy(localNetworkPlayer.gameObject); //Destroy local network player if possible
         localNetworkPlayer = null;                                                            //Remove reference to destroyed reference player
     }
+
     public void SetPlayerNickname(string name)
     {
-        PhotonNetwork.NickName = name;
+        string currentName = name;
+        bool duplicateNameExists = true;
+        int counter = 2;
+
+        while (duplicateNameExists)
+        {
+            if (GetPlayerNameList().Contains(currentName))
+            {
+                currentName = name + " " + counter.ToString();
+                counter++;
+            }
+            else
+            {
+                duplicateNameExists = false;
+            }
+        }
+
+        PhotonNetwork.NickName = currentName;
         PlayerSettingsController.Instance.charData.playerName = PhotonNetwork.NickName;
     }
 
