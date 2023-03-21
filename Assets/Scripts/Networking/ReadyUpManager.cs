@@ -14,7 +14,6 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     public static ReadyUpManager instance;
 
     [SerializeField] private TextMeshProUGUI playerReadyText;
-    [SerializeField] private string sceneToLoad = "DM_0.14_Arena";
 
     private const int MINIMUM_PLAYERS_NEEDED = 2;   // The minimum number of players needed for a round to start
 
@@ -96,7 +95,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
             foreach (var player in NetworkPlayer.instances)
                 player.networkPlayerStats = new PlayerStats();
 
-            NetworkManagerScript.instance.LoadSceneWithFade(sceneToLoad);
+            NetworkManagerScript.instance.LoadSceneWithFade(GameSettings.arenaScene);
         }
     }
 

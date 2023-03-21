@@ -26,12 +26,12 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// Loads the new scene when starting the game.
     /// </summary>
-    /// <param name="sceneIndex"></param>
-    public void LoadGame(SceneIndexes sceneIndex)
+    /// <param name="sceneName">The name of the scene.</param>
+    public void LoadGame(string sceneName)
     {
-        Debug.Log("Loading Scene - " + sceneIndex.ToString());
-        //SceneManager.LoadScene((int)sceneIndex);
-        PhotonNetwork.LoadLevel((int)sceneIndex);
+        Debug.Log("Loading Scene - " + sceneName);
+
+        PhotonNetwork.LoadLevel(sceneName);
         levelTransitionActive = false;
     }
 
@@ -48,6 +48,8 @@ public class GameManager : MonoBehaviour
     {
         switch (SceneManager.GetActiveScene().name)
         {
+            case "Init":
+                return true;
             case "MainMenu":
                 return true;
             case "NetworkLockerRoom":

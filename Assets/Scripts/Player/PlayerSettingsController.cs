@@ -31,7 +31,7 @@ public class CharacterData
     //Settings:
     public int playerID;                            //Unique number differentiating this player from others on the network
     public string playerName;                       //Name chosen by user to be displayed for other players on the network
-    public Color testColor = new Color(1, 1, 1, 1); //DEMO SETTING: Color chosen by player to be seen by all other players over the network (defaults to white)
+    public Color testColor = new Color(255f / 255f, 128f / 255f, 128f / 255f); //DEMO SETTING: Color chosen by player to be seen by all other players over the network (defaults to flesh)
 }
 
 public class PlayerStats

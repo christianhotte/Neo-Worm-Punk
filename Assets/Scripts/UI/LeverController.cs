@@ -44,6 +44,12 @@ public class LeverController : MonoBehaviour
     private float waitUntilAutoMoveTimer = 0.1f;
     private float currentMoveTimer;
 
+    private bool firstCheck;    //Ignores the value check for when it's immediately spawned
+
+    private void Start()
+    {
+        firstCheck = true;
+    }
 
     private void OnEnable()
     {
@@ -85,7 +91,7 @@ public class LeverController : MonoBehaviour
             //If the angle has hit the minimum limit and is not already at the limit
             if (angleWithMinLimit < angleBetweenThreshold)
             {
-                if (hingeJointState != HingeJointState.Min)
+                if (hingeJointState != HingeJointState.Min && !firstCheck)
                 {
                     Debug.Log(transform.name + " Minimum Limit Reached.");
                     OnMinLimitReached.Invoke();
@@ -107,7 +113,7 @@ public class LeverController : MonoBehaviour
             //If the angle has hit the maximum limit and is not already at the limit
             else if (angleWithMaxLimit < angleBetweenThreshold)
             {
-                if (hingeJointState != HingeJointState.Max)
+                if (hingeJointState != HingeJointState.Max && !firstCheck)
                 {
                     Debug.Log(transform.name + " Maximum Limit Reached.");
                     OnMaxLimitReached.Invoke();
@@ -136,7 +142,7 @@ public class LeverController : MonoBehaviour
         currentValue = GetLeverValue(); //Get the value of the lever
 
         //If the value has changed since the previous frame, call the OnValueChanged event
-        if (currentValue != previousValue)
+        if (currentValue != previousValue && !firstCheck)
         {
             OnValueChanged.Invoke(currentValue);
             previousValue = currentValue;
@@ -168,11 +174,14 @@ public class LeverController : MonoBehaviour
             }
         }
 
-        if (prevState != hingeJointState)
+        if (prevState != hingeJointState && !firstCheck)
         {
             Debug.Log("Lever State Changed Invoked.");
             OnStateChanged.Invoke();
         }
+
+        if (firstCheck)
+            firstCheck = false;
     }
 
     private void MoveToLimit(float limit)
