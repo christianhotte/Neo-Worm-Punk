@@ -13,8 +13,8 @@ public class MainMenuController : MonoBehaviour
     [SerializeField, Tooltip("The positions for where the player moves to in the menu areas.")] private Transform[] menuLocations;
     [SerializeField, Tooltip("The location of the lobby.")] private Transform lobbyLocation;
     [SerializeField, Tooltip("The animator for 1st Panel.")] private Animator Panel1Animator;
-    [SerializeField, Tooltip("The animator for 1st Panel.")] private Animator Panel2Animator;
-    [SerializeField, Tooltip("The animator for 1st Panel.")] private Animator Panel3Animator;
+    [SerializeField, Tooltip("The animator for 2nd Panel.")] private Animator Panel2Animator;
+    [SerializeField, Tooltip("The animator for 3rd Panel.")] private Animator Panel3Animator;
 
     [SerializeField, Tooltip("Main Menu Background Music")] private AudioClip mainMenuMusic;
     [SerializeField, Tooltip("Wormpunk Sound")] private AudioClip wormPunkSound;

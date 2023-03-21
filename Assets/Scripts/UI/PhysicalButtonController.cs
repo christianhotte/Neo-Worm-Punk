@@ -5,10 +5,13 @@ using UnityEngine.Events;
 
 public class PhysicalButtonController : MonoBehaviour
 {
+    [SerializeField] private Canvas buttonCanvas;
     [SerializeField, Tooltip("Defines how far the button needs to be move to be registered as pressed. Higher number = more sensitivity.")] private float threshold = 0.1f;    //The threshold for the button that defines when the button is pressed
 
     [SerializeField, Tooltip("If true, locks the button in place after pressing the button.")] private bool lockOnPress;
     [SerializeField, Tooltip("If true, the player can press the button to perform an action.")] private bool isInteractable = true;
+
+    [SerializeField, Tooltip("The color of the button when pressed.")] private Color pressColor = new Color(0, 0, 0, 0);
 
     [SerializeField, Tooltip("The time it takes for the button to fully press.")] private float buttonPressSeconds = 0.5f;
     [SerializeField, Tooltip("The animation movement for the button.")] private AnimationCurve buttonAniCurve;
@@ -27,9 +30,12 @@ public class PhysicalButtonController : MonoBehaviour
     private Transform buttonTransform;  //The button transform that moves when the button is pressed
     private IEnumerator buttonCoroutine; //The button coroutine
 
+    private Color defaultColor;
+
     private void Start()
     {
         buttonTransform = transform.Find("Button");
+        defaultColor = buttonTransform.Find("Clicker").GetComponent<MeshRenderer>().material.color;
         startPos = buttonTransform.localPosition;
         endPos = startPos;
         endPos.z += threshold;
@@ -88,12 +94,18 @@ public class PhysicalButtonController : MonoBehaviour
 
             //If the button is currently not pressed and it's halfway through the animation, press the button
             if (!isPressed && elapsedTime >= buttonPressSeconds / 2f)
+            {
                 Pressed();
+                if (pressColor != new Color(0, 0, 0, 0))
+                    ChangeButtonColor(pressColor, false);
+            }
 
             yield return null;
         }
 
-        if(!isLocked)
+        ChangeButtonColor(defaultColor, false);
+
+        if (!isLocked)
             buttonTransform.localPosition = startPos;
         isPressed = false;
         isPressing = false;
@@ -121,6 +133,28 @@ public class PhysicalButtonController : MonoBehaviour
     }
 
     /// <summary>
+    /// Changes the color of the button.
+    /// </summary>
+    /// <param name="newColor">The new color of the button.</param>
+    /// <param name="setToDefault">If true, this sets the button's default color as well.</param>
+    public void ChangeButtonColor(Color newColor, bool setToDefault = true)
+    {
+        buttonTransform.Find("Clicker").GetComponent<MeshRenderer>().material.color = newColor;
+
+        if (setToDefault)
+            defaultColor = newColor;
+    }
+
+    /// <summary>
+    /// Shows the text that is on top of the button.
+    /// </summary>
+    /// <param name="showText">If true, show the text on the button.</param>
+    public void ShowText(bool showText)
+    {
+        buttonCanvas.gameObject.SetActive(showText);
+    }
+
+    /// <summary>
     /// Locks or unlocks the button's position.
     /// </summary>
     /// <param name="locked">If true, the position of the button is locked. If false, the button can be pressed freely.</param>
@@ -136,5 +170,10 @@ public class PhysicalButtonController : MonoBehaviour
     public void EnableButton(bool isEnabled)
     {
         isInteractable = isEnabled;
+
+        if (!isInteractable)
+            buttonTransform.localPosition = endPos;
+        else
+            buttonTransform.localPosition = startPos;
     }
 }
