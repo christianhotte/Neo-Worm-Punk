@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 475025754}
   - component: {fileID: 475025753}
   - component: {fileID: 475025755}
-  m_Layer: 3
+  m_Layer: 16
   m_Name: Tail8
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -158,7 +158,7 @@ GameObject:
   - component: {fileID: 1749515703}
   - component: {fileID: 1749515702}
   - component: {fileID: 1749515704}
-  m_Layer: 3
+  m_Layer: 16
   m_Name: Tail5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -672,6 +672,7 @@ MonoBehaviour:
   rightHolster: {fileID: 5847821605411582915}
   healthSettings: {fileID: 11400000, guid: 6d24db3effe67fb47a10bfaa9621390b, type: 2}
   maxHeadDistance: 0
+  torsoVerticalOffset: 1
   keepTorsoCentered: 1
   targetHitSound: {fileID: 8300000, guid: 531eac65f6344cf478fc990cb0396400, type: 3}
   debugUpdateSettings: 0
@@ -958,7 +959,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1952950443538666959}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.987, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2012,7 +2013,7 @@ GameObject:
   - component: {fileID: 250001885}
   - component: {fileID: 250001884}
   - component: {fileID: 250001886}
-  m_Layer: 3
+  m_Layer: 16
   m_Name: Tail3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2597,7 +2598,7 @@ GameObject:
   - component: {fileID: 591402584}
   - component: {fileID: 591402583}
   - component: {fileID: 591402585}
-  m_Layer: 3
+  m_Layer: 16
   m_Name: Tail4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3708,9 +3709,9 @@ GameObject:
   m_Component:
   - component: {fileID: 6318786951184492023}
   - component: {fileID: 765214971}
-  - component: {fileID: 5368783225556277761}
   - component: {fileID: 1297214217308056281}
-  m_Layer: 3
+  - component: {fileID: 765214973}
+  m_Layer: 16
   m_Name: Tail2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3749,19 +3750,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!135 &5368783225556277761
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6030540786218838468}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.17
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!144 &1297214217308056281
 CharacterJoint:
   m_ObjectHideFlags: 0
@@ -3808,6 +3796,19 @@ CharacterJoint:
   m_EnablePreprocessing: 1
   m_MassScale: 1
   m_ConnectedMassScale: 1
+--- !u!135 &765214973
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6030540786218838468}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.17
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &6117604869144871427
 GameObject:
   m_ObjectHideFlags: 0
@@ -3820,7 +3821,7 @@ GameObject:
   - component: {fileID: 1195754327}
   - component: {fileID: 1195754326}
   - component: {fileID: 1195754328}
-  m_Layer: 3
+  m_Layer: 16
   m_Name: Tail7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4042,7 +4043,7 @@ MonoBehaviour:
       rotateChestByHands: 1
       chestClampWeight: 0.5
       headClampWeight: 0.6
-      moveBodyBackWhenCrouching: 0.5
+      moveBodyBackWhenCrouching: 0
       maintainPelvisPosition: 0.2
       maxRootAngle: 25
       rootHeadingOffset: 0
@@ -5009,7 +5010,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8535459139723959112}
-  m_Layer: 3
+  m_Layer: 16
   m_Name: Tail11
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5247,7 +5248,7 @@ GameObject:
   - component: {fileID: 1501690845}
   - component: {fileID: 1501690844}
   - component: {fileID: 1501690846}
-  m_Layer: 3
+  m_Layer: 16
   m_Name: Tail10
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5719,7 +5720,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3818631222060029949}
   - component: {fileID: 7851357070361824214}
-  m_Layer: 3
+  m_Layer: 16
   m_Name: Tail1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5770,7 +5771,7 @@ GameObject:
   - component: {fileID: 2123790008}
   - component: {fileID: 2123790007}
   - component: {fileID: 2123790009}
-  m_Layer: 3
+  m_Layer: 16
   m_Name: Tail9
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5913,7 +5914,7 @@ GameObject:
   - component: {fileID: 623481981}
   - component: {fileID: 623481980}
   - component: {fileID: 623481982}
-  m_Layer: 3
+  m_Layer: 16
   m_Name: Tail6
   m_TagString: Untagged
   m_Icon: {fileID: 0}

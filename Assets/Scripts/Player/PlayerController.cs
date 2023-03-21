@@ -47,8 +47,9 @@ public class PlayerController : MonoBehaviour
     [Header("Settings:")]
     [SerializeField, Tooltip("Settings determining player health properties.")] private HealthSettings healthSettings;
     [Space()]
-    [SerializeField, Tooltip("How far player head can get from body before it is sent back to center.")] private float maxHeadDistance;
-    [SerializeField, Tooltip("Makes sure that player torso is always below player head.")]               private bool keepTorsoCentered = true;
+    [SerializeField, Tooltip("How far player head can get from body before it is sent back to center.")]        private float maxHeadDistance;
+    [SerializeField, Tooltip("Amount by which to move torso down (allows player to collapse more naturally).")] private float torsoVerticalOffset = 10f;
+    [SerializeField, Tooltip("Makes sure that player torso is always below player head.")]                      private bool keepTorsoCentered = true;
     [Header("Sound Settings:")]
     [SerializeField, Tooltip("SFX played when player strikes a target.")] private AudioClip targetHitSound;
     [Header("Debug Options:")]
@@ -153,6 +154,7 @@ public class PlayerController : MonoBehaviour
         {
             inMenu = false;
         }
+            
     }
     private void Update()
     {
@@ -162,7 +164,7 @@ public class PlayerController : MonoBehaviour
             centeredInScene = true; //Indicate that player has been centered
             CenterCamera();         //Make sure player camera is in dead center of rigidbody
         }
-        if (keepTorsoCentered) playerModel.transform.position = Vector3.ProjectOnPlane(cam.transform.position, Vector3.up); //Center model to player body position
+        if (keepTorsoCentered) playerModel.transform.position = cam.transform.position + (Vector3.down * torsoVerticalOffset); //Center model to player body position and apply vertical offset
 
         //Debug functions:
         if (debugUpdateSettings && Application.isEditor) //Debug settings updates are enabled (only necessary while running in Unity Editor)
