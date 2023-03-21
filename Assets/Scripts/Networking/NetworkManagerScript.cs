@@ -29,6 +29,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
     private Room mostRecentRoom;
 
+    internal List<ColorOptions> takenColors = new List<ColorOptions>();
+
     //RUNTIME METHODS:
     private void Awake()
     {
@@ -344,6 +346,18 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             PhotonNetwork.LoadLevel(sceneName);
         }
     }
+
+    public void UpdateTakenColorList(ColorOptions previousTakenColor, ColorOptions newTakenColor)
+    {
+        if (ColorTaken(previousTakenColor))
+            RemoveColor(previousTakenColor);
+
+        TakeColor(newTakenColor);
+    }
+
+    public void TakeColor(ColorOptions colorOption) => takenColors.Add(colorOption);
+    public void RemoveColor(ColorOptions colorOption) => takenColors.Remove(colorOption);
+    public bool ColorTaken(ColorOptions colorOption) => takenColors.Contains(colorOption);
 
     public Room GetMostRecentRoom() => mostRecentRoom;
     public string GetCurrentRoom() => PhotonNetwork.CurrentRoom.Name;
