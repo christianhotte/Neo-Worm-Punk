@@ -18,13 +18,13 @@ public class SliderController : MonoBehaviour
     [SerializeField, Tooltip("Determine if a dummy model is shown when rotating the dial.")] private bool useDummyHands;
 
     public UnityEvent<float> OnValueChanged;    //The action performed when the slider changes
+    [SerializeField, Tooltip("The sound that plays when the slider is moved.")] private AudioClip onMoveSoundEffect;
 
     private float offsetOnGrab; //The offset of the grabber when grabbing the slider
     private Vector3 handleLocalStartPos;    //The start position of the handle when grabbed
 
     [SerializeField, Tooltip("The type of restriction the slider has with its movement.")] private SliderRestriction sliderRestriction;
 
-    private Transform activeGrabber;    //The active object grabbing the slider
     private float handMovedSinceGrab;   //The distance moved since grabbing the slider
     private Vector3 handInLocalSpace;   //The hand position relative to the slider
 
@@ -62,6 +62,13 @@ public class SliderController : MonoBehaviour
         float sliderValue = Mathf.Lerp(outputRange.x, outputRange.y, percentOfRange);
 
         OnValueChanged.Invoke(sliderValue);
+        if (onMoveSoundEffect != null)
+        {
+            if (!GetComponent<AudioSource>().isPlaying)
+            {
+                GetComponent<AudioSource>().PlayOneShot(onMoveSoundEffect, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
+            }
+        }
     }
 
     /// <summary>
@@ -77,7 +84,7 @@ public class SliderController : MonoBehaviour
         if (sliderRestriction == SliderRestriction.LOCKED)
             return;
 
-        float newHandPosition = sliderHandle.transform.parent.InverseTransformPoint(activeGrabber.position).x;
+        float newHandPosition = sliderHandle.transform.parent.InverseTransformPoint(sliderHandle.GetFollowObject().position).x;
         handMovedSinceGrab = newHandPosition - offsetOnGrab;
 
         //Check the old position and the expected position of the handle
@@ -96,6 +103,17 @@ public class SliderController : MonoBehaviour
         float percentOfRange = Mathf.InverseLerp(boundLeft.localPosition.x, boundRight.localPosition.x, sliderHandle.transform.localPosition.x);
         float sliderValue = Mathf.Lerp(outputRange.x, outputRange.y, percentOfRange);
 
-        OnValueChanged.Invoke(sliderValue);
+        //If the old position is different from the new position, call the OnValueChanged function
+        if(oldX != newX)
+        {
+            OnValueChanged.Invoke(sliderValue);
+            if (onMoveSoundEffect != null)
+            {
+                if (!GetComponent<AudioSource>().isPlaying)
+                {
+                    GetComponent<AudioSource>().PlayOneShot(onMoveSoundEffect, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
+                }
+            }
+        }
     }
 }

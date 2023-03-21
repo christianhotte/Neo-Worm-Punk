@@ -149,14 +149,14 @@ public class SecondaryWeapons : PlayerEquipment
         blade.transform.position = Vector3.MoveTowards(blade.transform.position, bladeDeployed.transform.position, deploySpeed);
         blade.transform.localRotation = bladeDeployed.transform.localRotation;
         deployed = true;
-        sawAud.PlayOneShot(chainsawDeploy, PlayerPrefs.GetFloat("SFXVolume", 0.5f) * PlayerPrefs.GetFloat("MasterVolume", 0.5f));       
+        sawAud.PlayOneShot(chainsawDeploy, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));       
         StartCoroutine(StartCooldown());
     }
     public void Sheethe()
     {
         blade.transform.position = Vector3.MoveTowards(blade.transform.position, bladeSheethed.transform.position, deploySpeed);
         deployed = false;
-        sawAud.PlayOneShot(chainsawSheethe, PlayerPrefs.GetFloat("SFXVolume", 0.5f) * PlayerPrefs.GetFloat("MasterVolume", 0.5f));
+        sawAud.PlayOneShot(chainsawSheethe, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
         StartCoroutine(StartCooldown());
         if (shotsHeld > 0)
         {

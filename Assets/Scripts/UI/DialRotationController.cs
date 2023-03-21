@@ -180,7 +180,7 @@ public class DialRotationController : GrabbableUI
         Debug.Log("Rotating " + gameObject.name + " Clockwise.");
         OnValueChanged.Invoke(GetDialValue(dialTransform.localEulerAngles.y));
         if (onSnapSoundEffect != null)
-            GetComponent<AudioSource>().PlayOneShot(onSnapSoundEffect, PlayerPrefs.GetFloat("SFXVolume", 0.5f) * PlayerPrefs.GetFloat("MasterVolume", 0.5f));
+            GetComponent<AudioSource>().PlayOneShot(onSnapSoundEffect, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
     }
 
     /// <summary>
@@ -203,7 +203,7 @@ public class DialRotationController : GrabbableUI
 
         OnValueChanged.Invoke(GetDialValue(dialTransform.localEulerAngles.y));
         if (onSnapSoundEffect != null)
-            GetComponent<AudioSource>().PlayOneShot(onSnapSoundEffect, PlayerPrefs.GetFloat("SFXVolume", 0.5f) * PlayerPrefs.GetFloat("MasterVolume", 0.5f));
+            GetComponent<AudioSource>().PlayOneShot(onSnapSoundEffect, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
     }
 
     private float GetDialValue(float angle)

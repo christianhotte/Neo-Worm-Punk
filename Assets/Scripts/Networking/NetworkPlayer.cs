@@ -188,7 +188,7 @@ public class NetworkPlayer : MonoBehaviour
     [PunRPC]
     public void RPC_DeathLog(string killerName, string victimName)
     {
-        PlayerController.instance.combatHUD.AddToDeathInfoBoard(killerName, victimName);
+        NetworkManagerScript.instance.AddDeathToJumbotron(killerName, victimName);
     }
 
     /// <summary>
@@ -285,6 +285,7 @@ public class NetworkPlayer : MonoBehaviour
             print(PhotonNetwork.LocalPlayer.NickName + " killed enemy with index " + enemyID);
             PlayerController.instance.combatHUD.UpdatePlayerStats(networkPlayerStats);
             SyncStats();
+            PlayerController.instance.combatHUD.AddToDeathInfoBoard(PhotonNetwork.LocalPlayer.NickName, PhotonNetwork.GetPhotonView(enemyID).Owner.NickName);
         }
     }
 
