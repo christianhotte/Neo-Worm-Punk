@@ -122,6 +122,7 @@ public class HookProjectile : Projectile
                         Vector3 addVel = Vector3.ProjectOnPlane(handDiff, hitDirection) * maneuverMultiplier; //Get additional velocity to player based on how much they are pulling their arm to the side
                         newVelocity -= addVel;                                                                //Apply additional velocity (rotated based on player orientation)
                     }
+                    //newVelocity += otherEffectsThatCanOccurInLevel
                     controller.player.bodyRb.velocity = newVelocity; //Apply new velocity
                 }
                 break;
@@ -136,6 +137,7 @@ public class HookProjectile : Projectile
                     Vector3 handDiff = controller.RelativePosition - controller.hookedHandPos;                                                              //Get difference between current position of hand and position when it initially hooked something
                     if (Vector3.Angle(handDiff, hitDirection) > 90) newVelocity -= Vector3.Project(handDiff, hitDirection) * controller.settings.yankForce; //Apply additional velocity to player based on how much they are pulling their arm back
                     if (!punchWhipped) newVelocity -= Vector3.ProjectOnPlane(handDiff, hitDirection) * controller.settings.lateralManeuverForce;            //Apply additional velocity to player based on how much they are pulling their arm to the side
+                    //newVelocity += otherEffectsThatCanOccurInLevel
                     controller.player.bodyRb.velocity = newVelocity;                                                                                        //Apply new velocity
                 }
                 break;
