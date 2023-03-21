@@ -13,7 +13,7 @@ public class PlayerSetup : MonoBehaviour
     /// </summary>
     public void ApplyAllSettings()
     {
-        SetColor(PlayerSettingsController.Instance.charData.testColor); //DEMO: Set player color
+        SetColor(PlayerSettingsController.Instance.charData.playerColor); //DEMO: Set player color
     }
     /// <summary>
     /// DEMO FUNCTION: Set a color on the player.

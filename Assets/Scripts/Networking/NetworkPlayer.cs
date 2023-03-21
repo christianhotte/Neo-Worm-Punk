@@ -199,19 +199,27 @@ public class NetworkPlayer : MonoBehaviour
         Debug.Log("Syncing Player Data...");                                        //Indicate that data is being synced
         string characterData = PlayerSettingsController.Instance.CharDataToString();          //Encode data to a string so that it can be sent over the network
         photonView.RPC("LoadPlayerSettings", RpcTarget.AllBuffered, characterData); //Send data to every player on the network (including this one)
-        photonView.RPC("UpdateTakenColors", RpcTarget.AllBuffered, NetworkManagerScript.instance.takenColors); //Send data to every player on the network (including this one)
+        SyncColors();
+    }
+
+    /// <summary>
+    /// Syncs the list of taken colors in the room.
+    /// </summary>
+    public void SyncColors()
+    {
+        photonView.RPC("UpdateTakenColors", RpcTarget.AllBuffered, NetworkManagerScript.instance.takenColors.ToArray()); //Send data to every player on the network (including this one)
     }
 
     //REMOTE METHODS:
     [PunRPC]
-    public void UpdateTakenColors(List<ColorOptions> listOfColors)
+    public void UpdateTakenColors(int[] listOfColors)
     {
         Debug.Log("Updating Taken Color List...");
 
         if(ReadyUpManager.instance != null)
         {
             //Refreshes the list of taken colors
-            NetworkManagerScript.instance.takenColors = new List<ColorOptions>();
+            NetworkManagerScript.instance.takenColors = new List<int>();
             NetworkManagerScript.instance.takenColors.AddRange(listOfColors);
 
             ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
@@ -236,7 +244,7 @@ public class NetworkPlayer : MonoBehaviour
         //Initialization:
         Debug.Log("Applying Synced Settings...");                           //Indicate that message has been received
         CharacterData settings = JsonUtility.FromJson<CharacterData>(data); //Decode settings into CharacterData object
-        currentColor = settings.testColor;                                  //Store color currently being used for player
+        currentColor = settings.playerColor;                                  //Store color currently being used for player
 
         //Apply settings:
         foreach (Material mat in bodyRenderer.materials) mat.color = currentColor; //Apply color to entire player body

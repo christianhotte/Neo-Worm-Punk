@@ -28,8 +28,8 @@ Transform:
   m_GameObject: {fileID: 221425426379594762}
   m_LocalRotation: {x: 0.7063644, y: -0.03239437, z: -0.032394376, w: 0.7063644}
   m_LocalPosition: {x: 0, y: 0.2518642, z: -1.3511038}
-  m_LocalScale: {x: 0.07, y: 0.1, z: 0.1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.027999999, y: 0.04, z: 0.04}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 5805044184379500391}
   m_RootOrder: 7
@@ -293,6 +293,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5918380509768204751}
   - component: {fileID: 3118599093465364672}
+  - component: {fileID: 2475355473198491606}
   m_Layer: 0
   m_Name: AnyUI_CanvasCamPost-Game Leaderboard (1)0e0a7238-bc23-4841-93ba-ad84c3abbc49
   m_TagString: Untagged
@@ -358,6 +359,39 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
+--- !u!114 &2475355473198491606
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2976599725888812479}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_RenderShadows: 1
+  m_RequiresDepthTextureOption: 2
+  m_RequiresOpaqueTextureOption: 2
+  m_CameraType: 0
+  m_Cameras: []
+  m_RendererIndex: -1
+  m_VolumeLayerMask:
+    serializedVersion: 2
+    m_Bits: 1
+  m_VolumeTrigger: {fileID: 0}
+  m_VolumeFrameworkUpdateModeOption: 2
+  m_RenderPostProcessing: 0
+  m_Antialiasing: 0
+  m_AntialiasingQuality: 2
+  m_StopNaN: 0
+  m_Dithering: 0
+  m_ClearDepth: 1
+  m_AllowXRRendering: 1
+  m_RequiresDepthTexture: 0
+  m_RequiresColorTexture: 0
+  m_Version: 2
 --- !u!1 &4483686193930440666
 GameObject:
   m_ObjectHideFlags: 0
@@ -512,6 +546,7 @@ Transform:
   - {fileID: 8153146537846400807}
   - {fileID: 7115208306301560971}
   - {fileID: 4402691152191261786}
+  - {fileID: 1341378792406185000}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -528,6 +563,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   readyLights: {fileID: 531758594558998983}
+  playerNameSpawnPoint: {fileID: 1341378792406185000}
+  playerNamePrefab: {fileID: 399958048466888585, guid: 10936a11bfcf4c947b98d4569609d0ea, type: 3}
   occupied: 0
 --- !u!1 &6669534944369279751
 GameObject:
@@ -638,6 +675,37 @@ MonoBehaviour:
   m_RequiresDepthTexture: 0
   m_RequiresColorTexture: 0
   m_Version: 2
+--- !u!1 &7029478218238767828
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1341378792406185000}
+  m_Layer: 0
+  m_Name: NameSpawnPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: -964228994112308473, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1341378792406185000
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7029478218238767828}
+  m_LocalRotation: {x: -0, y: 0.7933534, z: -0, w: 0.6087614}
+  m_LocalPosition: {x: 1.2172577, y: 0.4301691, z: -0.45703983}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5805044184379500391}
+  m_RootOrder: 10
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7196025975318405373
 GameObject:
   m_ObjectHideFlags: 0

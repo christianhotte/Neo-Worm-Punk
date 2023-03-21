@@ -145,6 +145,8 @@ public class PhysicalButtonController : MonoBehaviour
             defaultColor = newColor;
     }
 
+    public Color GetButtonColor() => buttonTransform.Find("Clicker").GetComponent<MeshRenderer>().material.color;
+
     /// <summary>
     /// Shows the text that is on top of the button.
     /// </summary>
@@ -158,7 +160,7 @@ public class PhysicalButtonController : MonoBehaviour
     /// Locks or unlocks the button's position.
     /// </summary>
     /// <param name="locked">If true, the position of the button is locked. If false, the button can be pressed freely.</param>
-    private void LockButton(bool locked)
+    public void LockButton(bool locked)
     {
         isLocked = locked;
     }
