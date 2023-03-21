@@ -21,6 +21,7 @@ public class ShotgunSettings : ScriptableObject
     [Min(1), Tooltip("Multiplier applied to launch velocity when player is firing backwards.")]                                       public float reverseFireBoost;
     [Min(1), Tooltip("Greatest multiplier which can be applied to fire velocity due to closeness to a wall")]                         public float maxWallBoost;
     [Min(0), Tooltip("Distance from wall at which wall boost power will begin to take effect (closer means more power).")]            public float maxWallBoostDist;
+    [Tooltip("If player fires weapon near a wall, always give them the maximum possible boost.")]                                     public bool alwaysMaxWallBoost = true;
     [Tooltip("Layers which weapon will consider a wall for the purposes of wallboosting.")]                                           public LayerMask wallBoostLayers;
     [Min(1), Tooltip("If player fires within this angle of their current velocity, shot will add velocity instead of replacing it.")] public float additiveVelocityMaxAngle;
     [Range(0, 1), Tooltip("Multiplier applied to velocity addition when player is firing multiple times in the same direction.")]     public float additiveVelocityMultiplier;
