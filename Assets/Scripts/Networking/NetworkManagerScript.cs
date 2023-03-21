@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
@@ -238,6 +237,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         Debug.Log("Joined " + PhotonNetwork.CurrentRoom.Name + " room."); //Indicate that room has been joined
         SpawnNetworkPlayer();                                             //Always spawn a network player instance when joining a room
     }
+
     public override void OnJoinRoomFailed(short returnCode, string message)
     {
         Debug.LogError("Join Room Failed. Reason: " + message);
@@ -254,7 +254,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
         base.OnPlayerEnteredRoom(newPlayer);
-        Debug.Log("A new player has joined the room.");
+        Debug.Log(newPlayer.NickName + " has joined.");
 
         LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
 
@@ -264,6 +264,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             lobbyUI.UpdateRoomList();
         }
     }
+
     public override void OnLeftRoom()
     {
         //Update lobby script:
@@ -344,6 +345,17 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         {
             PhotonNetwork.LoadLevel(sceneName);
         }
+    }
+
+    public bool TryToTakeColor(ColorOptions currentColor)
+    {
+        if (!ColorTaken((int)currentColor))
+        {
+            TakeColor((int)currentColor);
+            return true;
+        }
+
+        return false;
     }
 
     public void UpdateTakenColorList(ColorOptions currentColor, ColorOptions newTakenColor)
