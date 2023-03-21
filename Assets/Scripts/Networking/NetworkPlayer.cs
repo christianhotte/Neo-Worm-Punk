@@ -199,6 +199,14 @@ public class NetworkPlayer : MonoBehaviour
         Debug.Log("Syncing Player Data...");                                        //Indicate that data is being synced
         string characterData = PlayerSettingsController.Instance.CharDataToString();          //Encode data to a string so that it can be sent over the network
         photonView.RPC("LoadPlayerSettings", RpcTarget.AllBuffered, characterData); //Send data to every player on the network (including this one)
+        SyncColors();
+    }
+
+    /// <summary>
+    /// Syncs the list of taken colors in the room.
+    /// </summary>
+    public void SyncColors()
+    {
         photonView.RPC("UpdateTakenColors", RpcTarget.AllBuffered, NetworkManagerScript.instance.takenColors.ToArray()); //Send data to every player on the network (including this one)
     }
 

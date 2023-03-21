@@ -116,12 +116,14 @@ public class PlayerColorChanger : MonoBehaviour
         foreach(var button in colorButtons)
         {
             button.ShowText(false);
+            button.LockButton(false);
             button.EnableButton(true);
         }
 
         foreach (var color in NetworkManagerScript.instance.takenColors)
         {
             colorButtons[color].ShowText(true);
+            colorButtons[color].LockButton(true);
             colorButtons[color].EnableButton(false);
         }
     }
