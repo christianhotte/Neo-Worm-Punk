@@ -56,6 +56,7 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
             {
                 ReadyUpManager.instance.UpdateStatus(spawnTube.tubeNumber);
                 ReadyUpManager.instance.localPlayerTube = spawnTube;
+                ReadyUpManager.instance.localPlayerTube.SpawnPlayerName(NetworkManagerScript.instance.GetLocalPlayerName());
             }
             
         }
@@ -77,6 +78,7 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
             {
                 ReadyUpManager.instance.UpdateStatus(spawnTube.tubeNumber);
                 ReadyUpManager.instance.localPlayerTube = spawnTube;
+                ReadyUpManager.instance.localPlayerTube.SpawnPlayerName(NetworkManagerScript.instance.GetLocalPlayerName());
             }
         }
     }
