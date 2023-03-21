@@ -196,7 +196,7 @@ public class NetworkPlayer : MonoBehaviour
                 newColorText = "BLACK";
                 break;
             default:
-                newColor = Color.white;
+                newColor = new Color(255f / 255f, 128f / 255f, 128f / 255f);
                 newColorText = "DEFAULT";
                 break;
         }
