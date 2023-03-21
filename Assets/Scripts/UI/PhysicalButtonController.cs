@@ -145,6 +145,8 @@ public class PhysicalButtonController : MonoBehaviour
             defaultColor = newColor;
     }
 
+    public Color GetButtonColor() => buttonTransform.Find("Clicker").GetComponent<MeshRenderer>().material.color;
+
     /// <summary>
     /// Shows the text that is on top of the button.
     /// </summary>

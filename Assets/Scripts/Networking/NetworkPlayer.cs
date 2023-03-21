@@ -204,14 +204,14 @@ public class NetworkPlayer : MonoBehaviour
 
     //REMOTE METHODS:
     [PunRPC]
-    public void UpdateTakenColors(List<ColorOptions> listOfColors)
+    public void UpdateTakenColors(List<Color> listOfColors)
     {
         Debug.Log("Updating Taken Color List...");
 
         if(ReadyUpManager.instance != null)
         {
             //Refreshes the list of taken colors
-            NetworkManagerScript.instance.takenColors = new List<ColorOptions>();
+            NetworkManagerScript.instance.takenColors = new List<Color>();
             NetworkManagerScript.instance.takenColors.AddRange(listOfColors);
 
             ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
@@ -236,7 +236,7 @@ public class NetworkPlayer : MonoBehaviour
         //Initialization:
         Debug.Log("Applying Synced Settings...");                           //Indicate that message has been received
         CharacterData settings = JsonUtility.FromJson<CharacterData>(data); //Decode settings into CharacterData object
-        currentColor = settings.testColor;                                  //Store color currently being used for player
+        currentColor = settings.playerColor;                                  //Store color currently being used for player
 
         //Apply settings:
         foreach (Material mat in bodyRenderer.materials) mat.color = currentColor; //Apply color to entire player body
