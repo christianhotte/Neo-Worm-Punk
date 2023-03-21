@@ -11,7 +11,7 @@ public class Jumbotron : MonoBehaviour
     [SerializeField, Tooltip("The most recent kill text.")] private TextMeshProUGUI mostRecentDeathText;
     private AudioSource jumboAud;
     private bool cooldown = false,finished=false;
-    public AudioClip oonge, bees;
+    public AudioClip oonge, bees,beeees, bwarp,eer,jaigh,krah,oo,rro,yert;
     private LevelTimer currentLevelTimer;
     private void Start()
     {
@@ -20,19 +20,75 @@ public class Jumbotron : MonoBehaviour
     }
     private void Update()
     {
+        Debug.Log(currentLevelTimer.GetTotalSecondsLeft());
         if (currentLevelTimer.GetTotalSecondsLeft() <= 11.0f&& currentLevelTimer.GetTotalSecondsLeft() >0&& !cooldown&&!finished)
         {
             if (currentLevelTimer.GetTotalSecondsLeft() < 1.0f)
             {
-                jumboAud.PlayOneShot(bees);
+                jumboAud.PlayOneShot(beeees);
                 finished = true;
             }
-            else
+            else if(currentLevelTimer.GetTotalSecondsLeft() > 10.0f)
+            {
+                jumboAud.PlayOneShot(bwarp);
+                cooldown = true;
+                StartCoroutine(CountdownCooldown());
+            }
+            else if (currentLevelTimer.GetTotalSecondsLeft() > 9.0f)
+            {
+                jumboAud.PlayOneShot(oo);
+                cooldown = true;
+                StartCoroutine(CountdownCooldown());
+            }
+            else if (currentLevelTimer.GetTotalSecondsLeft() > 8.0f)
+            {
+                jumboAud.PlayOneShot(jaigh);
+                cooldown = true;
+                StartCoroutine(CountdownCooldown());
+            }
+            else if (currentLevelTimer.GetTotalSecondsLeft() > 7.0f)
+            {
+                jumboAud.PlayOneShot(eer);
+                cooldown = true;
+                StartCoroutine(CountdownCooldown());
+            }
+            else if (currentLevelTimer.GetTotalSecondsLeft() > 6.0f)
+            {
+                jumboAud.PlayOneShot(krah);
+                cooldown = true;
+                StartCoroutine(CountdownCooldown());
+            }
+            else if (currentLevelTimer.GetTotalSecondsLeft() > 5.0f)
+            {
+                jumboAud.PlayOneShot(rro);
+                cooldown = true;
+                StartCoroutine(CountdownCooldown());
+            }
+            else if (currentLevelTimer.GetTotalSecondsLeft() < 4.0f)
+            {
+                jumboAud.PlayOneShot(yert);
+                cooldown = true;
+                StartCoroutine(CountdownCooldown());
+            }
+            else if (currentLevelTimer.GetTotalSecondsLeft() < 3.0f)
+            {
+                jumboAud.PlayOneShot(bwarp);
+                cooldown = true;
+                StartCoroutine(CountdownCooldown());
+            }
+            else if (currentLevelTimer.GetTotalSecondsLeft() < 2.0f)
             {
                 jumboAud.PlayOneShot(oonge);
                 cooldown = true;
                 StartCoroutine(CountdownCooldown());
             }
+            else
+            {
+                jumboAud.PlayOneShot(bees);
+                cooldown = true;
+                StartCoroutine(CountdownCooldown());
+            }
+
         }
     }
     private DeathInfo mostRecentDeath;  //The most recent death recorded
