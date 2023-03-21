@@ -199,19 +199,19 @@ public class NetworkPlayer : MonoBehaviour
         Debug.Log("Syncing Player Data...");                                        //Indicate that data is being synced
         string characterData = PlayerSettingsController.Instance.CharDataToString();          //Encode data to a string so that it can be sent over the network
         photonView.RPC("LoadPlayerSettings", RpcTarget.AllBuffered, characterData); //Send data to every player on the network (including this one)
-        photonView.RPC("UpdateTakenColors", RpcTarget.AllBuffered, NetworkManagerScript.instance.takenColors); //Send data to every player on the network (including this one)
+        photonView.RPC("UpdateTakenColors", RpcTarget.AllBuffered, NetworkManagerScript.instance.takenColors.ToArray()); //Send data to every player on the network (including this one)
     }
 
     //REMOTE METHODS:
     [PunRPC]
-    public void UpdateTakenColors(List<Color> listOfColors)
+    public void UpdateTakenColors(int[] listOfColors)
     {
         Debug.Log("Updating Taken Color List...");
 
         if(ReadyUpManager.instance != null)
         {
             //Refreshes the list of taken colors
-            NetworkManagerScript.instance.takenColors = new List<Color>();
+            NetworkManagerScript.instance.takenColors = new List<int>();
             NetworkManagerScript.instance.takenColors.AddRange(listOfColors);
 
             ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();

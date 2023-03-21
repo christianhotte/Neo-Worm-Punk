@@ -7,6 +7,7 @@ public enum ColorOptions { DEFAULT, RED, ORANGE, YELLOW, GREEN, BLUE, TEAL, VIOL
 public class PlayerColorChanger : MonoBehaviour
 {
     private PhysicalButtonController[] colorButtons;
+    private ColorOptions currentColorOptionSelected = ColorOptions.DEFAULT;
 
     // Start is called before the first frame update
     void Start()
@@ -101,9 +102,10 @@ public class PlayerColorChanger : MonoBehaviour
 
         Color newColor = PlayerSettingsController.ColorOptionsToColor((ColorOptions)colorOption);
 
-        NetworkManagerScript.instance.UpdateTakenColorList(newColor);
+        NetworkManagerScript.instance.UpdateTakenColorList(currentColorOptionSelected, (ColorOptions)colorOption);
 
         PlayerSettingsController.Instance.charData.playerColor = newColor;   //Set the player color in the character data
+        currentColorOptionSelected = (ColorOptions)colorOption;
 
         PlayerController.instance.ApplyAndSyncSettings(); //Apply settings to player (NOTE TO PETER: Call this whenever you want to change a setting and sync it across the network)
         Debug.Log("Changing Player Color To " + newColorText);
@@ -113,20 +115,14 @@ public class PlayerColorChanger : MonoBehaviour
     {
         foreach(var button in colorButtons)
         {
-            //Look through the buttons and check if they are taken colors
-            foreach (var color in NetworkManagerScript.instance.takenColors)
-            {
-                if(button.GetButtonColor() == color)
-                {
-                    button.ShowText(true);
-                    button.EnableButton(false);
-                }
-                else
-                {
-                    button.ShowText(true);
-                    button.EnableButton(false);
-                }
-            }
+            button.ShowText(false);
+            button.EnableButton(true);
+        }
+
+        foreach (var color in NetworkManagerScript.instance.takenColors)
+        {
+            colorButtons[color].ShowText(true);
+            colorButtons[color].EnableButton(false);
         }
     }
 }
