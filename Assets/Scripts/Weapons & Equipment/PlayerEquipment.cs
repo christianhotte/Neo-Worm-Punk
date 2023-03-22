@@ -42,6 +42,7 @@ public class PlayerEquipment : MonoBehaviour
     [SerializeField, Tooltip("Settings defining this equipment's physical joint behavior.")]                                         private protected EquipmentJointSettings jointSettings;
     [SerializeField, Tooltip("Only enable this on equipment which needs it, best practice is to have only one such piece per arm.")] private bool canMoveHandRig = false;
     [SerializeField, Tooltip("Enables constant joint updates for testing purposes.")]                                                private protected bool debugUpdateSettings;
+    private protected Transform positionMemoryReference; //Transform used to track position and velocity memory, defaults to targetTransform
 
     //Runtime Variables:
     /// <summary>
@@ -83,8 +84,13 @@ public class PlayerEquipment : MonoBehaviour
     {
         get
         {
-            if (playerBody == null) return Vector3.zero;                                      //Return nothing if equipment is not attached to a real player
-            else return playerBody.transform.InverseTransformPoint(targetTransform.position); //Use inverse transform point to determine the position of the weapon relative to its player body
+            if (playerBody == null) return Vector3.zero; //Return nothing if equipment is not attached to a real player
+            else //Equipment has a player body to reference
+            {
+                Vector3 positionRef = positionMemoryReference == null ? targetTransform.position : positionMemoryReference.position; //Use given position memory reference (or default to target transform position)
+                return playerBody.transform.InverseTransformPoint(positionRef);                                                      //Use inverse transform point to determine the position of the weapon relative to its player body
+            }
+                
         }
     }
     /// <summary>
@@ -353,12 +359,8 @@ public class PlayerEquipment : MonoBehaviour
     /// Holsters or un-holsters weapon. Disables inputs to this piece of equipment, and stows it in appropriate transform on player.
     /// </summary>
     /// <param name="holster">Pass true to hoster this equipment, false to un-holster it.</param>
-    public void Holster(bool holster = true)
+    public virtual void Holster(bool holster = true)
     {
-        if (!holster) //Weapon is being unholstered
-        {
-            if (TryGetComponent(out NewShotgunController gun)) gun.reverseFireStage = 0; //Make sure weapon does not become unholstered in reverse fire mode
-        }
         holstered = holster;                                             //Always update holster status
         if (!holsterTransitioning) StartCoroutine(MoveHolster(holster)); //Move holster to designated position over time
     }

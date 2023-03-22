@@ -29,17 +29,21 @@ public class NewShotgunController : PlayerEquipment
     [SerializeField, Tooltip("Makes it so that weapon fires from the gun itself and not on the netwrok.")] private bool debugFireLocal = false;
 
     //Runtime Variables:
-    private int currentBarrelIndex = 0; //Index of barrel currently selected as next to fire
-    private int loadedShots = 0;        //Number of shots weapon is able to fire before needing to reload again
-    internal bool breachOpen = false;   //Indicates whether or not weapon breach is swung open
-    private float breachOpenTime = 0;   //Time breach has been open for (zero if breach is closed)
-    private float timeSinceFiring = 0;  //Time since weapon was last fired
-    private bool triggerPulled = false; //Whether or not the trigger is currently pulled
-    private float doubleFireWindow = 0; //Above zero means that weapon has just been fired and firing another weapon will cause a double fire
-    internal bool locked = false;       //Lets the other equipment disable the guns
-    internal int reverseFireStage = 0;  //Used to twirl guns and fire them backwards. Progressed from 0 to 3 (in order to make sure guns always spin the correct way)
-    private float recoilRotOffset = 0;  //Current rotational offset along the X axis due to weapon recoil sequence
-    private string projResourceName;    //Calculated at start, the name/directory of projectile this weapon uses in the Resources folder
+    private int currentBarrelIndex = 0;  //Index of barrel currently selected as next to fire
+    private int loadedShots = 0;         //Number of shots weapon is able to fire before needing to reload again
+    internal bool breachOpen = false;    //Indicates whether or not weapon breach is swung open
+    private float breachOpenTime = 0;    //Time breach has been open for (zero if breach is closed)
+    private float timeSinceFiring = 0;   //Time since weapon was last fired
+    private bool triggerPulled = false;  //Whether or not the trigger is currently pulled
+    private float doubleFireWindow = 0;  //Above zero means that weapon has just been fired and firing another weapon will cause a double fire
+    internal bool locked = false;        //Lets the other equipment disable the guns
+    private float recoilRotOffset = 0;   //Current rotational offset along the X axis due to weapon recoil sequence
+    private string projResourceName;     //Calculated at start, the name/directory of projectile this weapon uses in the Resources folder
+
+    internal bool reverseFiring = false;     //True when reverse fire input is pressed
+    private float reverseTime = 0;           //Time until reverse fire phase is complete (used to make sure guns always rotate in the correct direction)
+    private float reverseButtonCooldown = 0; //Prevents the reverse button from being spammed while above zero
+    private bool flipSwingUp = true;         //Indicates whether player swung up or down while pressing reverse button (system defaults to upward)
 
     private Vector3 baseScale;       //Initial scale of weapon
     private Vector3 baseReciproPos;  //Base position of reciprocating barrel assembly
@@ -58,7 +62,6 @@ public class NewShotgunController : PlayerEquipment
         Vector3 maxOffset = gunSettings.recoilDistance * Vector3.back;                //Get greatest offset value which weapon will reach during recoil phase
         //Quaternion maxRotation = Quaternion.Euler(-gunSettings.recoilRotation, 0, 0); //Get greatest rotation value which weapon will reaach during recoil phase
         Vector3 maxScale = gunSettings.recoilScale * baseScale;                       //Get greatest scale value which weapon will reach during recoil phase
-
         Vector3 barrelTargetPos = (gunSettings.barrelReciprocationDistance * Vector3.back) + baseReciproPos; //Get target position barrels reciprocate to
 
         //Linear recoil & scaling procedure:
@@ -137,6 +140,7 @@ public class NewShotgunController : PlayerEquipment
         }
 
         //Setup runtime variables:
+        //positionMemoryReference = barrels[0];                                   //Use first barrel as position memory reference
         projResourceName = "Projectiles/" + gunSettings.projectileResourceName; //Put together resource name from setting
         loadedShots = gunSettings.maxLoadedShots;                               //Fully load weapon on start
         baseScale = transform.localScale;                     //Get base scale
@@ -169,7 +173,8 @@ public class NewShotgunController : PlayerEquipment
             breachOpenTime += Time.deltaTime;                                                                     //Increment breach time tracker
             if (loadedShots < gunSettings.maxLoadedShots && breachOpenTime >= gunSettings.cooldownTime) Reload(); //Reload weapon once cooldown time has been reached
         }
-        if (doubleFireWindow > 0) doubleFireWindow = Mathf.Max(doubleFireWindow - Time.deltaTime, 0); //Decrement time tracker and floor at zero
+        if (doubleFireWindow > 0) doubleFireWindow = Mathf.Max(doubleFireWindow - Time.deltaTime, 0);                //Decrement time tracker and floor at zero
+        if (reverseButtonCooldown > 0) reverseButtonCooldown = Mathf.Max(reverseButtonCooldown - Time.deltaTime, 0); //Decrement reverse button time tracker and floor at zero
         timeSinceFiring += Time.deltaTime; //Always update timeSinceFiring tracker (whatever state weapon is in)
         if (gunSettings.emptyEjectWait >= 0 && !breachOpen && loadedShots == 0 && timeSinceFiring >= gunSettings.emptyEjectWait) Eject(); //Do auto-eject sequence
 
@@ -191,17 +196,19 @@ public class NewShotgunController : PlayerEquipment
         base.FixedUpdate(); //Call base fixed update stuff
 
         //Update rotation offset:
-        if (currentAddRotOffset != Vector3.zero || recoilRotOffset != 0 || reverseFireStage > 0) //Rotation offset needs to be modified this update
+        if (currentAddRotOffset != Vector3.zero || recoilRotOffset != 0 || reverseTime > 0 || reverseFiring) //Rotation offset needs to be modified this update
         {
-            //Set new rotational offset:
-            Vector3 newRotOffset = Vector3.zero;     //Initialize value to store new rotational offset eulers in
-            newRotOffset.x += recoilRotOffset;       //Apply current recoil rotation to offset
-            newRotOffset.x -= 90 * reverseFireStage; //Use reverse firing stages to twirl gun around in consistent direction
-            currentAddRotOffset = newRotOffset;      //Set new rotational offset
+            //Initialization:
+            reverseTime = Mathf.Max(reverseTime - Time.fixedDeltaTime, 0); //Update reverse time tracker
 
-            //Progress reverse firing state:
-            if (reverseFireStage == 1) reverseFireStage = 2;      //Progress state to stable active position
-            else if (reverseFireStage == 3) reverseFireStage = 0; //Progress state to stable inactive position
+            //Set new rotational offset:
+            Vector3 newRotOffset = Vector3.zero;                                                                                      //Initialize value to store new rotational offset eulers in
+            newRotOffset.x += recoilRotOffset;                                                                                        //Apply current recoil rotation to offset
+            float reverseTimeInterp = 1 - Mathf.Clamp01(reverseTime / gunSettings.reverseSpeed);                                      //Get value representing progression through reversal procedure
+            float reverseOffsetAdd = reverseFiring ? Mathf.Lerp(0, 180, reverseTimeInterp) : Mathf.Lerp(180, 360, reverseTimeInterp); //Determine how to lerp added amount based on which reverse fire phase weapon is in
+            if (flipSwingUp) reverseOffsetAdd *= -1;                                                                                  //Make gun flip upward if designated
+            newRotOffset.x += reverseOffsetAdd;                                                                                       //Apply modifier to overall rotational offset
+            currentAddRotOffset = newRotOffset;                                                                                       //Set new rotational offset
         }
     }
 
@@ -246,15 +253,29 @@ public class NewShotgunController : PlayerEquipment
                 }
                 break;
             case "AButton":
-                if (context.started) //Reverse fire button has just been pressed
+                if (context.started && !reverseFiring && reverseButtonCooldown == 0) //Reverse fire button has just been pressed
                 {
-                    if (reverseFireStage == 0 || reverseFireStage == 3) reverseFireStage = 1; //Progress reverse fire staging system into starting state
-                    if (breachOpen) Close();                                                  //Close breach on button press if possible
+                    //Determine flip properties:
+                    /*flipSwingUp = true;                                                          //Default to upward flip
+                    Vector3 currentBarrelVel = Vector3.Project(RelativeVelocity, barrels[0].up); //Get current velocity of barrels (only along vertical axis)
+                    float swingSpeed = currentBarrelVel.magnitude;                               //Get speed at which weapon is being swung upwards/downwards
+                    if (swingSpeed > gunSettings.directionalReverseSwingSpeed) //Player is swinging weapon fast enough to reverse in a particular direction
+                    {
+                        if (Vector3.Angle(barrels[0].up, currentBarrelVel) > 90) flipSwingUp = false; //Flip downward if player is swinging gun downward
+                    }*/
+
+                    //Begin rotation procedure:
+                    reverseTime = Mathf.Min(reverseTime + gunSettings.reverseSpeed, gunSettings.reverseSpeed * 2); //Initialize reversal sequence by adding time to the reversal clock
+                    reverseFiring = true;                                      //Indicate that weapon is moving to reverse fire mode
+                    if (breachOpen) Close();                                   //Close breach on button press if possible
+                    reverseButtonCooldown = gunSettings.reverseButtonCooldown; //Disable button for a brief period
                 }
-                else if (context.canceled) //Reverse fire button has just been released
+                else if (context.canceled && reverseFiring) //Reverse fire button has just been released
                 {
-                    if (reverseFireStage == 2 || reverseFireStage == 1) reverseFireStage = 3; //Progress reverse fire staging system into finishing state
-                    if (breachOpen) Close();                                                  //Close breach on button release if possible
+                    //Continue rotation procedure:
+                    reverseTime = Mathf.Min(reverseTime + gunSettings.reverseSpeed, gunSettings.reverseSpeed * 2); //Initialize reversal sequence by adding time to the reversal clock
+                    reverseFiring = false;   //Indicate that weapon is no longer in reverse fire mode
+                    if (breachOpen) Close(); //Close breach on button release if possible
                 }
                 break;
             default: break; //Ignore unrecognized actions
@@ -266,14 +287,15 @@ public class NewShotgunController : PlayerEquipment
     public Projectile Fire()
     {
         //Validation & initialization:
-        Projectile projectile = null;                           //Initialize reference to projectile
-        if (loadedShots <= 0) { DryFire(); return projectile; } //Dry-fire if weapon is out of shots
-        if (breachOpen) { DryFire(); return projectile; }       //Dry-fire if weapon breach is open
-        if (locked) return projectile;                          //Return if locked by another weapon
-        Transform currentBarrel = barrels[currentBarrelIndex];  //Get reference to active barrel
+        Projectile projectile = null;                                                                                     //Initialize reference to projectile
+        if (loadedShots <= 0) { DryFire(); return projectile; }                                                           //Dry-fire if weapon is out of shots
+        if (breachOpen) { DryFire(); return projectile; }                                                                 //Dry-fire if weapon breach is open
+        if (gunSettings.noFireDuringRecoil && timeSinceFiring < gunSettings.recoilTime) { DryFire(); return projectile; } //Dry-fire if weapon has not finished firing cooldown
+        if (locked) return projectile;                                                                                    //Return if locked by another weapon
+        Transform currentBarrel = barrels[currentBarrelIndex]; //Get reference to active barrel
 
         //Put weapon at default position:
-        if (reverseFireStage == 0) //Only snap weapon while in normal fire mode
+        if (!reverseFiring) //Only snap weapon while in normal fire mode
         {
             currentAddOffset = Vector3.zero;                      //Reset positional offset
             recoilRotOffset = 0;                                  //Reset rotational offset (due to recoil)
@@ -323,10 +345,10 @@ public class NewShotgunController : PlayerEquipment
             player.ShakeScreen(gunSettings.fireScreenShake); //Shake screen (gently)
 
             //Generic exit velocity modifiers:
-            float effectiveFireVel = gunSettings.fireVelocity;                                                  //Store fire velocity so it can be optionally modified
-            if (otherGun != null && otherGun.doubleFireWindow > 0 &&                                            //Player is firing both weapons simultaneously...
-                otherGun.reverseFireStage == reverseFireStage) effectiveFireVel *= gunSettings.doubleFireBoost; //And both weapons are in the same firing mode, apply double-fire boost
-            if (reverseFireStage == 2) effectiveFireVel *= gunSettings.reverseFireBoost;                        //Add reverse firing boost
+            float effectiveFireVel = gunSettings.fireVelocity;                                            //Store fire velocity so it can be optionally modified
+            if (otherGun != null && otherGun.doubleFireWindow > 0 &&                                      //Player is firing both weapons simultaneously...
+                otherGun.reverseFiring == reverseFiring) effectiveFireVel *= gunSettings.doubleFireBoost; //And both weapons are in the same firing mode, apply double-fire boost
+            if (reverseFiring) effectiveFireVel *= gunSettings.reverseFireBoost;                          //Add reverse firing boost
 
             //Wall boost calculations
             bool hitWall = Physics.Raycast(currentBarrel.position, currentBarrel.forward, out RaycastHit hit, gunSettings.maxWallBoostDist, gunSettings.wallBoostLayers); //Determine whether or not play is shooting at a wall
@@ -341,9 +363,9 @@ public class NewShotgunController : PlayerEquipment
             }
 
             //Apply velocity to player
-            if (!hitWall && gunSettings.wallBoostOnly && reverseFireStage != 2) //Additive boost system is being used
+            if (!hitWall && gunSettings.wallBoostOnly && !reverseFiring) //Additive boost system is being used
             {
-                player.bodyRb.AddForce(-currentBarrel.forward * effectiveFireVel, ForceMode.Impulse); //Add impulse force to player's existing velocity
+                if (gunSettings.neutralFireBoost) player.bodyRb.AddForce(-currentBarrel.forward * effectiveFireVel, ForceMode.Impulse); //Add impulse force to player's existing velocity
             }
             else //Override boost system is being used
             {
@@ -440,16 +462,33 @@ public class NewShotgunController : PlayerEquipment
 
     //FUNCTIONALITY METHODS:
     /// <summary>
+    /// Moves shotgun to or from player hip.
+    /// </summary>
+    public override void Holster(bool holster = true)
+    {
+        base.Holster(holster); //Call base holster functionality
+        if (holster) //Reset stuff affecting weapon rotation when holstering
+        {
+            if (breachOpen) Close();            //Close weapon if open
+            Reload();                           //Make sure weapon is fully loaded
+            reverseFiring = false;              //Make sure weapon is not in reverse fire mode
+            reverseTime = 0;                    //Clear reverse fire timer
+            currentAddRotOffset = Vector3.zero; //Reset rotation offset
+        }
+    }
+    /// <summary>
     /// Restores shotgun to base state (fully-loaded and closed).
     /// </summary>
     /// <param name="disableInputTime">Also disables player input for this number of seconds (0 does not disable player input, less than 0 disables it indefinitely)</param>
     public override void Shutdown(float disableInputTime = 0)
     {
-        base.Shutdown(disableInputTime); //Call base functionality
-        if (breachOpen) Close();         //Close weapon if open
-        Reload();                        //Make sure weapon is fully loaded
-        triggerPulled = false;           //Reset trigger value tracker
-        reverseFireStage = 0;            //Make sure weapon is not in reverse fire mode
+        base.Shutdown(disableInputTime);    //Call base functionality
+        if (breachOpen) Close();            //Close weapon if open
+        Reload();                           //Make sure weapon is fully loaded
+        triggerPulled = false;              //Reset trigger value tracker
+        reverseFiring = false;              //Make sure weapon is not in reverse fire mode
+        reverseTime = 0;                    //Clear reverse fire timer
+        currentAddRotOffset = Vector3.zero; //Reset rotation offset
     }
 
     //UTILITY METHODS:
