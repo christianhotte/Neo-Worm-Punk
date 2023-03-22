@@ -61,6 +61,10 @@ public class PlayerEquipment : MonoBehaviour
     /// </summary>
     internal bool inStasis = false;
     /// <summary>
+    /// When false, equipment will not accept any player input.
+    /// </summary>
+    internal bool inputEnabled = true;
+    /// <summary>
     /// Indicates that this weapon is currently stowed on the player's body and is not in use.
     /// </summary>
     internal bool holstered = false;
@@ -160,6 +164,14 @@ public class PlayerEquipment : MonoBehaviour
             preferredHolster.localRotation = Quaternion.identity; //Clear any remaining rotation holster has
         }
         holstered = holster; //Update holstered status to false once done, so weapon can resume normal followbody control
+    }
+    /// <summary>
+    /// Enables equipment input after given amount of time.
+    /// </summary>
+    private IEnumerator TimedEnableInput(float timeToEnable)
+    {
+        yield return new WaitForSeconds(timeToEnable); //Wait for given number of seconds
+        inputEnabled = true;                           //Re-enable input once wait is finished
     }
 
     //RUNTIME METHODS:
@@ -306,6 +318,7 @@ public class PlayerEquipment : MonoBehaviour
         //Input exception states:
         if (!player.InCombat()) return; //Ignore equipment input while not in combat
         if (holstered) return;          //Ignore input while equipment is holstered
+        if (!inputEnabled) return;      //Ignore input while inputs are explicitly disabled
 
         InputActionTriggered(context); //Pass along input
     }
@@ -344,6 +357,19 @@ public class PlayerEquipment : MonoBehaviour
             if (TryGetComponent(out NewShotgunController gun)) gun.reverseFireStage = 0; //Make sure weapon does not become unholstered in reverse fire mode
         }
         StartCoroutine(MoveHolster(holster)); //Move holster to designated position over time
+    }
+    /// <summary>
+    /// Puts equipment into default (stowed) state (contextual based on equipment type), useful for stuff like wormholes.
+    /// </summary>
+    /// <param name="disableInputTime">Also disables player input for this number of seconds (0 does not disable player input, less than 0 disables it indefinitely).</param>
+    public virtual void Shutdown(float disableInputTime = 0)
+    {
+        //Input management:
+        if (disableInputTime != 0) //Input is being disabled
+        {
+            inputEnabled = false;                                                         //Immediately disable input
+            if (disableInputTime > 0) StartCoroutine(TimedEnableInput(disableInputTime)); //Enable input after a certain amount of time has passed (if set)
+        }
     }
 
     //UTILITY METHODS:

@@ -260,7 +260,6 @@ public class NewShotgunController : PlayerEquipment
             default: break; //Ignore unrecognized actions
         }
     }
-
     /// <summary>
     /// Shoots the gun (instantiates projectiles in network if possible).
     /// </summary>
@@ -407,8 +406,7 @@ public class NewShotgunController : PlayerEquipment
     public void Close()
     {
         //Validity checks:
-        if (!breachOpen) return;                               //Do not attempt to close if breach is open
-        if (breachOpenTime < gunSettings.cooldownTime) return; //Do not allow breach to close during cooldown
+        if (!breachOpen) return; //Do not attempt to close if breach is open
 
         //Close joint:
         breakJoint.angularXMotion = ConfigurableJointMotion.Locked;  //Lock pivot rotation
@@ -438,6 +436,20 @@ public class NewShotgunController : PlayerEquipment
     public void DryFire()
     {
 
+    }
+
+    //FUNCTIONALITY METHODS:
+    /// <summary>
+    /// Restores shotgun to base state (fully-loaded and closed).
+    /// </summary>
+    /// <param name="disableInputTime">Also disables player input for this number of seconds (0 does not disable player input, less than 0 disables it indefinitely)</param>
+    public override void Shutdown(float disableInputTime = 0)
+    {
+        base.Shutdown(disableInputTime); //Call base functionality
+        if (breachOpen) Close();         //Close weapon if open
+        Reload();                        //Make sure weapon is fully loaded
+        triggerPulled = false;           //Reset trigger value tracker
+        reverseFireStage = 0;            //Make sure weapon is not in reverse fire mode
     }
 
     //UTILITY METHODS:
