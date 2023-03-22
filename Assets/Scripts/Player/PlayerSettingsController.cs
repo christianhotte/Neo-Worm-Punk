@@ -28,31 +28,35 @@ public class PlayerSettingsController : MonoBehaviour
     public string CharDataToString() => JsonUtility.ToJson(charData); //Sends player settings to a string (transmissible over RPC)
     public static string PlayerStatsToString(PlayerStats playerStats) => JsonUtility.ToJson(playerStats); //Sends player stats to a string (transmissible over RPC)
 
+    private static Color[] playerColors = { 
+        new Color(255f / 255f, 128f / 255f, 128f / 255f),
+        new Color(197f / 255f, 17f / 255f, 17f / 255f),
+        new Color(232f / 255f, 131f / 255f, 23f / 255f),
+        new Color(253f / 255f, 253f / 255f, 150f / 255f),
+        Color.green,
+        Color.blue,
+        new Color(46f / 255f, 200f / 255f, 209f / 255f),
+        new Color(52f / 255f, 31f / 255f, 224f / 255f),
+        Color.magenta,
+        Color.black
+    };
+
+    public static int NumberOfPlayerColors() => playerColors.Length;
+
     public static Color ColorOptionsToColor(ColorOptions colorOption)
     {
-        switch (colorOption)
+        return playerColors[(int)colorOption];
+    }
+
+    public static ColorOptions ColorToColorOptions(Color currentColor)
+    {
+        for(int i = 0; i < playerColors.Length; i++)
         {
-            case ColorOptions.RED:
-                return new Color(197f / 255f, 17f / 255f, 17f / 255f);
-            case ColorOptions.ORANGE:
-                return new Color(232f / 255f, 131f / 255f, 23f / 255f);
-            case ColorOptions.YELLOW:
-                return new Color(253f / 255f, 253f / 255f, 150f / 255f);
-            case ColorOptions.GREEN:
-                return Color.green;
-            case ColorOptions.BLUE:
-                return Color.blue;
-            case ColorOptions.TEAL:
-                return new Color(46f / 255f, 200f / 255f, 209f / 255f);
-            case ColorOptions.VIOLET:
-                return new Color(52f / 255f, 31f / 255f, 224f / 255f);
-            case ColorOptions.MAGENTA:
-                return Color.magenta;
-            case ColorOptions.BLACK:
-                return Color.black;
-            default:
-                return new Color(255f / 255f, 128f / 255f, 128f / 255f);
+            if (playerColors[i] == currentColor)
+                return (ColorOptions)i;
         }
+
+        return ColorOptions.DEFAULT;
     }
 }
 
