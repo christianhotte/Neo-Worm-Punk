@@ -359,7 +359,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
     public void LoadSceneWithFade(string sceneName)
     {
-        if (PhotonNetwork.IsMasterClient) StartCoroutine(FadeLevelRoutine(sceneName));
+        StartCoroutine(FadeLevelRoutine(sceneName));
     }
 
     private IEnumerator FadeLevelRoutine(string sceneName)
@@ -370,10 +370,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         yield return new WaitForSeconds(playerScreenFader.GetFadeDuration());
         yield return null;
 
-        if (PhotonNetwork.IsMasterClient)
-        {
-            PhotonNetwork.LoadLevel(sceneName);
-        }
+        PhotonNetwork.LoadLevel(sceneName);
     }
 
     public bool TryToTakeColor(ColorOptions currentColor)

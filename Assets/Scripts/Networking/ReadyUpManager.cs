@@ -12,6 +12,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     // Can probably have a button that lights up green or red to show if a player is ready through the network.
     //[SerializeField] private GameObject readyButton;
     public static ReadyUpManager instance;
+    private bool loadingScene = false;
 
     [SerializeField] private TextMeshProUGUI playerReadyText;
 
@@ -89,12 +90,13 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
         }
 
         // If all players are ready, load the game scene
-        if (playersReady == playersInRoom && (playersInRoom >= MINIMUM_PLAYERS_NEEDED || GameSettings.debugMode))
+        if (!loadingScene && (playersReady == playersInRoom && (playersInRoom >= MINIMUM_PLAYERS_NEEDED || GameSettings.debugMode)))
         {
             //Reset all players
             foreach (var player in NetworkPlayer.instances)
                 player.networkPlayerStats = new PlayerStats();
 
+            loadingScene = true;
             NetworkManagerScript.instance.LoadSceneWithFade(GameSettings.arenaScene);
         }
     }
