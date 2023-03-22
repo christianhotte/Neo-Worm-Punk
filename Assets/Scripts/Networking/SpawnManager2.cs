@@ -56,6 +56,7 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
             {
                 ReadyUpManager.instance.UpdateStatus(spawnTube.tubeNumber);
                 ReadyUpManager.instance.localPlayerTube = spawnTube;
+                ReadyUpManager.instance.localPlayerTube.SpawnPlayerName(NetworkManagerScript.instance.GetLocalPlayerName());
             }
             
         }
@@ -69,7 +70,7 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
             PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
             PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
 
-            //Add lever listener:
+            //Add lever listener
             LeverController lever = spawnTube.GetComponentInChildren<LeverController>();
             lever.OnStateChanged.AddListener(ReadyUpManager.instance.LeverStateChanged);
 
@@ -77,6 +78,7 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
             {
                 ReadyUpManager.instance.UpdateStatus(spawnTube.tubeNumber);
                 ReadyUpManager.instance.localPlayerTube = spawnTube;
+                ReadyUpManager.instance.localPlayerTube.SpawnPlayerName(NetworkManagerScript.instance.GetLocalPlayerName());
             }
         }
     }

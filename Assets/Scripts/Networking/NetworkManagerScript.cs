@@ -29,6 +29,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
     private Room mostRecentRoom;
 
+    internal List<int> takenColors = new List<int>();
+
     //RUNTIME METHODS:
     private void Awake()
     {
@@ -74,7 +76,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         RoomOptions roomOptions = new RoomOptions();
         Hashtable customRoomSettings = new Hashtable();
 
-        customRoomSettings.Add("RoundLength", 600);
+        customRoomSettings.Add("RoundLength", 300);
 
         roomOptions.IsVisible = true; // The player is able to see the room
         roomOptions.IsOpen = true; // The room is open.
@@ -148,7 +150,10 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         // Setting up the room options
         if (joinRoomOnLoad && !PhotonNetwork.InRoom)
         {
-            OnCreateRoom("Dev. Test Room");
+            if(FindObjectOfType<AutoJoinRoom>() != null)
+                OnCreateRoom(FindObjectOfType<AutoJoinRoom>().GetRoomName());
+            else
+                OnCreateRoom("Dev. Test Room");
         }
     }
 
@@ -215,6 +220,11 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     }
     public override void OnJoinedRoom()
     {
+        //Automatically load the player into the locker room if the auto join script calls for it
+        AutoJoinRoom autoJoin = FindObjectOfType<AutoJoinRoom>();
+        if (autoJoin != null && autoJoin.GoToLockerRoom())
+            autoJoin.AutoLoadScene(GameSettings.roomScene);
+
         //Update lobby UI:
         LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
         if (lobbyUI != null) //If there is a lobby in the scene, display room information
@@ -335,6 +345,18 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             PhotonNetwork.LoadLevel(sceneName);
         }
     }
+
+    public void UpdateTakenColorList(ColorOptions currentColor, ColorOptions newTakenColor)
+    {
+        if (ColorTaken((int)currentColor))
+            RemoveColor((int)currentColor);
+
+        TakeColor((int)newTakenColor);
+    }
+
+    public void TakeColor(int colorOption) => takenColors.Add(colorOption);
+    public void RemoveColor(int colorOption) => takenColors.Remove(colorOption);
+    public bool ColorTaken(int colorOption) => takenColors.Contains(colorOption);
 
     public Room GetMostRecentRoom() => mostRecentRoom;
     public string GetCurrentRoom() => PhotonNetwork.CurrentRoom.Name;
