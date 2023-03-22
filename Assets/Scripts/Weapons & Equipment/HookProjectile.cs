@@ -46,6 +46,7 @@ public class HookProjectile : Projectile
     private float retractSpeed;   //Current speed (in meters per second) at which hook is being retracted
     internal bool punchWhipped;   //True when projectile has been launched using punch-whip technique
     private float tetherDistance; //Distance between hook and player when hook last locked onto something
+    private RaycastHit lastHit;   //Data from last hit by this hook
 
     //Utility Variables:
     /// <summary>
@@ -159,8 +160,9 @@ public class HookProjectile : Projectile
             //Check for wall bounce:
             if (Vector3.Distance(controller.barrel.position, tetherPoint.position) <= controller.settings.wallBounceDist) //Player is very close to hook
             {
-                Release();                                                                                                                                 //Release hook
-                if (controller.settings.wallBounceForce > 0) controller.player.bodyRb.velocity = -transform.forward * controller.settings.wallBounceForce; //Bounce player away from wall with designated amount of force
+                Release(); //Release hook
+                if (lastHit.collider.transform.TryGetComponent(out JumpPad jumpPad)) jumpPad.Bounce();
+                else if (controller.settings.wallBounceForce > 0) controller.player.bodyRb.velocity = lastHit.normal * controller.settings.wallBounceForce; //Bounce player away from wall with designated amount of force
             }
         }
 
@@ -291,6 +293,7 @@ public class HookProjectile : Projectile
         if (hitPlayer == null) hitPlayer = hitInfo.collider.GetComponent<NetworkPlayer>(); //Try again for network player if it was not initially gotten
         if (hitPlayer != null) HookToPlayer(hitPlayer);                                    //Hook is attaching to a player
         else HookToPoint(hitInfo.point);                                                   //Hook to given point
+        lastHit = hitInfo;                                                                 //Store data from hit
 
         //Cleanup:
         tetherDistance = Vector3.Distance(hitInfo.point, controller.barrel.position); //Get exact max length of tether
