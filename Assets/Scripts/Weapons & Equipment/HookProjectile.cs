@@ -145,6 +145,7 @@ public class HookProjectile : Projectile
         }
         if (photonView.IsMine && (state == HookState.Hooked || state == HookState.PlayerTethered)) //Hook is hooked onto something
         {
+            //Check for hook intersects:
             if (controller.settings.hookedIntersectBehavior != HookshotSettings.LineIntersectBehavior.Ignore) //Hook needs to check if anything is intersecting its line
             {
                 if (Physics.Linecast(controller.barrel.position, tetherPoint.position, out RaycastHit hitInfo, controller.settings.lineCheckLayers)) //Check along line for collisions
@@ -153,6 +154,13 @@ public class HookProjectile : Projectile
                     else if (controller.settings.hookedIntersectBehavior == HookshotSettings.LineIntersectBehavior.Release) Release();                    //Behavior is set to release on line intersection
                     else if (controller.settings.hookedIntersectBehavior == HookshotSettings.LineIntersectBehavior.Grab) HitObject(hitInfo);              //Behavior is set to grab on line intersection
                 }
+            }
+
+            //Check for wall bounce:
+            if (Vector3.Distance(controller.barrel.position, tetherPoint.position) <= controller.settings.wallBounceDist) //Player is very close to hook
+            {
+                Release();                                                                                                                                 //Release hook
+                if (controller.settings.wallBounceForce > 0) controller.player.bodyRb.velocity = -transform.forward * controller.settings.wallBounceForce; //Bounce player away from wall with designated amount of force
             }
         }
 
