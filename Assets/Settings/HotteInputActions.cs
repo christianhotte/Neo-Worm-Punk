@@ -973,7 +973,7 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""1c3b611b-5809-4868-8903-ac52dae46cef"",
-                    ""path"": ""<XRController>{LeftHand}/joystick"",
+                    ""path"": ""<XRController>{RightHand}/joystick"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Generic XR Controller"",

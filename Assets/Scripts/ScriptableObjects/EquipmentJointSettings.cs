@@ -25,5 +25,6 @@ public class EquipmentJointSettings : ScriptableObject
     [Tooltip("Base maximum angular speed of weapon rigidbody (affects weapon swinginess).")]                               public float maxAngularSpeed = 15;
     [Min(1), Tooltip("Number of fixed updates to keep in position memory for smoothing the results of RelativeVelocity.")] public int positionMemory = 10;
     [Min(0), Tooltip("How quickly (in seconds) equipment travels to and returns from its holster.")]                       public float holsterSpeed = 0.2f;
+    [Min(0), Tooltip("Scale of equipment while in a holster.")]                                                            public float holsterScaleMod = 1;
     [Tooltip("Describes holstering (or unholstering) motion over time.")]                                                  public AnimationCurve holsterCurve;
 }
