@@ -70,14 +70,20 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         PhotonNetwork.ConnectUsingSettings();
         Debug.Log("Trying To Connect To Server...");
     }
-    public void OnCreateRoom(string roomName)
+    public void OnCreateRoom(string roomName, RoomOptions roomOptions = null, Hashtable customRoomSettings = null)
     {
-        RoomOptions roomOptions = new RoomOptions();
-        Hashtable customRoomSettings = new Hashtable();
+        if(roomOptions == null)
+        {
+            roomOptions = new RoomOptions();
+            roomOptions.IsVisible = true; // The player is able to see the room
+        }
 
-        customRoomSettings.Add("RoundLength", 300);
+        if (customRoomSettings == null)
+        {
+            customRoomSettings = new Hashtable();
+            customRoomSettings.Add("RoundLength", 300);
+        }
 
-        roomOptions.IsVisible = true; // The player is able to see the room
         roomOptions.IsOpen = true; // The room is open.
         roomOptions.EmptyRoomTtl = 0; // Leave the room open for 0 milliseconds after the room is empty
         roomOptions.MaxPlayers = 6;

@@ -4,11 +4,13 @@ using UnityEngine;
 
 public static class GameSettings
 {
-    public static bool debugMode = false;
+    public static bool debugMode = true;
 
     public static bool toggleTest = false;
     public static float testDialValue = 0f;
     public static float testSliderValue = 0f;
+
+    public static int roomCodeLength = 5;
 
     public static string titleScreenScene = "JustinMenuScene";
     public static string roomScene = "NetworkLockerRoom";

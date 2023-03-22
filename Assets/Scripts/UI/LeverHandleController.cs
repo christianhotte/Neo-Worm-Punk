@@ -12,7 +12,6 @@ public class LeverHandleController : GrabbableUI
     {
         base.Awake();
         leverController = GetComponentInParent<LeverController>();
-        startingVector = transform.up;
     }
 
     public override void OnGrab()
@@ -34,9 +33,9 @@ public class LeverHandleController : GrabbableUI
         }
     }
 
-    public void MoveToAngle(float newAngle)
+    public void MoveToAngle(LeverController lever, float newAngle)
     {
-        transform.localRotation = Quaternion.Euler(Mathf.Clamp(newAngle, leverController.GetMinimumAngle(), leverController.GetMaximumAngle()), 0, 0);
+        transform.localRotation = Quaternion.Euler(Mathf.Clamp(newAngle, lever.GetMinimumAngle(), lever.GetMaximumAngle()), 0, 0);
     }
 
     public float GetAngle() => (transform.localEulerAngles.x > 180) ? transform.localEulerAngles.x - 360 : transform.localEulerAngles.x;
@@ -44,5 +43,11 @@ public class LeverHandleController : GrabbableUI
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
+    }
+
+    public void SetStartVector()
+    {
+        startingVector = transform.up;
+        Debug.DrawRay(transform.position, startingVector * 10f, Color.red, 20);
     }
 }
