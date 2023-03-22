@@ -113,7 +113,7 @@ public class NetworkPlayer : MonoBehaviour
     }
     private void OnDestroy()
     {
-        photonView.RPC("RPC_TubeVacated", RpcTarget.All, lastTubeNumber);
+        //photonView.RPC("RPC_TubeVacated", RpcTarget.All, lastTubeNumber);
 
         //Reference cleanup:
         instances.Remove(this);                                                                                 //Remove from instance list
@@ -171,7 +171,14 @@ public class NetworkPlayer : MonoBehaviour
         rightHandTarget = attachedPlayer.rightHand.transform; //Get right hand from player script (since it has already automatically collected the reference)
         modelTarget = attachedPlayer.bodyRig.transform;       //Get base model transform from player script
     }
+    private void OnPlayerDisconnected(NetworkPlayer player)
+    {
+        Debug.Log("Cleaning up after player " + player);
 
+        photonView.RPC("RPC_TubeVacated", RpcTarget.All, lastTubeNumber);
+        //RemoveRPCs(player);
+        //DestroyPlayerObjects(player);
+    }
     public void SyncStats()
     {
         Debug.Log("Syncing Player Stats...");
