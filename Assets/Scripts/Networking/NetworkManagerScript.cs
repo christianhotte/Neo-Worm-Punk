@@ -370,7 +370,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         yield return new WaitForSeconds(playerScreenFader.GetFadeDuration());
         yield return null;
 
-        PhotonNetwork.LoadLevel(sceneName); PhotonNetwork.LoadLevel(sceneName);
+        PhotonNetwork.LoadLevel(sceneName);
     }
 
     public bool TryToTakeColor(ColorOptions currentColor)
