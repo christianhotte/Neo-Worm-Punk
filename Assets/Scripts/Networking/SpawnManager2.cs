@@ -52,13 +52,11 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
             LeverController lever = spawnTube.GetComponentInChildren<LeverController>();
             lever.OnStateChanged.AddListener(ReadyUpManager.instance.LeverStateChanged);
 
-            DialRotationController dial = spawnTube.GetComponentInChildren<DialRotationController>();
-            dial.OnValueChanged.AddListener(NetworkManagerScript.localNetworkPlayer.ChangePlayerColor);
-
             if (ReadyUpManager.instance != null)
             {
                 ReadyUpManager.instance.UpdateStatus(spawnTube.tubeNumber);
                 ReadyUpManager.instance.localPlayerTube = spawnTube;
+                ReadyUpManager.instance.localPlayerTube.SpawnPlayerName(NetworkManagerScript.instance.GetLocalPlayerName());
             }
             
         }
@@ -76,14 +74,11 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
             LeverController lever = spawnTube.GetComponentInChildren<LeverController>();
             lever.OnStateChanged.AddListener(ReadyUpManager.instance.LeverStateChanged);
 
-            //Add dial listener
-            DialRotationController dial = spawnTube.GetComponentInChildren<DialRotationController>();
-            dial.OnValueChanged.AddListener(NetworkManagerScript.localNetworkPlayer.ChangePlayerColor);
-
             if (ReadyUpManager.instance != null)
             {
                 ReadyUpManager.instance.UpdateStatus(spawnTube.tubeNumber);
                 ReadyUpManager.instance.localPlayerTube = spawnTube;
+                ReadyUpManager.instance.localPlayerTube.SpawnPlayerName(NetworkManagerScript.instance.GetLocalPlayerName());
             }
         }
     }

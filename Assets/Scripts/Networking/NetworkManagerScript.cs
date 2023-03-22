@@ -29,6 +29,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
     private Room mostRecentRoom;
 
+    internal List<int> takenColors = new List<int>();
+
     //RUNTIME METHODS:
     private void Awake()
     {
@@ -148,7 +150,10 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         // Setting up the room options
         if (joinRoomOnLoad && !PhotonNetwork.InRoom)
         {
-            OnCreateRoom("Dev. Test Room");
+            if(FindObjectOfType<AutoJoinRoom>() != null)
+                OnCreateRoom(FindObjectOfType<AutoJoinRoom>().GetRoomName());
+            else
+                OnCreateRoom("Dev. Test Room");
         }
     }
 
@@ -340,6 +345,18 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             PhotonNetwork.LoadLevel(sceneName);
         }
     }
+
+    public void UpdateTakenColorList(ColorOptions currentColor, ColorOptions newTakenColor)
+    {
+        if (ColorTaken((int)currentColor))
+            RemoveColor((int)currentColor);
+
+        TakeColor((int)newTakenColor);
+    }
+
+    public void TakeColor(int colorOption) => takenColors.Add(colorOption);
+    public void RemoveColor(int colorOption) => takenColors.Remove(colorOption);
+    public bool ColorTaken(int colorOption) => takenColors.Contains(colorOption);
 
     public Room GetMostRecentRoom() => mostRecentRoom;
     public string GetCurrentRoom() => PhotonNetwork.CurrentRoom.Name;
