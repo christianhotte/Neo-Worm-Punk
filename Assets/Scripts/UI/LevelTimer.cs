@@ -113,7 +113,7 @@ public class LevelTimer : MonoBehaviour
     /// Gets the level time in terms of percentage. Goes from 0% to 100% completion.
     /// </summary>
     /// <returns>The percentage as a float value.</returns>
-    public float LevelTimePercentage() => 100f - (currentTime / levelTime);
+    public float LevelTimePercentage() => 100f - ((currentTime / levelTime) * 100f);
 
     public void SetLevelTime(int newLevelTime) => levelTime = newLevelTime;
 }
