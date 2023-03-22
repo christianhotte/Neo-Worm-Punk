@@ -271,6 +271,9 @@ public class PlayerController : MonoBehaviour
                     Vector3 stickDir = new Vector3(stickValue.x, 0, stickValue.y);                   //Convert stick value to a flat vector3
                     Quaternion playerRotator = Quaternion.FromToRotation(Vector3.forward, stickDir); //Get a rotation that points the player in the direction of the stick
                     bodyRb.transform.rotation = playerRotator * bodyRb.transform.rotation;           //Rotate the player
+                    Vector3 newEulers = bodyRb.transform.eulerAngles;
+                    newEulers.z = 0; newEulers.x = 0;
+                    bodyRb.transform.eulerAngles = newEulers;
                 }
                 prevRightStick = stickValue; //Store stick value for later
                 break;
