@@ -66,11 +66,13 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     {
         if (!PhotonNetwork.IsConnected) { ConnectToServer(); }
     }
+
     void ConnectToServer()
     {
         PhotonNetwork.ConnectUsingSettings();
         Debug.Log("Trying To Connect To Server...");
     }
+
     public void OnCreateRoom(string roomName)
     {
         RoomOptions roomOptions = new RoomOptions();
@@ -85,6 +87,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         roomOptions.CustomRoomProperties = customRoomSettings;
         PhotonNetwork.JoinOrCreateRoom(roomName, roomOptions, TypedLobby.Default);
     }
+
     public void JoinRoom(string roomName)
     {
         // Joins the room on the network
@@ -94,6 +97,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
         if (PhotonNetwork.InRoom) Debug.Log("Successfully Connected To " + roomName);
     }
+
     public void LeaveRoom()
     {
         LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();

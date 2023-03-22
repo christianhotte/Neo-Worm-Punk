@@ -55,6 +55,12 @@ public class WormHole : MonoBehaviour
                 grapple.hook.Stow();
             }
         }
+       // PC.attachedEquipment.shu
+       foreach(PlayerEquipment pe in PC.attachedEquipment)
+        {
+            pe.Shutdown(waitTime);
+        }
+
         playerOBJ.transform.position = wormZoneShifted.position; //Player enters worm zone here
         float entryDiff = playerCam.transform.eulerAngles.y - wormZoneShifted.eulerAngles.y; //difference for player to face down wormhole
         playerOBJ.transform.rotation = Quaternion.Euler(playerOBJ.transform.eulerAngles.x, playerOBJ.transform.eulerAngles.y - entryDiff, playerOBJ.transform.eulerAngles.z);
