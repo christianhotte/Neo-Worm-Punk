@@ -242,4 +242,17 @@ public class NewChainsawController : PlayerEquipment
             default: break; //Ignore unrecognized actions
         }
     }
+
+    //FUNCTIONALITY METHODS:
+    /// <summary>
+    /// Restores blade to sheathed position.
+    /// </summary>
+    /// <param name="disableInputTime">Also disables player input for this number of seconds (0 does not disable player input, less than 0 disables it indefinitely)</param>
+    public override void Shutdown(float disableInputTime = 0)
+    {
+        base.Shutdown(disableInputTime); //Call base functionality
+        reverseGrip = false;             //Clear reverse grip input
+        gripValue = 0;                   //Clear grip input (chainsaw will begin sheathing)
+        triggerValue = 0;                //Clear trigger input
+    }
 }
