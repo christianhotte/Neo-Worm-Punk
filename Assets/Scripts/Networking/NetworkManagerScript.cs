@@ -29,6 +29,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
     private Room mostRecentRoom;
 
+    internal List<int> takenColors = new List<int>();
+
     //RUNTIME METHODS:
     private void Awake()
     {
@@ -76,7 +78,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         RoomOptions roomOptions = new RoomOptions();
         Hashtable customRoomSettings = new Hashtable();
 
-        customRoomSettings.Add("RoundLength", 600);
+        customRoomSettings.Add("RoundLength", 300);
 
         roomOptions.IsVisible = true; // The player is able to see the room
         roomOptions.IsOpen = true; // The room is open.
@@ -152,15 +154,18 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         // Setting up the room options
         if (joinRoomOnLoad && !PhotonNetwork.InRoom)
         {
-            OnCreateRoom("Dev. Test Room");
+            if(FindObjectOfType<AutoJoinRoom>() != null)
+                OnCreateRoom(FindObjectOfType<AutoJoinRoom>().GetRoomName());
+            else
+                OnCreateRoom("Dev. Test Room");
         }
     }
 
     //List of random adjectives and nouns to name random players
     private readonly string[] wormAdjectives = { "Unfortunate", "Sad", "Despairing", "Grotesque", "Despicable", "Abhorrent", "Regrettable", "Incorrigible", "Greasy", "Platonic", "Sinister", "Hideous", "Glum", "Blasphemous", "Malignant", "Undulating", "Treacherous", "Hostile", "Slimy", "Squirming", "Blubbering", "Twisted", "Manic", "Slippery", "Wet", "Moist", "Lugubrious", "Tubular", "Little", "Erratic", "Pathetic" };
-    private readonly string[] wormNouns = { "Invertebrate", "Wormlet", "Creature", "Critter", "Fool", "Goon", "Specimen", "Homonculus", "Grubling", "Wormling", "Nightcrawler", "Stinker", "Rapscallion", "Scalliwag", "Beastling", "Crawler", "Larva", "Dingus", "Freak", "Blighter", "Cretin", "Dink", "Unit", "Denizen", "Creepy-Crawlie", "Parasite", "Organism" };
-    private readonly string[] wormAdjectivesBad = { "Guzzling", "Fleshy", "Sopping", "Throbbing", "Promiscuous", "Flaccid", "Erect" };
-    private readonly string[] wormNounsBad = { "Guzzler", "Pervert", "Fucko", "Pissbaby" };
+    private readonly string[] wormNouns = { "Invertebrate", "Wormlet", "Creature", "Critter", "Fool", "Goon", "Specimen", "Homonculus", "Grubling", "Snotling", "Wormling", "Nightcrawler", "Stinker", "Rapscallion", "Scalliwag", "Beastling", "Crawler", "Larva", "Dingus", "Freak", "Blighter", "Cretin", "Dink", "Unit", "Denizen", "Parasite", "Organism" };
+    private readonly string[] wormAdjectivesBad = { "Guzzling", "Fleshy", "Sopping", "Throbbing", "Promiscuous", "Flaccid", "Erect", "Gaping" };
+    private readonly string[] wormNounsBad = { "Guzzler", "Pervert", "Fucko", "Pissbaby", "Shithead" };
 
     /// <summary>
     /// Generates a random nickname for the player.
@@ -344,6 +349,18 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             PhotonNetwork.LoadLevel(sceneName);
         }
     }
+
+    public void UpdateTakenColorList(ColorOptions currentColor, ColorOptions newTakenColor)
+    {
+        if (ColorTaken((int)currentColor))
+            RemoveColor((int)currentColor);
+
+        TakeColor((int)newTakenColor);
+    }
+
+    public void TakeColor(int colorOption) => takenColors.Add(colorOption);
+    public void RemoveColor(int colorOption) => takenColors.Remove(colorOption);
+    public bool ColorTaken(int colorOption) => takenColors.Contains(colorOption);
 
     public Room GetMostRecentRoom() => mostRecentRoom;
     public string GetCurrentRoom() => PhotonNetwork.CurrentRoom.Name;
