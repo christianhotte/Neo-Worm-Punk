@@ -40,7 +40,7 @@ public class JumpPad : MonoBehaviour
     public void Bounce()
     {
         Rigidbody playerRb = PlayerController.instance.bodyRb;
-        playerRb.transform.position = this.transform.position; // moves the player to the center of the jump pad
-        playerRb.velocity = this.transform.up * jumpForce;// Launches the player off of the pad
+        playerRb.transform.position = jumpDirection.position; // moves the player to the center of the jump pad
+        playerRb.velocity = jumpDirection.up * jumpForce;// Launches the player off of the pad
     }
 }
