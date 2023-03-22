@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class LockerTubeController : MonoBehaviour
 {
@@ -16,6 +17,8 @@ public class LockerTubeController : MonoBehaviour
     }
 
     [SerializeField, Tooltip("The parent that holds all of the ready lights.")] private Transform readyLights;
+    [SerializeField, Tooltip("The spawn point for the player's name.")] private Transform playerNameSpawnPoint;
+    [SerializeField, Tooltip("The prefab that displays the player's name.")] private GameObject playerNamePrefab;
     internal int tubeNumber;
     public bool occupied = false;
     /// <summary>
@@ -44,6 +47,24 @@ public class LockerTubeController : MonoBehaviour
         foreach (var light in readyLights.GetComponentsInChildren<ReadyLightController>())
             light.ActivateLight(isActivated);
     }
+
+    /// <summary>
+    /// Spawns the player name in the tube.
+    /// </summary>
+    /// <param name="playerName">The name of the player.</param>
+    public void SpawnPlayerName(string playerName)
+    {
+        //If there is not a name in the tube, add a name
+        if(playerNameSpawnPoint.childCount == 0)
+        {
+            GameObject playerNameObject = Instantiate(playerNamePrefab, playerNameSpawnPoint);
+            playerNameObject.transform.localPosition = Vector3.zero;
+
+            playerNameObject.GetComponentInChildren<TextMeshProUGUI>().text = playerName;
+        }
+    }
+
+
     public static LockerTubeController GetTubeByNumber(int number)
     {
         foreach (LockerTubeController tube in tubes)

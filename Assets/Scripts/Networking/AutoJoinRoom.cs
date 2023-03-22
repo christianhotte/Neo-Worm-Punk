@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 public class AutoJoinRoom : MonoBehaviour
 {
     [SerializeField, Tooltip("If true, automatically spawn the player in the locker room upon joining the room.")] private bool goToLockerRoom;
+    [SerializeField, Tooltip("The name of the room for when joining on Init scene.")] private string roomName = "[DEMO ROOM]";
 
     void Awake()
     {
@@ -21,6 +22,8 @@ public class AutoJoinRoom : MonoBehaviour
     {
         SceneManager.LoadScene(sceneName);
     }
+
+    public string GetRoomName() => roomName;
 
     public bool GoToLockerRoom() => goToLockerRoom;
 }

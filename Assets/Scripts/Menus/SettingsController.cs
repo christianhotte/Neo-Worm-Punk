@@ -45,7 +45,7 @@ public class SettingsController : MonoBehaviour
                 break;
         }
 
-        PlayerSettingsController.Instance.charData.testColor = newColor;   //Set the player color in the character data
+        PlayerSettingsController.Instance.charData.playerColor = newColor;   //Set the player color in the character data
         PlayerController.instance.ApplyAndSyncSettings(); //Apply settings to player (NOTE TO PETER: Call this whenever you want to change a setting and sync it across the network)
         //FindObjectOfType<PlayerSetup>().SetColor(newColor);
 
