@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
@@ -66,28 +65,31 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     {
         if (!PhotonNetwork.IsConnected) { ConnectToServer(); }
     }
-
     void ConnectToServer()
     {
         PhotonNetwork.ConnectUsingSettings();
         Debug.Log("Trying To Connect To Server...");
     }
-
-    public void OnCreateRoom(string roomName)
+    public void OnCreateRoom(string roomName, RoomOptions roomOptions = null, Hashtable customRoomSettings = null)
     {
-        RoomOptions roomOptions = new RoomOptions();
-        Hashtable customRoomSettings = new Hashtable();
+        if(roomOptions == null)
+        {
+            roomOptions = new RoomOptions();
+            roomOptions.IsVisible = true; // The player is able to see the room
+        }
 
-        customRoomSettings.Add("RoundLength", 300);
+        if (customRoomSettings == null)
+        {
+            customRoomSettings = new Hashtable();
+            customRoomSettings.Add("RoundLength", 300);
+        }
 
-        roomOptions.IsVisible = true; // The player is able to see the room
         roomOptions.IsOpen = true; // The room is open.
         roomOptions.EmptyRoomTtl = 0; // Leave the room open for 0 milliseconds after the room is empty
         roomOptions.MaxPlayers = 6;
         roomOptions.CustomRoomProperties = customRoomSettings;
         PhotonNetwork.JoinOrCreateRoom(roomName, roomOptions, TypedLobby.Default);
     }
-
     public void JoinRoom(string roomName)
     {
         // Joins the room on the network
@@ -97,7 +99,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
         if (PhotonNetwork.InRoom) Debug.Log("Successfully Connected To " + roomName);
     }
-
     public void LeaveRoom()
     {
         LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
@@ -182,7 +183,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         }
 
         string currentWormName = realWormAdjectives[Random.Range(0, realWormAdjectives.Count)] + " " + realWormNouns[Random.Range(0, realWormNouns.Count)];
-        SetPlayerNickname(currentWormName + " #" + Random.Range(0, 1000).ToString("0000"));
+        SetPlayerNickname(currentWormName);
     }
 
     /// <summary>
@@ -242,6 +243,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         Debug.Log("Joined " + PhotonNetwork.CurrentRoom.Name + " room."); //Indicate that room has been joined
         SpawnNetworkPlayer();                                             //Always spawn a network player instance when joining a room
     }
+
     public override void OnJoinRoomFailed(short returnCode, string message)
     {
         Debug.LogError("Join Room Failed. Reason: " + message);
@@ -258,7 +260,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
         base.OnPlayerEnteredRoom(newPlayer);
-        Debug.Log("A new player has joined the room.");
+        Debug.Log(newPlayer.NickName + " has joined.");
 
         LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
 
@@ -268,6 +270,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             lobbyUI.UpdateRoomList();
         }
     }
+
     public override void OnLeftRoom()
     {
         //Update lobby script:
@@ -307,14 +310,37 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
         Debug.Log("Actor Number For " + GetLocalPlayerName() + ": " + PhotonNetwork.LocalPlayer.ActorNumber);
     }
+
     public void DeSpawnNetworkPlayer()
     {
+        //Remove the player's color from the list of colors
+        RemoveColor((int)PlayerSettingsController.ColorToColorOptions(PlayerSettingsController.Instance.charData.playerColor));
+        localNetworkPlayer.SyncColors();
+
         if (localNetworkPlayer != null) PhotonNetwork.Destroy(localNetworkPlayer.gameObject); //Destroy local network player if possible
         localNetworkPlayer = null;                                                            //Remove reference to destroyed reference player
     }
+
     public void SetPlayerNickname(string name)
     {
-        PhotonNetwork.NickName = name;
+        string currentName = name;
+        bool duplicateNameExists = true;
+        int counter = 2;
+
+        while (duplicateNameExists)
+        {
+            if (GetPlayerNameList().Contains(currentName))
+            {
+                currentName = name + " " + counter.ToString();
+                counter++;
+            }
+            else
+            {
+                duplicateNameExists = false;
+            }
+        }
+
+        PhotonNetwork.NickName = currentName;
         PlayerSettingsController.Instance.charData.playerName = PhotonNetwork.NickName;
     }
 
@@ -348,6 +374,17 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         {
             PhotonNetwork.LoadLevel(sceneName);
         }
+    }
+
+    public bool TryToTakeColor(ColorOptions currentColor)
+    {
+        if (!ColorTaken((int)currentColor))
+        {
+            TakeColor((int)currentColor);
+            return true;
+        }
+
+        return false;
     }
 
     public void UpdateTakenColorList(ColorOptions currentColor, ColorOptions newTakenColor)

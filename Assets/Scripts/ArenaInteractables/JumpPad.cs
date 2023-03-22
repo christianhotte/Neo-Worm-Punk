@@ -32,10 +32,15 @@ public class JumpPad : MonoBehaviour
                     grapple.hook.Stow();
                 }
             }
-            Rigidbody playerRb = playerOrigin.GetComponent<Rigidbody>();
-            playerRb.transform.position = this.transform.position; // moves the player to the center of the jump pad
-            playerRb.velocity = this.transform.up * jumpForce;// Launches the player off of the pad
+            Bounce();
             return;
         }
+    }
+
+    public void Bounce()
+    {
+        Rigidbody playerRb = PlayerController.instance.bodyRb;
+        playerRb.transform.position = this.transform.position; // moves the player to the center of the jump pad
+        playerRb.velocity = this.transform.up * jumpForce;// Launches the player off of the pad
     }
 }
