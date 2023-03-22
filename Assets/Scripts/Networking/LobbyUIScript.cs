@@ -30,6 +30,8 @@ public class LobbyUIScript : MonoBehaviour
     private List<string> playerList = new List<string>();
     private List<PlayerListItem> playerListItems = new List<PlayerListItem>();
 
+    [SerializeField, Tooltip("The Create Room controller.")] private CreateRoomController createRoom;
+
     // Easier to call the  open menu method through script
     public void OpenMenu(string menuName)
     {
@@ -103,16 +105,11 @@ public class LobbyUIScript : MonoBehaviour
 
     public void CreateRoom()
     {
-        // Doesn't allow an empty room name.
-        if (string.IsNullOrEmpty(roomNameInPutField.text))
-        {
-            return;
-        }
-
         OpenMenu("loading"); // Opens the loading screen
         // Creates a room with the name of what the player has typed in.
-        NetworkManagerScript.instance.OnCreateRoom(roomNameInPutField.text);
+        NetworkManagerScript.instance.OnCreateRoom(createRoom.GenerateRoomCode(), createRoom.GetRoomOptions(), createRoom.GetCustomRoomSettings());
     }
+
     public void CreateName()
     {
         // Doesn't allow an empty worm name.

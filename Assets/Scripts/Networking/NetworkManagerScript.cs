@@ -65,28 +65,31 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     {
         if (!PhotonNetwork.IsConnected) { ConnectToServer(); }
     }
-
     void ConnectToServer()
     {
         PhotonNetwork.ConnectUsingSettings();
         Debug.Log("Trying To Connect To Server...");
     }
-
-    public void OnCreateRoom(string roomName)
+    public void OnCreateRoom(string roomName, RoomOptions roomOptions = null, Hashtable customRoomSettings = null)
     {
-        RoomOptions roomOptions = new RoomOptions();
-        Hashtable customRoomSettings = new Hashtable();
+        if(roomOptions == null)
+        {
+            roomOptions = new RoomOptions();
+            roomOptions.IsVisible = true; // The player is able to see the room
+        }
 
-        customRoomSettings.Add("RoundLength", 300);
+        if (customRoomSettings == null)
+        {
+            customRoomSettings = new Hashtable();
+            customRoomSettings.Add("RoundLength", 300);
+        }
 
-        roomOptions.IsVisible = true; // The player is able to see the room
         roomOptions.IsOpen = true; // The room is open.
         roomOptions.EmptyRoomTtl = 0; // Leave the room open for 0 milliseconds after the room is empty
         roomOptions.MaxPlayers = 6;
         roomOptions.CustomRoomProperties = customRoomSettings;
         PhotonNetwork.JoinOrCreateRoom(roomName, roomOptions, TypedLobby.Default);
     }
-
     public void JoinRoom(string roomName)
     {
         // Joins the room on the network
@@ -96,7 +99,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
         if (PhotonNetwork.InRoom) Debug.Log("Successfully Connected To " + roomName);
     }
-
     public void LeaveRoom()
     {
         LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
@@ -164,7 +166,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     private readonly string[] wormAdjectives = { "Unfortunate", "Sad", "Despairing", "Grotesque", "Despicable", "Abhorrent", "Regrettable", "Incorrigible", "Greasy", "Platonic", "Sinister", "Hideous", "Glum", "Blasphemous", "Malignant", "Undulating", "Treacherous", "Hostile", "Slimy", "Squirming", "Blubbering", "Twisted", "Manic", "Slippery", "Wet", "Moist", "Lugubrious", "Tubular", "Little", "Erratic", "Pathetic" };
     private readonly string[] wormNouns = { "Invertebrate", "Wormlet", "Creature", "Critter", "Fool", "Goon", "Specimen", "Homonculus", "Grubling", "Snotling", "Wormling", "Nightcrawler", "Stinker", "Rapscallion", "Scalliwag", "Beastling", "Crawler", "Larva", "Dingus", "Freak", "Blighter", "Cretin", "Dink", "Unit", "Denizen", "Parasite", "Organism" };
     private readonly string[] wormAdjectivesBad = { "Guzzling", "Fleshy", "Sopping", "Throbbing", "Promiscuous", "Flaccid", "Erect", "Gaping" };
-    private readonly string[] wormNounsBad = { "Guzzler", "Pervert", "Fucko", "Pissbaby", "Shithead" };
+    private readonly string[] wormNounsBad = { "Guzzler", "Pervert", "Fucko", "Pissbaby" };
 
     /// <summary>
     /// Generates a random nickname for the player.
@@ -368,10 +370,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         yield return new WaitForSeconds(playerScreenFader.GetFadeDuration());
         yield return null;
 
-        if (PhotonNetwork.IsMasterClient)
-        {
-            PhotonNetwork.LoadLevel(sceneName);
-        }
+        PhotonNetwork.LoadLevel(sceneName);
     }
 
     public bool TryToTakeColor(ColorOptions currentColor)

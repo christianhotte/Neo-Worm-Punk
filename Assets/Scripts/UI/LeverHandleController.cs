@@ -12,7 +12,8 @@ public class LeverHandleController : GrabbableUI
     {
         base.Awake();
         leverController = GetComponentInParent<LeverController>();
-        startingVector = transform.up;
+        startingVector = leverController.transform.up;
+        Debug.DrawRay(leverController.transform.position, leverController.transform.up * 10, Color.red, 20);
     }
 
     public override void OnGrab()
@@ -29,14 +30,15 @@ public class LeverHandleController : GrabbableUI
     {
         if (isGrabbed && followObject != null)
         {
-            Quaternion lookAngle = Quaternion.Euler(Mathf.Clamp(Vector2.SignedAngle(followObject.position - transform.position, startingVector), leverController.GetMinimumAngle(), leverController.GetMaximumAngle()), 0, 0);
-            transform.localRotation = lookAngle;
+            Quaternion lookMover = Quaternion.FromToRotation(transform.up, Vector3.ProjectOnPlane((followObject.position - leverController.transform.position).normalized, leverController.transform.right)) * transform.rotation;
+            Quaternion lookAngle = Quaternion.Euler(Mathf.Clamp(lookMover.eulerAngles.x, leverController.GetMinimumAngle(), leverController.GetMaximumAngle()), lookMover.eulerAngles.y, lookMover.eulerAngles.z);
+            transform.rotation = lookAngle;
         }
     }
 
-    public void MoveToAngle(float newAngle)
+    public void MoveToAngle(LeverController lever, float newAngle)
     {
-        transform.localRotation = Quaternion.Euler(Mathf.Clamp(newAngle, leverController.GetMinimumAngle(), leverController.GetMaximumAngle()), 0, 0);
+        transform.localRotation = Quaternion.Euler(Mathf.Clamp(newAngle, lever.GetMinimumAngle(), lever.GetMaximumAngle()), 0, 0);
     }
 
     public float GetAngle() => (transform.localEulerAngles.x > 180) ? transform.localEulerAngles.x - 360 : transform.localEulerAngles.x;
