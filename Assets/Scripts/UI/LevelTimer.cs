@@ -107,5 +107,13 @@ public class LevelTimer : MonoBehaviour
     public string GetMinutes() => Mathf.FloorToInt(currentTime / 60f).ToString();
     public string GetSeconds() => Mathf.FloorToInt(currentTime % 60f).ToString("00");
 
+    public float GetTotalSecondsLeft() => currentTime;
+
+    /// <summary>
+    /// Gets the level time in terms of percentage. Goes from 0% to 100% completion.
+    /// </summary>
+    /// <returns>The percentage as a float value.</returns>
+    public float LevelTimePercentage() => 100f - ((currentTime / levelTime) * 100f);
+
     public void SetLevelTime(int newLevelTime) => levelTime = newLevelTime;
 }

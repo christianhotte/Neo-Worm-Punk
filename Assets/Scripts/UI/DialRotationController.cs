@@ -15,7 +15,7 @@ public class DialRotationController : GrabbableUI
     [SerializeField, Tooltip("Dummy models to show when grabbing the dial.")] private GameObject leftHandModel, rightHandModel;
     [SerializeField, Tooltip("Determine if a dummy model is shown when rotating the dial.")] private bool useDummyHands;
 
-    [SerializeField, Tooltip("The event called when the dial has been rotated, sends the angle rotation.")] private UnityEvent<float> OnValueChanged;
+    [SerializeField, Tooltip("The event called when the dial has been rotated, sends the angle rotation.")] public UnityEvent<float> OnValueChanged;
     [SerializeField, Tooltip("The sound that plays when the dial clicks into a position.")] private AudioClip onSnapSoundEffect;
 
     private Transform dialTransform;    //The dial transform, what needs to be rotated
@@ -98,7 +98,7 @@ public class DialRotationController : GrabbableUI
     {
         if (!requiresStartAngle)
         {
-            Debug.Log("Start Angle - " + startAngle + " | Current Angle - " + currentAngle);
+            //Debug.Log("Start Angle - " + startAngle + " | Current Angle - " + currentAngle);
 
             float angleDifference = Mathf.Abs(startAngle - currentAngle);   //The angle difference between the start angle and the current angle to see how much it's moved
 
