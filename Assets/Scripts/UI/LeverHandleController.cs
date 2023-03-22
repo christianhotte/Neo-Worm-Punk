@@ -12,6 +12,7 @@ public class LeverHandleController : GrabbableUI
     {
         base.Awake();
         leverController = GetComponentInParent<LeverController>();
+        startingVector = leverController.transform.up;
     }
 
     public override void OnGrab()
@@ -43,11 +44,5 @@ public class LeverHandleController : GrabbableUI
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
-    }
-
-    public void SetStartVector()
-    {
-        startingVector = transform.up;
-        Debug.DrawRay(transform.position, startingVector * 10f, Color.red, 20);
     }
 }

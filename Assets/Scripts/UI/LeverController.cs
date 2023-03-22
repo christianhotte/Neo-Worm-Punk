@@ -50,13 +50,11 @@ public class LeverController : MonoBehaviour
     {
         firstCheck = true;
         handle = GetComponentInChildren<LeverHandleController>();
-        handle.SetStartVector();
     }
 
     private void OnEnable()
     {
         handle = GetComponentInChildren<LeverHandleController>();
-
         if (startingAngle != 0)
             handle.MoveToAngle(this, startingAngle);
 
