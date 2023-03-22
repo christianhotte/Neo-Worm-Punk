@@ -210,6 +210,32 @@ public class NetworkPlayer : MonoBehaviour
         photonView.RPC("UpdateTakenColors", RpcTarget.AllBuffered, NetworkManagerScript.instance.takenColors.ToArray()); //Send data to every player on the network (including this one)
     }
 
+    /// <summary>
+    /// When a user joins, try to take either their color or the next available color.
+    /// </summary>
+    public void UpdateTakenColorsOnJoin()
+    {
+        if(ReadyUpManager.instance != null)
+        {
+            int startingColorOption = (int)PlayerSettingsController.ColorToColorOptions(PlayerSettingsController.Instance.charData.playerColor);
+            int currentColorOption = startingColorOption;
+
+            for (int i = 0; i < PlayerSettingsController.NumberOfPlayerColors(); i++)
+            {
+                if (NetworkManagerScript.instance.TryToTakeColor((ColorOptions)(currentColorOption)))
+                {
+                    Debug.Log("Setting Color On Join To " + (ColorOptions)currentColorOption);
+                    ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().ChangePlayerColor(currentColorOption);
+                    break;
+                }
+
+                currentColorOption++;
+                if (currentColorOption >= PlayerSettingsController.NumberOfPlayerColors())
+                    currentColorOption = 0;
+            }
+        }
+    }
+
     //REMOTE METHODS:
     [PunRPC]
     public void UpdateTakenColors(int[] listOfColors)

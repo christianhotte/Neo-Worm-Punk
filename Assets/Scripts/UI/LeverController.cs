@@ -49,13 +49,14 @@ public class LeverController : MonoBehaviour
     private void Start()
     {
         firstCheck = true;
+        handle = GetComponentInChildren<LeverHandleController>();
     }
 
     private void OnEnable()
     {
         handle = GetComponentInChildren<LeverHandleController>();
         if (startingAngle != 0)
-            handle.MoveToAngle(startingAngle);
+            handle.MoveToAngle(this, startingAngle);
 
         currentMoveTimer = waitUntilAutoMoveTimer;
     }
@@ -74,7 +75,7 @@ public class LeverController : MonoBehaviour
         if  (debugActivate)
         {
             debugActivate = false;
-            handle.MoveToAngle(maximumAngle);
+            handle.MoveToAngle(this, maximumAngle);
         }
 
         //If there is an active level transition, don't do anything
@@ -202,13 +203,13 @@ public class LeverController : MonoBehaviour
         {
             float t = timeElapsed / snapMovementSpeed;
 
-            handle.MoveToAngle(Mathf.Lerp(handle.GetAngle(), newPos, t));
+            handle.MoveToAngle(this, Mathf.Lerp(handle.GetAngle(), newPos, t));
 
             timeElapsed += Time.deltaTime;
             yield return null;
         }
 
-        handle.MoveToAngle(newPos);
+        handle.MoveToAngle(this, newPos);
         leverAutomaticallyMoving = false;
     }
 
