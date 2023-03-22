@@ -189,4 +189,13 @@ public class NewGrapplerController : PlayerEquipment
         //Release hook:
         hook.Release(); //Indicate to hook that it is being released and needs to return to player
     }
+    /// <summary>
+    /// Immediately stows grappling hook and resets all cooldowns.
+    /// </summary>
+    /// <param name="disableInputTime">Also disables player input for this number of seconds (0 does not disable player input, less than 0 disables it indefinitely)</param>
+    public override void Shutdown(float disableInputTime = 0)
+    {
+        base.Shutdown(disableInputTime); //Call base functionality
+        hook.Stow();                     //Stow hook
+    }
 }
