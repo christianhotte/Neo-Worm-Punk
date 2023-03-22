@@ -359,7 +359,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
     public void LoadSceneWithFade(string sceneName)
     {
-        StartCoroutine(FadeLevelRoutine(sceneName));
+        if (PhotonNetwork.IsMasterClient) StartCoroutine(FadeLevelRoutine(sceneName));
     }
 
     private IEnumerator FadeLevelRoutine(string sceneName)
