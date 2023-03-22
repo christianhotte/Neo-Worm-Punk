@@ -359,7 +359,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
     public void LoadSceneWithFade(string sceneName)
     {
-        PhotonNetwork.AutomaticallySyncScene = true;
         StartCoroutine(FadeLevelRoutine(sceneName));
     }
 
