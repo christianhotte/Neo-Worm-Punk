@@ -27,11 +27,17 @@ public class ShotgunSettings : ScriptableObject
     [Range(0, 1), Tooltip("Multiplier applied to velocity addition when player is firing multiple times in the same direction.")]     public float additiveVelocityMultiplier;
     [Tooltip("Modulates additive velocity multiplier depending on how aligned shot is with current velocity.")]                       public AnimationCurve additiveVelocityCurve;
     [Header("Gunfeel:")]
+    [Tooltip("Forces player to wait for end of recoil phase before they are able to fire again.")] public bool noFireDuringRecoil = true;
     [Range(0, 1), Tooltip("How far back the player has to pull the trigger before it fires.")]     public float triggerThreshold = 1;
     [Min(0), Tooltip("Dampens gun wobble when pressed to make aiming a bit easier.")]              public float triggerDamper = 20;
     [Min(0), Tooltip("Strength of force used to close breach when swinging guns vertically.")]     public float closerForce;
     [Min(0), Tooltip("Time to wait after opening breach before allowing swing-close assistance.")] public float swingCloseWait;
     [Tooltip("When true, shotguns will only bounce player when shooting directly at a wall.")]     public bool wallBoostOnly;
+    [Tooltip("Enables natural shotgun recoil boosting.")]                                          public bool neutralFireBoost = false;
+    [Space()]
+    [Min(0), Tooltip("Approximate number of seconds it takes weapon to rotate 180 degrees during reverse fire procedure.")]          public float reverseSpeed = 0.15f;
+    [Min(0), Tooltip("Minimum duration between reverse button presses (prevents spamming that jams up guns).")]                      public float reverseButtonCooldown = 0.2f;
+    [Min(0), Tooltip("Minimum speed at which player must swing barrel in order to flip it in a particular direction (up or down).")] public float directionalReverseSwingSpeed;
     [Space()]
     [Min(0), Tooltip("Length of linear recoil weapon goes through when fired.")]                           public float recoilDistance;
     [Min(0.01f), Tooltip("Amout of time (in seconds) gun spends in linear recoil phase.")]                 public float recoilTime;
