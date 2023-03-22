@@ -8,6 +8,7 @@ public class WormHoleTrigger : MonoBehaviour
     private WormHole WHS;
     internal bool exiting = false,flashin=false,reset=false;
     public GameObject light,WormHole;
+    public Transform wormholeEntrance;
     private Animator holeAnim;
     // Start is called before the first frame update
     void Start()
@@ -42,12 +43,12 @@ public class WormHoleTrigger : MonoBehaviour
         if (other.TryGetComponent(out XROrigin playerOrigin) && !WHS.locked) // make sure it hit the player, and the wormhole isnt locked
         {
             GameObject playerRb = PlayerController.instance.bodyRb.gameObject;//gets player reference to send to the wormhole script
+            playerRb.transform.position = wormholeEntrance.position;
             holeAnim.SetBool("Locked", true);
             StartCoroutine(WHS.StartWormhole(this.gameObject, playerRb)); //Tells the wormhole to start the loop 
             return;
         }
     }
-
     public IEnumerator FlashLight()
     {
         flashin = true;

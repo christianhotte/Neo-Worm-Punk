@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
@@ -29,7 +28,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
     private Room mostRecentRoom;
 
-    internal List<ColorOptions> takenColors = new List<ColorOptions>();
+    internal List<int> takenColors = new List<int>();
 
     //RUNTIME METHODS:
     private void Awake()
@@ -71,14 +70,20 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         PhotonNetwork.ConnectUsingSettings();
         Debug.Log("Trying To Connect To Server...");
     }
-    public void OnCreateRoom(string roomName)
+    public void OnCreateRoom(string roomName, RoomOptions roomOptions = null, Hashtable customRoomSettings = null)
     {
-        RoomOptions roomOptions = new RoomOptions();
-        Hashtable customRoomSettings = new Hashtable();
+        if(roomOptions == null)
+        {
+            roomOptions = new RoomOptions();
+            roomOptions.IsVisible = true; // The player is able to see the room
+        }
 
-        customRoomSettings.Add("RoundLength", 300);
+        if (customRoomSettings == null)
+        {
+            customRoomSettings = new Hashtable();
+            customRoomSettings.Add("RoundLength", 300);
+        }
 
-        roomOptions.IsVisible = true; // The player is able to see the room
         roomOptions.IsOpen = true; // The room is open.
         roomOptions.EmptyRoomTtl = 0; // Leave the room open for 0 milliseconds after the room is empty
         roomOptions.MaxPlayers = 6;
@@ -150,14 +155,17 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         // Setting up the room options
         if (joinRoomOnLoad && !PhotonNetwork.InRoom)
         {
-            OnCreateRoom("Dev. Test Room");
+            if(FindObjectOfType<AutoJoinRoom>() != null)
+                OnCreateRoom(FindObjectOfType<AutoJoinRoom>().GetRoomName());
+            else
+                OnCreateRoom("Dev. Test Room");
         }
     }
 
     //List of random adjectives and nouns to name random players
     private readonly string[] wormAdjectives = { "Unfortunate", "Sad", "Despairing", "Grotesque", "Despicable", "Abhorrent", "Regrettable", "Incorrigible", "Greasy", "Platonic", "Sinister", "Hideous", "Glum", "Blasphemous", "Malignant", "Undulating", "Treacherous", "Hostile", "Slimy", "Squirming", "Blubbering", "Twisted", "Manic", "Slippery", "Wet", "Moist", "Lugubrious", "Tubular", "Little", "Erratic", "Pathetic" };
-    private readonly string[] wormNouns = { "Invertebrate", "Wormlet", "Creature", "Critter", "Fool", "Goon", "Specimen", "Homonculus", "Grubling", "Wormling", "Nightcrawler", "Stinker", "Rapscallion", "Scalliwag", "Beastling", "Crawler", "Larva", "Dingus", "Freak", "Blighter", "Cretin", "Dink", "Unit", "Denizen", "Creepy-Crawlie", "Parasite", "Organism" };
-    private readonly string[] wormAdjectivesBad = { "Guzzling", "Fleshy", "Sopping", "Throbbing", "Promiscuous", "Flaccid", "Erect" };
+    private readonly string[] wormNouns = { "Invertebrate", "Wormlet", "Creature", "Critter", "Fool", "Goon", "Specimen", "Homonculus", "Grubling", "Snotling", "Wormling", "Nightcrawler", "Stinker", "Rapscallion", "Scalliwag", "Beastling", "Crawler", "Larva", "Dingus", "Freak", "Blighter", "Cretin", "Dink", "Unit", "Denizen", "Parasite", "Organism" };
+    private readonly string[] wormAdjectivesBad = { "Guzzling", "Fleshy", "Sopping", "Throbbing", "Promiscuous", "Flaccid", "Erect", "Gaping" };
     private readonly string[] wormNounsBad = { "Guzzler", "Pervert", "Fucko", "Pissbaby" };
 
     /// <summary>
@@ -175,7 +183,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         }
 
         string currentWormName = realWormAdjectives[Random.Range(0, realWormAdjectives.Count)] + " " + realWormNouns[Random.Range(0, realWormNouns.Count)];
-        SetPlayerNickname(currentWormName + " #" + Random.Range(0, 1000).ToString("0000"));
+        SetPlayerNickname(currentWormName);
     }
 
     /// <summary>
@@ -235,6 +243,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         Debug.Log("Joined " + PhotonNetwork.CurrentRoom.Name + " room."); //Indicate that room has been joined
         SpawnNetworkPlayer();                                             //Always spawn a network player instance when joining a room
     }
+
     public override void OnJoinRoomFailed(short returnCode, string message)
     {
         Debug.LogError("Join Room Failed. Reason: " + message);
@@ -251,7 +260,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
         base.OnPlayerEnteredRoom(newPlayer);
-        Debug.Log("A new player has joined the room.");
+        Debug.Log(newPlayer.NickName + " has joined.");
 
         LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
 
@@ -261,6 +270,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             lobbyUI.UpdateRoomList();
         }
     }
+
     public override void OnLeftRoom()
     {
         //Update lobby script:
@@ -300,14 +310,37 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
         Debug.Log("Actor Number For " + GetLocalPlayerName() + ": " + PhotonNetwork.LocalPlayer.ActorNumber);
     }
+
     public void DeSpawnNetworkPlayer()
     {
+        //Remove the player's color from the list of colors
+        RemoveColor((int)PlayerSettingsController.ColorToColorOptions(PlayerSettingsController.Instance.charData.playerColor));
+        localNetworkPlayer.SyncColors();
+
         if (localNetworkPlayer != null) PhotonNetwork.Destroy(localNetworkPlayer.gameObject); //Destroy local network player if possible
         localNetworkPlayer = null;                                                            //Remove reference to destroyed reference player
     }
+
     public void SetPlayerNickname(string name)
     {
-        PhotonNetwork.NickName = name;
+        string currentName = name;
+        bool duplicateNameExists = true;
+        int counter = 2;
+
+        while (duplicateNameExists)
+        {
+            if (GetPlayerNameList().Contains(currentName))
+            {
+                currentName = name + " " + counter.ToString();
+                counter++;
+            }
+            else
+            {
+                duplicateNameExists = false;
+            }
+        }
+
+        PhotonNetwork.NickName = currentName;
         PlayerSettingsController.Instance.charData.playerName = PhotonNetwork.NickName;
     }
 
@@ -326,7 +359,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
     public void LoadSceneWithFade(string sceneName)
     {
-        StartCoroutine(FadeLevelRoutine(sceneName));
+        if (PhotonNetwork.IsMasterClient) StartCoroutine(FadeLevelRoutine(sceneName));
     }
 
     private IEnumerator FadeLevelRoutine(string sceneName)
@@ -343,17 +376,28 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         }
     }
 
-    public void UpdateTakenColorList(ColorOptions previousTakenColor, ColorOptions newTakenColor)
+    public bool TryToTakeColor(ColorOptions currentColor)
     {
-        if (ColorTaken(previousTakenColor))
-            RemoveColor(previousTakenColor);
+        if (!ColorTaken((int)currentColor))
+        {
+            TakeColor((int)currentColor);
+            return true;
+        }
 
-        TakeColor(newTakenColor);
+        return false;
     }
 
-    public void TakeColor(ColorOptions colorOption) => takenColors.Add(colorOption);
-    public void RemoveColor(ColorOptions colorOption) => takenColors.Remove(colorOption);
-    public bool ColorTaken(ColorOptions colorOption) => takenColors.Contains(colorOption);
+    public void UpdateTakenColorList(ColorOptions currentColor, ColorOptions newTakenColor)
+    {
+        if (ColorTaken((int)currentColor))
+            RemoveColor((int)currentColor);
+
+        TakeColor((int)newTakenColor);
+    }
+
+    public void TakeColor(int colorOption) => takenColors.Add(colorOption);
+    public void RemoveColor(int colorOption) => takenColors.Remove(colorOption);
+    public bool ColorTaken(int colorOption) => takenColors.Contains(colorOption);
 
     public Room GetMostRecentRoom() => mostRecentRoom;
     public string GetCurrentRoom() => PhotonNetwork.CurrentRoom.Name;
