@@ -81,7 +81,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         if (customRoomSettings == null)
         {
             customRoomSettings = new Hashtable();
-            customRoomSettings.Add("RoundLength", 300);
+            customRoomSettings.Add("RoundLength", 30);
         }
 
         roomOptions.IsOpen = true; // The room is open.
