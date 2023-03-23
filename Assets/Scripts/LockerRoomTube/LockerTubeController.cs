@@ -30,6 +30,7 @@ public class LockerTubeController : MonoBehaviour
     private void Awake()
     {
         tubeNumber = int.Parse(name.Replace("TestTube", ""));
+        Debug.Log("Assigning Tube Number: " + tubeNumber);
         tubes.Add(this);
         spawnPoint = transform.Find("Spawnpoint");
     }
@@ -71,7 +72,7 @@ public class LockerTubeController : MonoBehaviour
         {
             if (tube.tubeNumber == number) return tube;
         }
-        Debug.LogError("Failed to get tube number " + number);
+        Debug.LogError("Failed to get tube number " + number + " | Tube count = " + tubes.Count);
         return null;
     }
 }

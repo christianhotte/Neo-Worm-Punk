@@ -142,10 +142,9 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     {
         int playersReady = 0;
 
-        // Gets the amount of players that have a readied lever at lowest state.
-        foreach(var players in FindObjectsOfType<NetworkPlayer>())
+        foreach (var player in PhotonNetwork.CurrentRoom.Players)
         {
-            if (players.GetNetworkPlayerStats().isReady)
+            if ((bool)player.Value.CustomProperties["IsReady"])
                 playersReady++;
         }
 

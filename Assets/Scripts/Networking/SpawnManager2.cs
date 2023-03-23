@@ -98,6 +98,7 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
             }
         }
 
+        Debug.LogError("Error: Could Not Find An Empty Tube.");
         return null;
     }
 }
