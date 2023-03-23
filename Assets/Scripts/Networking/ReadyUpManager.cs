@@ -76,27 +76,30 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     [PunRPC]
     public void RPC_UpdateReadyStatus(int tubeID, bool updatedPlayerReady)
     {
-        LockerTubeController tube = FindObjectOfType<TubeManager>().GetTubeByNumber(tubeID);
-        if (tube != null) tube.UpdateLights(updatedPlayerReady);
-
-        // Get the number of players that have readied up
-        playersReady = GetAllPlayersReady();
-        playersInRoom = PhotonNetwork.CurrentRoom.PlayerCount;
-        
-        UpdateReadyText();
-        foreach (var player in NetworkPlayer.instances)
+        if(FindObjectOfType<TubeManager>() != null)
         {
-            print("Player " + player.photonView.ViewID + " ready status: " + (player.networkPlayerStats.isReady ? "READY" : "NOT READY"));
-        }
+            LockerTubeController tube = FindObjectOfType<TubeManager>().GetTubeByNumber(tubeID);
+            if (tube != null) tube.UpdateLights(updatedPlayerReady);
 
-        // If all players are ready, load the game scene
-        if (!GameManager.Instance.levelTransitionActive && (playersReady == playersInRoom && (playersInRoom >= MINIMUM_PLAYERS_NEEDED || GameSettings.debugMode)))
-        {
-            //Reset all players
+            // Get the number of players that have readied up
+            playersReady = GetAllPlayersReady();
+            playersInRoom = PhotonNetwork.CurrentRoom.PlayerCount;
+
+            UpdateReadyText();
             foreach (var player in NetworkPlayer.instances)
-                player.networkPlayerStats = new PlayerStats();
+            {
+                print("Player " + player.photonView.ViewID + " ready status: " + (player.networkPlayerStats.isReady ? "READY" : "NOT READY"));
+            }
 
-            NetworkManagerScript.instance.LoadSceneWithFade(GameSettings.arenaScene);
+            // If all players are ready, load the game scene
+            if (!GameManager.Instance.levelTransitionActive && (playersReady == playersInRoom && (playersInRoom >= MINIMUM_PLAYERS_NEEDED || GameSettings.debugMode)))
+            {
+                //Reset all players
+                foreach (var player in NetworkPlayer.instances)
+                    player.networkPlayerStats = new PlayerStats();
+
+                NetworkManagerScript.instance.LoadSceneWithFade(GameSettings.arenaScene);
+            }
         }
     }
 
