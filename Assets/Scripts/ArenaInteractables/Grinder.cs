@@ -12,13 +12,15 @@ public class Grinder : MonoBehaviour
     public bool Activated = false, Closed = true;
     public float doorSpeed = 3;
     public float LevelTimePercent;
-
+    internal AudioSource GrinderAud;
+    public AudioClip GrindnerSound;
     private Jumbotron jumbotronObject;
 
     // Start is called before the first frame update
     void Start()
     {
         jumbotronObject = FindObjectOfType<Jumbotron>();
+        GrinderAud = this.GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -39,6 +41,7 @@ public class Grinder : MonoBehaviour
             if (LevelTimePercent >= 75)
             {
                 Activated = true;
+                GrinderAud.PlayOneShot(GrindnerSound);
             }
         }
     }
