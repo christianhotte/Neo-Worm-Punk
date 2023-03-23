@@ -36,7 +36,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
         NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().isReady = (localLever.GetLeverState() == LeverController.HingeJointState.Max);
         NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["IsReady"] = NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().isReady;
         NetworkManagerScript.localNetworkPlayer.SyncStats();
-        UpdateStatus(localPlayerTube.tubeNumber);
+        UpdateStatus(localPlayerTube.GetTubeNumber());
     }
 
     // Once the room is joined.
@@ -76,7 +76,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     [PunRPC]
     public void RPC_UpdateReadyStatus(int tubeID, bool updatedPlayerReady)
     {
-        LockerTubeController tube = LockerTubeController.GetTubeByNumber(tubeID);
+        LockerTubeController tube = FindObjectOfType<TubeManager>().GetTubeByNumber(tubeID);
         if (tube != null) tube.UpdateLights(updatedPlayerReady);
 
         // Get the number of players that have readied up
@@ -142,9 +142,10 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     {
         int playersReady = 0;
 
-        foreach (var player in PhotonNetwork.CurrentRoom.Players)
+        // Gets the amount of players that have a readied lever at lowest state.
+        foreach (var players in FindObjectsOfType<NetworkPlayer>())
         {
-            if ((bool)player.Value.CustomProperties["IsReady"])
+            if (players.GetNetworkPlayerStats().isReady)
                 playersReady++;
         }
 
