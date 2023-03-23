@@ -49,9 +49,6 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
             PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
             PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
 
-            LeverController lever = spawnTube.GetComponentInChildren<LeverController>();
-            lever.OnStateChanged.AddListener(ReadyUpManager.instance.LeverStateChanged);
-
             if (ReadyUpManager.instance != null)
             {
                 ReadyUpManager.instance.localPlayerTube = spawnTube;
@@ -70,10 +67,6 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
             spawnTube.occupied = true;
             PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
             PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
-
-            //Add lever listener
-            LeverController lever = spawnTube.GetComponentInChildren<LeverController>();
-            lever.OnStateChanged.AddListener(ReadyUpManager.instance.LeverStateChanged);
 
             if (ReadyUpManager.instance != null)
             {

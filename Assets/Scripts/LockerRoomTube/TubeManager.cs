@@ -15,4 +15,10 @@ public class TubeManager : MonoBehaviour
         return null;
     }
 
+    public void OnLeverStateChanged()
+    {
+        if (ReadyUpManager.instance != null)
+            ReadyUpManager.instance.LeverStateChanged();
+    }
+
 }
