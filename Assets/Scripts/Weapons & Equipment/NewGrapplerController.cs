@@ -36,6 +36,7 @@ public class NewGrapplerController : PlayerEquipment
         yield return new WaitUntil(() => PlayerController.photonView != null);                                                                       //Wait until player's network player has been spawned
         hook = PhotonNetwork.Instantiate("Projectiles/" + settings.hookResourceName, barrel.position, hand.rotation).GetComponent<HookProjectile>(); //Instantiate hook projectile on the network
         hook.Stow(this);                                                                                                                             //Immediately do a stow initialization on new projectile
+        player.UpdateWeaponry();                                                                                                                     //Hide hook if in a network scene
     }
 
     //RUNTIME METHODS:

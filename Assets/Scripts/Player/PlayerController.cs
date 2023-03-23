@@ -53,8 +53,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField, Range(0, 1), Tooltip("Amount by which player has to pull the thumb stick in order to snap-turn.")] private float flickStickThreshold;
     [Header("Sound Settings:")]
     [SerializeField, Tooltip("SFX played when player strikes a target.")] private AudioClip targetHitSound;
+    [SerializeField, Tooltip("SFX played when player kills a target.")]   private AudioClip targetKillSound;
     [Header("Debug Options:")]
-    [SerializeField, Tooltip("Enables constant settings checks in order to test changes.")]                                private bool debugUpdateSettings;
     [SerializeField, Tooltip("Enables usage of SpawnManager system to automatically position player upon instantiation.")] private bool useSpawnPoint = true;
     [SerializeField, Tooltip("Click to snap camera back to center of player rigidbody (ignoring height).")]                private bool debugCenterCamera;
     [SerializeField, Tooltip("Manually isntantiate a network player.")]                                                    private bool debugSpawnNetworkPlayer;
@@ -73,14 +73,35 @@ public class PlayerController : MonoBehaviour
 
     //Misc:
     internal bool Launchin = false; //NOTE: What references this and where is it modified?
-    private GameObject[] weapons;   //A list of active weapons on the player NOTE: Can this be replaced by attachedEquipment?
-    private GameObject[] tools;     //A list of active tools on the player NOTE: Can this be replaced by attachedEquipment?
 
     //Utility Variables:
     /// <summary>
     /// What percentage of maximum player health they currently have.
     /// </summary>
     public float HealthPercent { get { return currentHealth / (float)healthSettings.defaultHealth; } }
+
+    //Events & Coroutines:
+    /// <summary>
+    /// Controls functions which occur while player is dying.
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerator DeathSequence()
+    {
+        yield return new WaitForSeconds(healthSettings.deathTime); //Wait for designated number of seconds in death zone
+
+        if (SpawnManager.current != null && useSpawnPoint) //Spawn manager is present in scene
+        {
+            Transform spawnpoint = SpawnManager.current.GetRandomSpawnPoint();                    //Get spawnpoint from spawnpoint manager
+            xrOrigin.transform.position = spawnpoint.position;                                    //Move spawned player to target position
+            xrOrigin.transform.eulerAngles = Vector3.Project(spawnpoint.eulerAngles, Vector3.up); //Rotate player to designated spawnpoint rotation
+        }
+        foreach (PlayerEquipment equipment in attachedEquipment) equipment.inputEnabled = true; //Re-enable equipment input
+        bodyRb.isKinematic = false; //Re-enable player physics
+
+        photonView.RPC("RPC_MakeVisible", RpcTarget.Others); //Unhide trailrenderers for all other players
+        isDead = false;                                      //Indicate that player is no longer dead
+        CenterCamera();                                      //Center camera (this is worth doing during any major transition)
+    }
 
     //RUNTIME METHODS:
     private void Awake()
@@ -124,9 +145,6 @@ public class PlayerController : MonoBehaviour
         currentHealth = healthSettings.defaultHealth; //Set base health value
         baseDrag = bodyRb.drag;                       //Store base drag value
 
-        weapons = GameObject.FindGameObjectsWithTag("PlayerEquipment");
-        tools = GameObject.FindGameObjectsWithTag("Wall");
-
         inCombat = true;
         UpdateWeaponry();
 
@@ -169,7 +187,7 @@ public class PlayerController : MonoBehaviour
         if (keepTorsoCentered) playerModel.transform.position = cam.transform.position + (Vector3.down * torsoVerticalOffset); //Center model to player body position and apply vertical offset
 
         //Debug functions:
-        if (debugUpdateSettings && Application.isEditor) //Debug settings updates are enabled (only necessary while running in Unity Editor)
+        if (Application.isEditor) //Debug settings updates are enabled (only necessary while running in Unity Editor)
         {
             if (debugSpawnNetworkPlayer)
             {
@@ -242,7 +260,7 @@ public class PlayerController : MonoBehaviour
     /// <summary>
     /// Updates the weaponry so that the player can / can't fight under certain conditions.
     /// </summary>
-    private void UpdateWeaponry()
+    public void UpdateWeaponry()
     {
         if (inMenu)
         {
@@ -254,6 +272,15 @@ public class PlayerController : MonoBehaviour
         foreach (var weapon in attachedEquipment)
             foreach (var renderer in weapon.GetComponentsInChildren<Renderer>())
                 renderer.enabled = inCombat;
+
+        foreach (NewGrapplerController grappler in GetComponentsInChildren<NewGrapplerController>())
+        {
+            if (grappler.hook != null)
+            {
+                foreach (Renderer renderer in grappler.hook.GetComponentsInChildren<Renderer>())
+                    renderer.enabled = inCombat;
+            }
+        }
 
         combatHUDScreen.GetComponent<MeshRenderer>().enabled = inCombat;
     }
@@ -284,7 +311,14 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     public void HitEnemy()
     {
-        if (targetHitSound != null) audioSource.PlayOneShot(targetHitSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play hit sound when player shoots (or damages) a target
+        if (targetHitSound != null) audioSource.PlayOneShot(targetHitSound); //Play hit sound when player shoots (or damages) a target
+    }
+    /// <summary>
+    /// Called when player hits and kills an enemy with a projectile.
+    /// </summary>
+    public void KilledEnemy()
+    {
+        if (targetKillSound != null) audioSource.PlayOneShot(targetKillSound); //Play kill sound when player kills a target
     }
     /// <summary>
     /// Method called when this player is hit by a projectile.
@@ -304,7 +338,7 @@ public class PlayerController : MonoBehaviour
         }
         else //Player is being hurt by this projectile hit
         {
-            audioSource.PlayOneShot(healthSettings.hurtSound != null ? healthSettings.hurtSound : (AudioClip)Resources.Load("Sounds/Default_Hurt_Sound"), PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play hurt sound
+            audioSource.PlayOneShot(healthSettings.hurtSound != null ? healthSettings.hurtSound : (AudioClip)Resources.Load("Sounds/Default_Hurt_Sound")); //Play hurt sound
             if (healthSettings.regenSpeed > 0) timeUntilRegen = healthSettings.regenPauseTime;                                                             //Optionally begin regeneration sequence
             return false;
         }
@@ -314,8 +348,11 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     public void IsKilled()
     {
+        //Validity checks:
+        if (isDead) return; //Do not allow dead players to be killed
+
         //Effects:
-        audioSource.PlayOneShot(healthSettings.deathSound != null ? healthSettings.deathSound : (AudioClip)Resources.Load("Sounds/Temp_Death_Sound"), PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play death sound
+        audioSource.PlayOneShot(healthSettings.deathSound != null ? healthSettings.deathSound : (AudioClip)Resources.Load("Sounds/Temp_Death_Sound")); //Play death sound
         
         //Weapon cleanup:
         foreach (NewGrapplerController hookShot in GetComponentsInChildren<NewGrapplerController>()) //Iterate through any hookshots player may have equipped
@@ -324,19 +361,20 @@ public class PlayerController : MonoBehaviour
         }
 
         //Put player in limbo:
-        bodyRb.velocity = Vector3.zero;                              //Reset player velocity
-        CenterCamera();                                              //Center camera (this is worth doing during any major transition)
-        photonView.RPC("RPC_MakeVisible", RpcTarget.OthersBuffered); //Reset trail
+        photonView.RPC("RPC_MakeInvisible", RpcTarget.Others);                           //Hide trailrenderers for all other players
+        bodyRb.velocity = Vector3.zero;                                                  //Reset player velocity
+        CenterCamera();                                                                  //Center camera (this is worth doing during any major transition)
+        foreach (PlayerEquipment equipment in attachedEquipment) equipment.Shutdown(-1); //Stow and disable all equipment on player
+        bodyRb.isKinematic = true;                                                       //Disable body physics
 
         //Cleanup:
         isDead = true; //Indicate that this player is dead
-        if (SpawnManager.current != null && useSpawnPoint) //Spawn manager is present in scene
-        {
-            Transform spawnpoint = SpawnManager.current.GetRandomSpawnPoint(); //Get spawnpoint from spawnpoint manager
-            xrOrigin.transform.position = spawnpoint.position;                 //Move spawned player to target position
-        }
-        currentHealth = healthSettings.defaultHealth; //Reset to max health
-        healthVolume.weight = 0;                      //Reset health volume weight
+        xrOrigin.transform.position = SpawnManager.current.deathZone.position; //Move player to death zone
+        xrOrigin.transform.rotation = Quaternion.identity;                     //Zero out player rotation
+        StartCoroutine(DeathSequence());                                       //Begin death sequence
+        currentHealth = healthSettings.defaultHealth;                          //Reset to max health
+        healthVolume.weight = 0;                                               //Reset health volume weight
+        timeUntilRegen = 0;                                                    //Reset regen timer
         print("Local player has been killed!");
     }
 
