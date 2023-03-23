@@ -225,6 +225,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     }
     public override void OnJoinedRoom()
     {
+
+
         //Automatically load the player into the locker room if the auto join script calls for it
         AutoJoinRoom autoJoin = FindObjectOfType<AutoJoinRoom>();
         if (autoJoin != null && autoJoin.GoToLockerRoom())
@@ -271,6 +273,12 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         }
     }
 
+    public override void OnPlayerLeftRoom(Player otherPlayer)
+    {
+        base.OnPlayerLeftRoom(otherPlayer);
+        Debug.Log(otherPlayer.NickName + " has left.");
+    }
+
     public override void OnLeftRoom()
     {
         //Update lobby script:
@@ -313,10 +321,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
     public void DeSpawnNetworkPlayer()
     {
-        //Remove the player's color from the list of colors
-        RemoveColor((int)PlayerSettingsController.ColorToColorOptions(PlayerSettingsController.Instance.charData.playerColor));
-        localNetworkPlayer.SyncColors();
-
         if (localNetworkPlayer != null) PhotonNetwork.Destroy(localNetworkPlayer.gameObject); //Destroy local network player if possible
         localNetworkPlayer = null;                                                            //Remove reference to destroyed reference player
     }
@@ -364,6 +368,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
     private IEnumerator FadeLevelRoutine(string sceneName)
     {
+        GameManager.Instance.levelTransitionActive = true;
+
         FadeScreen playerScreenFader = PlayerController.instance.GetComponentInChildren<FadeScreen>();
         playerScreenFader.FadeOut();
 
@@ -371,6 +377,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         yield return null;
 
         PhotonNetwork.LoadLevel(sceneName);
+
+        GameManager.Instance.levelTransitionActive = false;
     }
 
     public bool TryToTakeColor(ColorOptions currentColor)

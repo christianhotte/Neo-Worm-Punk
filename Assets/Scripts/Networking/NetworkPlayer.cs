@@ -5,6 +5,7 @@ using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
 using Photon.Pun;
 using Photon.Realtime;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 using UnityEngine.SceneManagement;
 using RootMotion.FinalIK;
 
@@ -26,6 +27,7 @@ public class NetworkPlayer : MonoBehaviour
     private SkinnedMeshRenderer bodyRenderer;                    //Renderer component for main player body/skin
     private TrailRenderer trail;                                 //Renderer for trail that makes players more visible to each other
     internal PlayerStats networkPlayerStats = new PlayerStats(); //The stats for the network player
+    internal Hashtable photonPlayerSettings;
 
     private Transform headTarget;      //True local position of player head
     private Transform leftHandTarget;  //True local position of player left hand
@@ -70,6 +72,9 @@ public class NetworkPlayer : MonoBehaviour
             PlayerController.photonView = photonView; //Give playerController a reference to local client photon view component
 
             //Local initialization:
+
+            photonPlayerSettings = new Hashtable();                       //Create new custom player settings
+            InitializePhotonPlayerSettings();
             PlayerController.instance.playerSetup.ApplyAllSettings();                                //Apply default settings to player
             SyncData();                                                                              //Sync settings between every version of this network player
             foreach (Renderer r in transform.GetComponentsInChildren<Renderer>()) r.enabled = false; //Local player should never be able to see their own NetworkPlayer
@@ -79,6 +84,17 @@ public class NetworkPlayer : MonoBehaviour
         SceneManager.sceneLoaded += OnSceneLoaded; //Subscribe to scene load event (every NetworkPlayer should do this)
         DontDestroyOnLoad(gameObject);             //Make sure network players are not destroyed when a new scene is loaded
     }
+
+    /// <summary>
+    /// Initializes the player's photon player settings.
+    /// </summary>
+    private void InitializePhotonPlayerSettings()
+    {
+        photonPlayerSettings.Add("Color", (int)PlayerSettingsController.ColorToColorOptions(PlayerSettingsController.Instance.charData.playerColor));
+        photonPlayerSettings.Add("IsReady", false);
+        PlayerController.photonView.Owner.SetCustomProperties(photonPlayerSettings);
+    }
+
     void Start()
     {
         if (photonView.IsMine) //Initialization for local network player
