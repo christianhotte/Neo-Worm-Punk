@@ -10,7 +10,7 @@ using Photon.Pun;
 public class Projectile : MonoBehaviourPunCallbacks
 {
     //Objects & Components:
-    private AudioSource audioSource;       //Audiosource component used by this projectile to make sound effects
+    internal AudioSource audioSource;      //Audiosource component used by this projectile to make sound effects
     private protected TrailRenderer trail; //Renderer component for trail projectile leaves in its wake
 
     //Settings:

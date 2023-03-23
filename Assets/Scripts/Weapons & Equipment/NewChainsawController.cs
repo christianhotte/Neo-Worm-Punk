@@ -100,7 +100,7 @@ public class NewChainsawController : PlayerEquipment
         {
             //Switch modes:
             if (handWeapon != null) handWeapon.Holster();     //Holster weapon held in hand if possible
-            PlaySFX(settings.extendSound);                    //Play extend sound
+            if (settings.extendSound != null) audioSource.PlayOneShot(settings.extendSound); //Play extend sound
             SendHapticImpulse(settings.extendHaptics);        //Play extend haptics
             mode = BladeMode.Extending;                       //Indicate that blade is now extending
             timeInMode = 0;                                   //Reset mode time tracker
@@ -110,7 +110,7 @@ public class NewChainsawController : PlayerEquipment
         {
             //Switch mode:
             if (handWeapon != null) handWeapon.Holster(false); //Un-holster weapon held in hand if possible
-            PlaySFX(settings.sheathSound);                     //Play retraction sound
+            if (settings.sheathSound != null) audioSource.PlayOneShot(settings.sheathSound); //Play sheath sound
             SendHapticImpulse(settings.retractHaptics);        //Play haptic impulse
             mode = BladeMode.Retracting;                       //Indicate that blade is now retracting
             timeInMode = 0;                                    //Reset mode time tracker
