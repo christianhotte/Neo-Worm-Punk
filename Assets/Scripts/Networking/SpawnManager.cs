@@ -12,6 +12,8 @@ public class SpawnManager : MonoBehaviour
     /// </summary>
     public static SpawnManager current;
     public List<Transform> spawnPoints = new List<Transform>();
+    [Tooltip("The place players temporarily go to when they die.")] public Transform deathZone;
+    public float deathZoneRotSpeed;
 
     //Settings:
 
@@ -22,6 +24,13 @@ public class SpawnManager : MonoBehaviour
     void Awake()
     {
         current = this; //Always set newest-loaded spawnManager script to current
+    }
+    private void Update()
+    {
+        if (deathZone != null && PlayerController.instance.isDead)
+        {
+            deathZone.Rotate(deathZoneRotSpeed * Time.deltaTime * Vector3.up);
+        }
     }
 
     public Transform GetRandomSpawnPoint()

@@ -36,6 +36,7 @@ public class NewGrapplerController : PlayerEquipment
         yield return new WaitUntil(() => PlayerController.photonView != null);                                                                       //Wait until player's network player has been spawned
         hook = PhotonNetwork.Instantiate("Projectiles/" + settings.hookResourceName, barrel.position, hand.rotation).GetComponent<HookProjectile>(); //Instantiate hook projectile on the network
         hook.Stow(this);                                                                                                                             //Immediately do a stow initialization on new projectile
+        player.UpdateWeaponry();                                                                                                                     //Hide hook if in a network scene
     }
 
     //RUNTIME METHODS:
@@ -96,6 +97,16 @@ public class NewGrapplerController : PlayerEquipment
 
     //FEEDBACK METHODS:
     /// <summary>
+    /// Called when hook is stowed back into launcher.
+    /// </summary>
+    public void Stowed()
+    {
+        audioSource.loop = false; //Stop audiosource looping
+        audioSource.Stop();       //Stop playing whatever sound is playing
+        if (settings.bounceSound != null) audioSource.PlayOneShot(settings.hitSound); //Play sound effect
+        SendHapticImpulse(settings.hitHaptics); //Play haptic impulse
+    }
+    /// <summary>
     /// Called when hook successfully locks onto a surface.
     /// </summary>
     public void HookedObstacle()
@@ -103,8 +114,14 @@ public class NewGrapplerController : PlayerEquipment
         hookedHandPos = RelativePosition; //Get position of hand at moment of contact
 
         //Effects:
-        if (settings.hitSound != null) audioSource.PlayOneShot(settings.hitSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play sound effect
-        SendHapticImpulse(settings.hitHaptics);                                    //Play haptic impulse
+        if (settings.hitSound != null) hook.audioSource.PlayOneShot(settings.hitSound); //Play sound effect
+        if (settings.reelSound != null)
+        {
+            audioSource.loop = true;               //Set audiosource to loop
+            audioSource.clip = settings.reelSound; //Queue up reel sound
+            audioSource.Play();                    //Play reel sound on loop
+        }
+        SendHapticImpulse(settings.hitHaptics); //Play haptic impulse
     }
     /// <summary>
     /// Called when hook successfully locks onto a player.
@@ -113,15 +130,23 @@ public class NewGrapplerController : PlayerEquipment
     {
         hookedHandPos = RelativePosition; //Get position of hand at moment of contact
 
-        if (settings.playerHitSound != null) audioSource.PlayOneShot(settings.playerHitSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play sound effect
-        SendHapticImpulse(settings.hitHaptics);                                                //Play haptic impulse
+        if (settings.playerHitSound != null) hook.audioSource.PlayOneShot(settings.playerHitSound); //Play sound effect
+        if (settings.reelSound != null)
+        {
+            audioSource.loop = true;               //Set audiosource to loop
+            audioSource.clip = settings.reelSound; //Queue up reel sound
+            audioSource.Play();                    //Play reel sound on loop
+        }
+        SendHapticImpulse(settings.hitHaptics); //Play haptic impulse
     }
     /// <summary>
     /// Called when hook automatically releases itself for some reason.
     /// </summary>
     public void ForceReleased()
     {
-        if (settings.releaseSound != null) audioSource.PlayOneShot(settings.releaseSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play sound effect
+        audioSource.loop = false; //Make audiosource stop looping reel sound
+        audioSource.Stop();       //Make sure audiosource stops playing reel sound
+        if (settings.releaseSound != null) audioSource.PlayOneShot(settings.releaseSound); //Play sound effect
         SendHapticImpulse(settings.releaseHaptics);                                        //Play haptic impulse
     }
     /// <summary>
@@ -129,8 +154,8 @@ public class NewGrapplerController : PlayerEquipment
     /// </summary>
     public void Bounced()
     {
-        if (settings.bounceSound != null) audioSource.PlayOneShot(settings.bounceSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play sound effect
-        SendHapticImpulse(settings.releaseHaptics);                                      //Play haptic impulse
+        if (settings.bounceSound != null) hook.audioSource.PlayOneShot(settings.bounceSound); //Play sound effect (on projectile)
+        SendHapticImpulse(settings.releaseHaptics);                                           //Play haptic impulse
     }
 
     //FUNCTIONALITY METHODS:
@@ -169,11 +194,11 @@ public class NewGrapplerController : PlayerEquipment
             }
 
             hook.punchWhipped = true;                                                    //Indicate to hook that it has been punch=whipped
-            if (settings.whipSound != null) audioSource.PlayOneShot(settings.whipSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play sound effect
+            if (settings.whipSound != null) audioSource.PlayOneShot(settings.whipSound); //Play sound effect
         }
         else //Normal launch effects
         {
-            if (settings.launchSound != null) audioSource.PlayOneShot(settings.launchSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play sound effect
+            if (settings.launchSound != null) audioSource.PlayOneShot(settings.launchSound); //Play sound effect
         }
         if (settings.holstersWeapon) handWeapon.Holster(); //Holster gun while grappling (if set to do so)
         SendHapticImpulse(settings.launchHaptics);         //Play haptic impulse

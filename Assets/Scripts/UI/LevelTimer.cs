@@ -7,14 +7,14 @@ using Photon.Pun;
 
 public class LevelTimer : MonoBehaviour
 {
+    public static bool timerEnded; //If true, the timer has ended. If false, the timer has not ended
     private int levelTime;  //The desired timer for the level
     private float currentTime;  //The current time left
 
     private TextMeshProUGUI timerText;  //The timer text component
 
-    private bool timerActivated;  //If true, the timer has been activated. If false, the timer has not been activated
-    private bool timerActive;   //If true, the timer is active. If false, the timer is not active
-    private bool timerEnded;    //If true, the timer has ended. If false, the timer has not ended
+    private bool timerActivated; //If true, the timer has been activated. If false, the timer has not been activated
+    private bool timerActive;    //If true, the timer is active. If false, the timer is not active
 
     public UnityEvent OnTimerEnd;  //The event to call when the timer ends
 
@@ -31,6 +31,10 @@ public class LevelTimer : MonoBehaviour
     private void OnEnable()
     {
         OnTimerEnd.AddListener(BackToLockerRoom);
+    }
+    private void OnDestroy()
+    {
+        timerEnded = false;
     }
 
     /// <summary>

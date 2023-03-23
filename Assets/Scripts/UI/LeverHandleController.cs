@@ -30,9 +30,9 @@ public class LeverHandleController : GrabbableUI
     {
         if (isGrabbed && followObject != null)
         {
-            Debug.DrawLine(leverController.transform.position, followObject.position, Color.green, Time.deltaTime);
-            Quaternion lookAngle = Quaternion.Euler(Mathf.Clamp(Vector3.SignedAngle(leverController.transform.position, followObject.position, new Vector3(0, 0, 1)), leverController.GetMinimumAngle(), leverController.GetMaximumAngle()), 0, 0);
-            transform.localRotation = lookAngle;
+            Quaternion lookMover = Quaternion.FromToRotation(transform.up, Vector3.ProjectOnPlane((followObject.position - leverController.transform.position).normalized, leverController.transform.right)) * transform.rotation;
+            Quaternion lookAngle = Quaternion.Euler(Mathf.Clamp(lookMover.eulerAngles.x, leverController.GetMinimumAngle(), leverController.GetMaximumAngle()), lookMover.eulerAngles.y, lookMover.eulerAngles.z);
+            transform.rotation = lookAngle;
         }
     }
 
