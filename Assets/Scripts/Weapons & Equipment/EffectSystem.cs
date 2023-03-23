@@ -7,5 +7,12 @@ using UnityEngine;
 /// </summary>
 public class EffectSystem : MonoBehaviour
 {
-    
+    public float duration;
+    private float timeAlive = 0;
+
+    private void Update()
+    {
+        timeAlive += Time.deltaTime;
+        if (timeAlive > duration) Destroy(gameObject);
+    }
 }
