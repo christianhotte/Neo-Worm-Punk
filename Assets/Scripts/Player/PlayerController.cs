@@ -260,7 +260,7 @@ public class PlayerController : MonoBehaviour
     /// <summary>
     /// Updates the weaponry so that the player can / can't fight under certain conditions.
     /// </summary>
-    private void UpdateWeaponry()
+    public void UpdateWeaponry()
     {
         if (inMenu)
         {
