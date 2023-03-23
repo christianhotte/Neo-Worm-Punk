@@ -21,11 +21,11 @@ MonoBehaviour:
     m_Bits: 257
   travelIntersectBehavior: 2
   hookedIntersectBehavior: 2
-  basePullSpeed: 50
-  baseRetractSpeed: 600
-  retractAcceleration: 300
-  lateralManeuverForce: 75
-  yankForce: 85
+  basePullSpeed: 70
+  baseRetractSpeed: 650
+  retractAcceleration: 450
+  lateralManeuverForce: 90
+  yankForce: 100
   deployThreshold: 1
   releaseThreshold: 0.5
   hookTravelScale: 3
@@ -35,10 +35,10 @@ MonoBehaviour:
   minPunchWhipDist: 5
   punchWhipBoost: 2
   punchWhipCooldown: 0
-  holstersWeapon: 0
+  holstersWeapon: 1
   launchHaptics:
-    amplitude: 1
-    duration: 0.1
+    amplitude: 0.6
+    duration: 0.3
     behaviorCurve:
       serializedVersion: 2
       m_Curve: []
@@ -55,8 +55,8 @@ MonoBehaviour:
       m_PostInfinity: 2
       m_RotationOrder: 4
   hitHaptics:
-    amplitude: 0
-    duration: 0
+    amplitude: 1
+    duration: 0.1
     behaviorCurve:
       serializedVersion: 2
       m_Curve: []
@@ -64,18 +64,18 @@ MonoBehaviour:
       m_PostInfinity: 2
       m_RotationOrder: 4
   releaseHaptics:
-    amplitude: 0
-    duration: 0
+    amplitude: 0.5
+    duration: 0.1
     behaviorCurve:
       serializedVersion: 2
       m_Curve: []
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-  launchSound: {fileID: 0}
+  launchSound: {fileID: 8300000, guid: f275fbfaf3c007346b668fe0aecb0e6a, type: 3}
   whipSound: {fileID: 8300000, guid: 0a1f0db4823577d4bb7b69d63b9ac65f, type: 3}
-  reelSound: {fileID: 0}
-  releaseSound: {fileID: 0}
-  hitSound: {fileID: 0}
-  playerHitSound: {fileID: 0}
-  bounceSound: {fileID: 0}
+  reelSound: {fileID: 8300000, guid: 092a80465908b5d43aab893e35eac56d, type: 3}
+  releaseSound: {fileID: 8300000, guid: 2465e0e005a94ef48833932cc6dca515, type: 3}
+  hitSound: {fileID: 8300000, guid: 64fedcde5cf7dec4b8bec195fe966716, type: 3}
+  playerHitSound: {fileID: 8300000, guid: 64fedcde5cf7dec4b8bec195fe966716, type: 3}
+  bounceSound: {fileID: 8300000, guid: 4022ac0e7dbc5834eae29d17de7af7e1, type: 3}

@@ -153,6 +153,8 @@ public class NetworkPlayer : MonoBehaviour
         //Enable/Disable components:
         foreach (Renderer r in transform.GetComponentsInChildren<Renderer>()) r.enabled = makeEnabled; //Update status of each renderer on player avatar
         foreach (Collider c in transform.GetComponentsInChildren<Collider>()) c.enabled = makeEnabled; //Update status of each collider on player avatar
+        trail.enabled = makeEnabled;                                                                   //Specifically update status of trailRenderer
+        trail.Clear();                                                                                 //Clear trail status
 
         //Cleanup:
         visible = makeEnabled; //Indicate whether or not networkPlayer is currently visible
@@ -367,7 +369,6 @@ public class NetworkPlayer : MonoBehaviour
     public void RPC_MakeVisible()
     {
         ChangeVisibility(true); //Show renderers and enable colliders
-        trail.Clear();          //Clean up trail
     }
     /// <summary>
     /// Hides this player's renderers and disables all remote collision detection.

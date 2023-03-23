@@ -269,6 +269,8 @@ public class NewShotgunController : PlayerEquipment
                     reverseFiring = true;                                      //Indicate that weapon is moving to reverse fire mode
                     if (breachOpen) Close();                                   //Close breach on button press if possible
                     reverseButtonCooldown = gunSettings.reverseButtonCooldown; //Disable button for a brief period
+
+                    if (gunSettings.flipSound != null) audioSource.PlayOneShot(gunSettings.flipSound); //Play flipping sound effect
                 }
                 else if (context.canceled && reverseFiring) //Reverse fire button has just been released
                 {
@@ -276,6 +278,8 @@ public class NewShotgunController : PlayerEquipment
                     reverseTime = Mathf.Min(reverseTime + gunSettings.reverseSpeed, gunSettings.reverseSpeed * 2); //Initialize reversal sequence by adding time to the reversal clock
                     reverseFiring = false;   //Indicate that weapon is no longer in reverse fire mode
                     if (breachOpen) Close(); //Close breach on button release if possible
+
+                    if (gunSettings.flipSound != null) audioSource.PlayOneShot(gunSettings.flipSound); //Play flipping sound effect
                 }
                 break;
             default: break; //Ignore unrecognized actions
@@ -326,8 +330,8 @@ public class NewShotgunController : PlayerEquipment
         }
 
         //Effects:
-        audioSource.PlayOneShot(gunSettings.fireSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play fire sound
-        StartCoroutine(DoRecoil());                     //Begin recoil phase
+        if (gunSettings.fireSound != null) audioSource.PlayOneShot(gunSettings.fireSound); //Play sound effect
+        StartCoroutine(DoRecoil());                                                        //Begin recoil phase
         if (loadedShots == 2) //Weapon is firing its first shot
         {
             StartCoroutine(MoveEjector(handedness, true)); //Move inner ejector when one shot is fired
@@ -385,7 +389,6 @@ public class NewShotgunController : PlayerEquipment
         //Cleanup:
         timeSinceFiring = 0;                           //Reset firing timer
         doubleFireWindow = gunSettings.doubleFireTime; //Open double fire window so that other weapon can check for it
-        if (gunSettings.fireSound != null) audioSource.PlayOneShot(gunSettings.fireSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play sound effect
         if (barrels.Length > 1) //Only index barrel if there is more than one
         {
             currentBarrelIndex += 1;                                          //Index current barrel number by one
@@ -418,7 +421,7 @@ public class NewShotgunController : PlayerEquipment
         MovePin(Handedness.None, false);                     //Move pins to backward positions
 
         //Cleanup:
-        if (gunSettings.ejectSound != null) audioSource.PlayOneShot(gunSettings.ejectSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play sound effect
+        if (gunSettings.ejectSound != null) audioSource.PlayOneShot(gunSettings.ejectSound); //Play sound effect
         SendHapticImpulse(gunSettings.ejectHaptics);                                         //Play haptic impulse
         breachOpen = true;                                                                   //Indicate that breach is now open
     }
@@ -438,7 +441,7 @@ public class NewShotgunController : PlayerEquipment
         breakJoint.highAngularXLimit = newJointLimit;                //Apply new joint limit
 
         //Cleanup:
-        if (gunSettings.lockSound != null) audioSource.PlayOneShot(gunSettings.lockSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play sound effect
+        if (gunSettings.lockSound != null) audioSource.PlayOneShot(gunSettings.lockSound); //Play sound effect
         SendHapticImpulse(gunSettings.closeHaptics);                                       //Play haptic impulse
         breachOpenTime = 0;                                                                //Reset breach open time tracker
         breachOpen = false;                                                                //Indicate that breach is now closed

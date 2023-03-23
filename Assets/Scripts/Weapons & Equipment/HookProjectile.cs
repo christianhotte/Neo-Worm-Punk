@@ -221,6 +221,7 @@ public class HookProjectile : Projectile
             transform.parent = controller.hookVisibleOnBarrel ? controller.barrel : controller.stowPoint; //Child hook to stow point
             photonView.RPC("RPC_Stow", RpcTarget.OthersBuffered);                                         //Stow remote hooks
             if (!controller.handWeapon.holstered) controller.handWeapon.Holster(false); //Unholster gun after grappling (if it hasn't been already)
+            controller.Stowed(); //Indicate to controller that hook has been stowed (triggers various effects)
         }
         else transform.parent = originPlayerBody; //Child remote hooks to networkplayer's center mass
         transform.localPosition = Vector3.zero;    //Zero out position relative to stow point
