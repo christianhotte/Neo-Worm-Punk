@@ -73,7 +73,6 @@ public class PlayerColorChanger : MonoBehaviour
         NetworkManagerScript.instance.UpdateTakenColorList(currentColorOptionSelected, (ColorOptions)colorOption);
 
         PlayerSettingsController.Instance.charData.playerColor = newColor;   //Set the player color in the character data
-        NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["Color"] = (int)PlayerSettingsController.ColorToColorOptions(PlayerSettingsController.Instance.charData.playerColor);
         currentColorOptionSelected = (ColorOptions)colorOption;
 
         PlayerController.instance.ApplyAndSyncSettings(); //Apply settings to player (NOTE TO PETER: Call this whenever you want to change a setting and sync it across the network)
