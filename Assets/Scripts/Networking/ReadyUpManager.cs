@@ -14,6 +14,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     public static ReadyUpManager instance;
 
     [SerializeField] private TextMeshProUGUI playerReadyText;
+    public bool debugReadyUpAll;
 
     private const int MINIMUM_PLAYERS_NEEDED = 2;   // The minimum number of players needed for a round to start
 
@@ -22,13 +23,23 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
 
     private void Awake()
     {
-        if (instance != null) { Destroy(gameObject); } else { instance = this; }
+        instance = this;
         DontDestroyOnLoad(gameObject);
     }
-
-    private void OnDestroy()
+    private void Update()
     {
-        instance = null;
+        if (debugReadyUpAll)
+        {
+            debugReadyUpAll = false;
+            if (!GameManager.Instance.levelTransitionActive)
+            {
+                //Reset all players
+                foreach (var player in NetworkPlayer.instances)
+                    player.networkPlayerStats = new PlayerStats();
+
+                NetworkManagerScript.instance.LoadSceneWithFade(GameSettings.arenaScene);
+            }
+        }
     }
     public void LeverStateChanged()
     {
