@@ -41,7 +41,7 @@ public class Grinder : MonoBehaviour
             if (LevelTimePercent >= 75)
             {
                 Activated = true;
-                GrinderAud.PlayOneShot(GrindnerSound);
+                if(GrindnerSound!=null)GrinderAud.PlayOneShot(GrindnerSound);
             }
         }
     }
