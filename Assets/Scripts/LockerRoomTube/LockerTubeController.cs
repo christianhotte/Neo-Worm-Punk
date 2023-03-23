@@ -5,13 +5,14 @@ using TMPro;
 
 public class LockerTubeController : MonoBehaviour
 {
-    public static List<LockerTubeController> tubes = new List<LockerTubeController>();
+    private static TubeManager tubeManager;
+
     public static int OccupiedTubes
     {
         get
         {
             int x = 0;
-            foreach (LockerTubeController tube in tubes) if (tube.occupied) x++;
+            foreach (LockerTubeController tube in tubeManager.roomTubes) if (tube.occupied) x++;
             return x;
         }
     }
@@ -19,7 +20,8 @@ public class LockerTubeController : MonoBehaviour
     [SerializeField, Tooltip("The parent that holds all of the ready lights.")] private Transform readyLights;
     [SerializeField, Tooltip("The spawn point for the player's name.")] private Transform playerNameSpawnPoint;
     [SerializeField, Tooltip("The prefab that displays the player's name.")] private GameObject playerNamePrefab;
-    internal int tubeNumber;
+
+    //internal int tubeNumber;
     public bool occupied = false;
     /// <summary>
     /// ID of player which is currently in this tube.
@@ -29,13 +31,10 @@ public class LockerTubeController : MonoBehaviour
 
     private void Awake()
     {
-        tubeNumber = int.Parse(name.Replace("TestTube", ""));
-        tubes.Add(this);
+        tubeManager = FindObjectOfType<TubeManager>();
+        /*        tubeNumber = int.Parse(name.Replace("TestTube", ""));
+                Debug.Log("Assigning Tube Number: " + tubeNumber);*/
         spawnPoint = transform.Find("Spawnpoint");
-    }
-    private void OnDestroy()
-    {
-        tubes.Remove(this);
     }
 
     /// <summary>
@@ -64,14 +63,15 @@ public class LockerTubeController : MonoBehaviour
         }
     }
 
-
-    public static LockerTubeController GetTubeByNumber(int number)
+    public int GetTubeNumber()
     {
-        foreach (LockerTubeController tube in tubes)
+        for(int i = 0; i < tubeManager.roomTubes.Count; i++)
         {
-            if (tube.tubeNumber == number) return tube;
+            if (tubeManager.roomTubes[i] == this)
+                return i + 1;
         }
-        Debug.LogError("Failed to get tube number " + number);
-        return null;
+
+        Debug.LogError("Failed to get tube " + this.name + " | Tube count = " + tubeManager.roomTubes.Count);
+        return -1;
     }
 }
