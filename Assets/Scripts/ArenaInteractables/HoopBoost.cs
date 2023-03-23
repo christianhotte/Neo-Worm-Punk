@@ -12,10 +12,13 @@ public class HoopBoost : MonoBehaviour
     public bool maintainsOtherVelocity;
     internal bool launchin = false,slimed=false;
     public Transform hoopInner;
+    internal AudioSource HoopAud;
+    public AudioClip HoopSound;
     public Transform hoopOuter;
     // Start is called before the first frame update
     void Start()
-    {        
+    {
+        HoopAud = this.GetComponent<AudioSource>();
     }
     // Update is called once per frame
     void Update()
@@ -39,7 +42,7 @@ public class HoopBoost : MonoBehaviour
         {
             yield return null;
         }
-
+        if(HoopSound!=null)HoopAud.PlayOneShot(HoopSound);
         if(maintainsOtherVelocity)
         {
             //just add the boostAmount to the velocity of the player
