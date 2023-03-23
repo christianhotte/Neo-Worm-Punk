@@ -38,12 +38,14 @@ public class NewChainsawController : PlayerEquipment
     /// Blade's current behavior state.
     /// </summary>
     internal BladeMode mode = BladeMode.Sheathed;
-    internal bool grinding;       //Whether or not player is currently grinding on a surface
-    private float timeInMode;     //How long weapon has been in current mode for
-    private float timeUntilPulse; //Time until next haptic pulse should be triggered (used for repeated pulses while saw is active)
-    private bool reverseGrip;     //Indicates that player is pressing the input for reverse grip mode (only valid while chainsaw is active)
-    private float gripValue;      //Latest value from grip input
-    private float triggerValue;   //Latest value from trigger input
+    internal bool grinding;          //Whether or not player is currently grinding on a surface
+    private float grindTime = 0;     //Amount of time chainsaw has been grinding on surface for
+    private RaycastHit lastGrindHit; //Data for last surface chainsaw has ground on
+    private float timeInMode;        //How long weapon has been in current mode for
+    private float timeUntilPulse;    //Time until next haptic pulse should be triggered (used for repeated pulses while saw is active)
+    private bool reverseGrip;        //Indicates that player is pressing the input for reverse grip mode (only valid while chainsaw is active)
+    private float gripValue;         //Latest value from grip input
+    private float triggerValue;      //Latest value from trigger input
 
     private Vector3 bladeOriginPos;    //Initial local (sheathed) position of blade
     private Vector3 wristOriginPos;    //Initial local (sheathed) position of wrist assembly
@@ -91,13 +93,14 @@ public class NewChainsawController : PlayerEquipment
                 timeUntilPulse = newPulse.duration + Random.Range(-settings.activeHapticFrequencyVariance, settings.activeHapticFrequencyVariance); //Schedule new pulse with slight variation in activation time
             }
         }
+        if (grinding) grindTime += Time.deltaTime; //Update grind time tracker
 
         //Extend/Retract blade:
         if (mode == BladeMode.Sheathed && gripValue >= settings.triggerThreshold) //Grip has been squeezed enough to activate the chainsaw
         {
             //Switch modes:
             if (handWeapon != null) handWeapon.Holster();     //Holster weapon held in hand if possible
-            PlaySFX(settings.extendSound);                    //Play extend sound
+            if (settings.extendSound != null) audioSource.PlayOneShot(settings.extendSound); //Play extend sound
             SendHapticImpulse(settings.extendHaptics);        //Play extend haptics
             mode = BladeMode.Extending;                       //Indicate that blade is now extending
             timeInMode = 0;                                   //Reset mode time tracker
@@ -107,11 +110,18 @@ public class NewChainsawController : PlayerEquipment
         {
             //Switch mode:
             if (handWeapon != null) handWeapon.Holster(false); //Un-holster weapon held in hand if possible
-            PlaySFX(settings.sheathSound);                     //Play retraction sound
+            if (settings.sheathSound != null) audioSource.PlayOneShot(settings.sheathSound); //Play sheath sound
             SendHapticImpulse(settings.retractHaptics);        //Play haptic impulse
             mode = BladeMode.Retracting;                       //Indicate that blade is now retracting
             timeInMode = 0;                                    //Reset mode time tracker
-            grinding = false;                                  //Indicate player can no longer be grinding on a surface
+
+            //Grinding disengagement:
+            if (grinding) //Player is currently grinding on a surface
+            {
+                player.bodyRb.AddForce(lastGrindHit.normal * settings.disengageForce, ForceMode.Impulse); //Bounce player away from surface when ending grind
+                grinding = false;                                                                         //Indicate player can no longer be grinding on a surface
+                grindTime = 0;                                                                            //Reset grind time tracker
+            }
         }
         if (mode == BladeMode.Extending || mode == BladeMode.Retracting) //Blade is moving between primary modes
         {
@@ -183,19 +193,20 @@ public class NewChainsawController : PlayerEquipment
                 Physics.Linecast(wristPivot.position + bladeOffset, bladeEnd.position + bladeOffset, out hitInfo, settings.grindLayers)) //Check for obstacles intersecting front of the blade
             {
                 //Adjust player velocity:
-                Vector3 grindDirection = Vector3.Cross(hitInfo.normal, wrist.up).normalized; //Get target direction of grind
-                float grindSpeed = settings.grindSpeed;                                      //Get base speed for grinding
-                grindSpeed *= Mathf.Lerp(1, settings.triggerGrindMultiplier, triggerValue);  //Modify grind speed by multiplier depending on how much player is squeezing the trigger
-                playerBody.velocity = grindDirection * grindSpeed;                           //Modify player velocity based on grind values
+                Vector3 grindDirection = Vector3.Cross(hitInfo.normal, wrist.up).normalized;                                 //Get target direction of grind
+                float grindTimeInterpolant = Mathf.Clamp01(grindTime / settings.grindAccelTime);                             //Get interpolant for how long player has been grinding
+                float grindSpeed = Mathf.Lerp(settings.grindSpeedRange.x, settings.grindSpeedRange.y, grindTimeInterpolant); //Determine grind speed based on how long player has been grinding for
+                playerBody.velocity = grindDirection * grindSpeed;                                                           //Modify player velocity based on grind values
 
                 //Cleanup:
-                Debug.DrawRay(hand.position, grindDirection, Color.cyan);
-                grinding = true;
+                lastGrindHit = hitInfo; //Store hit info for later
+                grinding = true;        //Indicate that player is now grinding
             }
-            else //Blade is not touching a wall
+            else if (grinding) //Blade has just stopped touching a wall
             {
-                //Cleanup:
-                grinding = false;
+                player.bodyRb.AddForce(lastGrindHit.normal * settings.disengageForce, ForceMode.Impulse); //Bounce player away from surface when ending grind
+                grinding = false;                                                                         //Indicate that grind is no longer occurring
+                grindTime = 0;                                                                            //Reset grind time tracker
             }
 
             //Player killing:

@@ -10,7 +10,7 @@ using Photon.Pun;
 public class Projectile : MonoBehaviourPunCallbacks
 {
     //Objects & Components:
-    private AudioSource audioSource;       //Audiosource component used by this projectile to make sound effects
+    internal AudioSource audioSource;      //Audiosource component used by this projectile to make sound effects
     private protected TrailRenderer trail; //Renderer component for trail projectile leaves in its wake
 
     //Settings:
@@ -438,6 +438,13 @@ public class Projectile : MonoBehaviourPunCallbacks
                 Vector3 knockback = transform.forward * settings.knockback;          //Get value by which to launch hit player
                 targetPlayer.photonView.RPC("RPC_Launch", RpcTarget.All, knockback); //Add force to player rigidbody based on knockback amount
             }
+
+            //Player hit effect:
+            if (settings.playerHitPrefab != null)
+            {
+                Instantiate(settings.playerHitPrefab, transform.position, transform.rotation);
+                photonView.RPC("RPC_PlayerHit", RpcTarget.Others);
+            }
         }
         else //Hit object is not a player
         {
@@ -548,6 +555,14 @@ public class Projectile : MonoBehaviourPunCallbacks
     {
         ExplosionController explosion = Instantiate(settings.explosionPrefab, transform.position, transform.rotation).GetComponent<ExplosionController>(); //Instantiate an explosion at burnout point
         explosion.originPlayerID = originPlayerID;                                                                                                         //Make sure explosion can't hit its own player
+    }
+    [PunRPC]
+    public void RPC_PlayerHit()
+    {
+        if (settings.playerHitPrefab != null)
+        {
+            Instantiate(settings.playerHitPrefab, transform.position, transform.rotation);
+        }
     }
 
     //UTILITY METHODS:

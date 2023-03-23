@@ -59,7 +59,8 @@ public class ShotgunSettings : ScriptableObject
     [Tooltip("Settings for configuring the vibration player feels when closing the breach.")] public PlayerEquipment.HapticData closeHaptics;
     [Tooltip("Magnitude (x) and duration (y) of screenshake event when weapon is fired.")]    public Vector2 fireScreenShake;
     [Header("Sounds:")]
-    [Tooltip("SFX for when weapon is fired")]  public AudioClip fireSound;
-    [Tooltip("SFX for when breach is opened")] public AudioClip ejectSound;
-    [Tooltip("SFX for when breach is closed")] public AudioClip lockSound;
+    [Tooltip("SFX for when weapon is fired")]          public AudioClip fireSound;
+    [Tooltip("SFX for when breach is opened")]         public AudioClip ejectSound;
+    [Tooltip("SFX for when breach is closed")]         public AudioClip lockSound;
+    [Tooltip("SFX for when weapon is flipped around")] public AudioClip flipSound;
 }
