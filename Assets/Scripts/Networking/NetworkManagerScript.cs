@@ -225,8 +225,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     }
     public override void OnJoinedRoom()
     {
-
-
         //Automatically load the player into the locker room if the auto join script calls for it
         AutoJoinRoom autoJoin = FindObjectOfType<AutoJoinRoom>();
         if (autoJoin != null && autoJoin.GoToLockerRoom())
@@ -378,9 +376,17 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
         PhotonNetwork.LoadLevel(sceneName);
 
+        //Unready
+        localNetworkPlayer.photonView.Owner.CustomProperties["IsReady"] = false;
+
         GameManager.Instance.levelTransitionActive = false;
     }
 
+    /// <summary>
+    /// Tries to take the color from the list of colors.
+    /// </summary>
+    /// <param name="currentColor">The color to take.</param>
+    /// <returns>If true, the color was successfully taken.</returns>
     public bool TryToTakeColor(ColorOptions currentColor)
     {
         if (!ColorTaken((int)currentColor))
@@ -398,6 +404,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             RemoveColor((int)currentColor);
 
         TakeColor((int)newTakenColor);
+        localNetworkPlayer.photonView.Owner.CustomProperties["Color"] = (int)newTakenColor;
     }
 
     public void TakeColor(int colorOption) => takenColors.Add(colorOption);
