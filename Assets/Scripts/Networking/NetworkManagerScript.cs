@@ -53,7 +53,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         if (scene.name == roomScene)
         {
             // The master client is only spawning 1 ReadyUpManager.
-            if (PhotonNetwork.IsMasterClient)
+            if (ReadyUpManager.instance == null && PhotonNetwork.IsMasterClient)
             {
                 PhotonNetwork.Instantiate(readyUpManagerName, Vector3.zero, Quaternion.identity);
             }

@@ -103,10 +103,10 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
             foreach (var player in NetworkPlayer.instances)
             {
                 print("Player " + player.photonView.ViewID + " ready status: " + (player.networkPlayerStats.isReady ? "READY" : "NOT READY"));
-                if(player.photonView.Owner.IsMasterClient && player.networkPlayerStats.isReady)
+                /*if(player.photonView.Owner.IsMasterClient && player.networkPlayerStats.isReady)
                 {
                     forceLoadViaMasterClient = true;
-                }
+                }*/
             }
 
             // If all players are ready, load the game scene
