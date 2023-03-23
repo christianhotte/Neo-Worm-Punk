@@ -273,7 +273,9 @@ public class NetworkPlayer : MonoBehaviour
             NetworkManagerScript.instance.takenColors = new List<int>();
             NetworkManagerScript.instance.takenColors.AddRange(listOfColors);
 
-            ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
+            if(FindObjectOfType<TubeManager>() != null)
+                foreach (var tube in FindObjectOfType<TubeManager>().roomTubes)
+                    tube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
         }
     }
 
