@@ -97,13 +97,20 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
             playersInRoom = PhotonNetwork.CurrentRoom.PlayerCount;
 
             UpdateReadyText();
+
+            bool forceLoadViaMasterClient = false;
+
             foreach (var player in NetworkPlayer.instances)
             {
                 print("Player " + player.photonView.ViewID + " ready status: " + (player.networkPlayerStats.isReady ? "READY" : "NOT READY"));
+                if(player.photonView.Owner.IsMasterClient && player.networkPlayerStats.isReady)
+                {
+                    forceLoadViaMasterClient = true;
+                }
             }
 
             // If all players are ready, load the game scene
-            if (!GameManager.Instance.levelTransitionActive && (playersReady == playersInRoom && (playersInRoom >= MINIMUM_PLAYERS_NEEDED || GameSettings.debugMode)))
+            if (forceLoadViaMasterClient || !GameManager.Instance.levelTransitionActive && (playersReady == playersInRoom && (playersInRoom >= MINIMUM_PLAYERS_NEEDED || GameSettings.debugMode)))
             {
                 //Reset all players
                 foreach (var player in NetworkPlayer.instances)
