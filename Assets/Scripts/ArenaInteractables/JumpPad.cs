@@ -9,11 +9,14 @@ public class JumpPad : MonoBehaviour
     public Transform jumpDirection;
     private float startingYPos;
     private float changeYPos = 0.03f;
+    internal AudioSource jumpPadAudio;
+    public AudioClip jumpPadSound;
     private float maxDist = 0.5f;
     // Start is called before the first frame update
     void Start()
     {
         startingYPos = jumpDirection.localPosition.y;
+        jumpPadAudio = this.GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -49,6 +52,7 @@ public class JumpPad : MonoBehaviour
 
     public void Bounce()
     {
+        if(jumpPadSound!=null)jumpPadAudio.PlayOneShot(jumpPadSound);
         Rigidbody playerRb = PlayerController.instance.bodyRb;
         playerRb.transform.position = jumpDirection.position; // moves the player to the center of the jump pad
         playerRb.velocity = jumpDirection.up * jumpForce;// Launches the player off of the pad
