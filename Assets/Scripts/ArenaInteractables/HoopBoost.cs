@@ -20,10 +20,8 @@ public class HoopBoost : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        /*
         RotateHoop(hoopInner, new Vector3(0.75f, 0, 0));
         RotateHoop(hoopOuter, new Vector3(0f, 0, 0));
-        */
     }
 
 
