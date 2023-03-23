@@ -19,14 +19,14 @@ public class JumpPad : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        /*
+        
         jumpDirection.Rotate(new Vector3(0, -0.25f, 0));    //rotates the middle jump section
         if(Mathf.Abs(jumpDirection.localPosition.y - startingYPos) >= maxDist)  //checks if the transform is outside of a its maxDistance
         {
             changeYPos *= -1;   //changes the directions of movement
         }
         jumpDirection.Translate(new Vector3(0, changeYPos, 0)); //moves the middle jump section
-        */
+        
     }
     private void OnTriggerEnter(Collider other)
     {
