@@ -11,6 +11,7 @@ public static class GameSettings
     public static float testSliderValue = 0f;
 
     public static int roomCodeLength = 5;
+    public static int testMatchLength = 300;
 
     public static string titleScreenScene = "JustinMenuScene";
     public static string roomScene = "NetworkLockerRoom";
