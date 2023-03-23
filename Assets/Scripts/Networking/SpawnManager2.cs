@@ -54,8 +54,8 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
 
             if (ReadyUpManager.instance != null)
             {
-                ReadyUpManager.instance.UpdateStatus(spawnTube.GetTubeNumber());
                 ReadyUpManager.instance.localPlayerTube = spawnTube;
+                ReadyUpManager.instance.UpdateStatus(spawnTube.GetTubeNumber());
                 ReadyUpManager.instance.localPlayerTube.SpawnPlayerName(NetworkManagerScript.instance.GetLocalPlayerName());
                 NetworkManagerScript.localNetworkPlayer.UpdateTakenColorsOnJoin();
             }
@@ -77,8 +77,8 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
 
             if (ReadyUpManager.instance != null)
             {
-                ReadyUpManager.instance.UpdateStatus(spawnTube.GetTubeNumber());
                 ReadyUpManager.instance.localPlayerTube = spawnTube;
+                ReadyUpManager.instance.UpdateStatus(spawnTube.GetTubeNumber());
                 ReadyUpManager.instance.localPlayerTube.SpawnPlayerName(NetworkManagerScript.instance.GetLocalPlayerName());
                 NetworkManagerScript.localNetworkPlayer.UpdateTakenColorsOnJoin();
             }
