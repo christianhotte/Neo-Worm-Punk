@@ -44,7 +44,10 @@ public class PhysicalButtonController : MonoBehaviour
 
     private void OnEnable()
     {
-        if(buttonTransform != null)
+        if(defaultColor != null)
+            ChangeButtonColor(defaultColor, false);
+
+        if (buttonTransform != null)
             buttonTransform.localPosition = startPos;
         isPressed = false;
     }

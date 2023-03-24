@@ -8,7 +8,7 @@ using Photon.Realtime;
 
 public class GameInfo : MonoBehaviour
 {
-    public enum PINGLEVEL { GOOD, MODERATE, SEVERE };
+    public enum PINGLEVEL { LOW, MEDIUM, HIGH };
 
     [SerializeField, Tooltip("The colors that indicate the severity of the player's ping.")] private Color[] pingSeverityLevels;
 
@@ -66,15 +66,15 @@ public class GameInfo : MonoBehaviour
 
         if(currentPing >= badPing)
         {
-            pingIndicator.color = pingSeverityLevels[(int)PINGLEVEL.SEVERE];
+            pingIndicator.color = pingSeverityLevels[(int)PINGLEVEL.HIGH];
         }
         else if(currentPing >= okPing)
         {
-            pingIndicator.color = pingSeverityLevels[(int)PINGLEVEL.MODERATE];
+            pingIndicator.color = pingSeverityLevels[(int)PINGLEVEL.MEDIUM];
         }
         else
         {
-            pingIndicator.color = pingSeverityLevels[(int)PINGLEVEL.GOOD];
+            pingIndicator.color = pingSeverityLevels[(int)PINGLEVEL.LOW];
         }
     }
 
