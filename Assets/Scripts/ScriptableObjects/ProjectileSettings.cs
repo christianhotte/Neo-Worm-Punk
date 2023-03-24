@@ -12,7 +12,8 @@ public class ProjectileSettings : ScriptableObject
     [Header("Hit Effect:")]
     [Min(0), Tooltip("How much damage this projectile deals to targets it hits.")] public int damage = 1;
     [Min(0), Tooltip("How much force this projectile applies to struck objects.")] public float knockback = 0;
-    [Min(0), Tooltip("Object spawned when projectile burns out or hits a wall.")]  public GameObject explosionPrefab;
+    [Tooltip("Object spawned when projectile burns out or hits a wall.")]          public GameObject explosionPrefab;
+    [Tooltip("Object spawned when projectile hits a player.")]                     public GameObject playerHitPrefab;
     
     [Header("Travel Properties:")]
     [Tooltip("Speed at which projectile travels upon spawn.")]                                     public float initialVelocity;

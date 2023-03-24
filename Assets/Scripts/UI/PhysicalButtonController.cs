@@ -139,7 +139,7 @@ public class PhysicalButtonController : MonoBehaviour
     /// <param name="setToDefault">If true, this sets the button's default color as well.</param>
     public void ChangeButtonColor(Color newColor, bool setToDefault = true)
     {
-        buttonTransform.Find("Clicker").GetComponent<MeshRenderer>().material.color = newColor;
+        buttonTransform.Find("Clicker").GetComponent<MeshRenderer>().material.SetColor("_BaseColor", newColor);
 
         if (setToDefault)
             defaultColor = newColor;
