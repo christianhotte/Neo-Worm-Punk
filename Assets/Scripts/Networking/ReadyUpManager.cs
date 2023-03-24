@@ -12,9 +12,9 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     // Can probably have a button that lights up green or red to show if a player is ready through the network.
     //[SerializeField] private GameObject readyButton;
     public static ReadyUpManager instance;
-    private bool loadingScene = false;
 
     [SerializeField] private TextMeshProUGUI playerReadyText;
+    public bool debugReadyUpAll;
 
     private const int MINIMUM_PLAYERS_NEEDED = 2;   // The minimum number of players needed for a round to start
 
@@ -23,20 +23,31 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
 
     private void Awake()
     {
-        if (instance != null) { Destroy(gameObject); } else { instance = this; }
+        instance = this;
         DontDestroyOnLoad(gameObject);
     }
-
-    private void OnDestroy()
+    private void Update()
     {
-        instance = null;
+        if (debugReadyUpAll)
+        {
+            debugReadyUpAll = false;
+            if (!GameManager.Instance.levelTransitionActive)
+            {
+                //Reset all players
+                foreach (var player in NetworkPlayer.instances)
+                    player.networkPlayerStats = new PlayerStats();
+
+                NetworkManagerScript.instance.LoadSceneWithFade(GameSettings.arenaScene);
+            }
+        }
     }
     public void LeverStateChanged()
     {
         LeverController localLever = localPlayerTube.GetComponentInChildren<LeverController>();
         NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().isReady = (localLever.GetLeverState() == LeverController.HingeJointState.Max);
+        NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["IsReady"] = NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().isReady;
         NetworkManagerScript.localNetworkPlayer.SyncStats();
-        UpdateStatus(localPlayerTube.tubeNumber);
+        UpdateStatus(localPlayerTube.GetTubeNumber());
     }
 
     // Once the room is joined.
@@ -76,28 +87,37 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     [PunRPC]
     public void RPC_UpdateReadyStatus(int tubeID, bool updatedPlayerReady)
     {
-        LockerTubeController tube = LockerTubeController.GetTubeByNumber(tubeID);
-        if (tube != null) tube.UpdateLights(updatedPlayerReady);
-
-        // Get the number of players that have readied up
-        playersReady = GetAllPlayersReady();
-        playersInRoom = PhotonNetwork.CurrentRoom.PlayerCount;
-        
-        UpdateReadyText();
-        foreach (var player in NetworkPlayer.instances)
+        if(FindObjectOfType<TubeManager>() != null)
         {
-            print("Player " + player.photonView.ViewID + " ready status: " + (player.networkPlayerStats.isReady ? "READY" : "NOT READY"));
-        }
+            LockerTubeController tube = FindObjectOfType<TubeManager>().GetTubeByNumber(tubeID);
+            if (tube != null) tube.UpdateLights(updatedPlayerReady);
 
-        // If all players are ready, load the game scene
-        if (!loadingScene && (playersReady == playersInRoom && (playersInRoom >= MINIMUM_PLAYERS_NEEDED || GameSettings.debugMode)))
-        {
-            //Reset all players
+            // Get the number of players that have readied up
+            playersReady = GetAllPlayersReady();
+            playersInRoom = PhotonNetwork.CurrentRoom.PlayerCount;
+
+            UpdateReadyText();
+
+            bool forceLoadViaMasterClient = false;
+
             foreach (var player in NetworkPlayer.instances)
-                player.networkPlayerStats = new PlayerStats();
+            {
+                print("Player " + player.photonView.ViewID + " ready status: " + (player.networkPlayerStats.isReady ? "READY" : "NOT READY"));
 
-            loadingScene = true;
-            NetworkManagerScript.instance.LoadSceneWithFade(GameSettings.arenaScene);
+                //If in debug mode, force the game to load when the master client readies up
+                if(player.photonView.Owner.IsMasterClient && player.networkPlayerStats.isReady && GameSettings.debugMode)
+                    forceLoadViaMasterClient = true;
+            }
+
+            // If all players are ready, load the game scene
+            if (forceLoadViaMasterClient || !GameManager.Instance.levelTransitionActive && (playersReady == playersInRoom && (playersInRoom >= MINIMUM_PLAYERS_NEEDED || GameSettings.debugMode)))
+            {
+                //Reset all players
+                foreach (var player in NetworkPlayer.instances)
+                    player.networkPlayerStats = new PlayerStats();
+
+                NetworkManagerScript.instance.LoadSceneWithFade(GameSettings.arenaScene);
+            }
         }
     }
 
@@ -144,7 +164,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
         int playersReady = 0;
 
         // Gets the amount of players that have a readied lever at lowest state.
-        foreach(var players in FindObjectsOfType<NetworkPlayer>())
+        foreach (var players in FindObjectsOfType<NetworkPlayer>())
         {
             if (players.GetNetworkPlayerStats().isReady)
                 playersReady++;

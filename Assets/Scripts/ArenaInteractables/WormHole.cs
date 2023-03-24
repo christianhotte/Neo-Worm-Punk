@@ -14,7 +14,7 @@ public class WormHole : MonoBehaviour
     public GameObject playerOrigin;
     public static List<WormHole> ActiveWormholes = new List<WormHole>();
     public AudioSource wormHoleAud;
-    public AudioClip enterSound, exitSound;
+    public AudioClip enterSound;
     private WormHoleTrigger triggerScript,EntryTrigger;
     void Start()
     {
@@ -64,9 +64,10 @@ public class WormHole : MonoBehaviour
         {
             pe.Shutdown(waitTime);
         }
+        if (enterSound != null) wormHoleAud.PlayOneShot(enterSound);
         PlayerController.photonView.RPC("RPC_MakeInvisible", RpcTarget.Others);
         playerOBJ.transform.position = wormZoneShifted.position; //Player enters worm zone here
-        if(enterSound!=null) wormHoleAud.PlayOneShot(enterSound);
+
         float entryDiff = playerCam.transform.eulerAngles.y - wormZoneShifted.eulerAngles.y; //difference for player to face down wormhole
         playerOBJ.transform.rotation = Quaternion.Euler(playerOBJ.transform.eulerAngles.x, playerOBJ.transform.eulerAngles.y - entryDiff, playerOBJ.transform.eulerAngles.z);
         float startRot = playerCam.transform.eulerAngles.y;//reference the starting rotation of the players camera
@@ -82,7 +83,6 @@ public class WormHole : MonoBehaviour
         playerOBJ.transform.rotation = Quaternion.Euler(playerOBJ.transform.eulerAngles.x, playerOBJ.transform.eulerAngles.y - diff, playerOBJ.transform.eulerAngles.z);//turns the player to face out of the worhole
         playerOBJ.transform.position = exitPos.position; //takes the player out of the wormhole
         PlayerController.photonView.RPC("RPC_MakeIVisible", RpcTarget.Others);
-        if (exitSound != null) wormHoleAud.PlayOneShot(exitSound);
         playerRB.useGravity = true; //Bring back Gravity
         playerRB.velocity = exitPos.forward * exitSpeed;    //launch out of wormhole
         triggerScript.exiting = false;

@@ -53,7 +53,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         if (scene.name == roomScene)
         {
             // The master client is only spawning 1 ReadyUpManager.
-            if (PhotonNetwork.IsMasterClient)
+            if (ReadyUpManager.instance == null && PhotonNetwork.IsMasterClient)
             {
                 PhotonNetwork.Instantiate(readyUpManagerName, Vector3.zero, Quaternion.identity);
             }
@@ -81,7 +81,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         if (customRoomSettings == null)
         {
             customRoomSettings = new Hashtable();
-            customRoomSettings.Add("RoundLength", 300);
+            customRoomSettings.Add("RoundLength", GameSettings.testMatchLength);
         }
 
         roomOptions.IsOpen = true; // The room is open.
@@ -271,6 +271,12 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         }
     }
 
+    public override void OnPlayerLeftRoom(Player otherPlayer)
+    {
+        base.OnPlayerLeftRoom(otherPlayer);
+        Debug.Log(otherPlayer.NickName + " has left.");
+    }
+
     public override void OnLeftRoom()
     {
         //Update lobby script:
@@ -313,10 +319,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
     public void DeSpawnNetworkPlayer()
     {
-        //Remove the player's color from the list of colors
-        RemoveColor((int)PlayerSettingsController.ColorToColorOptions(PlayerSettingsController.Instance.charData.playerColor));
-        localNetworkPlayer.SyncColors();
-
         if (localNetworkPlayer != null) PhotonNetwork.Destroy(localNetworkPlayer.gameObject); //Destroy local network player if possible
         localNetworkPlayer = null;                                                            //Remove reference to destroyed reference player
     }
@@ -364,6 +366,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
     private IEnumerator FadeLevelRoutine(string sceneName)
     {
+        GameManager.Instance.levelTransitionActive = true;
+
         FadeScreen playerScreenFader = PlayerController.instance.GetComponentInChildren<FadeScreen>();
         playerScreenFader.FadeOut();
 
@@ -371,8 +375,18 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         yield return null;
 
         PhotonNetwork.LoadLevel(sceneName);
+
+        //Unready
+        localNetworkPlayer.photonView.Owner.CustomProperties["IsReady"] = false;
+
+        GameManager.Instance.levelTransitionActive = false;
     }
 
+    /// <summary>
+    /// Tries to take the color from the list of colors.
+    /// </summary>
+    /// <param name="currentColor">The color to take.</param>
+    /// <returns>If true, the color was successfully taken.</returns>
     public bool TryToTakeColor(ColorOptions currentColor)
     {
         if (!ColorTaken((int)currentColor))
@@ -390,6 +404,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             RemoveColor((int)currentColor);
 
         TakeColor((int)newTakenColor);
+        localNetworkPlayer.photonView.Owner.CustomProperties["Color"] = (int)newTakenColor;
     }
 
     public void TakeColor(int colorOption) => takenColors.Add(colorOption);
