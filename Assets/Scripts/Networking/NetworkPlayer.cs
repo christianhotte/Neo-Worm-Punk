@@ -90,7 +90,7 @@ public class NetworkPlayer : MonoBehaviour
     /// </summary>
     private void InitializePhotonPlayerSettings()
     {
-        photonPlayerSettings.Add("Color", (int)PlayerSettingsController.ColorToColorOptions(PlayerSettingsController.Instance.charData.playerColor));
+        photonPlayerSettings.Add("Color", -1);
         photonPlayerSettings.Add("IsReady", false);
         PlayerController.photonView.Owner.SetCustomProperties(photonPlayerSettings);
     }
@@ -247,12 +247,18 @@ public class NetworkPlayer : MonoBehaviour
 
             for (int i = 0; i < PlayerSettingsController.NumberOfPlayerColors(); i++)
             {
-                if (NetworkManagerScript.instance.TryToTakeColor((ColorOptions)(currentColorOption)))
+                bool successfullyTakenColor = NetworkManagerScript.instance.TryToTakeColor((ColorOptions)(currentColorOption));
+
+                if (successfullyTakenColor)
                 {
                     Debug.Log("Setting Color On Join To " + (ColorOptions)currentColorOption);
                     ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().ChangePlayerColor(currentColorOption);
                     break;
                 }
+
+                //If the player is already a color that is taken
+                else if (currentColorOption == (int)photonView.Owner.CustomProperties["Color"])
+                    break;
 
                 currentColorOption++;
                 if (currentColorOption >= PlayerSettingsController.NumberOfPlayerColors())
