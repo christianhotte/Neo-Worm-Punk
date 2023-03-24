@@ -38,7 +38,7 @@ public class Leaderboards : MonoBehaviourPunCallbacks
     void Start()
     {
         //Initialization:
-        if (PhotonNetwork.LocalPlayer.ActorNumber != GetComponentInParent<LockerTubeController>().tubeNumber) { gameObject.SetActive(false); return; } //Hide board if it does not correspond with player's tube
+        if (PhotonNetwork.LocalPlayer.ActorNumber != GetComponentInParent<LockerTubeController>().GetTubeNumber()) { gameObject.SetActive(false); return; } //Hide board if it does not correspond with player's tube
 
         //Check scene state:
         foreach (NetworkPlayer player in NetworkPlayer.instances) { if (player.networkPlayerStats.numOfKills > 0) { showingLeaderboard = true; break; } } //Show leaderboard if any players have any kills

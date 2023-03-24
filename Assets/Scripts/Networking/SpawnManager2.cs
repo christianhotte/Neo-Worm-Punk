@@ -49,13 +49,10 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
             PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
             PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
 
-            LeverController lever = spawnTube.GetComponentInChildren<LeverController>();
-            lever.OnStateChanged.AddListener(ReadyUpManager.instance.LeverStateChanged);
-
             if (ReadyUpManager.instance != null)
             {
-                ReadyUpManager.instance.UpdateStatus(spawnTube.tubeNumber);
                 ReadyUpManager.instance.localPlayerTube = spawnTube;
+                ReadyUpManager.instance.UpdateStatus(spawnTube.GetTubeNumber());
                 ReadyUpManager.instance.localPlayerTube.SpawnPlayerName(NetworkManagerScript.instance.GetLocalPlayerName());
                 NetworkManagerScript.localNetworkPlayer.UpdateTakenColorsOnJoin();
             }
@@ -64,21 +61,17 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
     }
     public void MoveDemoPlayerToSpawnPoint(int tubeIndex)
     {
-        LockerTubeController spawnTube = LockerTubeController.GetTubeByNumber(tubeIndex);
+        LockerTubeController spawnTube = FindObjectOfType<TubeManager>().GetTubeByNumber(tubeIndex);
         if (spawnTube != null)
         {
             spawnTube.occupied = true;
             PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
             PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
 
-            //Add lever listener
-            LeverController lever = spawnTube.GetComponentInChildren<LeverController>();
-            lever.OnStateChanged.AddListener(ReadyUpManager.instance.LeverStateChanged);
-
             if (ReadyUpManager.instance != null)
             {
-                ReadyUpManager.instance.UpdateStatus(spawnTube.tubeNumber);
                 ReadyUpManager.instance.localPlayerTube = spawnTube;
+                ReadyUpManager.instance.UpdateStatus(spawnTube.GetTubeNumber());
                 ReadyUpManager.instance.localPlayerTube.SpawnPlayerName(NetworkManagerScript.instance.GetLocalPlayerName());
                 NetworkManagerScript.localNetworkPlayer.UpdateTakenColorsOnJoin();
             }
@@ -87,17 +80,20 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
 
     public LockerTubeController GetEmptyTube()
     {
-        for (int x = 0; x < LockerTubeController.tubes.Count; x++)
+        TubeManager tubeManager = FindObjectOfType<TubeManager>();
+
+        for (int x = 0; x < tubeManager.roomTubes.Count; x++)
         {
-            foreach (LockerTubeController tube in LockerTubeController.tubes)
+            foreach (LockerTubeController tube in tubeManager.roomTubes)
             {
-                if (tube.tubeNumber == x + 1)
+                if (tube.GetTubeNumber() == x + 1)
                 {
                     if (!tube.occupied) return tube;
                 }
             }
         }
 
+        Debug.LogError("Error: Could Not Find An Empty Tube.");
         return null;
     }
 }
