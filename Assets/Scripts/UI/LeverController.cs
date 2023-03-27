@@ -162,11 +162,11 @@ public class LeverController : MonoBehaviour
             //If the hinge is not at a limit
             if(hingeJointState == HingeJointState.None)
             {
-                Debug.Log("Time Until Auto Move: " + currentMoveTimer + " seconds...");
+                //Debug.Log("Time Until Auto Move: " + currentMoveTimer + " seconds...");
                 currentMoveTimer -= Time.deltaTime;
                 if(currentMoveTimer < 0)
                 {
-                    Debug.Log("Moving Lever...");
+                    //Debug.Log("Moving Lever...");
                     if (handle.GetAngle() < 0)
                         MoveToLimit(minimumAngle);
                     else
@@ -241,4 +241,5 @@ public class LeverController : MonoBehaviour
     public float GetMinimumAngle() => minimumAngle;
     public float GetMaximumAngle() => maximumAngle;
     public HingeJointState GetLeverState() => hingeJointState;
+    public float GetLeverThreshold() => angleBetweenThreshold;
 }
