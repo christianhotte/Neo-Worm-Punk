@@ -123,7 +123,6 @@ public class MainMenuController : MonoBehaviour
     {
         GameManager.Instance.levelTransitionActive = true;
         yield return new WaitForSeconds(2.0f);
-        NetworkManagerScript.instance.JoinLobby();
         FadeScreen playerScreenFader = PlayerController.instance.GetComponentInChildren<FadeScreen>();
         playerScreenFader.FadeOut();
         yield return new WaitForSeconds(playerScreenFader.GetFadeDuration());
