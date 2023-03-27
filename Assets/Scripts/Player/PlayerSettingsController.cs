@@ -3,6 +3,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 
+
+[System.Serializable]
+public class WordStructure
+{
+    public string word;
+    public int[] wordSounds;
+
+    public WordStructure(string word, int[] wordSounds)
+    {
+        this.word = word;
+        this.wordSounds = wordSounds;
+    }
+}
+
 /// <summary>
 /// Contains settings object (relevant to local player) and functionality for sending it over the network.
 /// </summary>
@@ -63,6 +77,8 @@ public class CharacterData
     //Settings:
     public int playerID;                            //Unique number differentiating this player from others on the network
     public string playerName;                       //Name chosen by user to be displayed for other players on the network
+    public WordStructure playerAdjective;           //The player's adjective
+    public WordStructure playerNoun;                //The player's noun
     public Color playerColor = PlayerSettingsController.ColorOptionsToColor(ColorOptions.DEFAULT); //DEMO SETTING: Color chosen by player to be seen by all other players over the network (defaults to flesh)
 }
 
