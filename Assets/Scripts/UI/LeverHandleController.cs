@@ -32,7 +32,12 @@ public class LeverHandleController : GrabbableUI
         {
             Quaternion lookMover = Quaternion.FromToRotation(transform.up, Vector3.ProjectOnPlane((followObject.position - leverController.transform.position).normalized, leverController.transform.right)) * transform.rotation;
             Quaternion lookAngle = Quaternion.Euler(Mathf.Clamp(lookMover.eulerAngles.x, leverController.GetMinimumAngle(), leverController.GetMaximumAngle()), lookMover.eulerAngles.y, lookMover.eulerAngles.z);
-            transform.rotation = lookAngle;
+
+            //Debug.Log("Lever Pivot Angle: " + lookAngle.eulerAngles.x);
+
+            //If the angle of the pivot is not in the deadzone of the lever, rotate the lever with the player's hand movement
+            //if(lookAngle.eulerAngles.x > leverController.GetMinimumAngle() + leverController.GetLeverThreshold() && lookAngle.eulerAngles.x < leverController.GetMaximumAngle() - leverController.GetLeverThreshold())
+                transform.rotation = lookAngle;
         }
     }
 
