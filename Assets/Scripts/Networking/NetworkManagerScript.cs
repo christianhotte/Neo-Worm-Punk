@@ -390,6 +390,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     // When the master client leaves the room, we transfer object ownership to new master client.
     public override void OnMasterClientSwitched(Player newMasterClient)
     {
+        base.OnMasterClientSwitched(newMasterClient);
         Debug.Log("New Master Client: " + newMasterClient.NickName);
 
         // Transfer ownership of all objects owned by the old master client to the new master client
