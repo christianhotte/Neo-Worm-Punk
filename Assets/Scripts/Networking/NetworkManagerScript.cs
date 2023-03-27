@@ -358,6 +358,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         //Cleanup:
         DeSpawnNetworkPlayer(); //De-spawn local network player whenever player leaves a room
     }
+
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
         //base.OnRoomListUpdate(roomList);
@@ -372,6 +373,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             lobbyUI.UpdateLobbyList(roomList);
         }
     }
+
     public override void OnDisconnected(DisconnectCause cause)
     {
         Debug.Log("Disconnected from server for reason " + cause.ToString());
@@ -382,6 +384,23 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         if (lobbyUI != null)
         {
             lobbyUI.SwitchMenu(LobbyMenuState.START);
+        }
+    }
+
+    // When the master client leaves the room, we transfer object ownership to new master client.
+    public override void OnMasterClientSwitched(Player newMasterClient)
+    {
+        Debug.Log("New Master Client: " + newMasterClient.NickName);
+
+        // Transfer ownership of all objects owned by the old master client to the new master client
+        PhotonView[] views = PhotonView.FindObjectsOfType<PhotonView>();
+        // photonView components have to be instantiated on the Photon network for ownership to transfer.
+        foreach (PhotonView view in views)
+        {
+            if (view.Owner == PhotonNetwork.MasterClient)
+            {
+                view.TransferOwnership(newMasterClient);
+            }
         }
     }
 
@@ -413,6 +432,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
                 currentName = name + " " + counter.ToString();
                 counter++;
             }
+
             else
             {
                 duplicateNameExists = false;
