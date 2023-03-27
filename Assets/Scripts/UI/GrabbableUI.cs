@@ -74,7 +74,7 @@ public class GrabbableUI : MonoBehaviour
     {
         if (isGrabbable && !isGrabbed)
         {
-            Debug.Log("Grabbing Object...");
+            //Debug.Log("Grabbing Object...");
             isGrabbed = true;
             SetAllMaterials(grabbedMat);
         }
@@ -84,7 +84,7 @@ public class GrabbableUI : MonoBehaviour
     {
         if (isGrabbed)
         {
-            Debug.Log("Releasing Object...");
+            //Debug.Log("Releasing Object...");
             isGrabbed = false;
             followObject = null;
             SetDefaultMaterials();
