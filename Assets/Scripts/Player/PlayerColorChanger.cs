@@ -21,39 +21,7 @@ public class PlayerColorChanger : MonoBehaviour
     {
         Color newColor;
 
-        switch (colorOption)
-        {
-            case (int)ColorOptions.RED:
-                newColor = new Color(197f / 255f, 17f / 255f, 17f / 255f);
-                break;
-            case (int)ColorOptions.ORANGE:
-                newColor = new Color(232f / 255f, 131f / 255f, 23f / 255f);
-                break;
-            case (int)ColorOptions.YELLOW:
-                newColor = new Color(253f / 255f, 253f / 255f, 150f / 255f);
-                break;
-            case (int)ColorOptions.GREEN:
-                newColor = Color.green;
-                break;
-            case (int)ColorOptions.BLUE:
-                newColor = Color.blue;
-                break;
-            case (int)ColorOptions.TEAL:
-                newColor = new Color(46f / 255f, 200f / 255f, 209f / 255f);
-                break;
-            case (int)ColorOptions.VIOLET:
-                newColor = new Color(52f / 255f, 31f / 255f, 224f / 255f);
-                break;
-            case (int)ColorOptions.MAGENTA:
-                newColor = Color.magenta;
-                break;
-            case (int)ColorOptions.BLACK:
-                newColor = Color.black;
-                break;
-            default:
-                newColor = new Color(255f / 255f, 128f / 255f, 128f / 255f);
-                break;
-        }
+        newColor = PlayerSettingsController.playerColors[colorOption];
 
         currentButton.ChangeButtonColor(newColor, true);
     }
