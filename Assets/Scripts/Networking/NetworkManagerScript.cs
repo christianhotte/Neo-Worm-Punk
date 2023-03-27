@@ -400,6 +400,10 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             if (view.Owner == PhotonNetwork.MasterClient)
             {
                 view.TransferOwnership(newMasterClient);
+
+                // Updates the ReadyUpManager
+                if (ReadyUpManager.instance != null)
+                    ReadyUpManager.instance.UpdateStatus(ReadyUpManager.instance.localPlayerTube.GetTubeNumber());
             }
         }
     }
