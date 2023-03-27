@@ -44,7 +44,7 @@ public class LevelTimer : MonoBehaviour
     {
         if (PhotonNetwork.CurrentRoom != null && !timerActivated)
         {
-            Debug.Log("Round Length: " + (int)PhotonNetwork.CurrentRoom.CustomProperties["RoundLength"]);
+           // Debug.Log("Round Length: " + (int)PhotonNetwork.CurrentRoom.CustomProperties["RoundLength"]);
             if ((int)PhotonNetwork.CurrentRoom.CustomProperties["RoundLength"] < 0)
             {
                 timerActive = false;
@@ -53,7 +53,7 @@ public class LevelTimer : MonoBehaviour
             }
             else
             {
-                Debug.Log("Timer Started!");
+              //  Debug.Log("Timer Started!");
                 SetLevelTime((int)PhotonNetwork.CurrentRoom.CustomProperties["RoundLength"]);
                 currentTime = levelTime;
                 timerActive = true;
@@ -84,7 +84,7 @@ public class LevelTimer : MonoBehaviour
                 currentTime = 0;
                 DisplayTime();
 
-                Debug.Log("Time Is Up!");
+              //  Debug.Log("Time Is Up!");
                 OnTimerEnd.Invoke();
                 timerEnded = true;
                 gameObject.SetActive(false);
