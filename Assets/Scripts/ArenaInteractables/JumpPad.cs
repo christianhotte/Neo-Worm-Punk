@@ -39,7 +39,7 @@ public class JumpPad : MonoBehaviour
             {
                 NewGrapplerController grapple = equipment.GetComponent<NewGrapplerController>(); // Searches for the grappling hook atached to the hit player
                 if (grapple == null) continue;
-                if (grapple.hook.state != HookProjectile.HookState.Stowed)
+                if (grapple.hook != null && grapple.hook.state != HookProjectile.HookState.Stowed)
                 {
                     grapple.hook.Release();//forces the grapplehook to release when hitting jump pad
                     grapple.hook.Stow();//forces the hookshot to release

@@ -82,7 +82,7 @@ public class WormHole : MonoBehaviour
         diff = diff - exitDiff;
         playerOBJ.transform.rotation = Quaternion.Euler(playerOBJ.transform.eulerAngles.x, playerOBJ.transform.eulerAngles.y - diff, playerOBJ.transform.eulerAngles.z);//turns the player to face out of the worhole
         playerOBJ.transform.position = exitPos.position; //takes the player out of the wormhole
-        PlayerController.photonView.RPC("RPC_MakeIVisible", RpcTarget.Others);
+        PlayerController.photonView.RPC("RPC_MakeVisible", RpcTarget.Others);
         playerRB.useGravity = true; //Bring back Gravity
         playerRB.velocity = exitPos.forward * exitSpeed;    //launch out of wormhole
         triggerScript.exiting = false;

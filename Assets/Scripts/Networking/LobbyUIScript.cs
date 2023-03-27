@@ -7,50 +7,171 @@ using TMPro;
 
 // Code was used from https://youtu.be/zPZK7C5_BQo?t=781
 
+public enum LobbyMenuState { LOADING, NICKNAME, START, TUTORIALS, ONLINE, HOST, PUBLIC, PRIVATE, ROOM, ERROR}
+
 public class LobbyUIScript : MonoBehaviour
 {
-    [SerializeField] TMP_InputField roomNameInPutField;
-    [SerializeField] TMP_InputField wormNameInputField;
-    [SerializeField] TMP_Text roomNameText;
-    [SerializeField] TMP_Text playerNameText;
-    [SerializeField] TMP_Text errorText;
 
-    [SerializeField] private int roomNameLength = 5;
+    [SerializeField, Tooltip("The list of menus in the lobby.")] private GameObject[] menus;
+    private GameObject currentMenu;
 
-    [SerializeField] private GameObject goToLevelButton;
-    [SerializeField] private GameObject tutorialMenu;
+    [SerializeField, Tooltip("The loading screen message.")] private TextMeshProUGUI loadingScreenMessage;
+
+    [SerializeField, Tooltip("The text object that shows the player's nickname.")] private TextMeshProUGUI playerNameText;
+    [SerializeField, Tooltip("The text object that shows when the player successfully sets their nickname.")] private TextMeshProUGUI nameSetSuccessText;
+    [SerializeField, Tooltip("The number of seconds for the name success animation to play for.")] private float nameSetSuccessAnimationPlayDuration;
+    [SerializeField, Tooltip("The number of seconds for the name success animation to pause for when shown.")] private float nameSetSuccessAnimationPauseDuration;
+    [SerializeField, Tooltip("The ease type for the success animation.")] private LeanTweenType nameSetSuccessEaseType;
+
+    [SerializeField, Tooltip("The text object that displays the reason for an error.")] TextMeshProUGUI errorText;
 
     [SerializeField] Transform roomListContent;
     [SerializeField] Transform playerListContent;
     [SerializeField] GameObject roomListItemPrefab;
     [SerializeField] GameObject playerListItemPrefab;
 
-    [SerializeField] Menus[] menus;
+    [Header("Individual Menu Managers")]
+    [SerializeField, Tooltip("The Create Room controller.")] private CreateRoomController createRoom;
 
+    //Runtime Variables
     private List<string> playerList = new List<string>();
     private List<PlayerListItem> playerListItems = new List<PlayerListItem>();
 
-    [SerializeField, Tooltip("The Create Room controller.")] private CreateRoomController createRoom;
+    private WordStructure currentDisplayedAdjective, currentDisplayedNoun;
 
-    // Easier to call the  open menu method through script
-    public void OpenMenu(string menuName)
+    private void Start()
     {
-        // Loops through all the menus in the Canvas.
-        for (int i = 0; i < menus.Length; i++)
-        {
-            // If the menu matches with the menu name we're trying to open...
-            if (menus[i].menuName == menuName)
-            {
-                // Then we can open the menu
-                OpenMenu(menus[i]);
-            }
+        currentMenu = menus[(int)LobbyMenuState.START];     //Sets the first menu as the starting menu
 
-            // If it's not the menu we're trying to open, then we want to close it.
-            else if (menus[i].open)
-            {
-                CloseMenu(menus[i]);
-            }
-        }
+        //Ensures that the first menu is always the start menu
+        if (menus[(int)LobbyMenuState.START])
+            SwitchMenu(LobbyMenuState.START);
+    }
+
+    #region MenuStates
+    /// <summary>
+    /// Switches the menu state, hiding the current menu state and showing the new menu state.
+    /// </summary>
+    /// <param name="menu">The new menu state.</param>
+    public void SwitchMenu(LobbyMenuState menu)
+    {
+        OpenMenu(menu);
+    }
+
+    /// <summary>
+    /// Switches the menu state, hiding the current menu state and showing the new menu state.
+    /// </summary>
+    /// <param name="menu">The new menu state.</param>
+    public void SwitchMenu(int menu)
+    {
+        OpenMenu((LobbyMenuState)menu);
+    }
+
+    /// <summary>
+    /// Shows or hides a menu state without altering the current menu state open.
+    /// </summary>
+    /// <param name="menu">The menu state to open.</param>
+    /// <param name="showState">If true, the menu state is showing. If false, the menu state is not showing.</param>
+    public void ShowMenuState(LobbyMenuState menu, bool showState)
+    {
+        menus[(int)menu].SetActive(showState);
+    }
+
+    /// <summary>
+    /// Makes a menu state active.
+    /// </summary>
+    /// <param name="menu">The new menu state.</param>
+    /// <param name="switchMenu">If true, hide the current menu state and show the new menu state.</param>
+    private void OpenMenu(LobbyMenuState menu)
+    {
+        GameObject newMenu = menus[(int)menu];
+        GameObject prevMenu = currentMenu;
+
+        currentMenu = newMenu;
+        prevMenu.SetActive(false);
+        currentMenu.SetActive(true);
+    }
+    #endregion
+
+    #region LoadingScreen
+    /// <summary>
+    /// Opens the loading screen.
+    /// </summary>
+    /// <param name="loadingMessage">The initial message for the loading screen.</param>
+    public void OpenLoadingScreen(string loadingMessage = "Loading...")
+    {
+        loadingScreenMessage.text = loadingMessage;
+        SwitchMenu(LobbyMenuState.LOADING);
+    }
+
+    /// <summary>
+    /// Changes the loading menu screen message.
+    /// </summary>
+    /// <param name="newMessage">The new loading menu message.</param>
+    public void UpdateLoadingScreenMessage(string newMessage)
+    {
+        loadingScreenMessage.text = newMessage;
+    }
+    #endregion
+
+    #region ServerConnection
+    public void StartOnlinePlay()
+    {
+        OpenLoadingScreen("Connecting To Server...");
+        NetworkManagerScript.instance.ConnectAndGiveDavidYourIPAddress();
+    }
+
+    public void ExitOnlinePlay()
+    {
+        OpenLoadingScreen("Disconnecting...");
+        NetworkManagerScript.instance.DisconnectFromServer();
+    }
+    #endregion
+
+    /// <summary>
+    /// Updates the player name text.
+    /// </summary>
+    /// <param name="nameText">The new name for the player.</param>
+    public void UpdateNameText(WordStructure currentAdjective, WordStructure currentNoun)
+    {
+        playerNameText.text = currentAdjective.word + " " + currentNoun.word;
+
+        //Saving the objects locally so that the player can choose to set this nickname
+        currentDisplayedAdjective = currentAdjective;
+        currentDisplayedNoun = currentNoun;
+    }
+
+    /// <summary>
+    /// Generates a random nickname for the player.
+    /// </summary>
+    public void GenerateRandomNickname()
+    {
+        NetworkManagerScript.instance.GenerateRandomNickname();
+    }
+
+    /// <summary>
+    /// Sets the nickname of the player.
+    /// </summary>
+    public void SetNickname()
+    {
+        NetworkManagerScript.instance.SetPlayerNickname(currentDisplayedAdjective, currentDisplayedNoun);
+        PlayNameSetSuccessAnimation();
+    }
+
+    /// <summary>
+    /// Plays an animation with the name success text.
+    /// </summary>
+    private void PlayNameSetSuccessAnimation()
+    {
+        LeanTween.alphaCanvas(nameSetSuccessText.GetComponent<CanvasGroup>(), 1f, nameSetSuccessAnimationPlayDuration).setEase(nameSetSuccessEaseType).setOnComplete(() => LeanTween.delayedCall(nameSetSuccessAnimationPauseDuration, PlayNameSetSuccessExitAnimation));
+    }
+
+    /// <summary>
+    /// Plays an exit animation for the name success text.
+    /// </summary>
+    private void PlayNameSetSuccessExitAnimation()
+    {
+        LeanTween.alphaCanvas(nameSetSuccessText.GetComponent<CanvasGroup>(), 0f, nameSetSuccessAnimationPlayDuration).setEase(nameSetSuccessEaseType);
     }
 
     /// <summary>
@@ -59,23 +180,10 @@ public class LobbyUIScript : MonoBehaviour
     /// <param name="segment">The segment of letter(s) to add.</param>
     public void AddLetterToNameBox(string segment)
     {
-        if (roomNameInPutField.text.Length < roomNameLength)
+/*        if (roomNameInPutField.text.Length < roomNameLength)
             roomNameInPutField.text += segment;
         else
-            Debug.Log("Room Name Too Long.");
-    }
-
-    public void AddSectionToWormName(string segment)
-    {
-        wormNameInputField.text += segment;
-    }
-
-    /// <summary>
-    /// Clears the name box text.
-    /// </summary>
-    public void ClearInputBox(TMP_InputField inputField)
-    {
-        inputField.text = "";
+            Debug.Log("Room Name Too Long.");*/
     }
 
     // Displays the error message to the player.
@@ -84,47 +192,15 @@ public class LobbyUIScript : MonoBehaviour
         errorText.text = errorMessage;
     }
 
-    // Easier to call the open menu method through hierarchy.
-    public void OpenMenu(Menus menu)
-    {
-        // If the menu is open, we want to close it because we only want one menu open at a time.
-        for (int i = 0; i < menus.Length; i++)
-        {
-            CloseMenu(menus[i]);
-        }
-
-        // Opens the menu.
-        menu.Open();
-    }
-
-    // Closes the menu (easier through hierarchy).
-    public void CloseMenu(Menus menu)
-    {
-        menu.Close();
-    }
-
     public void CreateRoom()
     {
-        OpenMenu("loading"); // Opens the loading screen
+        //OpenMenu("loading"); // Opens the loading screen
         // Creates a room with the name of what the player has typed in.
         NetworkManagerScript.instance.OnCreateRoom(createRoom.GenerateRoomCode(), createRoom.GetRoomOptions(), createRoom.GetCustomRoomSettings());
     }
-
-    public void CreateName()
-    {
-        // Doesn't allow an empty worm name.
-        if (string.IsNullOrEmpty(wormNameInputField.text))
-        {
-            return;
-        }
-
-        // Creates a nickname with the name of what the player has typed in.
-        NetworkManagerScript.instance.SetPlayerNickname(wormNameInputField.text);
-        OpenMenu("title"); // Opens the title screen
-    }
     public void JoinRoom(string roomName)
     {
-        OpenMenu("loading");
+        //OpenMenu("loading");
         NetworkManagerScript.instance.JoinRoom(roomName);
     }
 
@@ -175,20 +251,12 @@ public class LobbyUIScript : MonoBehaviour
     public void OpenRoomList()
     {
         UpdateRoomList();
-        OpenMenu("room");
-    }
-
-    public void ShowLaunchButton(bool showButton)
-    {
-        goToLevelButton.SetActive(showButton);
+        //OpenMenu("room");
     }
 
     public void UpdateRoomList()
     {
         // Opens the room menu UI
-        roomNameText.text = NetworkManagerScript.instance.GetCurrentRoom();
-        playerNameText.text = NetworkManagerScript.instance.GetLocalPlayerName();
-
         playerList = NetworkManagerScript.instance.GetPlayerNameList();
         print("Players in room list: " + playerList.Count);
 

@@ -20,8 +20,8 @@ public class Jumbotron : MonoBehaviour
     }
     private void Update()
     {
-        Debug.Log(currentLevelTimer.GetTotalSecondsLeft());
-        Debug.Log(currentLevelTimer.LevelTimePercentage());
+        //Debug.Log(currentLevelTimer.GetTotalSecondsLeft());
+        //Debug.Log(currentLevelTimer.LevelTimePercentage());
         if (currentLevelTimer.GetTotalSecondsLeft() <= 11.0f&& currentLevelTimer.GetTotalSecondsLeft() >0&& !cooldown&&!finished)
         {
             if (currentLevelTimer.GetTotalSecondsLeft() < 1.0f)
