@@ -254,10 +254,14 @@ public class NetworkPlayer : MonoBehaviour
                 if (currentPlayer == photonView.Owner)
                     continue;
 
+                Debug.Log("Checking " + currentPlayer.NickName + "'s Color: " + (ColorOptions)currentPlayer.CustomProperties["Color"]);
                 takenColors.Add((int)currentPlayer.CustomProperties["Color"]);
 
                 if (currentPlayer.CustomProperties["Color"] == photonView.Owner.CustomProperties["Color"])
+                {
+                    Debug.Log((ColorOptions)currentPlayer.CustomProperties["Color"] + " is taken.");
                     mustReplaceColor = true;
+                }
             }
 
             //If the player must replace their color, change their color
@@ -265,7 +269,7 @@ public class NetworkPlayer : MonoBehaviour
             {
                 for(int i = 0; i < PlayerSettingsController.NumberOfPlayerColors(); i++)
                 {
-                    //If the taken color list does not contain the current color, take it
+                    //If the taken color list does not contain the current color list, take it
                     if (!takenColors.Contains(i))
                     {
                         ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().ChangePlayerColor(i);
