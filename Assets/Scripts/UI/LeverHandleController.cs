@@ -30,16 +30,31 @@ public class LeverHandleController : GrabbableUI
     {
         if (isGrabbed && followObject != null)
         {
-            Quaternion lookMover = Quaternion.FromToRotation(transform.up, Vector3.ProjectOnPlane((followObject.position - leverController.transform.position).normalized, leverController.transform.right)) * transform.rotation;
-            Quaternion lookAngle = Quaternion.Euler(Mathf.Clamp(lookMover.eulerAngles.x, leverController.GetMinimumAngle(), leverController.GetMaximumAngle()), lookMover.eulerAngles.y, lookMover.eulerAngles.z);
+            Quaternion lookAngle = Quaternion.FromToRotation(transform.up, Vector3.ProjectOnPlane((followObject.position - leverController.transform.position).normalized, leverController.transform.right)) * transform.rotation;
+            Quaternion localLookAngle = Quaternion.Inverse(leverController.transform.rotation) * lookAngle;
 
-            //Debug.Log("Lever Pivot Angle: " + lookAngle.eulerAngles.x);
+            float localAngle = (localLookAngle.eulerAngles.x > 180) ? localLookAngle.eulerAngles.x - 360 : localLookAngle.eulerAngles.x;
 
-            //If the angle of the pivot is not in the deadzone of the lever, rotate the lever with the player's hand movement
-            //if(lookAngle.eulerAngles.x > leverController.GetMinimumAngle() + leverController.GetLeverThreshold() && lookAngle.eulerAngles.x < leverController.GetMaximumAngle() - leverController.GetLeverThreshold())
-                transform.rotation = lookAngle;
+            Debug.Log("Local Lever Angle: " + localAngle);
+
+            //If the player angle is not in the threshold area, allow free lever movement
+            if (localAngle > leverController.GetMinimumAngle() + leverController.GetLeverMinThreshold() && localAngle < leverController.GetMaximumAngle() - leverController.GetLeverMaxThreshold())
+            {
+                transform.localRotation = localLookAngle;
+                ClampLever();
+            }
+            //If the player angle is in the threshold area, move to one of the limits
+            else
+            {
+                if (localAngle > 0)
+                    MoveToAngle(leverController, leverController.GetMaximumAngle());
+                else
+                    MoveToAngle(leverController, leverController.GetMinimumAngle());
+            }
         }
     }
+
+    private void ClampLever() => transform.localRotation = Quaternion.Euler(Mathf.Clamp(GetAngle(), leverController.GetMinimumAngle(), leverController.GetMaximumAngle()), 0, 0);
 
     public void MoveToAngle(LeverController lever, float newAngle)
     {
