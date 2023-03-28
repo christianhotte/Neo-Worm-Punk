@@ -381,12 +381,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         {
             lobbyUI.UpdateRoomList();
         }
-
-        // Updates the ReadyUpManager
-        if (ReadyUpManager.instance != null)
-        {
-            ReadyUpManager.instance.UpdateStatus(ReadyUpManager.instance.localPlayerTube.GetTubeNumber());
-        }
     }
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
