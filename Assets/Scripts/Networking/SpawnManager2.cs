@@ -55,6 +55,7 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
                 ReadyUpManager.instance.UpdateStatus(spawnTube.GetTubeNumber());
                 ReadyUpManager.instance.localPlayerTube.SpawnPlayerName(NetworkManagerScript.instance.GetLocalPlayerName());
                 NetworkManagerScript.localNetworkPlayer.UpdateTakenColorsOnJoin();
+                ReadyUpManager.instance.localPlayerTube.GetComponent<PlayerColorChanger>().RefreshButtons();
             }
             
         }
@@ -74,6 +75,7 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
                 ReadyUpManager.instance.UpdateStatus(spawnTube.GetTubeNumber());
                 ReadyUpManager.instance.localPlayerTube.SpawnPlayerName(NetworkManagerScript.instance.GetLocalPlayerName());
                 NetworkManagerScript.localNetworkPlayer.UpdateTakenColorsOnJoin();
+                ReadyUpManager.instance.localPlayerTube.GetComponent<PlayerColorChanger>().RefreshButtons();
             }
         }
     }
