@@ -146,7 +146,7 @@ public class LobbyUIScript : MonoBehaviour
     /// </summary>
     public void GenerateRandomNickname()
     {
-        NetworkManagerScript.instance.GenerateRandomNickname();
+        NetworkManagerScript.instance.GenerateRandomNickname(true);
     }
 
     /// <summary>
@@ -196,11 +196,13 @@ public class LobbyUIScript : MonoBehaviour
     {
         //OpenMenu("loading"); // Opens the loading screen
         // Creates a room with the name of what the player has typed in.
+        OpenLoadingScreen("Creating Room...");
         NetworkManagerScript.instance.OnCreateRoom(createRoom.GenerateRoomCode(), createRoom.GetRoomOptions(), createRoom.GetCustomRoomSettings());
     }
     public void JoinRoom(string roomName)
     {
         //OpenMenu("loading");
+        OpenLoadingScreen("Joining Room...");
         NetworkManagerScript.instance.JoinRoom(roomName);
     }
 
