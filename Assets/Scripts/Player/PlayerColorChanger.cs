@@ -70,8 +70,6 @@ public class PlayerColorChanger : MonoBehaviour
 
         Color newColor = PlayerSettingsController.ColorOptionsToColor((ColorOptions)colorOption);
 
-        NetworkManagerScript.instance.UpdateTakenColorList(currentColorOptionSelected, (ColorOptions)colorOption);
-
         PlayerSettingsController.Instance.charData.playerColor = newColor;   //Set the player color in the character data
         NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["Color"] = colorOption;
         currentColorOptionSelected = (ColorOptions)colorOption;
@@ -89,11 +87,11 @@ public class PlayerColorChanger : MonoBehaviour
             button.EnableButton(true);
         }
 
-        foreach (var color in NetworkManagerScript.instance.takenColors)
+        foreach (var player in NetworkManagerScript.instance.GetPlayerList())
         {
-            colorButtons[color].ShowText(true);
-            colorButtons[color].LockButton(true);
-            colorButtons[color].EnableButton(false);
+            colorButtons[(int)player.CustomProperties["Color"]].ShowText(true);
+            colorButtons[(int)player.CustomProperties["Color"]].LockButton(true);
+            colorButtons[(int)player.CustomProperties["Color"]].EnableButton(false);
         }
     }
 }
