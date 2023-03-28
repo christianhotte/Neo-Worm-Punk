@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 
-public class CrusherTrap : MonoBehaviour
+public class CrusherTrap : NetworkedArenaElement
 {
     public bool cooldown = false;
     internal TrapTrigger triggerScript;

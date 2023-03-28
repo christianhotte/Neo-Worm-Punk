@@ -33,6 +33,7 @@ public class PlayerController : MonoBehaviour
     internal Camera cam;                       //Primary camera for VR rendering, located on player head
     internal PlayerInput input;                //Input manager component used by player to send messages to hands and such
     internal SkinnedMeshRenderer bodyRenderer; //Mesh renderer for player's physical worm body
+    internal PlayerBodyManager bodyManager;    //Reference to script on player that manages body collisions and special effects
     private AudioSource audioSource;           //Main player audio source
     private Transform camOffset;               //Object used to offset camera position in case of weirdness
     private InputActionMap inputMap;           //Input map which player uses
@@ -51,6 +52,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField, Tooltip("Amount by which to move torso down (allows player to collapse more naturally).")]         private float torsoVerticalOffset = 10f;
     [SerializeField, Tooltip("Makes sure that player torso is always below player head.")]                              private bool keepTorsoCentered = true;
     [SerializeField, Range(0, 1), Tooltip("Amount by which player has to pull the thumb stick in order to snap-turn.")] private float flickStickThreshold;
+    [Space()]
+    [Tooltip("How quickly player slides down horizontal inclines.")]                                                            public float slipSpeed = 5;
+    [MinMaxSlider(0, 90), Tooltip("Minimum and maximum angles for determining whether or not player will slide on a surface.")] public Vector2 slipAngleRange;
     [Header("Sound Settings:")]
     [SerializeField, Tooltip("SFX played when player strikes a target.")] private AudioClip targetHitSound;
     [SerializeField, Tooltip("SFX played when player kills a target.")]   private AudioClip targetKillSound;
@@ -122,6 +126,7 @@ public class PlayerController : MonoBehaviour
         combatHUD = GetComponentInChildren<CombatHUDController>();                                                                                                             //Get the combat HUD canvas
         screenShaker = cam.GetComponent<ScreenShakeVR>();                                                                                                                      //Get screenshaker script from camera object
         playerModel = GetComponentInChildren<VRIK>().transform;                                                                                                                //Get player model component
+        bodyManager = GetComponentInChildren<PlayerBodyManager>(); if (bodyManager == null) bodyRb.gameObject.AddComponent<PlayerBodyManager>();                               //Make sure player has a body manager component
         foreach (Volume volume in GetComponentsInChildren<Volume>()) //Iterate through Volume components in children
         {
             if (volume.name.Contains("Health")) healthVolume = volume; //Get health volume
@@ -377,7 +382,10 @@ public class PlayerController : MonoBehaviour
         timeUntilRegen = 0;                                                    //Reset regen timer
         print("Local player has been killed!");
     }
-
+    private void MakeNotWiggly()
+    {
+        //foreach (Rigidbody rigidbody in playerModel.GetComponentsInChildren<Rigidbody>()).
+    }
     /// <summary>
     /// Safely shakes the player's eyeballs.
     /// </summary>
