@@ -16,12 +16,6 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
 
     void Start()
     {
-        // Updates the ReadyUpManager
-        if (ReadyUpManager.instance != null)
-        {
-            ReadyUpManager.instance.UpdateStatus(ReadyUpManager.instance.localPlayerTube.GetTubeNumber());
-        }
-
         demoPlayer = PlayerController.instance.gameObject;
         if (demoPlayer == null)
         {

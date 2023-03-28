@@ -31,12 +31,12 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     //Called when a scene is loaded
     private void OnSceneLoad(Scene scene, LoadSceneMode loadSceneMode)
     {
-        //If the locker room was loaded, update the locker text and the player colors
+/*        //If the locker room was loaded, update the locker text and the player colors
         if(scene.name == GameSettings.roomScene)
         {
             playersInRoom = NetworkManagerScript.instance.GetMostRecentRoom().PlayerCount;
             UpdateReadyText();
-        }
+        }*/
     }
 
     private void Update()
