@@ -18,10 +18,7 @@ public class LobbyUIScript : MonoBehaviour
     [SerializeField, Tooltip("The loading screen message.")] private TextMeshProUGUI loadingScreenMessage;
 
     [SerializeField, Tooltip("The text object that shows the player's nickname.")] private TextMeshProUGUI playerNameText;
-    [SerializeField, Tooltip("The text object that shows when the player successfully sets their nickname.")] private TextMeshProUGUI nameSetSuccessText;
-    [SerializeField, Tooltip("The number of seconds for the name success animation to play for.")] private float nameSetSuccessAnimationPlayDuration;
-    [SerializeField, Tooltip("The number of seconds for the name success animation to pause for when shown.")] private float nameSetSuccessAnimationPauseDuration;
-    [SerializeField, Tooltip("The ease type for the success animation.")] private LeanTweenType nameSetSuccessEaseType;
+    [SerializeField, Tooltip("The text object that shows whether explicit words are used or not.")] private TextMeshProUGUI explicitWordsText;
 
     [SerializeField, Tooltip("The text object that displays the reason for an error.")] TextMeshProUGUI errorText;
 
@@ -37,7 +34,7 @@ public class LobbyUIScript : MonoBehaviour
     private List<string> playerList = new List<string>();
     private List<PlayerListItem> playerListItems = new List<PlayerListItem>();
 
-    private WordStructure currentDisplayedAdjective, currentDisplayedNoun;
+    private int currentAdjective, currentNoun;
 
     private void Start()
     {
@@ -46,6 +43,8 @@ public class LobbyUIScript : MonoBehaviour
         //Ensures that the first menu is always the start menu
         if (menus[(int)LobbyMenuState.START])
             SwitchMenu(LobbyMenuState.START);
+
+        UpdateFunnyText();
     }
 
     #region MenuStates
@@ -131,14 +130,43 @@ public class LobbyUIScript : MonoBehaviour
     /// <summary>
     /// Updates the player name text.
     /// </summary>
-    /// <param name="nameText">The new name for the player.</param>
-    public void UpdateNameText(WordStructure currentAdjective, WordStructure currentNoun)
+    /// <param name="adjective">The index of the new adjective.</param>
+    /// <param name="noun">The index of the new noun.</param>
+    public void UpdateNameText(int adjective, int noun)
     {
-        playerNameText.text = currentAdjective.word + " " + currentNoun.word;
+        playerNameText.text = NetworkManagerScript.instance.GetTotalWormAdjectives()[adjective].word + " " + NetworkManagerScript.instance.GetTotalWormNouns()[noun].word;
 
-        //Saving the objects locally so that the player can choose to set this nickname
-        currentDisplayedAdjective = currentAdjective;
-        currentDisplayedNoun = currentNoun;
+        //Saving the objects locally so that the player can choose to change this nickname
+        currentAdjective = adjective;
+        currentNoun = noun;
+    }
+
+    public void IncrementAdjective(int increment)
+    {
+        currentAdjective += increment;
+
+        if (currentAdjective >= NetworkManagerScript.instance.GetAvailableWormAdjectives().Count)
+            currentAdjective = 0;
+        if (currentAdjective < 0)
+            currentAdjective = NetworkManagerScript.instance.GetAvailableWormAdjectives().Count - 1;
+
+        PlayerPrefs.SetInt("WormAdjective", currentAdjective);
+        NetworkManagerScript.instance.SetPlayerNickname(NetworkManagerScript.instance.GetAvailableWormAdjectives()[currentAdjective], PlayerSettingsController.Instance.charData.playerNoun);
+        UpdateNameText(currentAdjective, currentNoun);
+    }
+
+    public void IncrementNoun(int increment)
+    {
+        currentNoun += increment;
+
+        if (currentNoun >= NetworkManagerScript.instance.GetAvailableWormNouns().Count)
+            currentNoun = 0;
+        if (currentNoun < 0)
+            currentNoun = NetworkManagerScript.instance.GetAvailableWormNouns().Count - 1;
+
+        PlayerPrefs.SetInt("WormNoun", currentNoun);
+        NetworkManagerScript.instance.SetPlayerNickname(PlayerSettingsController.Instance.charData.playerAdjective, NetworkManagerScript.instance.GetAvailableWormNouns()[currentNoun]);
+        UpdateNameText(currentAdjective, currentNoun);
     }
 
     /// <summary>
@@ -150,40 +178,17 @@ public class LobbyUIScript : MonoBehaviour
     }
 
     /// <summary>
-    /// Sets the nickname of the player.
+    /// Toggles the use of funny words.
     /// </summary>
-    public void SetNickname()
+    public void ToggleFunnyWords()
     {
-        NetworkManagerScript.instance.SetPlayerNickname(currentDisplayedAdjective, currentDisplayedNoun);
-        PlayNameSetSuccessAnimation();
+        NetworkManagerScript.instance.UpdateFunnyWords(!NetworkManagerScript.instance.IsUsingFunnyWords());
+        UpdateFunnyText();
     }
 
-    /// <summary>
-    /// Plays an animation with the name success text.
-    /// </summary>
-    private void PlayNameSetSuccessAnimation()
+    private void UpdateFunnyText()
     {
-        LeanTween.alphaCanvas(nameSetSuccessText.GetComponent<CanvasGroup>(), 1f, nameSetSuccessAnimationPlayDuration).setEase(nameSetSuccessEaseType).setOnComplete(() => LeanTween.delayedCall(nameSetSuccessAnimationPauseDuration, PlayNameSetSuccessExitAnimation));
-    }
-
-    /// <summary>
-    /// Plays an exit animation for the name success text.
-    /// </summary>
-    private void PlayNameSetSuccessExitAnimation()
-    {
-        LeanTween.alphaCanvas(nameSetSuccessText.GetComponent<CanvasGroup>(), 0f, nameSetSuccessAnimationPlayDuration).setEase(nameSetSuccessEaseType);
-    }
-
-    /// <summary>
-    /// Adds letters to the room name box.
-    /// </summary>
-    /// <param name="segment">The segment of letter(s) to add.</param>
-    public void AddLetterToNameBox(string segment)
-    {
-/*        if (roomNameInPutField.text.Length < roomNameLength)
-            roomNameInPutField.text += segment;
-        else
-            Debug.Log("Room Name Too Long.");*/
+        explicitWordsText.text = "Explicit Words: " + (PlayerPrefs.GetInt("FunnyWords") == 1 ? "On" : "Off");
     }
 
     // Displays the error message to the player.
