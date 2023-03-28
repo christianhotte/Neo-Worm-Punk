@@ -87,7 +87,7 @@ public class NewChainsawController : PlayerEquipment
             timeUntilPulse -= Time.deltaTime; //Increment pulse time tracker
             if (timeUntilPulse <= 0) //It is time for the next haptic pulse
             {
-                HapticData newPulse = settings.activeHapticPulse;                                                                                   //Get values from settings for active pulse
+                PlayerController.HapticData newPulse = settings.activeHapticPulse;                                                                  //Get values from settings for active pulse
                 newPulse.amplitude += Random.Range(-settings.activeHapticMagnitudeVariance, settings.activeHapticMagnitudeVariance);                //Add a little bit of random variation to the pulse
                 SendHapticImpulse(newPulse);                                                                                                        //Play new haptic pulse
                 timeUntilPulse = newPulse.duration + Random.Range(-settings.activeHapticFrequencyVariance, settings.activeHapticFrequencyVariance); //Schedule new pulse with slight variation in activation time
@@ -204,9 +204,8 @@ public class NewChainsawController : PlayerEquipment
             }
             else if (grinding) //Blade has just stopped touching a wall
             {
-                player.bodyRb.AddForce(lastGrindHit.normal * settings.disengageForce, ForceMode.Impulse); //Bounce player away from surface when ending grind
-                grinding = false;                                                                         //Indicate that grind is no longer occurring
-                grindTime = 0;                                                                            //Reset grind time tracker
+                grinding = false; //Indicate that grind is no longer occurring
+                grindTime = 0;    //Reset grind time tracker
             }
 
             //Player killing:

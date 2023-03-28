@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.XR;
 using Unity.XR.CoreUtils;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.InputSystem;
@@ -16,6 +17,18 @@ using UnityEngine.Rendering;
 /// </summary>
 public class PlayerController : MonoBehaviour
 {
+    //Classes, Enums & Structs:
+    /// <summary>
+    /// Describes a complex haptic event used by PlayerEquipment.
+    /// </summary>
+    [System.Serializable]
+    public struct HapticData
+    {
+        [Min(0), Tooltip("Base intensity of haptic impulse (should be within range 0 - 1).")] public float amplitude;
+        [Min(0), Tooltip("Total length (in seconds) of haptic impulse.")]                     public float duration;
+        [Tooltip("Curve used to modulate magnitude throughout duration of impulse.")]         public AnimationCurve behaviorCurve;
+    }
+
     //Objects & Components:
     [Tooltip("Singleton instance of player controller.")]                                    public static PlayerController instance;
     [Tooltip("Singleton instance of this client's photonNetwork (on their NetworkPlayer).")] public static PhotonView photonView;
@@ -396,6 +409,39 @@ public class PlayerController : MonoBehaviour
     public void ShakeScreen(Vector2 shakeSettings) { screenShaker.Shake(shakeSettings.x, shakeSettings.y); }
 
     //UTILITY METHODS:
+    /// <summary>
+    /// Sends a haptic impulse to this equipment's associated controller.
+    /// </summary>
+    /// <param name="amplitude">Strength of vibration (between 0 and 1).</param>
+    /// <param name="duration">Duration of vibration (in seconds).</param>
+    public void SendHapticImpulse(InputDeviceRole deviceRole, float amplitude, float duration)
+    {
+        List<UnityEngine.XR.InputDevice> devices = new List<UnityEngine.XR.InputDevice>(); //Initialize list to store input devices
+        #pragma warning disable CS0618                                                     //Disable obsolescence warning
+        UnityEngine.XR.InputDevices.GetDevicesWithRole(deviceRole, devices);               //Find all input devices counted as right hand
+        #pragma warning restore CS0618                                                     //Re-enable obsolescence warning
+        foreach (var device in devices) //Iterate through list of devices identified as right hand
+        {
+            if (device.TryGetHapticCapabilities(out HapticCapabilities capabilities)) //Device has haptic capabilities
+            {
+                if (capabilities.supportsImpulse) device.SendHapticImpulse(0, amplitude, duration); //Send impulse if supported by device
+            }
+        }
+    }
+    public void SendHapticImpulse(InputDeviceRole deviceRole, Vector2 properties) { SendHapticImpulse(deviceRole, properties.x, properties.y); }
+    /// <summary>
+    /// Sends a haptic impulse to the given hand (or both).
+    /// </summary>
+    /// <param name="hand"></param>
+    /// <param name="amplitude"></param>
+    /// <param name="duration"></param>
+    public void SendHapticImpulse(CustomEnums.Handedness hand, float amplitude, float duration)
+    {
+        InputDeviceRole role = InputDeviceRole.Generic;                                    //Default to using generic device role
+        if (hand == CustomEnums.Handedness.Left) role = InputDeviceRole.LeftHanded;        //Use left hand if indicated
+        else if (hand == CustomEnums.Handedness.Right) role = InputDeviceRole.RightHanded; //Use right hand if indicated
+        SendHapticImpulse(role, amplitude, duration);                                      //Pass to actual haptic method
+    }
     public bool InCombat() => inCombat;
     public bool InMenu() => inMenu;
     public void SetCombat(bool combat)
