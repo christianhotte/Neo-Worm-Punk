@@ -377,6 +377,10 @@ public class PlayerController : MonoBehaviour
         timeUntilRegen = 0;                                                    //Reset regen timer
         print("Local player has been killed!");
     }
+    private void MakeNotWiggly()
+    {
+        //foreach (Rigidbody rigidbody in playerModel.GetComponentsInChildren<Rigidbody>()).
+    }
 
     /// <summary>
     /// Safely shakes the player's eyeballs.
