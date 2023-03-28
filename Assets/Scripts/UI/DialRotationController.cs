@@ -16,6 +16,7 @@ public class DialRotationController : GrabbableUI
     [SerializeField, Tooltip("Determine if a dummy model is shown when rotating the dial.")] private bool useDummyHands;
 
     [SerializeField, Tooltip("The event called when the dial has been rotated, sends the angle rotation.")] public UnityEvent<float> OnValueChanged;
+    [SerializeField, Tooltip("The event called when the dial has been rotated, sends -1 if turned counter-clockwise and 1 if turned clockwise.")] public UnityEvent<int> OnDialTurned;
     [SerializeField, Tooltip("The sound that plays when the dial clicks into a position.")] private AudioClip onSnapSoundEffect;
 
     private Transform dialTransform;    //The dial transform, what needs to be rotated
@@ -179,6 +180,7 @@ public class DialRotationController : GrabbableUI
 
         Debug.Log("Rotating " + gameObject.name + " Clockwise.");
         OnValueChanged.Invoke(GetDialValue(dialTransform.localEulerAngles.y));
+        OnDialTurned.Invoke(1);
         if (onSnapSoundEffect != null)
             GetComponent<AudioSource>().PlayOneShot(onSnapSoundEffect, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
     }
@@ -202,6 +204,7 @@ public class DialRotationController : GrabbableUI
         Debug.Log("Rotating " + gameObject.name + " Counter-Clockwise.");
 
         OnValueChanged.Invoke(GetDialValue(dialTransform.localEulerAngles.y));
+        OnDialTurned.Invoke(-1);
         if (onSnapSoundEffect != null)
             GetComponent<AudioSource>().PlayOneShot(onSnapSoundEffect, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
     }
