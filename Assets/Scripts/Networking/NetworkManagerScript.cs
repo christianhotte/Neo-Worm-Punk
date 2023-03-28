@@ -546,7 +546,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         PhotonNetwork.LoadLevel(sceneName);
 
         //Unready
-        localNetworkPlayer.photonView.Owner.CustomProperties["IsReady"] = false;
+        localNetworkPlayer.SetNetworkPlayerProperties("IsReady", false);
 
         GameManager.Instance.levelTransitionActive = false;
     }

@@ -269,12 +269,24 @@ public class NetworkPlayer : MonoBehaviour
                     if (!takenColors.Contains(i))
                     {
                         ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().ChangePlayerColor(i);
-                        photonView.Owner.CustomProperties["Color"] = i;
+                        SetNetworkPlayerProperties("Color", i);
                         break;
                     }
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Sets the custom properties of a PUN player object.
+    /// </summary>
+    /// <param name="key">The property to change.</param>
+    /// <param name="value">The value of the property.</param>
+    public void SetNetworkPlayerProperties(string key, object value)
+    {
+        Hashtable playerProperties = photonView.Owner.CustomProperties;
+        playerProperties[key] = value;
+        photonView.Owner.SetCustomProperties(playerProperties);
     }
 
     //REMOTE METHODS:
