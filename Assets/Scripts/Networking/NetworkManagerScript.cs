@@ -25,8 +25,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     [Tooltip("Name of primary multiplayer room scene.")]                                public string roomScene;
     [SerializeField, Tooltip("Name of network player prefab in Resources folder.")]     private string networkPlayerName;
     [SerializeField]                                                                    private string readyUpManagerName = "ReadyUpManager";
-    // Event code to use when a player leaves the room
-    private const byte PLAYER_LEFT_EVENT = 1;
 
     [SerializeField] private WordStructure[] wormAdjectives = { new WordStructure("Unfortunate", new int[4]), new WordStructure("Sad", new int[4]), new WordStructure("Despairing", new int[4]), new WordStructure("Grotesque", new int[4]), new WordStructure("Despicable", new int[4]), new WordStructure("Abhorrent", new int[4]), new WordStructure("Regrettable", new int[4]), new WordStructure("Incorrigible", new int[4]), new WordStructure("Greasy", new int[4]), new WordStructure("Platonic", new int[4]), new WordStructure("Sinister", new int[4]), new WordStructure("Hideous", new int[4]), new WordStructure("Glum", new int[4]), new WordStructure("Blasphemous", new int[4]), new WordStructure("Malignant", new int[4]), new WordStructure("Undulating", new int[4]), new WordStructure("Treacherous", new int[4]), new WordStructure("Hostile", new int[4]), new WordStructure("Slimy", new int[4]), new WordStructure("Squirming", new int[4]), new WordStructure("Blubbering", new int[4]), new WordStructure("Twisted", new int[4]), new WordStructure("Manic", new int[4]), new WordStructure("Slippery", new int[4]), new WordStructure("Wet", new int[4]), new WordStructure("Moist", new int[4]), new WordStructure("Lugubrious", new int[4]), new WordStructure("Tubular", new int[4]), new WordStructure("Little", new int[4]), new WordStructure("Erratic", new int[4]), new WordStructure("Pathetic", new int[4]) };
     [SerializeField] private WordStructure[] wormNouns = { new WordStructure("Invertebrate", new int[4]), new WordStructure("Wormlet", new int[4]), new WordStructure("Creature", new int[4]), new WordStructure("Critter", new int[4]), new WordStructure("Fool", new int[4]), new WordStructure("Goon", new int[4]), new WordStructure("Specimen", new int[4]), new WordStructure("Homonculus", new int[4]), new WordStructure("Grubling", new int[4]), new WordStructure("Snotling", new int[4]), new WordStructure("Wormling", new int[4]), new WordStructure("Nightcrawler", new int[4]), new WordStructure("Stinker", new int[4]), new WordStructure("Rapscallion", new int[4]), new WordStructure("Scalliwag", new int[4]), new WordStructure("Beastling", new int[4]), new WordStructure("Crawler", new int[4]), new WordStructure("Larva", new int[4]), new WordStructure("Dingus", new int[4]), new WordStructure("Freak", new int[4]), new WordStructure("Blighter", new int[4]), new WordStructure("Cretin", new int[4]), new WordStructure("Dink", new int[4]), new WordStructure("Unit", new int[4]), new WordStructure("Denizen", new int[4]), new WordStructure("Parasite", new int[4]), new WordStructure("Organism", new int[4]), new WordStructure("Worm", new int[4]), new WordStructure("Oonge", new int[4]), new WordStructure("Bwarp", new int[4]) };
@@ -392,10 +390,13 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
         // Raises an event on player left room.
         PhotonNetwork.RaiseEvent(1, otherPlayer.ActorNumber, RaiseEventOptions.Default, SendOptions.SendReliable);
+
+        //Removes the color from the list of colors
+        RemoveColor((int)otherPlayer.CustomProperties["Color"]);
     }
 
     // This method is called when a custom event is received
-    private void OnEvent(byte eventCode, object content, int senderId)
+    public void OnEvent(byte eventCode, object content, int senderId)
     {
         if (eventCode == 1)
         {
