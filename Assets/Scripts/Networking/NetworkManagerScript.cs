@@ -392,10 +392,13 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
         // Raises an event on player left room.
         PhotonNetwork.RaiseEvent(1, otherPlayer.ActorNumber, RaiseEventOptions.Default, SendOptions.SendReliable);
+
+        //Removes the color from the list of colors
+        RemoveColor((int)otherPlayer.CustomProperties["Color"]);
     }
 
     // This method is called when a custom event is received
-    private void OnEvent(byte eventCode, object content, int senderId)
+    public void OnEvent(byte eventCode, object content, int senderId)
     {
         if (eventCode == 1)
         {
