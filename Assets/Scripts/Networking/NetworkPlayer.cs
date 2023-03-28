@@ -257,7 +257,7 @@ public class NetworkPlayer : MonoBehaviour
                 Debug.Log("Checking " + currentPlayer.NickName + "'s Color: " + (ColorOptions)currentPlayer.CustomProperties["Color"]);
                 takenColors.Add((int)currentPlayer.CustomProperties["Color"]);
 
-                if (currentPlayer.CustomProperties["Color"] == photonView.Owner.CustomProperties["Color"])
+                if ((int)currentPlayer.CustomProperties["Color"] == (int)photonView.Owner.CustomProperties["Color"])
                 {
                     Debug.Log((ColorOptions)currentPlayer.CustomProperties["Color"] + " is taken.");
                     mustReplaceColor = true;
