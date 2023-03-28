@@ -44,9 +44,9 @@ public class ChainsawSettings : ScriptableObject
     [Tooltip("Sound chainsaw makes while it is actively running (while buried in a wall).")] public AudioClip runningWallSound;
     [Tooltip("Sound chainsaw makes when player releases it.")]                               public AudioClip sheathSound;
     [Header("Haptics:")]
-    [Tooltip("Haptic effect which plays when player extends their blade.")]                                            public PlayerEquipment.HapticData extendHaptics;
-    [Tooltip("Haptic effect which plays when player retracts their blade.")]                                           public PlayerEquipment.HapticData retractHaptics;
-    [Tooltip("Base properties of haptic pulses which are played continuously while blade is active.")]                 public PlayerEquipment.HapticData activeHapticPulse;
+    [Tooltip("Haptic effect which plays when player extends their blade.")]                                            public PlayerController.HapticData extendHaptics;
+    [Tooltip("Haptic effect which plays when player retracts their blade.")]                                           public PlayerController.HapticData retractHaptics;
+    [Tooltip("Base properties of haptic pulses which are played continuously while blade is active.")]                 public PlayerController.HapticData activeHapticPulse;
     [Tooltip("Maximum value of random decrease for pulse magnitude while chainsaw is active.")]                        public float activeHapticMagnitudeVariance;
     [Tooltip("While chainsaw is active, pulses will be separated by random time values between zero and this value.")] public float activeHapticFrequencyVariance;
 }

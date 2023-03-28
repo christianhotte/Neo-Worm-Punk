@@ -54,9 +54,9 @@ public class ShotgunSettings : ScriptableObject
     [Tooltip("Describes motion of ejector during traversal.")]                                public AnimationCurve ejectorTraverseCurve;
     [Min(0), Tooltip("Amount forward firing pins move when weapon is fired.")]                public float pinTraverseDistance;
     [Header("Effects:")]
-    [Tooltip("Settings for configuring the vibration player feels when firing.")]             public PlayerEquipment.HapticData fireHaptics;
-    [Tooltip("Settings for configuring the vibration player feels when ejecting shells.")]    public PlayerEquipment.HapticData ejectHaptics;
-    [Tooltip("Settings for configuring the vibration player feels when closing the breach.")] public PlayerEquipment.HapticData closeHaptics;
+    [Tooltip("Settings for configuring the vibration player feels when firing.")]             public PlayerController.HapticData fireHaptics;
+    [Tooltip("Settings for configuring the vibration player feels when ejecting shells.")]    public PlayerController.HapticData ejectHaptics;
+    [Tooltip("Settings for configuring the vibration player feels when closing the breach.")] public PlayerController.HapticData closeHaptics;
     [Tooltip("Magnitude (x) and duration (y) of screenshake event when weapon is fired.")]    public Vector2 fireScreenShake;
     [Header("Sounds:")]
     [Tooltip("SFX for when weapon is fired")]          public AudioClip fireSound;
