@@ -224,66 +224,7 @@ public class NetworkPlayer : MonoBehaviour
         Debug.Log("Syncing Player Data...");                                        //Indicate that data is being synced
         string characterData = PlayerSettingsController.Instance.CharDataToString();          //Encode data to a string so that it can be sent over the network
         photonView.RPC("LoadPlayerSettings", RpcTarget.AllBuffered, characterData); //Send data to every player on the network (including this one)
-        SyncColors();
-    }
-
-    /// <summary>
-    /// Syncs the list of taken colors in the room.
-    /// </summary>
-    public void SyncColors()
-    {
-        photonView.RPC("UpdateTakenColors", RpcTarget.AllBuffered, NetworkManagerScript.instance.takenColors.ToArray()); //Send data to every player on the network (including this one)
-    }
-
-    /// <summary>
-    /// When a user joins, try to take either their color or the next available color.
-    /// </summary>
-    public void UpdateTakenColorsOnJoin()
-    {
-        if(ReadyUpManager.instance != null)
-        {
-            int startingColorOption = (int)PlayerSettingsController.ColorToColorOptions(PlayerSettingsController.Instance.charData.playerColor);
-            int currentColorOption = startingColorOption;
-
-            for (int i = 0; i < PlayerSettingsController.NumberOfPlayerColors(); i++)
-            {
-                bool successfullyTakenColor = NetworkManagerScript.instance.TryToTakeColor((ColorOptions)(currentColorOption));
-
-                if (successfullyTakenColor)
-                {
-                    Debug.Log("Setting Color On Join To " + (ColorOptions)currentColorOption);
-                    ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().ChangePlayerColor(currentColorOption);
-                    photonView.Owner.CustomProperties["Color"] = currentColorOption;
-                    break;
-                }
-
-                //If the player is already a color that is taken
-                else if (currentColorOption == (int)photonView.Owner.CustomProperties["Color"])
-                    break;
-
-                currentColorOption++;
-                if (currentColorOption >= PlayerSettingsController.NumberOfPlayerColors())
-                    currentColorOption = 0;
-            }
-        }
-    }
-
-    //REMOTE METHODS:
-    [PunRPC]
-    public void UpdateTakenColors(int[] listOfColors)
-    {
-        Debug.Log("Updating Taken Color List...");
-
-        if(ReadyUpManager.instance != null)
-        {
-            //Refreshes the list of taken colors
-            NetworkManagerScript.instance.takenColors = new List<int>();
-            NetworkManagerScript.instance.takenColors.AddRange(listOfColors);
-
-            if(FindObjectOfType<TubeManager>() != null)
-                foreach (var tube in FindObjectOfType<TubeManager>().roomTubes)
-                    tube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
-        }
+        NetworkManagerScript.instance.SyncColors();
     }
 
     [PunRPC]
