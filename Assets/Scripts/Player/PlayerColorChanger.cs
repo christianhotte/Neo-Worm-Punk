@@ -89,6 +89,7 @@ public class PlayerColorChanger : MonoBehaviour
 
         foreach (var player in NetworkManagerScript.instance.GetPlayerList())
         {
+            Debug.Log("Player Color Taken: " + (int)player.CustomProperties["Color"]);
             colorButtons[(int)player.CustomProperties["Color"]].ShowText(true);
             colorButtons[(int)player.CustomProperties["Color"]].LockButton(true);
             colorButtons[(int)player.CustomProperties["Color"]].EnableButton(false);
