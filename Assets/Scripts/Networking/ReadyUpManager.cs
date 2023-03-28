@@ -59,7 +59,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     {
         LeverController localLever = localPlayerTube.GetComponentInChildren<LeverController>();
         NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().isReady = (localLever.GetLeverState() == LeverController.HingeJointState.Max);
-        NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["IsReady"] = NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().isReady;
+        NetworkManagerScript.localNetworkPlayer.SetNetworkPlayerProperties("IsReady", NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().isReady);
         NetworkManagerScript.localNetworkPlayer.SyncStats();
         UpdateStatus(localPlayerTube.GetTubeNumber());
     }
