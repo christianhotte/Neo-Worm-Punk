@@ -13,8 +13,15 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
     {
         instance = this;
     }
+
     void Start()
     {
+        // Updates the ReadyUpManager
+        if (ReadyUpManager.instance != null)
+        {
+            ReadyUpManager.instance.UpdateStatus(ReadyUpManager.instance.localPlayerTube.GetTubeNumber());
+        }
+
         demoPlayer = PlayerController.instance.gameObject;
         if (demoPlayer == null)
         {
@@ -34,6 +41,7 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
             PlayerController.photonView.RPC("RPC_GiveMeSpawnpoint", RpcTarget.MasterClient, PlayerController.photonView.ViewID);
         }
     }
+
     private void OnDestroy()
     {
         instance = null;
