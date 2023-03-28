@@ -253,6 +253,7 @@ public class NetworkPlayer : MonoBehaviour
                 {
                     Debug.Log("Setting Color On Join To " + (ColorOptions)currentColorOption);
                     ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().ChangePlayerColor(currentColorOption);
+                    photonView.Owner.CustomProperties["Color"] = currentColorOption;
                     break;
                 }
 
