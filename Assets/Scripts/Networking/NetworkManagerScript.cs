@@ -26,6 +26,14 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     [SerializeField]                                                                    private string readyUpManagerName = "ReadyUpManager";
     [SerializeField, Tooltip("Allow use of some of the worse words in our vocabulary")] private bool useFunnyWords;
 
+    [SerializeField] private WordStructure[] wormAdjectives = { new WordStructure("Unfortunate", new int[4]), new WordStructure("Sad", new int[4]), new WordStructure("Despairing", new int[4]), new WordStructure("Grotesque", new int[4]), new WordStructure("Despicable", new int[4]), new WordStructure("Abhorrent", new int[4]), new WordStructure("Regrettable", new int[4]), new WordStructure("Incorrigible", new int[4]), new WordStructure("Greasy", new int[4]), new WordStructure("Platonic", new int[4]), new WordStructure("Sinister", new int[4]), new WordStructure("Hideous", new int[4]), new WordStructure("Glum", new int[4]), new WordStructure("Blasphemous", new int[4]), new WordStructure("Malignant", new int[4]), new WordStructure("Undulating", new int[4]), new WordStructure("Treacherous", new int[4]), new WordStructure("Hostile", new int[4]), new WordStructure("Slimy", new int[4]), new WordStructure("Squirming", new int[4]), new WordStructure("Blubbering", new int[4]), new WordStructure("Twisted", new int[4]), new WordStructure("Manic", new int[4]), new WordStructure("Slippery", new int[4]), new WordStructure("Wet", new int[4]), new WordStructure("Moist", new int[4]), new WordStructure("Lugubrious", new int[4]), new WordStructure("Tubular", new int[4]), new WordStructure("Little", new int[4]), new WordStructure("Erratic", new int[4]), new WordStructure("Pathetic", new int[4]) };
+    [SerializeField] private WordStructure[] wormNouns = { new WordStructure("Invertebrate", new int[4]), new WordStructure("Wormlet", new int[4]), new WordStructure("Creature", new int[4]), new WordStructure("Critter", new int[4]), new WordStructure("Fool", new int[4]), new WordStructure("Goon", new int[4]), new WordStructure("Specimen", new int[4]), new WordStructure("Homonculus", new int[4]), new WordStructure("Grubling", new int[4]), new WordStructure("Snotling", new int[4]), new WordStructure("Wormling", new int[4]), new WordStructure("Nightcrawler", new int[4]), new WordStructure("Stinker", new int[4]), new WordStructure("Rapscallion", new int[4]), new WordStructure("Scalliwag", new int[4]), new WordStructure("Beastling", new int[4]), new WordStructure("Crawler", new int[4]), new WordStructure("Larva", new int[4]), new WordStructure("Dingus", new int[4]), new WordStructure("Freak", new int[4]), new WordStructure("Blighter", new int[4]), new WordStructure("Cretin", new int[4]), new WordStructure("Dink", new int[4]), new WordStructure("Unit", new int[4]), new WordStructure("Denizen", new int[4]), new WordStructure("Parasite", new int[4]), new WordStructure("Organism", new int[4]), new WordStructure("Worm", new int[4]), new WordStructure("Oonge", new int[4]), new WordStructure("Bwarp", new int[4]) };
+    [SerializeField] private WordStructure[] wormAdjectivesBad = { new WordStructure("Guzzling", new int[4]), new WordStructure("Fleshy", new int[4]), new WordStructure("Sopping", new int[4]), new WordStructure("Throbbing", new int[4]), new WordStructure("Promiscuous", new int[4]), new WordStructure("Flaccid", new int[4]), new WordStructure("Erect", new int[4]), new WordStructure("Gaping", new int[4]) };
+    [SerializeField] private WordStructure[] wormNounsBad = { new WordStructure("Guzzler", new int[4]), new WordStructure("Pervert", new int[4]), new WordStructure("Fucko", new int[4]), new WordStructure("Pissbaby", new int[4]) };
+
+    List<WordStructure> availableWormAdjectives = new List<WordStructure>();
+    List<WordStructure> availableWormNouns = new List<WordStructure>();
+
     private Room mostRecentRoom;
 
     internal List<int> takenColors = new List<int>();
@@ -41,8 +49,13 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     }
     void Start()
     {
-        ConnectAndGiveDavidYourIPAddress(); //Immediately start trying to connect to master server
+        RefreshWormNames();             //Generates the list of potential worm names
+        GenerateRandomNickname(true);   //Generates a random nickname on start
+
+        if (FindObjectOfType<AutoJoinRoom>() != null)
+            ConnectAndGiveDavidYourIPAddress(); //Immediately start trying to connect to master server
     }
+
     private void OnDestroy()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
@@ -70,6 +83,13 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         PhotonNetwork.ConnectUsingSettings();
         Debug.Log("Trying To Connect To Server...");
     }
+
+    public void DisconnectFromServer()
+    {
+        PhotonNetwork.Disconnect();
+        Debug.Log("Disconnecting From Server...");
+    }
+
     public void OnCreateRoom(string roomName, RoomOptions roomOptions = null, Hashtable customRoomSettings = null)
     {
         if(roomOptions == null)
@@ -106,7 +126,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         if (lobbyUI != null)
         {
             lobbyUI.UpdateRoomList();
-            lobbyUI.ShowLaunchButton(false);
+            lobbyUI.ShowMenuState(LobbyMenuState.NICKNAME, true);
         }
 
         PhotonNetwork.LeaveRoom();
@@ -119,10 +139,14 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         base.OnConnectedToMaster();
 
         // Setting up the lobby
-        if (joinRoomOnLoad && !PhotonNetwork.InRoom)
+        LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
+        //Update room information
+        if (lobbyUI != null)
         {
-            JoinLobby();
+            lobbyUI.UpdateLoadingScreenMessage("Joining The Lobby...");
         }
+
+        JoinLobby();
     }
 
     public void JoinLobby()
@@ -144,13 +168,11 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         //If there is a lobby in the scene, show the title screen
         if (lobbyUI != null)
         {
-            lobbyUI.OpenMenu("title");
+            lobbyUI.SwitchMenu(LobbyMenuState.ONLINE);
         }
 
         Debug.Log("Joined a lobby.");
         base.OnJoinedLobby();
-
-        GenerateRandomNickname();
 
         // Setting up the room options
         if (joinRoomOnLoad && !PhotonNetwork.InRoom)
@@ -162,28 +184,75 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         }
     }
 
-    //List of random adjectives and nouns to name random players
-    private readonly string[] wormAdjectives = { "Unfortunate", "Sad", "Despairing", "Grotesque", "Despicable", "Abhorrent", "Regrettable", "Incorrigible", "Greasy", "Platonic", "Sinister", "Hideous", "Glum", "Blasphemous", "Malignant", "Undulating", "Treacherous", "Hostile", "Slimy", "Squirming", "Blubbering", "Twisted", "Manic", "Slippery", "Wet", "Moist", "Lugubrious", "Tubular", "Little", "Erratic", "Pathetic" };
-    private readonly string[] wormNouns = { "Invertebrate", "Wormlet", "Creature", "Critter", "Fool", "Goon", "Specimen", "Homonculus", "Grubling", "Snotling", "Wormling", "Nightcrawler", "Stinker", "Rapscallion", "Scalliwag", "Beastling", "Crawler", "Larva", "Dingus", "Freak", "Blighter", "Cretin", "Dink", "Unit", "Denizen", "Parasite", "Organism" };
-    private readonly string[] wormAdjectivesBad = { "Guzzling", "Fleshy", "Sopping", "Throbbing", "Promiscuous", "Flaccid", "Erect", "Gaping" };
-    private readonly string[] wormNounsBad = { "Guzzler", "Pervert", "Fucko", "Pissbaby" };
+    /// <summary>
+    /// Refreshes the list of potential worm adjectives and nouns.
+    /// </summary>
+    public void RefreshWormNames()
+    {
+        availableWormAdjectives = new List<WordStructure>();
+        availableWormNouns = new List<WordStructure>();
+
+        availableWormAdjectives.AddRange(wormAdjectives);
+        availableWormNouns.AddRange(wormNouns);
+
+        if (useFunnyWords)
+        {
+            availableWormAdjectives.AddRange(wormAdjectivesBad);
+            availableWormNouns.AddRange(wormNounsBad);
+        }
+    }
 
     /// <summary>
     /// Generates a random nickname for the player.
     /// </summary>
-    private void GenerateRandomNickname()
+    /// <param name="setNickname">If true, this sets the name for the player.</param>
+    public void GenerateRandomNickname(bool setNickname = false)
+    {
+        Debug.Log("Generating Random Nickname...");
+
+        WordStructure currentAdjective = GenerateRandomAdjective();
+        WordStructure currentNoun = GenerateRandomNoun();
+
+        LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
+
+        //If there is a lobby in the scene, update the player name text
+        if (lobbyUI != null)
+            lobbyUI.UpdateNameText(currentAdjective, currentNoun);
+
+        //If set nickname is true, set the player nickname in the settings
+        if (setNickname)
+            SetPlayerNickname(currentAdjective, currentNoun);
+    }
+
+    /// <summary>
+    /// Generates a random adjective for the player nickname.
+    /// </summary>
+    /// <returns>A random adjective.</returns>
+    private WordStructure GenerateRandomAdjective()
     {
         Random.InitState(System.DateTime.Now.Millisecond);  //Seeds the randomizer
-        List<string> realWormAdjectives = new List<string>(wormAdjectives);
-        List<string> realWormNouns = new List<string>(wormNouns);
-        if (useFunnyWords)
-        {
-            realWormAdjectives.AddRange(wormAdjectivesBad);
-            realWormNouns.AddRange(wormNounsBad);
-        }
+        List<WordStructure> availableWormAdjectives = new List<WordStructure>();
 
-        string currentWormName = realWormAdjectives[Random.Range(0, realWormAdjectives.Count)] + " " + realWormNouns[Random.Range(0, realWormNouns.Count)];
-        SetPlayerNickname(currentWormName);
+        availableWormAdjectives.AddRange(wormAdjectives);
+        if (useFunnyWords)
+            availableWormAdjectives.AddRange(wormAdjectivesBad);
+
+        return availableWormAdjectives[Random.Range(0, availableWormAdjectives.Count)];
+    }
+
+    /// <summary>
+    /// Generates a random noun for the player nickname.
+    /// </summary>
+    /// <returns>A random noun.</returns>
+    private WordStructure GenerateRandomNoun()
+    {
+        Random.InitState(System.DateTime.Now.Millisecond);  //Seeds the randomizer
+
+        availableWormNouns.AddRange(wormNouns);
+        if (useFunnyWords)
+            availableWormNouns.AddRange(wormNounsBad);
+
+        return availableWormNouns[Random.Range(0, availableWormNouns.Count)];
     }
 
     /// <summary>
@@ -204,7 +273,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         //If there is a lobby in the scene, display room information
         if (lobbyUI != null)
         {
-            lobbyUI.OpenMenu("room");
+            lobbyUI.SwitchMenu(LobbyMenuState.ROOM);
         }
     }
     public override void OnCreateRoomFailed(short returnCode, string message)
@@ -220,7 +289,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         if (lobbyUI != null)
         {
             lobbyUI.UpdateErrorMessage(errorMessage);
-            lobbyUI.OpenMenu("error");
+            lobbyUI.SwitchMenu(LobbyMenuState.ERROR);
         }
     }
     public override void OnJoinedRoom()
@@ -235,8 +304,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         if (lobbyUI != null) //If there is a lobby in the scene, display room information
         {
             lobbyUI.UpdateRoomList();
-            lobbyUI.OpenMenu("room");
-            lobbyUI.ShowLaunchButton(true);
+            lobbyUI.SwitchMenu(LobbyMenuState.ROOM);
+            lobbyUI.ShowMenuState(LobbyMenuState.NICKNAME, false);
         }
 
         //Cleanup:
@@ -254,7 +323,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         if (lobbyUI != null)
         {
             lobbyUI.UpdateErrorMessage("Join Room Failed. Reason: " + message);
-            lobbyUI.OpenMenu("error");
+            lobbyUI.SwitchMenu(LobbyMenuState.ERROR);
         }
     }
     public override void OnPlayerEnteredRoom(Player newPlayer)
@@ -283,12 +352,13 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
         if (lobbyUI != null)
         {
-            lobbyUI.OpenMenu("title");
+            lobbyUI.SwitchMenu(LobbyMenuState.ONLINE);
         }
 
         //Cleanup:
         DeSpawnNetworkPlayer(); //De-spawn local network player whenever player leaves a room
     }
+
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
         //base.OnRoomListUpdate(roomList);
@@ -303,9 +373,39 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             lobbyUI.UpdateLobbyList(roomList);
         }
     }
+
     public override void OnDisconnected(DisconnectCause cause)
     {
         Debug.Log("Disconnected from server for reason " + cause.ToString());
+
+        LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
+
+        //If there is a lobby in the scene, go back to the starting menu
+        if (lobbyUI != null)
+        {
+            lobbyUI.SwitchMenu(LobbyMenuState.START);
+        }
+    }
+
+    // When the master client leaves the room, we transfer object ownership to new master client.
+    public override void OnMasterClientSwitched(Player newMasterClient)
+    {
+        Debug.Log("New Master Client: " + newMasterClient.NickName);
+
+        // Transfer ownership of all objects owned by the old master client to the new master client
+        PhotonView[] views = PhotonView.FindObjectsOfType<PhotonView>();
+        // photonView components have to be instantiated on the Photon network for ownership to transfer.
+        foreach (PhotonView view in views)
+        {
+            if (view.Owner == PhotonNetwork.MasterClient)
+            {
+                view.TransferOwnership(newMasterClient);
+
+                // Updates the ReadyUpManager
+                if (ReadyUpManager.instance != null)
+                    ReadyUpManager.instance.UpdateStatus(ReadyUpManager.instance.localPlayerTube.GetTubeNumber());
+            }
+        }
     }
 
     //FUNCTIONALITY METHODS:
@@ -323,9 +423,9 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         localNetworkPlayer = null;                                                            //Remove reference to destroyed reference player
     }
 
-    public void SetPlayerNickname(string name)
+    public void SetPlayerNickname(WordStructure adjective, WordStructure noun, bool playWormSound = false)
     {
-        string currentName = name;
+        string currentName = adjective.word + " " + noun.word;
         bool duplicateNameExists = true;
         int counter = 2;
 
@@ -336,6 +436,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
                 currentName = name + " " + counter.ToString();
                 counter++;
             }
+
             else
             {
                 duplicateNameExists = false;
@@ -343,7 +444,14 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         }
 
         PhotonNetwork.NickName = currentName;
+        PlayerSettingsController.Instance.charData.playerAdjective = adjective;
+        PlayerSettingsController.Instance.charData.playerNoun = noun;
         PlayerSettingsController.Instance.charData.playerName = PhotonNetwork.NickName;
+
+        if (playWormSound)
+        {
+            //Plays the sound of the worm's nickname when setting it
+        }
     }
 
     //UTILITY METHODS:
