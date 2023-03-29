@@ -151,7 +151,7 @@ public class LobbyUIScript : MonoBehaviour
             currentAdjective = NetworkManagerScript.instance.GetAvailableWormAdjectives().Count - 1;
 
         PlayerPrefs.SetInt("WormAdjective", currentAdjective);
-        NetworkManagerScript.instance.SetPlayerNickname(NetworkManagerScript.instance.GetAvailableWormAdjectives()[currentAdjective], PlayerSettingsController.Instance.charData.playerNoun);
+        NetworkManagerScript.instance.SetPlayerNickname(NetworkManagerScript.instance.GetTotalWormAdjectives()[currentAdjective], NetworkManagerScript.instance.GetTotalWormNouns()[PlayerPrefs.GetInt("WormNoun")]);
         UpdateNameText(currentAdjective, currentNoun);
     }
 
@@ -165,7 +165,11 @@ public class LobbyUIScript : MonoBehaviour
             currentNoun = NetworkManagerScript.instance.GetAvailableWormNouns().Count - 1;
 
         PlayerPrefs.SetInt("WormNoun", currentNoun);
-        NetworkManagerScript.instance.SetPlayerNickname(PlayerSettingsController.Instance.charData.playerAdjective, NetworkManagerScript.instance.GetAvailableWormNouns()[currentNoun]);
+
+        Debug.Log("Worm Adjective: " + PlayerPrefs.GetInt("WormAdjective"));
+        Debug.Log("Worm Noun: " + PlayerPrefs.GetInt("WormNoun"));
+
+        NetworkManagerScript.instance.SetPlayerNickname(NetworkManagerScript.instance.GetTotalWormAdjectives()[PlayerPrefs.GetInt("WormAdjective")], NetworkManagerScript.instance.GetTotalWormNouns()[currentNoun]);
         UpdateNameText(currentAdjective, currentNoun);
     }
 
