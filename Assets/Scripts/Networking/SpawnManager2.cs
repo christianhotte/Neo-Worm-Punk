@@ -47,32 +47,20 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
         instance = null;
     }
 
-    // Moves the local demo player to a spawn point.
-    public void MoveDemoPlayerToSpawnPoint()
+    /// <summary>
+    /// Moves a player to a spawn point in the tube.
+    /// </summary>
+    /// <param name="tubeIndex">The index for the tube that we want to put the player into.</param>
+    public void MoveDemoPlayerToSpawnPoint(int tubeIndex = 0)
     {
-        LockerTubeController spawnTube = GetEmptyTube();
-        if (spawnTube != null)
-        {
-            spawnTube.occupied = true;
-            PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
-            PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
+        LockerTubeController spawnTube;
+        if (tubeIndex == 0)
+            spawnTube = GetEmptyTube();
+        else
+            spawnTube = FindObjectOfType<TubeManager>().GetTubeByNumber(tubeIndex);
 
-            if (ReadyUpManager.instance != null)
-            {
-                ReadyUpManager.instance.localPlayerTube = spawnTube;
-                ReadyUpManager.instance.UpdateStatus(spawnTube.GetTubeNumber());
-                ReadyUpManager.instance.localPlayerTube.SpawnPlayerName(NetworkManagerScript.instance.GetLocalPlayerName());
-                NetworkManagerScript.localNetworkPlayer.UpdateTakenColorsOnJoin();
-                ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
-                if (PhotonNetwork.IsMasterClient)
-                    ReadyUpManager.instance.localPlayerTube.ShowHostSettings(true); //Show the settings if the player being moved is the master client
-            }
-            
-        }
-    }
-    public void MoveDemoPlayerToSpawnPoint(int tubeIndex)
-    {
-        LockerTubeController spawnTube = FindObjectOfType<TubeManager>().GetTubeByNumber(tubeIndex);
+        Debug.Log("Tube Being Occupied: TestTube" + spawnTube.GetTubeNumber() + " By " + NetworkManagerScript.instance.GetLocalPlayerName());
+
         if (spawnTube != null)
         {
             spawnTube.occupied = true;
@@ -96,11 +84,11 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
     {
         TubeManager tubeManager = FindObjectOfType<TubeManager>();
 
-        for (int x = 0; x < tubeManager.roomTubes.Count; x++)
+        for (int x = 1; x <= tubeManager.roomTubes.Count; x++)
         {
             foreach (LockerTubeController tube in tubeManager.roomTubes)
             {
-                if (tube.GetTubeNumber() == x + 1)
+                if (tube.GetTubeNumber() == x)
                 {
                     if (!tube.occupied) return tube;
                 }

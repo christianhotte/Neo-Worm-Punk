@@ -146,6 +146,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
         if (PhotonNetwork.InRoom) Debug.Log("Successfully Connected To " + roomName);
     }
+
     public void LeaveRoom()
     {
         LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();

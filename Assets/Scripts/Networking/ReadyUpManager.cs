@@ -135,9 +135,11 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     [PunRPC]
     public void RPC_UpdateTubeOccupation(bool[] tubeStates)
     {
-        for (int i = 0; i < 6; i++)
-        {
+        List<LockerTubeController> roomTubes = FindObjectOfType<TubeManager>().roomTubes;
 
+        for (int i = 0; i < roomTubes.Count; i++)
+        {
+            //roomTubes[i] = 
         }
     }
 
