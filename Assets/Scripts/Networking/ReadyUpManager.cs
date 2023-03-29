@@ -170,6 +170,16 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     }
 
     /// <summary>
+    /// Hides the host settings in all of the tubes.
+    /// </summary>
+    public void HideTubeHostSettings()
+    {
+        //Hide the host settings for all tubes
+        foreach (var tube in FindObjectOfType<TubeManager>().roomTubes)
+            tube.ShowHostSettings(false);
+    }
+
+    /// <summary>
     /// Check all of the lever values to see if everyone is ready.
     /// </summary>
     private int GetAllPlayersReady()

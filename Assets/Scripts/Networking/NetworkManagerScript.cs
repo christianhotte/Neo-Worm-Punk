@@ -465,7 +465,11 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
                 // Updates the ReadyUpManager
                 if (ReadyUpManager.instance != null)
+                {
+                    ReadyUpManager.instance.HideTubeHostSettings();
                     ReadyUpManager.instance.UpdateStatus(ReadyUpManager.instance.localPlayerTube.GetTubeNumber());
+                    ReadyUpManager.instance.localPlayerTube.ShowHostSettings(true);
+                }
             }
         }
     }
