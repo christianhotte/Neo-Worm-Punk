@@ -73,7 +73,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             GenerateRandomNickname(true);
         else
         {
-            SetPlayerNickname(totalWormAdjectives[PlayerPrefs.GetInt("WormAdjective")], totalWormNouns[PlayerPrefs.GetInt("WormNoun")]);
+            if (PhotonNetwork.IsConnected) SetPlayerNickname(totalWormAdjectives[PlayerPrefs.GetInt("WormAdjective")], totalWormNouns[PlayerPrefs.GetInt("WormNoun")]);
 
             LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
 
