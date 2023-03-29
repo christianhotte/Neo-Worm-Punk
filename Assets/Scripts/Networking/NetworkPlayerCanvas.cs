@@ -8,9 +8,7 @@ using Photon.Voice.PUN;
 public class NetworkPlayerCanvas : MonoBehaviour
 {
     private Canvas canvas;
-    private PhotonVoiceView photonVoiceView;
-
-    [SerializeField, Tooltip("The image to show when the player is recording.")] private Image recorderSprite;
+    [SerializeField, Tooltip("The Network Player's PhotonVoiceView component.")] private PhotonVoiceView photonVoiceView;
     [SerializeField, Tooltip("The image to show when the player is speaking.")] private Image speakerSprite;
 
     private void Awake()
@@ -18,16 +16,13 @@ public class NetworkPlayerCanvas : MonoBehaviour
         canvas = GetComponent<Canvas>();
         if (canvas != null && canvas.worldCamera == null)
             canvas.worldCamera = Camera.main;
-
-        photonVoiceView = GetComponentInParent<PhotonVoiceView>();
     }
 
 
     // Update is called once per frame
     private void Update()
     {
-        //Shows the recording or speaker sprite when either action is occurring
-        recorderSprite.enabled = photonVoiceView.IsRecording;
+        //Shows the speaker sprite when speaking is occurring
         speakerSprite.enabled = photonVoiceView.IsSpeaking;
     }
 
