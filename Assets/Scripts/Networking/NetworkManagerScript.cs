@@ -95,7 +95,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             // The master client is only spawning 1 ReadyUpManager.
             if (ReadyUpManager.instance == null && PhotonNetwork.IsMasterClient)
             {
-                PhotonNetwork.Instantiate(readyUpManagerName, Vector3.zero, Quaternion.identity);
+                //PhotonNetwork.Instantiate(readyUpManagerName, Vector3.zero, Quaternion.identity);
+                PhotonNetwork.InstantiateRoomObject(readyUpManagerName, Vector3.zero, Quaternion.identity);
             }
         }
     }
@@ -146,6 +147,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
         if (PhotonNetwork.InRoom) Debug.Log("Successfully Connected To " + roomName);
     }
+
     public void LeaveRoom()
     {
         LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
@@ -465,7 +467,11 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
                 // Updates the ReadyUpManager
                 if (ReadyUpManager.instance != null)
+                {
+                    ReadyUpManager.instance.HideTubeHostSettings();
                     ReadyUpManager.instance.UpdateStatus(ReadyUpManager.instance.localPlayerTube.GetTubeNumber());
+                    ReadyUpManager.instance.localPlayerTube.ShowHostSettings(true);
+                }
             }
         }
     }

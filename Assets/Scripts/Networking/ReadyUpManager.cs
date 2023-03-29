@@ -135,9 +135,11 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     [PunRPC]
     public void RPC_UpdateTubeOccupation(bool[] tubeStates)
     {
-        for (int i = 0; i < 6; i++)
-        {
+        List<LockerTubeController> roomTubes = FindObjectOfType<TubeManager>().roomTubes;
 
+        for (int i = 0; i < roomTubes.Count; i++)
+        {
+            //roomTubes[i] = 
         }
     }
 
@@ -167,6 +169,16 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
 
         Debug.Log(message);
         playerReadyText.text = message; // Display the message in the scene
+    }
+
+    /// <summary>
+    /// Hides the host settings in all of the tubes.
+    /// </summary>
+    public void HideTubeHostSettings()
+    {
+        //Hide the host settings for all tubes
+        foreach (var tube in FindObjectOfType<TubeManager>().roomTubes)
+            tube.ShowHostSettings(false);
     }
 
     /// <summary>

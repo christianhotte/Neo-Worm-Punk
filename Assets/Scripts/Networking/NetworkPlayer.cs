@@ -451,6 +451,7 @@ public class NetworkPlayer : MonoBehaviour
             LockerTubeController tube = FindObjectOfType<TubeManager>().GetTubeByNumber(tubeNumber);
             tube.occupied = false;
             tube.UpdateLights(false);
+            Debug.Log("TestTube" + tubeNumber + " Is Being Vacated...");
         }
         if (ReadyUpManager.instance != null)
         {
