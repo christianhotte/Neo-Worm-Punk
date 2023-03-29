@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class NetworkedArenaElement : MonoBehaviour
 {
+    public NetworkPlayer activatingPlayer;
     // Start is called before the first frame update
     void Start()
     {
@@ -14,5 +15,9 @@ public class NetworkedArenaElement : MonoBehaviour
     void Update()
     {
         
+    }
+    public void ActivateTrap(NetworkPlayer Trapper)
+    {
+
     }
 }

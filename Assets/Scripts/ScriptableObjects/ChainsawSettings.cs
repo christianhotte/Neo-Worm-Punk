@@ -35,9 +35,9 @@ public class ChainsawSettings : ScriptableObject
     [Min(0), Tooltip("How rapidly blade moves to and from reverse grip position.")]                     public float reverseGripLerpRate;
     [Min(0), Tooltip("How rapidly blade returns from reverse grip position when blade is retracting.")] public float reverseGripReturnRate;
     [Header("Feel & Input:")]
-    [Range(0, 1), Tooltip("How much player needs to squeeze the trigger in order to activate the blade.")]           public float triggerThreshold = 1;
-    [Range(0, 1), Tooltip("How much player needs to release the trigger in order to sheath the blade.")]             public float releaseThreshold = 0.5f;
-    [Tooltip("Lower and upper bounds of speed at which player can swing blade to activate/extend plasma extender.")] public Vector2 swingSpeedRange;
+    [MinMaxSlider(0, 1), Tooltip("How much player needs to squeeze the trigger in order to activate/release the blade.")] public Vector2 gripThresholds;
+    [MinMaxSlider(0, 1), Tooltip("How much player needs to squeeze the trigger in order to activate/release the blade.")] public Vector2 triggerThresholds;
+    [Tooltip("Lower and upper bounds of speed at which player can swing blade to activate/extend plasma extender.")]      public Vector2 swingSpeedRange;
     [Header("Sounds:")]
     [Tooltip("Sound chainsaw makes when it first extends.")]                                 public AudioClip extendSound;
     [Tooltip("Sound chainsaw makes while it is actively running.")]                          public AudioClip runningSound;

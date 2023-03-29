@@ -11,6 +11,8 @@ public class ShotgunSettings : ScriptableObject
     [Header("Mechanical Properties:")]
     [Tooltip("Name of projectile prefab fired by this weapon (make sure this refers to a projectile in the Resources/Projectiles folder).")] public string projectileResourceName;
     [Min(1), Tooltip("Maximum number of shots which can be loaded into weapon (not necessarily equal to number of barrels).")]               public int maxLoadedShots = 2;
+    [Min(1), Tooltip("Number of projectiles spawned whenever weapon is fired.")]                                                             public int projectilesPerShot = 1;
+    [Range(0, 90), Tooltip("Maximum random spread angle added to every projectile fired.")]                                                  public float shotSpread = 0;
     [Range(0, 90), Tooltip("Angle which barrels snap to when breach is open.")]                                                              public float breakAngle = 45;
     [Min(0), Tooltip("How much time weapon needs to be left open for in order for it to be reloaded.")]                                      public float cooldownTime = 0.7f;
     [Min(0), Tooltip("If both shotguns are fired within this amount of time, player will get a speed boost.")]                               public float doubleFireTime = 0.25f;
@@ -34,6 +36,7 @@ public class ShotgunSettings : ScriptableObject
     [Min(0), Tooltip("Time to wait after opening breach before allowing swing-close assistance.")] public float swingCloseWait;
     [Tooltip("When true, shotguns will only bounce player when shooting directly at a wall.")]     public bool wallBoostOnly;
     [Tooltip("Enables natural shotgun recoil boosting.")]                                          public bool neutralFireBoost = false;
+    [Min(0), Tooltip("Time player has to hold eject button to activate secondary mode.")]          public float modeHoldTime = 0.25f;
     [Space()]
     [Min(0), Tooltip("Approximate number of seconds it takes weapon to rotate 180 degrees during reverse fire procedure.")]          public float reverseSpeed = 0.15f;
     [Min(0), Tooltip("Minimum duration between reverse button presses (prevents spamming that jams up guns).")]                      public float reverseButtonCooldown = 0.2f;

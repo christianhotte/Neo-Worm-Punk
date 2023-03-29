@@ -31,7 +31,7 @@ public class Projectile : MonoBehaviourPunCallbacks
     private float timeAlive;                   //How much time this projectile has been alive for
     private protected float estimatedLifeTime; //Approximate projectile lifetime calculated based on velocity and range
 
-    private protected bool isHook; //Whether or not this projectile is a hook (set by hook script)
+    internal bool isHook;          //Whether or not this projectile is a hook (set by hook script)
     private Vector3 prevTargetPos; //Previous position of target, used for velocity prediction
     private Material origMat;      //Original material projectile had when spawned
 
@@ -418,9 +418,9 @@ public class Projectile : MonoBehaviourPunCallbacks
     private protected virtual void HitObject(RaycastHit hitInfo)
     {
         //Initialization:
-        transform.position = hitInfo.point;                               //Move projectile to its hit position
-        totalDistance += hitInfo.distance;                                //Add the final amount of distance projectile had to travel to get there
-        photonView.RPC("RPC_Move", RpcTarget.Others, transform.position); //Move all networked projectiles to hit position
+        transform.position = hitInfo.point;                                                              //Move projectile to its hit position
+        totalDistance += hitInfo.distance;                                                               //Add the final amount of distance projectile had to travel to get there
+        if (PhotonNetwork.IsConnected) photonView.RPC("RPC_Move", RpcTarget.Others, transform.position); //Move all networked projectiles to hit position
 
         //Look for strikeable scripts:
         NetworkPlayer targetPlayer = hitInfo.collider.GetComponentInParent<NetworkPlayer>();     //Try to get network player from hit collider
@@ -457,7 +457,7 @@ public class Projectile : MonoBehaviourPunCallbacks
             {
                 ExplosionController explosion = Instantiate(settings.explosionPrefab, transform.position, transform.rotation).GetComponent<ExplosionController>(); //Instantiate the explosion prefab and get reference to its script
                 explosion.originPlayerID = originPlayerID;                                                                                                         //Make sure explosion can't hit its own player
-                photonView.RPC("RPC_Explode", RpcTarget.Others);                                                                                                   //Create explosions from networked projectiles
+                if (PhotonNetwork.IsConnected) photonView.RPC("RPC_Explode", RpcTarget.Others);                                                                    //Create explosions from networked projectiles
             }
         }
 
@@ -471,12 +471,12 @@ public class Projectile : MonoBehaviourPunCallbacks
     private protected virtual void BurnOut()
     {
         //Mid-air explosion:
-        if (!photonView.IsMine) return; //Make sure non-main projectiles cannot burn out
+        if (PhotonNetwork.IsConnected && !photonView.IsMine) return; //Make sure non-main projectiles cannot burn out (only valid while projectiles are on the network)
         if (settings.explosionPrefab != null) //Only explode if projectile has an explosion prefab
         {
             ExplosionController explosion = Instantiate(settings.explosionPrefab, transform.position, transform.rotation).GetComponent<ExplosionController>(); //Instantiate an explosion at burnout point
             explosion.originPlayerID = originPlayerID;                                                                                                         //Make sure explosion can't hit its own player
-            photonView.RPC("RPC_Explode", RpcTarget.Others);                                                                                                   //Create explosions from networked projectiles
+            if (PhotonNetwork.IsConnected) photonView.RPC("RPC_Explode", RpcTarget.Others);                                                                    //Create explosions from networked projectiles
         }
 
         //Cleanup:
