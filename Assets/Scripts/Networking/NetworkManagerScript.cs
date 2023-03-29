@@ -421,6 +421,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
         //Cleanup:
         DeSpawnNetworkPlayer(); //De-spawn local network player whenever player leaves a room
+        if (SceneManager.GetActiveScene().name != GameSettings.titleScreenScene)
+            PhotonNetwork.LoadLevel(GameSettings.titleScreenScene);
     }
 
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
