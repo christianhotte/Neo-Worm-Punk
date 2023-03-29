@@ -4,12 +4,16 @@ using UnityEngine;
 
 public class TurretTrap : NetworkedArenaElement 
 {
-    public int shotCap = 6,shotsStored=0;
+    public int shotCap = 6,shotsStored=0,playerID;
     public bool firing = false, cooldown = false;
+    public Transform barrelPos;
+    public TrapTrigger connectedTrigger;
+    public GameObject ProjectilePrefab;
+    private NetworkedArenaElement NetworkController;
     // Start is called before the first frame update
     void Start()
     {
-        
+        NetworkController = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<NetworkedArenaElement>();
     }
 
     // Update is called once per frame
@@ -17,8 +21,12 @@ public class TurretTrap : NetworkedArenaElement
     {
         
     }
-    private void OnTriggerEnter(Collider other)
+    public void AddShot(int TriggeringPlayerID)
     {
-        
+        shotsStored++;
+        if (shotsStored == shotCap)
+        {
+            NetworkController.ActivateTrap(TriggeringPlayerID, this);
+        }
     }
 }

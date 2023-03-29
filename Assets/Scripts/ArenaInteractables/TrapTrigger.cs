@@ -9,6 +9,8 @@ public class TrapTrigger : Targetable
 {
     private CrusherTrap crushScript;
     private HoopBoost hoopScript;
+    private int lastPlayerID;
+    private TurretTrap turretScript;
     public GameObject indicatorLight,attatchedTrap;
     public GameObject[] MultiTrapsAttacthed;
     internal bool cooldown = false,multiTrigger=false;
@@ -42,10 +44,19 @@ public class TrapTrigger : Targetable
             ActivatingPlayer = player;
             if (!cooldown)
             {
+                lastPlayerID = playerID;
                 onTrapActivated.Invoke();
             }
       }
   }
+    public void TurretTrap()
+    {
+        cooldown = true;
+        turretScript = attatchedTrap.GetComponent<TurretTrap>();
+        turretScript.connectedTrigger = this.GetComponent<TrapTrigger>();
+        turretScript.AddShot(lastPlayerID);
+
+    }
     public void CrusherTrap()
     {
         cooldown = true;
