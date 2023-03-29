@@ -137,30 +137,32 @@ public class NetworkPlayer : MonoBehaviour
     }
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (photonView.IsMine) //Local player has loaded into a new scene
+        if (PhotonNetwork.IsConnectedAndReady)  //If the NetworkPlayer is on the network and ready for calls
         {
-            //Local scene setup:
-            RigToActivePlayer(); //Re-apply rig to new scene's PlayerController
-
-            if (scene.name == NetworkManagerScript.instance.mainMenuScene) 
-            { 
-                photonView.RPC("RPC_MakeInvisible", RpcTarget.OthersBuffered);  //Hide all remote players when entering main menu
-            }
-            else if (scene.name == NetworkManagerScript.instance.roomScene) 
+            if (photonView.IsMine) //Local player has loaded into a new scene
             {
-                PhotonNetwork.AutomaticallySyncScene = true;                    // Start syncing scene with other players
-                photonView.RPC("RPC_MakeVisible", RpcTarget.OthersBuffered);    //Show all remote players when entering locker room
-            }
-        }
-        else
-        {
-            trail.enabled = !GameManager.Instance.InMenu();               //Disable trail while in menus
-            if (scene.name == GameSettings.roomScene) trail.enabled = false; //Super disable trail if in the locker room
-        }
+                //Local scene setup:
+                RigToActivePlayer(); //Re-apply rig to new scene's PlayerController
 
-        //Generic scene load checks:
-        foreach (Collider c in transform.GetComponentsInChildren<Collider>()) c.enabled = !GameManager.Instance.InMenu(); //Always disable colliders if networkPlayer is in a menu scene
-        
+                if (scene.name == NetworkManagerScript.instance.mainMenuScene)
+                {
+                    photonView.RPC("RPC_MakeInvisible", RpcTarget.OthersBuffered);  //Hide all remote players when entering main menu
+                }
+                else if (scene.name == NetworkManagerScript.instance.roomScene)
+                {
+                    PhotonNetwork.AutomaticallySyncScene = true;                    // Start syncing scene with other players
+                    photonView.RPC("RPC_MakeVisible", RpcTarget.OthersBuffered);    //Show all remote players when entering locker room
+                }
+            }
+            else
+            {
+                trail.enabled = !GameManager.Instance.InMenu();               //Disable trail while in menus
+                if (scene.name == GameSettings.roomScene) trail.enabled = false; //Super disable trail if in the locker room
+            }
+
+            //Generic scene load checks:
+            foreach (Collider c in transform.GetComponentsInChildren<Collider>()) c.enabled = !GameManager.Instance.InMenu(); //Always disable colliders if networkPlayer is in a menu scene
+        }
     }
 
     //FUNCTIONALITY METHODS:

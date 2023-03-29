@@ -89,8 +89,6 @@ public class WristUIController : MonoBehaviour
         PhotonNetwork.LeaveRoom();  //Leave the room
         PhotonNetwork.LeaveLobby(); //Leave the lobby
         PhotonNetwork.Disconnect(); //Disconnects from the server
-
-        SceneManager.LoadScene(GameSettings.titleScreenScene);    //Go back to the main menu
     }
 
     /// <summary>
