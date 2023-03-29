@@ -73,7 +73,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             GenerateRandomNickname(true);
         else
         {
-            if (PhotonNetwork.IsConnected) SetPlayerNickname(totalWormAdjectives[PlayerPrefs.GetInt("WormAdjective")], totalWormNouns[PlayerPrefs.GetInt("WormNoun")]);
+            SetPlayerNickname(totalWormAdjectives[PlayerPrefs.GetInt("WormAdjective")], totalWormNouns[PlayerPrefs.GetInt("WormNoun")]);
 
             LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
 
@@ -521,7 +521,9 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         PhotonNetwork.NickName = currentName;
         PlayerSettingsController.Instance.charData.playerAdjective = adjective;
         PlayerSettingsController.Instance.charData.playerNoun = noun;
-        PlayerSettingsController.Instance.charData.playerName = PhotonNetwork.NickName;
+
+        Debug.Log("Current Name: " + currentName);
+        Debug.Log("Photon Name: " + PhotonNetwork.NickName);
 
         if (playWormSound)
         {

@@ -102,6 +102,9 @@ public class PlayerEquipment : MonoBehaviour
     /// <returns></returns>
     private IEnumerator MoveHolster(bool holster = true)
     {
+        //Validation:
+        yield return new WaitUntil(() => player.cam.transform.parent != null);
+
         //Initialize:
         holsterTransitioning = true;                                                                                                                    //Indicate that equipment is in the process of being holstered
         Transform localSpaceParent = player.cam.transform.parent;                                                                                       //Use camera offset as local space because hands are childed to it
