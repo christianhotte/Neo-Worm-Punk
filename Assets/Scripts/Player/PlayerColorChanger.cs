@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum ColorOptions { DEFAULT, RED, ORANGE, YELLOW, GREEN, BLUE, TEAL, VIOLET, MAGENTA, BLACK }
+public enum ColorOptions { DEFAULT, RED, ORANGE, YELLOW, GREEN, BLUE, CYAN, VIOLET, RAZZMATAZZ, LAVENDER }
 
 public class PlayerColorChanger : MonoBehaviour
 {
@@ -51,17 +51,17 @@ public class PlayerColorChanger : MonoBehaviour
             case (int)ColorOptions.BLUE:
                 newColorText = "BLUE";
                 break;
-            case (int)ColorOptions.TEAL:
-                newColorText = "TEAL";
+            case (int)ColorOptions.CYAN:
+                newColorText = "CYAN";
                 break;
             case (int)ColorOptions.VIOLET:
                 newColorText = "VIOLET";
                 break;
-            case (int)ColorOptions.MAGENTA:
-                newColorText = "MAGENTA";
+            case (int)ColorOptions.RAZZMATAZZ:
+                newColorText = "RAZZMATAZZ";
                 break;
-            case (int)ColorOptions.BLACK:
-                newColorText = "BLACK";
+            case (int)ColorOptions.LAVENDER:
+                newColorText = "LAVENDER";
                 break;
             default:
                 newColorText = "DEFAULT";
@@ -73,6 +73,7 @@ public class PlayerColorChanger : MonoBehaviour
         NetworkManagerScript.instance.UpdateTakenColorList(currentColorOptionSelected, (ColorOptions)colorOption);
 
         PlayerSettingsController.Instance.charData.playerColor = newColor;   //Set the player color in the character data
+        NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["Color"] = colorOption;
         currentColorOptionSelected = (ColorOptions)colorOption;
 
         PlayerController.instance.ApplyAndSyncSettings(); //Apply settings to player (NOTE TO PETER: Call this whenever you want to change a setting and sync it across the network)

@@ -12,18 +12,6 @@ using RootMotion.FinalIK;
 /// </summary>
 public class PlayerEquipment : MonoBehaviour
 {
-    //Classes, Enums & Structs:
-    /// <summary>
-    /// Describes a complex haptic event used by PlayerEquipment.
-    /// </summary>
-    [System.Serializable]
-    public struct HapticData
-    {
-        [Min(0), Tooltip("Base intensity of haptic impulse (should be within range 0 - 1).")] public float amplitude;
-        [Min(0), Tooltip("Total length (in seconds) of haptic impulse.")]                     public float duration;
-        [Tooltip("Curve used to modulate magnitude throughout duration of impulse.")]         public AnimationCurve behaviorCurve;
-    }
-
     //Objects & Components:
     internal PlayerController player;            //Player currently controlling this equipment
     private Transform basePlayerTransform;       //Master player object which all player equipment (and XR Origin) is under
@@ -107,36 +95,6 @@ public class PlayerEquipment : MonoBehaviour
     }
 
     //EVENTS & COROUTINES:
-    /// <summary>
-    /// Plays a haptic sequence using an AnimationCurve to modify amplitude over time.
-    /// </summary>
-    /// <returns></returns>
-    private IEnumerator HapticEvent(AnimationCurve hapticCurve, float maxAmplitude, float fullDuration)
-    {
-        //Validity checks:
-        if (fullDuration <= 0) { Debug.LogWarning("Tried to play haptic event with duration " + fullDuration + " . This is too small."); yield break; } //Do not run if duration is zero
-
-        //Get valid devices:
-        List<UnityEngine.XR.InputDevice> devices = new List<UnityEngine.XR.InputDevice>(); //Initialize list to store input devices
-        #pragma warning disable CS0618                                                     //Disable obsolescence warning
-        UnityEngine.XR.InputDevices.GetDevicesWithRole(deviceRole, devices);               //Find all input devices counted as right hand
-        #pragma warning restore CS0618                                                     //Re-enable obsolescence warning
-        for (int x = 0; x < devices.Count;) //Iterate through list of input devices (manually indexing iterator)
-        {
-            var device = devices[x];                                                                                                       //Get current device
-            if (device.TryGetHapticCapabilities(out HapticCapabilities capabilities)) if (capabilities.supportsImpulse) { x++; continue; } //Skip devices which are good to go
-            devices.RemoveAt(x);                                                                                                           //Remove incompatible devices from list
-        }
-
-        //Play haptic event over time:
-        for (float timePassed = 0; timePassed <= fullDuration; timePassed += Time.fixedDeltaTime) //Iterate over time for full duration of haptic event
-        {
-            float currentInterpolant = timePassed / fullDuration;                                               //Get interpolant based on current progression of time
-            float currentAmplitude = hapticCurve.Evaluate(currentInterpolant) * maxAmplitude;                   //Use given curve to get an amplitude value
-            foreach (var device in devices) device.SendHapticImpulse(0, currentAmplitude, Time.fixedDeltaTime); //Send a brief haptic pulse at current amplitude (duration is only until next update)
-            yield return new WaitForFixedUpdate();                                                              //Wait for next fixed update
-        }
-    }
     /// <summary>
     /// Moves preferred holster transform to position of actual holster or back to hand, then updates holster status if moving back to hand.
     /// </summary>
@@ -467,27 +425,9 @@ public class PlayerEquipment : MonoBehaviour
     /// </summary>
     /// <param name="amplitude">Strength of vibration (between 0 and 1).</param>
     /// <param name="duration">Duration of vibration (in seconds).</param>
-    public void SendHapticImpulse(float amplitude, float duration)
-    {
-        List<UnityEngine.XR.InputDevice> devices = new List<UnityEngine.XR.InputDevice>(); //Initialize list to store input devices
-        #pragma warning disable CS0618                                                     //Disable obsolescence warning
-        UnityEngine.XR.InputDevices.GetDevicesWithRole(deviceRole, devices);               //Find all input devices counted as right hand
-        #pragma warning restore CS0618                                                     //Re-enable obsolescence warning
-        foreach (var device in devices) //Iterate through list of devices identified as right hand
-        {
-            if (device.TryGetHapticCapabilities(out HapticCapabilities capabilities)) //Device has haptic capabilities
-            {
-                if (capabilities.supportsImpulse) device.SendHapticImpulse(0, amplitude, duration); //Send impulse if supported by device
-            }
-        }
-    }
+    public void SendHapticImpulse(float amplitude, float duration) { if (player != null) player.SendHapticImpulse(deviceRole, amplitude, duration); }
     public void SendHapticImpulse(Vector2 properties) { SendHapticImpulse(properties.x, properties.y); }
-    public void SendHapticImpulse(HapticData properties)
-    {
-        if (properties.duration == 0 || properties.amplitude == 0) return;                                           //Do nothing if player has given a null haptic setting
-        if (properties.behaviorCurve.keys.Length <= 1) SendHapticImpulse(properties.amplitude, properties.duration); //Use simpler impulse method if no curve is given
-        else StartCoroutine(HapticEvent(properties.behaviorCurve, properties.amplitude, properties.duration));       //Use coroutine to deploy more complex haptic impulses
-    }
+    public void SendHapticImpulse(PlayerController.HapticData properties) { SendHapticImpulse(properties.amplitude, properties.duration); }
     /// <summary>
     /// Plays one-shot of given sound, taking into account current volume settings (specific to SFX) (also checks if sound is null so you don't have to).
     /// </summary>

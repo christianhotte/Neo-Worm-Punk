@@ -5,6 +5,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.SceneManagement;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
+using ExitGames.Client.Photon;
 
 /* Code was referenced from https://www.youtube.com/watch?v=KHWuTBmT1oI
  * https://www.youtube.com/watch?v=zPZK7C5_BQo&list=PLhsVv9Uw1WzjI8fEBjBQpTyXNZ6Yp1ZLw */
@@ -57,6 +58,9 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     {
         useFunnyWords = PlayerPrefs.GetInt("FunnyWords") == 1;
         SetNameOnStart();
+
+        // Subscribes event handlers
+        PhotonNetwork.AddCallbackTarget(this);
 
         if (FindObjectOfType<AutoJoinRoom>() != null)
             ConnectAndGiveDavidYourIPAddress(); //Immediately start trying to connect to master server
@@ -382,7 +386,29 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
         base.OnPlayerLeftRoom(otherPlayer);
-        Debug.Log(otherPlayer.NickName + " has left.");
+        Debug.Log(otherPlayer.NickName + " has left or disconnected.");
+
+        // Raises an event on player left room.
+        PhotonNetwork.RaiseEvent(1, otherPlayer.ActorNumber, RaiseEventOptions.Default, SendOptions.SendReliable);
+
+        //Removes the color from the list of colors
+        RemoveColor((int)otherPlayer.CustomProperties["Color"]);
+    }
+
+    // This method is called when a custom event is received
+    public void OnEvent(byte eventCode, object content, int senderId)
+    {
+        if (eventCode == 1)
+        {
+            int actorNumber = (int)content;
+            // Do something with the actorNumber of the player who left
+
+            // Updates the ReadyUpManager
+            if (ReadyUpManager.instance != null)
+            {
+                ReadyUpManager.instance.UpdateStatus(ReadyUpManager.instance.localPlayerTube.GetTubeNumber());
+            }
+        }
     }
 
     public override void OnLeftRoom()
