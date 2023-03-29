@@ -349,11 +349,10 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             lobbyUI.ShowMenuState(LobbyMenuState.NICKNAME, false);
         }
 
-        localNetworkPlayer.SetNetworkPlayerProperties("IsReady", false);
-
         //Cleanup:
         Debug.Log("Joined " + PhotonNetwork.CurrentRoom.Name + " room."); //Indicate that room has been joined
         SpawnNetworkPlayer();                                             //Always spawn a network player instance when joining a room
+        localNetworkPlayer.SetNetworkPlayerProperties("IsReady", false);
     }
 
     public override void OnJoinRoomFailed(short returnCode, string message)
