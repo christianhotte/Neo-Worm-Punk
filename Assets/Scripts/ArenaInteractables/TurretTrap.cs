@@ -13,7 +13,7 @@ public class TurretTrap : NetworkedArenaElement
     // Start is called before the first frame update
     void Start()
     {
-        NetworkController = GameObject.FindGameObjectWithTag("NetworkController").GetComponent<NetworkedArenaElement>();
+        NetworkController = GameObject.FindGameObjectWithTag("NetworkManager").GetComponent<NetworkedArenaElement>();
     }
 
     // Update is called once per frame

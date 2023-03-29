@@ -61,8 +61,8 @@ public class TrapTrigger : Targetable
     {
         cooldown = true;
         crushScript = attatchedTrap.GetComponent<CrusherTrap>();
-        crushScript.triggerScript = this.GetComponent<TrapTrigger>();
-        crushScript.ActivateCrusher();
+        crushScript.connectedTrigger = this.GetComponent<TrapTrigger>();
+        crushScript.ActivateCrusher(lastPlayerID);
     }
     public void SlimeHoop()
     {

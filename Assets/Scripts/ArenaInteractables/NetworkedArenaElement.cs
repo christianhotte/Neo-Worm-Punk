@@ -5,7 +5,6 @@ using UnityEngine;
 public class NetworkedArenaElement : MonoBehaviour
 {
     public int activatingPlayer;
-    internal bool cooldown=false;
     public float cooldownTime = 10;
     private Projectile projScript;
     // Start is called before the first frame update
@@ -21,7 +20,6 @@ public class NetworkedArenaElement : MonoBehaviour
     }
     public void ActivateTrap(int Trapper,TurretTrap trap)
     {
-        cooldown = true;
         for(int i = 0; i <= trap.shotsStored; i++)
         {
             GameObject projInstace = Instantiate(trap.ProjectilePrefab);
@@ -34,7 +32,6 @@ public class NetworkedArenaElement : MonoBehaviour
     }
     public void ActivateTrap(int Trapper, CrusherTrap trap, List<NetworkPlayer> PlayersInTrap)
     {
-        cooldown = true;
         foreach (NetworkPlayer player in PlayersInTrap)
         {
 
@@ -42,19 +39,21 @@ public class NetworkedArenaElement : MonoBehaviour
             player.RPC_Hit(100, Trapper);
         }
         PlayersInTrap.Clear();
-        StartCoroutine(TrapCooldown(cooldownTime));
+        StartCoroutine(TrapCooldown(cooldownTime,trap));
     }
 
-    public IEnumerator TrapCooldown(float cooldownTime)
+    public IEnumerator TrapCooldown(float cooldownTime, CrusherTrap trap)
     {
         yield return new WaitForSeconds(cooldownTime);
-        cooldown = false;
+        trap.connectedTrigger.cooldown = false;
+        trap.cooldown = false;
+        trap.PlayersInTrap.Clear();
     }
     public IEnumerator TrapCooldown(float cooldownTime, TurretTrap trap)
     {
         yield return new WaitForSeconds(cooldownTime);
         trap.cooldown = false;
+        trap.connectedTrigger.cooldown = false;
         trap.shotsStored = 0;
-        cooldown = false;
     }
 }
