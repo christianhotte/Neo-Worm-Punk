@@ -35,11 +35,19 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
             PlayerController.photonView.RPC("RPC_GiveMeSpawnpoint", RpcTarget.MasterClient, PlayerController.photonView.ViewID);
         }
 
+        //Wait until the local player tube is assigned
+        StartCoroutine(WaitUntilLocalPlayerTube());
+    }
+
+    /// <summary>
+    /// Waits until the local player tube is assigned to update the ReadyUpManager status.
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator WaitUntilLocalPlayerTube()
+    {
+        yield return new WaitUntil(() => ReadyUpManager.instance != null && ReadyUpManager.instance.localPlayerTube != null);
         // Updates the ReadyUpManager
-        if (ReadyUpManager.instance != null)
-        {
-            ReadyUpManager.instance.UpdateStatus(ReadyUpManager.instance.localPlayerTube.GetTubeNumber());
-        }
+        ReadyUpManager.instance.UpdateStatus(ReadyUpManager.instance.localPlayerTube.GetTubeNumber());
     }
 
     private void OnDestroy()
