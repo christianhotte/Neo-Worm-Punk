@@ -224,14 +224,14 @@ public class LobbyUIScript : MonoBehaviour
             Destroy(trans.gameObject);
         }
 
-        if (GameSettings.debugMode)
+        /*if (GameSettings.debugMode)
         {
             // Loops through the list of dummy rooms.
             for (int i = 0; i < 10; i++)
             {
                 Instantiate(roomListItemPrefab, roomListContent).GetComponent<RoomListItem>().UpdateText("Dummy Room " + (i + 1));
             }
-        }
+        }*/
 
         // Loops through the list of rooms.
         for (int i = 0; i < roomListInfo.Count; i++)

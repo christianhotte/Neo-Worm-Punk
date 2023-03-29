@@ -95,7 +95,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             // The master client is only spawning 1 ReadyUpManager.
             if (ReadyUpManager.instance == null && PhotonNetwork.IsMasterClient)
             {
-                PhotonNetwork.Instantiate(readyUpManagerName, Vector3.zero, Quaternion.identity);
+                //PhotonNetwork.Instantiate(readyUpManagerName, Vector3.zero, Quaternion.identity);
+                PhotonNetwork.InstantiateRoomObject(readyUpManagerName, Vector3.zero, Quaternion.identity);
             }
         }
     }
