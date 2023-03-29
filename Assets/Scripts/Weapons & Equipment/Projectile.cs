@@ -579,7 +579,15 @@ public class Projectile : MonoBehaviourPunCallbacks
         //Check demo player:
         PlayerController hitRealPlayer = hit.collider.GetComponentInParent<PlayerController>();         //Try to get real player controller from collision
         if (hitRealPlayer == null) hitRealPlayer = hit.collider.GetComponent<PlayerController>();       //Try again to get real player controller from collision
-        if (hitRealPlayer != null && PlayerController.photonView.ViewID == originPlayerID) return true; //Return true if raycast hits projectile's own demo player
+        if (hitRealPlayer != null)
+        {
+            if (PlayerController.photonView != null)
+            {
+                if (PlayerController.photonView.ViewID == originPlayerID) return true; //Return true if raycast hits projectile's own demo player
+            }
+            else return true;
+        }
+            
 
         return false; //No possible self-hit could be detected, return false
     }

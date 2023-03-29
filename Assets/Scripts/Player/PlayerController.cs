@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.XR;
 using Unity.XR.CoreUtils;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.InputSystem;
@@ -16,6 +17,18 @@ using UnityEngine.Rendering;
 /// </summary>
 public class PlayerController : MonoBehaviour
 {
+    //Classes, Enums & Structs:
+    /// <summary>
+    /// Describes a complex haptic event used by PlayerEquipment.
+    /// </summary>
+    [System.Serializable]
+    public struct HapticData
+    {
+        [Min(0), Tooltip("Base intensity of haptic impulse (should be within range 0 - 1).")] public float amplitude;
+        [Min(0), Tooltip("Total length (in seconds) of haptic impulse.")]                     public float duration;
+        [Tooltip("Curve used to modulate magnitude throughout duration of impulse.")]         public AnimationCurve behaviorCurve;
+    }
+
     //Objects & Components:
     [Tooltip("Singleton instance of player controller.")]                                    public static PlayerController instance;
     [Tooltip("Singleton instance of this client's photonNetwork (on their NetworkPlayer).")] public static PhotonView photonView;
@@ -33,6 +46,7 @@ public class PlayerController : MonoBehaviour
     internal Camera cam;                       //Primary camera for VR rendering, located on player head
     internal PlayerInput input;                //Input manager component used by player to send messages to hands and such
     internal SkinnedMeshRenderer bodyRenderer; //Mesh renderer for player's physical worm body
+    internal PlayerBodyManager bodyManager;    //Reference to script on player that manages body collisions and special effects
     private AudioSource audioSource;           //Main player audio source
     private Transform camOffset;               //Object used to offset camera position in case of weirdness
     private InputActionMap inputMap;           //Input map which player uses
@@ -51,6 +65,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField, Tooltip("Amount by which to move torso down (allows player to collapse more naturally).")]         private float torsoVerticalOffset = 10f;
     [SerializeField, Tooltip("Makes sure that player torso is always below player head.")]                              private bool keepTorsoCentered = true;
     [SerializeField, Range(0, 1), Tooltip("Amount by which player has to pull the thumb stick in order to snap-turn.")] private float flickStickThreshold;
+    [Space()]
+    [Tooltip("How quickly player slides down horizontal inclines.")]                                                            public float slipSpeed = 5;
+    [MinMaxSlider(0, 90), Tooltip("Minimum and maximum angles for determining whether or not player will slide on a surface.")] public Vector2 slipAngleRange;
     [Header("Sound Settings:")]
     [SerializeField, Tooltip("SFX played when player strikes a target.")] private AudioClip targetHitSound;
     [SerializeField, Tooltip("SFX played when player kills a target.")]   private AudioClip targetKillSound;
@@ -122,6 +139,7 @@ public class PlayerController : MonoBehaviour
         combatHUD = GetComponentInChildren<CombatHUDController>();                                                                                                             //Get the combat HUD canvas
         screenShaker = cam.GetComponent<ScreenShakeVR>();                                                                                                                      //Get screenshaker script from camera object
         playerModel = GetComponentInChildren<VRIK>().transform;                                                                                                                //Get player model component
+        bodyManager = GetComponentInChildren<PlayerBodyManager>(); if (bodyManager == null) bodyRb.gameObject.AddComponent<PlayerBodyManager>();                               //Make sure player has a body manager component
         foreach (Volume volume in GetComponentsInChildren<Volume>()) //Iterate through Volume components in children
         {
             if (volume.name.Contains("Health")) healthVolume = volume; //Get health volume
@@ -377,7 +395,10 @@ public class PlayerController : MonoBehaviour
         timeUntilRegen = 0;                                                    //Reset regen timer
         print("Local player has been killed!");
     }
-
+    private void MakeNotWiggly()
+    {
+        //foreach (Rigidbody rigidbody in playerModel.GetComponentsInChildren<Rigidbody>()).
+    }
     /// <summary>
     /// Safely shakes the player's eyeballs.
     /// </summary>
@@ -388,6 +409,39 @@ public class PlayerController : MonoBehaviour
     public void ShakeScreen(Vector2 shakeSettings) { screenShaker.Shake(shakeSettings.x, shakeSettings.y); }
 
     //UTILITY METHODS:
+    /// <summary>
+    /// Sends a haptic impulse to this equipment's associated controller.
+    /// </summary>
+    /// <param name="amplitude">Strength of vibration (between 0 and 1).</param>
+    /// <param name="duration">Duration of vibration (in seconds).</param>
+    public void SendHapticImpulse(InputDeviceRole deviceRole, float amplitude, float duration)
+    {
+        List<UnityEngine.XR.InputDevice> devices = new List<UnityEngine.XR.InputDevice>(); //Initialize list to store input devices
+        #pragma warning disable CS0618                                                     //Disable obsolescence warning
+        UnityEngine.XR.InputDevices.GetDevicesWithRole(deviceRole, devices);               //Find all input devices counted as right hand
+        #pragma warning restore CS0618                                                     //Re-enable obsolescence warning
+        foreach (var device in devices) //Iterate through list of devices identified as right hand
+        {
+            if (device.TryGetHapticCapabilities(out HapticCapabilities capabilities)) //Device has haptic capabilities
+            {
+                if (capabilities.supportsImpulse) device.SendHapticImpulse(0, amplitude, duration); //Send impulse if supported by device
+            }
+        }
+    }
+    public void SendHapticImpulse(InputDeviceRole deviceRole, Vector2 properties) { SendHapticImpulse(deviceRole, properties.x, properties.y); }
+    /// <summary>
+    /// Sends a haptic impulse to the given hand (or both).
+    /// </summary>
+    /// <param name="hand"></param>
+    /// <param name="amplitude"></param>
+    /// <param name="duration"></param>
+    public void SendHapticImpulse(CustomEnums.Handedness hand, float amplitude, float duration)
+    {
+        InputDeviceRole role = InputDeviceRole.Generic;                                    //Default to using generic device role
+        if (hand == CustomEnums.Handedness.Left) role = InputDeviceRole.LeftHanded;        //Use left hand if indicated
+        else if (hand == CustomEnums.Handedness.Right) role = InputDeviceRole.RightHanded; //Use right hand if indicated
+        SendHapticImpulse(role, amplitude, duration);                                      //Pass to actual haptic method
+    }
     public bool InCombat() => inCombat;
     public bool InMenu() => inMenu;
     public void SetCombat(bool combat)

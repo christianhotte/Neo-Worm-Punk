@@ -25,7 +25,20 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     {
         instance = this;
         DontDestroyOnLoad(gameObject);
+        SceneManager.sceneLoaded += OnSceneLoad;
     }
+
+    //Called when a scene is loaded
+    private void OnSceneLoad(Scene scene, LoadSceneMode loadSceneMode)
+    {
+/*        //If the locker room was loaded, update the locker text and the player colors
+        if(scene.name == GameSettings.roomScene)
+        {
+            playersInRoom = NetworkManagerScript.instance.GetMostRecentRoom().PlayerCount;
+            UpdateReadyText();
+        }*/
+    }
+
     private void Update()
     {
         if (debugReadyUpAll)
@@ -41,11 +54,12 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
             }
         }
     }
+
     public void LeverStateChanged()
     {
         LeverController localLever = localPlayerTube.GetComponentInChildren<LeverController>();
         NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().isReady = (localLever.GetLeverState() == LeverController.HingeJointState.Max);
-        NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["IsReady"] = NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().isReady;
+        NetworkManagerScript.localNetworkPlayer.SetNetworkPlayerProperties("IsReady", NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().isReady);
         NetworkManagerScript.localNetworkPlayer.SyncStats();
         UpdateStatus(localPlayerTube.GetTubeNumber());
     }

@@ -50,7 +50,7 @@ public class ExplosionController : MonoBehaviour
         transform.localScale = Vector3.one * newScale;                    //Apply new scale to transform
 
         //Check for player hits:
-        if (PlayerController.photonView.ViewID == originPlayerID) //Only have master version of explosions check for hits
+        if (PlayerController.photonView != null && PlayerController.photonView.ViewID == originPlayerID) //Only have master version of explosions check for hits
         {
             foreach (NetworkPlayer player in NetworkPlayer.instances) //Iterate through all player instances in scene
             {

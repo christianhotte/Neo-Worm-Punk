@@ -13,6 +13,7 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
     {
         instance = this;
     }
+
     void Start()
     {
         demoPlayer = PlayerController.instance.gameObject;
@@ -34,6 +35,7 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
             PlayerController.photonView.RPC("RPC_GiveMeSpawnpoint", RpcTarget.MasterClient, PlayerController.photonView.ViewID);
         }
     }
+
     private void OnDestroy()
     {
         instance = null;
@@ -55,6 +57,7 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
                 ReadyUpManager.instance.UpdateStatus(spawnTube.GetTubeNumber());
                 ReadyUpManager.instance.localPlayerTube.SpawnPlayerName(NetworkManagerScript.instance.GetLocalPlayerName());
                 NetworkManagerScript.localNetworkPlayer.UpdateTakenColorsOnJoin();
+                ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
             }
             
         }
@@ -74,6 +77,7 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
                 ReadyUpManager.instance.UpdateStatus(spawnTube.GetTubeNumber());
                 ReadyUpManager.instance.localPlayerTube.SpawnPlayerName(NetworkManagerScript.instance.GetLocalPlayerName());
                 NetworkManagerScript.localNetworkPlayer.UpdateTakenColorsOnJoin();
+                ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
             }
         }
     }

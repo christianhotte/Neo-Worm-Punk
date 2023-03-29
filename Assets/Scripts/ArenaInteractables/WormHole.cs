@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using Unity.XR.CoreUtils;
-public class WormHole : MonoBehaviour
+public class WormHole : NetworkedArenaElement
 {
     public Transform holePos1, holePos2,wormZone,playerHead,wormZoneShifted;
     public GameObject wormZoneParticles,wormZoneInstance,playerCam;

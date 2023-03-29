@@ -90,7 +90,7 @@ public class NetworkPlayer : MonoBehaviour
     /// </summary>
     private void InitializePhotonPlayerSettings()
     {
-        photonPlayerSettings.Add("Color", -1);
+        photonPlayerSettings.Add("Color", 0);
         photonPlayerSettings.Add("IsReady", false);
         PlayerController.photonView.Owner.SetCustomProperties(photonPlayerSettings);
     }
@@ -232,7 +232,7 @@ public class NetworkPlayer : MonoBehaviour
     /// </summary>
     public void SyncColors()
     {
-        photonView.RPC("UpdateTakenColors", RpcTarget.AllBuffered, NetworkManagerScript.instance.takenColors.ToArray()); //Send data to every player on the network (including this one)
+        photonView.RPC("UpdateTakenColors", RpcTarget.AllBuffered); //Send data to every player on the network (including this one)
     }
 
     /// <summary>
@@ -242,44 +242,67 @@ public class NetworkPlayer : MonoBehaviour
     {
         if(ReadyUpManager.instance != null)
         {
-            int startingColorOption = (int)PlayerSettingsController.ColorToColorOptions(PlayerSettingsController.Instance.charData.playerColor);
-            int currentColorOption = startingColorOption;
+            List<int> takenColors = new List<int>();
 
-            for (int i = 0; i < PlayerSettingsController.NumberOfPlayerColors(); i++)
+            bool mustReplaceColor = false;
+
+            for (int i = 0; i < NetworkManagerScript.instance.GetPlayerList().Length; i++)
             {
-                bool successfullyTakenColor = NetworkManagerScript.instance.TryToTakeColor((ColorOptions)(currentColorOption));
+                Player currentPlayer = NetworkManagerScript.instance.GetPlayerList()[i];
 
-                if (successfullyTakenColor)
+                //If the current player is the owner of this network player, skip them
+                if (currentPlayer == photonView.Owner)
+                    continue;
+
+                Debug.Log("Checking " + currentPlayer.NickName + "'s Color: " + (ColorOptions)currentPlayer.CustomProperties["Color"]);
+                takenColors.Add((int)currentPlayer.CustomProperties["Color"]);
+
+                if ((int)currentPlayer.CustomProperties["Color"] == (int)photonView.Owner.CustomProperties["Color"])
                 {
-                    Debug.Log("Setting Color On Join To " + (ColorOptions)currentColorOption);
-                    ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().ChangePlayerColor(currentColorOption);
-                    break;
+                    Debug.Log((ColorOptions)currentPlayer.CustomProperties["Color"] + " is taken.");
+                    mustReplaceColor = true;
                 }
+            }
 
-                //If the player is already a color that is taken
-                else if (currentColorOption == (int)photonView.Owner.CustomProperties["Color"])
-                    break;
-
-                currentColorOption++;
-                if (currentColorOption >= PlayerSettingsController.NumberOfPlayerColors())
-                    currentColorOption = 0;
+            //If the player must replace their color, change their color
+            if (mustReplaceColor)
+            {
+                for(int i = 0; i < PlayerSettingsController.NumberOfPlayerColors(); i++)
+                {
+                    //If the taken color list does not contain the current color list, take it
+                    if (!takenColors.Contains(i))
+                    {
+                        ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().ChangePlayerColor(i);
+                        SetNetworkPlayerProperties("Color", i);
+                        break;
+                    }
+                }
             }
         }
     }
 
+    /// <summary>
+    /// Sets the custom properties of a PUN player object.
+    /// </summary>
+    /// <param name="key">The property to change.</param>
+    /// <param name="value">The value of the property.</param>
+    public void SetNetworkPlayerProperties(string key, object value)
+    {
+        Hashtable playerProperties = photonView.Owner.CustomProperties;
+        playerProperties[key] = value;
+        photonView.Owner.SetCustomProperties(playerProperties);
+    }
+
     //REMOTE METHODS:
     [PunRPC]
-    public void UpdateTakenColors(int[] listOfColors)
+    public void UpdateTakenColors()
     {
         Debug.Log("Updating Taken Color List...");
 
         if(ReadyUpManager.instance != null)
         {
-            //Refreshes the list of taken colors
-            NetworkManagerScript.instance.takenColors = new List<int>();
-            NetworkManagerScript.instance.takenColors.AddRange(listOfColors);
-
-            if(FindObjectOfType<TubeManager>() != null)
+            //Refreshes the tubes
+            if (FindObjectOfType<TubeManager>() != null)
                 foreach (var tube in FindObjectOfType<TubeManager>().roomTubes)
                     tube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
         }
