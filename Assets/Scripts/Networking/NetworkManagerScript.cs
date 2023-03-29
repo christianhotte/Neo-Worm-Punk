@@ -349,6 +349,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             lobbyUI.ShowMenuState(LobbyMenuState.NICKNAME, false);
         }
 
+        localNetworkPlayer.SetNetworkPlayerProperties("IsReady", false);
+
         //Cleanup:
         Debug.Log("Joined " + PhotonNetwork.CurrentRoom.Name + " room."); //Indicate that room has been joined
         SpawnNetworkPlayer();                                             //Always spawn a network player instance when joining a room
@@ -545,7 +547,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
         PhotonNetwork.LoadLevel(sceneName);
 
-        //Unready
+        // Unready
         localNetworkPlayer.SetNetworkPlayerProperties("IsReady", false);
 
         GameManager.Instance.levelTransitionActive = false;

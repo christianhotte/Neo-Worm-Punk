@@ -34,6 +34,12 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
         {
             PlayerController.photonView.RPC("RPC_GiveMeSpawnpoint", RpcTarget.MasterClient, PlayerController.photonView.ViewID);
         }
+
+        // Updates the ReadyUpManager
+        if (ReadyUpManager.instance != null)
+        {
+            ReadyUpManager.instance.UpdateStatus(ReadyUpManager.instance.localPlayerTube.GetTubeNumber());
+        }
     }
 
     private void OnDestroy()
