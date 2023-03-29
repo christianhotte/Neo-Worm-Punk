@@ -149,26 +149,31 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     /// </summary>
     public void UpdateReadyText()
     {
-        playersReady = GetAllPlayersReady();
-        if (playerReadyText == null)
+        if (PhotonNetwork.IsConnectedAndReady)
         {
-            foreach (TextMeshProUGUI tmp in FindObjectsOfType<TextMeshProUGUI>())
+            playersReady = GetAllPlayersReady();
+            if (playerReadyText == null)
             {
-                if (tmp.gameObject.name == "PlayerReadyText") { playerReadyText = tmp; break; }
+                foreach (TextMeshProUGUI tmp in FindObjectsOfType<TextMeshProUGUI>())
+                {
+                    if (tmp.gameObject.name == "PlayerReadyText") { playerReadyText = tmp; break; }
+                }
+
+                if (playerReadyText == null) return;
             }
 
-            if (playerReadyText == null) return;
+            string message = "Players Ready: " + playersReady.ToString() + "/" + PhotonNetwork.CurrentRoom.PlayerCount;
+
+            if (PhotonNetwork.CurrentRoom.PlayerCount < MINIMUM_PLAYERS_NEEDED && !GameSettings.debugMode)
+            {
+                message += "\n<size=25>Not Enough Players To Start.</size>";
+            }
+
+            Debug.Log(message);
+            playerReadyText.text = message; // Display the message in the scene
         }
-
-        string message = "Players Ready: " + playersReady.ToString() + "/" + PhotonNetwork.CurrentRoom.PlayerCount;
-
-        if (PhotonNetwork.CurrentRoom.PlayerCount < MINIMUM_PLAYERS_NEEDED && !GameSettings.debugMode)
-        {
-            message += "\n<size=25>Not Enough Players To Start.</size>";
-        }
-
-        Debug.Log(message);
-        playerReadyText.text = message; // Display the message in the scene
+        else
+            playerReadyText.text = "Not Connected To The Network";
     }
 
     /// <summary>
