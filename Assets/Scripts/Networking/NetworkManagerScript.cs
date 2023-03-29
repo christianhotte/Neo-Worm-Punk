@@ -49,14 +49,13 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         //Initialize:
         if (instance == null) { instance = this; } else Destroy(gameObject); //Singleton-ize this script instance
 
+        SetNameOnStart();
+
         //Get objects & components:
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
     void Start()
     {
-        useFunnyWords = PlayerPrefs.GetInt("FunnyWords") == 1;
-        SetNameOnStart();
-
         // Subscribes event handlers
         PhotonNetwork.AddCallbackTarget(this);
 
@@ -66,6 +65,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
     private void SetNameOnStart()
     {
+        useFunnyWords = PlayerPrefs.GetInt("FunnyWords") == 1;
         SetGlobalWormNameList();        //Generates the total list of potential worm names
         RefreshWormNames();             //Generates the list of available worm names
         //Generates a random nickname on start if the player does not have a saved name
@@ -73,7 +73,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             GenerateRandomNickname(true);
         else
         {
-            if (PhotonNetwork.IsConnected) SetPlayerNickname(totalWormAdjectives[PlayerPrefs.GetInt("WormAdjective")], totalWormNouns[PlayerPrefs.GetInt("WormNoun")]);
+            SetPlayerNickname(totalWormAdjectives[PlayerPrefs.GetInt("WormAdjective")], totalWormNouns[PlayerPrefs.GetInt("WormNoun")]);
 
             LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
 
@@ -90,7 +90,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         // If we are loaded into the Network Locker scene, and we are the master client
-        if (scene.name == roomScene)
+        if (scene.name == GameSettings.roomScene)
         {
             // The master client is only spawning 1 ReadyUpManager.
             if (ReadyUpManager.instance == null && PhotonNetwork.IsMasterClient)
@@ -98,6 +98,11 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
                 //PhotonNetwork.Instantiate(readyUpManagerName, Vector3.zero, Quaternion.identity);
                 PhotonNetwork.InstantiateRoomObject(readyUpManagerName, Vector3.zero, Quaternion.identity);
             }
+        }
+
+        if(scene.name == GameSettings.titleScreenScene)
+        {
+            SetNameOnStart();
         }
     }
 
@@ -516,7 +521,9 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         PhotonNetwork.NickName = currentName;
         PlayerSettingsController.Instance.charData.playerAdjective = adjective;
         PlayerSettingsController.Instance.charData.playerNoun = noun;
-        PlayerSettingsController.Instance.charData.playerName = PhotonNetwork.NickName;
+
+        Debug.Log("Current Name: " + currentName);
+        Debug.Log("Photon Name: " + PhotonNetwork.NickName);
 
         if (playWormSound)
         {
