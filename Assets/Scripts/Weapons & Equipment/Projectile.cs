@@ -31,7 +31,7 @@ public class Projectile : MonoBehaviourPunCallbacks
     private float timeAlive;                   //How much time this projectile has been alive for
     private protected float estimatedLifeTime; //Approximate projectile lifetime calculated based on velocity and range
 
-    private protected bool isHook; //Whether or not this projectile is a hook (set by hook script)
+    internal bool isHook;          //Whether or not this projectile is a hook (set by hook script)
     private Vector3 prevTargetPos; //Previous position of target, used for velocity prediction
     private Material origMat;      //Original material projectile had when spawned
 
