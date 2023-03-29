@@ -31,6 +31,10 @@ public class ChainsawSettings : ScriptableObject
     [Min(0), Tooltip("How quickly wrist lerps to match player hand rotation while chainsaw is deployed.")]        public float wristLerpRate;
     [Min(0), Tooltip("Speed (in degrees per second) at which wrist returns to base rotation during retraction.")] public float wristRotReturnRate;
     [Space()]
+    [Min(0), Tooltip("How long it takes for blade to move into (and from) deflect position.")] public float deflectTransTime;
+    [Min(0), Tooltip("Radius of deflection area while deflection is active.")]                 public float deflectRadius;
+    [Min(0), Tooltip("Speed at which blade rotates during deflection mode.")]                  public float deflectRotRate;
+    [Space()]
     [Range(0, 180), Tooltip("Angle blade turns to when set to reverse mode.")]                          public float reverseGripAngle;
     [Min(0), Tooltip("How rapidly blade moves to and from reverse grip position.")]                     public float reverseGripLerpRate;
     [Min(0), Tooltip("How rapidly blade returns from reverse grip position when blade is retracting.")] public float reverseGripReturnRate;

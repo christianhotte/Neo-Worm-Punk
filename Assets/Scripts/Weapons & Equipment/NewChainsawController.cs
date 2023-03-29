@@ -15,6 +15,7 @@ public class NewChainsawController : PlayerEquipment
         Extending,
         Extended,
         Retracting,
+        Deflecting
     }
 
     //Objects & Components:
@@ -109,7 +110,7 @@ public class NewChainsawController : PlayerEquipment
             timeInMode = 0;                                   //Reset mode time tracker
             timeUntilPulse = settings.extendHaptics.duration; //Set pulse timer to begin pulsing as soon as extend haptics have finished
         }
-        else if (mode == BladeMode.Extended && gripValue < settings.triggerThresholds.x) //Grip has been released enough to re-sheath the chainsaw (always check in case of early release)
+        else if ((mode == BladeMode.Extended || mode == BladeMode.Deflecting) && gripValue < settings.triggerThresholds.x) //Grip has been released enough to re-sheath the chainsaw (always check in case of early release)
         {
             //Switch mode:
             if (handWeapon != null) handWeapon.Holster(false); //Un-holster weapon held in hand if possible
@@ -126,6 +127,28 @@ public class NewChainsawController : PlayerEquipment
                 grindTime = 0;                                                                            //Reset grind time tracker
             }
         }
+        else if (mode == BladeMode.Extended && triggerValue >= settings.triggerThresholds.y) //Activate deflect mode when player squeezes the trigger
+        {
+            //Switch mode:
+            wrist.localRotation = Quaternion.identity; //Make sure wrist is snapped to identity orientation
+            mode = BladeMode.Deflecting;               //Indicate that blade is now deflecting
+            timeInMode = 0;                            //Reset mode time tracker
+
+            //Grinding disengagement:
+            if (grinding) //Player is currently grinding on a surface
+            {
+                grinding = false; //Indicate that player is no longer grinding
+                grindTime = 0;    //Reset grind time tracker
+            }
+        }
+        else if (mode == BladeMode.Deflecting && triggerValue < settings.triggerThresholds.x) //End deflect mode when player releases the trigger
+        {
+            //Switch mode:
+            mode = BladeMode.Extended; //Indicate that blade is no longer in deflect mode
+            timeInMode = 0;            //Reset mode time tracker
+        }
+
+        //Blade movement:
         if (mode == BladeMode.Extending || mode == BladeMode.Retracting) //Blade is moving between primary modes
         {
             //Initialize:
@@ -226,6 +249,21 @@ public class NewChainsawController : PlayerEquipment
             //Return to base rotation:
             wrist.localRotation = Quaternion.RotateTowards(wrist.localRotation, Quaternion.identity, settings.wristRotReturnRate * Time.deltaTime);              //Have wrist return to base rotation
             wristPivot.localRotation = Quaternion.RotateTowards(wristPivot.localRotation, Quaternion.identity, settings.reverseGripReturnRate * Time.deltaTime); //Have wrist pivot return to base rotation
+        }
+        else if (mode == BladeMode.Deflecting) //Blade is currently in deflect mode
+        {
+            //Rotate wrist:
+            //Quaternion targetWristRot = Quaternion.identity;
+            //targetWristRot = Quaternion.RotateTowards(wrist.parent.rotation, targetWristRot, settings.maxWristAngle);  //Clamp rotation to set angular limit
+            //wrist.rotation = Quaternion.Lerp(wrist.rotation, targetWristRot, settings.wristLerpRate * Time.deltaTime); //Lerp wrist toward target rotation
+
+            //Reverse grip:
+            if (wristPivot.localEulerAngles.y != -settings.reverseGripAngle)
+            {
+                Vector3 newPivotRot = wristPivot.localEulerAngles;                                                                         //Get current eulers from pivot
+                newPivotRot.y = Mathf.LerpAngle(newPivotRot.y, -settings.reverseGripAngle, settings.reverseGripLerpRate * Time.deltaTime); //Get new lerped y rotation value for pivot
+                wristPivot.localEulerAngles = newPivotRot;                                                                                 //Apply new eulers to pivot
+            }
         }
     }
     private protected override void FixedUpdate()
