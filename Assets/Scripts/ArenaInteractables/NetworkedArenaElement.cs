@@ -30,6 +30,11 @@ public class NetworkedArenaElement : MonoBehaviour
         }
 
     }
+    public void ActivateTrap(HoopBoost hoopScript)
+    {
+        hoopScript.slimed = true;
+        hoopScript.StartCoroutine(hoopScript.SlimeHoop());
+    }
     public void ActivateTrap(int Trapper, CrusherTrap trap, List<NetworkPlayer> PlayersInTrap)
     {
         foreach (NetworkPlayer player in PlayersInTrap)

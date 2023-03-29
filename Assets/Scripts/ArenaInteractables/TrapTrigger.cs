@@ -74,7 +74,7 @@ public class TrapTrigger : Targetable
                 hoopScript = trap.GetComponent<HoopBoost>();
                 hoopScript.triggerScript = this.GetComponent<TrapTrigger>();
                 hoopScript.slimed = true;
-                StartCoroutine(hoopScript.SlimeTime());
+                StartCoroutine(hoopScript.SlimeHoop());
             }
         }
         else
@@ -82,7 +82,7 @@ public class TrapTrigger : Targetable
             hoopScript = attatchedTrap.GetComponent<HoopBoost>();
             hoopScript.triggerScript = this.GetComponent<TrapTrigger>();
             hoopScript.slimed = true;
-            StartCoroutine(hoopScript.SlimeTime());
+            StartCoroutine(hoopScript.SlimeHoop());
         }
     }
 }
