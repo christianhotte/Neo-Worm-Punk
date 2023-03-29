@@ -7,7 +7,6 @@ public enum ColorOptions { DEFAULT, RED, ORANGE, YELLOW, GREEN, BLUE, CYAN, VIOL
 public class PlayerColorChanger : MonoBehaviour
 {
     private PhysicalButtonController[] colorButtons;
-    private ColorOptions currentColorOptionSelected = ColorOptions.DEFAULT;
 
     // Start is called before the first frame update
     void Start()
@@ -70,11 +69,8 @@ public class PlayerColorChanger : MonoBehaviour
 
         Color newColor = PlayerSettingsController.ColorOptionsToColor((ColorOptions)colorOption);
 
-        NetworkManagerScript.instance.UpdateTakenColorList(currentColorOptionSelected, (ColorOptions)colorOption);
-
         PlayerSettingsController.Instance.charData.playerColor = newColor;   //Set the player color in the character data
-        NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["Color"] = colorOption;
-        currentColorOptionSelected = (ColorOptions)colorOption;
+        NetworkManagerScript.localNetworkPlayer.SetNetworkPlayerProperties("Color", colorOption);
 
         PlayerController.instance.ApplyAndSyncSettings(); //Apply settings to player (NOTE TO PETER: Call this whenever you want to change a setting and sync it across the network)
         Debug.Log("Changing Player Color To " + newColorText);
@@ -89,11 +85,12 @@ public class PlayerColorChanger : MonoBehaviour
             button.EnableButton(true);
         }
 
-        foreach (var color in NetworkManagerScript.instance.takenColors)
+        foreach (var player in NetworkManagerScript.instance.GetPlayerList())
         {
-            colorButtons[color].ShowText(true);
-            colorButtons[color].LockButton(true);
-            colorButtons[color].EnableButton(false);
+            Debug.Log(player.NickName + "'s Color: " + (ColorOptions)player.CustomProperties["Color"]);
+            colorButtons[(int)player.CustomProperties["Color"]].ShowText(true);
+            colorButtons[(int)player.CustomProperties["Color"]].LockButton(true);
+            colorButtons[(int)player.CustomProperties["Color"]].EnableButton(false);
         }
     }
 }

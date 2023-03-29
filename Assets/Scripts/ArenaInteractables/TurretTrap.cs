@@ -2,9 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NetworkedArenaElement : MonoBehaviour
+public class TurretTrap : NetworkedArenaElement 
 {
-    public NetworkPlayer activatingPlayer;
+    public int shotCap = 6,shotsStored=0;
+    public bool firing = false, cooldown = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -16,8 +17,8 @@ public class NetworkedArenaElement : MonoBehaviour
     {
         
     }
-    public void ActivateTrap(NetworkPlayer Trapper)
+    private void OnTriggerEnter(Collider other)
     {
-
+        
     }
 }

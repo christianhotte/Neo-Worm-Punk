@@ -43,8 +43,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
     private Room mostRecentRoom;
 
-    internal List<int> takenColors = new List<int>();
-
     //RUNTIME METHODS:
     private void Awake()
     {
@@ -97,7 +95,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             // The master client is only spawning 1 ReadyUpManager.
             if (ReadyUpManager.instance == null && PhotonNetwork.IsMasterClient)
             {
-                PhotonNetwork.Instantiate(readyUpManagerName, Vector3.zero, Quaternion.identity);
+                //PhotonNetwork.Instantiate(readyUpManagerName, Vector3.zero, Quaternion.identity);
+                PhotonNetwork.InstantiateRoomObject(readyUpManagerName, Vector3.zero, Quaternion.identity);
             }
         }
     }
@@ -148,6 +147,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
         if (PhotonNetwork.InRoom) Debug.Log("Successfully Connected To " + roomName);
     }
+
     public void LeaveRoom()
     {
         LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
@@ -354,6 +354,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         //Cleanup:
         Debug.Log("Joined " + PhotonNetwork.CurrentRoom.Name + " room."); //Indicate that room has been joined
         SpawnNetworkPlayer();                                             //Always spawn a network player instance when joining a room
+        localNetworkPlayer.SetNetworkPlayerProperties("IsReady", false);
     }
 
     public override void OnJoinRoomFailed(short returnCode, string message)
@@ -390,9 +391,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
         // Raises an event on player left room.
         PhotonNetwork.RaiseEvent(1, otherPlayer.ActorNumber, RaiseEventOptions.Default, SendOptions.SendReliable);
-
-        //Removes the color from the list of colors
-        RemoveColor((int)otherPlayer.CustomProperties["Color"]);
+        localNetworkPlayer.SyncColors();
     }
 
     // This method is called when a custom event is received
@@ -422,6 +421,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
         //Cleanup:
         DeSpawnNetworkPlayer(); //De-spawn local network player whenever player leaves a room
+        if (SceneManager.GetActiveScene().name != GameSettings.titleScreenScene)
+            PhotonNetwork.LoadLevel(GameSettings.titleScreenScene);
     }
 
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
@@ -468,7 +469,11 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
                 // Updates the ReadyUpManager
                 if (ReadyUpManager.instance != null)
+                {
+                    ReadyUpManager.instance.HideTubeHostSettings();
                     ReadyUpManager.instance.UpdateStatus(ReadyUpManager.instance.localPlayerTube.GetTubeNumber());
+                    ReadyUpManager.instance.localPlayerTube.ShowHostSettings(true);
+                }
             }
         }
     }
@@ -549,35 +554,10 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
         PhotonNetwork.LoadLevel(sceneName);
 
-        //Unready
-        localNetworkPlayer.photonView.Owner.CustomProperties["IsReady"] = false;
+        // Unready
+        localNetworkPlayer.SetNetworkPlayerProperties("IsReady", false);
 
         GameManager.Instance.levelTransitionActive = false;
-    }
-
-    /// <summary>
-    /// Tries to take the color from the list of colors.
-    /// </summary>
-    /// <param name="currentColor">The color to take.</param>
-    /// <returns>If true, the color was successfully taken.</returns>
-    public bool TryToTakeColor(ColorOptions currentColor)
-    {
-        if (!ColorTaken((int)currentColor))
-        {
-            TakeColor((int)currentColor);
-            return true;
-        }
-
-        return false;
-    }
-
-    public void UpdateTakenColorList(ColorOptions currentColor, ColorOptions newTakenColor)
-    {
-        if (ColorTaken((int)currentColor))
-            RemoveColor((int)currentColor);
-
-        TakeColor((int)newTakenColor);
-        localNetworkPlayer.photonView.Owner.CustomProperties["Color"] = (int)newTakenColor;
     }
 
     public List<WordStructure> GetTotalWormAdjectives() => totalWormAdjectives;
@@ -585,10 +565,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     public List<WordStructure> GetAvailableWormAdjectives() => availableWormAdjectives;
     public List<WordStructure> GetAvailableWormNouns() => availableWormNouns;
     public bool IsUsingFunnyWords() => useFunnyWords;
-
-    public void TakeColor(int colorOption) => takenColors.Add(colorOption);
-    public void RemoveColor(int colorOption) => takenColors.Remove(colorOption);
-    public bool ColorTaken(int colorOption) => takenColors.Contains(colorOption);
 
     public Room GetMostRecentRoom() => mostRecentRoom;
     public string GetCurrentRoom() => PhotonNetwork.CurrentRoom.Name;
