@@ -18,7 +18,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
 
     private const int MINIMUM_PLAYERS_NEEDED = 2;   // The minimum number of players needed for a round to start
 
-    private int playersReady, playersInRoom;
+    private int playersReady;
     internal LockerTubeController localPlayerTube;
 
     private void Awake()
@@ -67,7 +67,6 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     // Once the room is joined.
     public override void OnJoinedRoom()
     {
-        playersInRoom = NetworkManagerScript.instance.GetMostRecentRoom().PlayerCount;
         UpdateReadyText();
 
         // If the amount of players in the room is maxed out, close the room so no more people are able to join.
@@ -84,7 +83,6 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
         {
             if (NetworkManagerScript.instance.GetMostRecentRoom().PlayerCount > 0)
             {
-                playersInRoom = NetworkManagerScript.instance.GetMostRecentRoom().PlayerCount;
                 UpdateReadyText();
             }
         }
@@ -107,8 +105,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
             if (tube != null) tube.UpdateLights(updatedPlayerReady);
 
             // Get the number of players that have readied up
-            playersReady = GetAllPlayersReady();
-            playersInRoom = PhotonNetwork.CurrentRoom.PlayerCount;
+            int playersInRoom = PhotonNetwork.CurrentRoom.PlayerCount;
 
             UpdateReadyText();
 
@@ -138,9 +135,11 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     [PunRPC]
     public void RPC_UpdateTubeOccupation(bool[] tubeStates)
     {
-        for (int i = 0; i < 6; i++)
-        {
+        List<LockerTubeController> roomTubes = FindObjectOfType<TubeManager>().roomTubes;
 
+        for (int i = 0; i < roomTubes.Count; i++)
+        {
+            //roomTubes[i] = 
         }
     }
 
@@ -150,18 +149,20 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     /// </summary>
     public void UpdateReadyText()
     {
+        playersReady = GetAllPlayersReady();
         if (playerReadyText == null)
         {
             foreach (TextMeshProUGUI tmp in FindObjectsOfType<TextMeshProUGUI>())
             {
                 if (tmp.gameObject.name == "PlayerReadyText") { playerReadyText = tmp; break; }
             }
+
             if (playerReadyText == null) return;
         }
 
-        string message = "Players Ready: " + playersReady.ToString() + "/" + playersInRoom;
+        string message = "Players Ready: " + playersReady.ToString() + "/" + PhotonNetwork.CurrentRoom.PlayerCount;
 
-        if (playersInRoom < MINIMUM_PLAYERS_NEEDED && !GameSettings.debugMode)
+        if (PhotonNetwork.CurrentRoom.PlayerCount < MINIMUM_PLAYERS_NEEDED && !GameSettings.debugMode)
         {
             message += "\n<size=25>Not Enough Players To Start.</size>";
         }
@@ -171,16 +172,32 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     }
 
     /// <summary>
+    /// Hides the host settings in all of the tubes.
+    /// </summary>
+    public void HideTubeHostSettings()
+    {
+        //Hide the host settings for all tubes
+        foreach (var tube in FindObjectOfType<TubeManager>().roomTubes)
+            tube.ShowHostSettings(false);
+    }
+
+    /// <summary>
     /// Check all of the lever values to see if everyone is ready.
     /// </summary>
     private int GetAllPlayersReady()
     {
         int playersReady = 0;
 
-        // Gets the amount of players that have a readied lever at lowest state.
+/*        // Gets the amount of players that have a readied lever at lowest state.
         foreach (var players in FindObjectsOfType<NetworkPlayer>())
         {
             if (players.GetNetworkPlayerStats().isReady)
+                playersReady++;
+        }*/
+
+        foreach(var player in NetworkManagerScript.instance.GetPlayerList())
+        {
+            if ((bool)player.CustomProperties["IsReady"])
                 playersReady++;
         }
 
