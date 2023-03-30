@@ -15,6 +15,7 @@ public class NewChainsawController : PlayerEquipment
         Extending,
         Extended,
         Retracting,
+        Deflecting
     }
 
     //Objects & Components:
@@ -38,6 +39,7 @@ public class NewChainsawController : PlayerEquipment
     /// Blade's current behavior state.
     /// </summary>
     internal BladeMode mode = BladeMode.Sheathed;
+    private BladeMode prevMode = BladeMode.Sheathed; //Previous mode blade was in
     internal bool grinding;          //Whether or not player is currently grinding on a surface
     private float grindTime = 0;     //Amount of time chainsaw has been grinding on surface for
     private RaycastHit lastGrindHit; //Data for last surface chainsaw has ground on
@@ -105,16 +107,18 @@ public class NewChainsawController : PlayerEquipment
             if (handWeapon != null) handWeapon.Holster();     //Holster weapon held in hand if possible
             if (settings.extendSound != null) audioSource.PlayOneShot(settings.extendSound); //Play extend sound
             SendHapticImpulse(settings.extendHaptics);        //Play extend haptics
+            prevMode = mode;                                  //Record previous blade mode
             mode = BladeMode.Extending;                       //Indicate that blade is now extending
             timeInMode = 0;                                   //Reset mode time tracker
             timeUntilPulse = settings.extendHaptics.duration; //Set pulse timer to begin pulsing as soon as extend haptics have finished
         }
-        else if (mode == BladeMode.Extended && gripValue < settings.triggerThresholds.x) //Grip has been released enough to re-sheath the chainsaw (always check in case of early release)
+        else if ((mode == BladeMode.Extended || mode == BladeMode.Deflecting) && gripValue < settings.triggerThresholds.x) //Grip has been released enough to re-sheath the chainsaw (always check in case of early release)
         {
             //Switch mode:
             if (handWeapon != null) handWeapon.Holster(false); //Un-holster weapon held in hand if possible
             if (settings.sheathSound != null) audioSource.PlayOneShot(settings.sheathSound); //Play sheath sound
             SendHapticImpulse(settings.retractHaptics);        //Play haptic impulse
+            prevMode = mode;                                   //Record previous blade mode
             mode = BladeMode.Retracting;                       //Indicate that blade is now retracting
             timeInMode = 0;                                    //Reset mode time tracker
 
@@ -126,6 +130,30 @@ public class NewChainsawController : PlayerEquipment
                 grindTime = 0;                                                                            //Reset grind time tracker
             }
         }
+        else if (mode == BladeMode.Extended && triggerValue >= settings.triggerThresholds.y) //Activate deflect mode when player squeezes the trigger
+        {
+            //Switch mode:
+            prevMode = mode;                           //Record previous blade mode
+            mode = BladeMode.Deflecting;               //Indicate that blade is now deflecting
+            wrist.localRotation = Quaternion.identity; //Reset local rotation of the wrist
+            timeInMode = 0;                            //Reset mode time tracker
+
+            //Grinding disengagement:
+            if (grinding) //Player is currently grinding on a surface
+            {
+                grinding = false; //Indicate that player is no longer grinding
+                grindTime = 0;    //Reset grind time tracker
+            }
+        }
+        else if (mode == BladeMode.Deflecting && triggerValue < settings.triggerThresholds.x) //End deflect mode when player releases the trigger
+        {
+            //Switch mode:
+            prevMode = mode;            //Record previous blade mode
+            mode = BladeMode.Extending; //Indicate that blade is no longer in deflect mode
+            timeInMode = 0;             //Reset mode time tracker
+        }
+
+        //Blade movement:
         if (mode == BladeMode.Extending || mode == BladeMode.Retracting) //Blade is moving between primary modes
         {
             //Initialize:
@@ -133,7 +161,14 @@ public class NewChainsawController : PlayerEquipment
             float gripInterpolant = settings.bladePreRetractCurve.Evaluate(gripValue / settings.triggerThresholds.y);       //Get multiplier to apply to retraction distance for true retracted position
             Vector3 bladeExtendPos = bladeOriginPos + (Vector3.forward * settings.bladeTraverseDistance);                   //Get target position blade is extending to (or retracting from)
             Vector3 bladeRetractPos = bladeOriginPos + (gripInterpolant * settings.bladePreRetractDistance * Vector3.back); //Get target position blade is retracting to (or extending from)
+            Vector3 wristStartPos = wristOriginPos;                                                                         //Get starting position of wrist
             Vector3 wristExtendPos = wristOriginPos + (Vector3.forward * settings.wristExtendDistance);                     //Get extended target position of wrist
+            if (prevMode == BladeMode.Deflecting)
+            {
+                wristStartPos = wristOriginPos + (Vector3.forward * settings.deflectWristExtend);
+                if (mode == BladeMode.Extending) bladeRetractPos = bladeOriginPos + (Vector3.forward * settings.deflectRadius);
+                else if (mode == BladeMode.Retracting) bladeExtendPos = bladeOriginPos + (Vector3.forward * settings.deflectRadius);
+            }
 
             //Move blade tip:
             if (mode == BladeMode.Extending) bladeTip.localPosition = Vector3.LerpUnclamped(bladeRetractPos, bladeExtendPos, settings.bladeExtendCurve.Evaluate(timeInterpolant)); //Move extending blade to interpolated position
@@ -142,10 +177,10 @@ public class NewChainsawController : PlayerEquipment
             //Move wrist:
             if (timeInterpolant <= settings.wristDeployPeriod) //Wrist deploys during first part of blade extension/retraction
             {
-                float wristInterpolant = Mathf.InverseLerp(0, settings.wristDeployPeriod, timeInterpolant);                            //Get special interpolant for wrist deployment
-                wristInterpolant = settings.wristDeployCurve.Evaluate(wristInterpolant);                                               //Feed interpolant through animation curve
-                if (mode == BladeMode.Extending) wrist.localPosition = Vector3.Lerp(wristOriginPos, wristExtendPos, wristInterpolant); //Move wrist toward extended position
-                else wrist.localPosition = Vector3.Lerp(wristExtendPos, wristOriginPos, wristInterpolant);                             //Move wrist toward extended position
+                float wristInterpolant = Mathf.InverseLerp(0, settings.wristDeployPeriod, timeInterpolant);                           //Get special interpolant for wrist deployment
+                wristInterpolant = settings.wristDeployCurve.Evaluate(wristInterpolant);                                              //Feed interpolant through animation curve
+                if (mode == BladeMode.Extending) wrist.localPosition = Vector3.Lerp(wristStartPos, wristExtendPos, wristInterpolant); //Move wrist toward extended position
+                else wrist.localPosition = Vector3.Lerp(wristExtendPos, wristStartPos, wristInterpolant);                             //Move wrist toward extended position
             }
             else if (mode == BladeMode.Extending && wrist.localPosition != wristExtendPos) wrist.localPosition = wristExtendPos;  //Make sure wrist reaches its final position
             else if (mode == BladeMode.Retracting && wrist.localPosition != wristOriginPos) wrist.localPosition = wristOriginPos; //Make sure wrist reaches its final position
@@ -160,17 +195,13 @@ public class NewChainsawController : PlayerEquipment
                     wrist.localRotation = Quaternion.identity;      //Return wrist to base rotation
                     wristPivot.localRotation = Quaternion.identity; //Return wrist pivot to base rotation
                 }
+                prevMode = mode;                                                                //Record previous blade mode
                 mode = (mode == BladeMode.Extending ? BladeMode.Extended : BladeMode.Sheathed); //Progress mode to stable state
                 timeInMode = 0;                                                                 //Reset mode timer
             }
 
-            //Stretch blade extender:
-            Vector3 newExtenderScale = bladeExtender.localScale; newExtenderScale.z = bladeTip.localPosition.z;                            //Match Z scale of extender to Z position of blade tip (should be fine if everything is set up right)
-            bladeExtender.localScale = newExtenderScale;                                                                                   //Set blade extender's local scale so that it reaches and connects with blade tip
-            newExtenderScale = bladeExtenderBack.localScale;                                                                               //Switch to modifying scale of rear blade extender
-            float backExtenderInterpolant = Mathf.InverseLerp(bladeOriginPos.z, settings.bladeTraverseDistance, bladeTip.localPosition.z); //Get interpolant for back extender downscaling based on current blade length percentage
-            newExtenderScale.z = Mathf.Lerp(bladeBackOriginSize, 0, backExtenderInterpolant);                                              //Use interpolant to scale down back extender as blade gets longer
-            bladeExtenderBack.localScale = newExtenderScale;                                                                               //Apply new scale to back extender
+            //Cleanup:
+            UpdateBladeExtender(); //Automatically update blade extender and blade end system
         }
 
         //Blade rotations:
@@ -227,6 +258,54 @@ public class NewChainsawController : PlayerEquipment
             wrist.localRotation = Quaternion.RotateTowards(wrist.localRotation, Quaternion.identity, settings.wristRotReturnRate * Time.deltaTime);              //Have wrist return to base rotation
             wristPivot.localRotation = Quaternion.RotateTowards(wristPivot.localRotation, Quaternion.identity, settings.reverseGripReturnRate * Time.deltaTime); //Have wrist pivot return to base rotation
         }
+        else if (mode == BladeMode.Deflecting) //Blade is currently in deflect mode
+        {
+            //Transition period:
+            float wristRotAngle = settings.deflectRotRate * Time.deltaTime; //Get initial value for how quickly blade will rotate this frame
+            if (timeInMode <= settings.deflectTransTime) //Blade is currently transitioning into deflection mode
+            {
+                //Initialization:
+                float timeInterpolant = Mathf.Clamp01(timeInMode / settings.deflectTransTime); //Get interpolant value representing time spent in deflection mode
+                wristRotAngle *= timeInterpolant;                                               //Apply time interpolant to wrist rotation rate in order to make it spin up
+
+                //Reverse grip transition:
+                if (wristPivot.localEulerAngles.y != -90) //Wrist is still transitioning into deflection mode
+                {
+                    Vector3 newPivotRot = wristPivot.localEulerAngles;   //Get current eulers from pivot
+                    newPivotRot.y = Mathf.Lerp(0, -90, timeInterpolant); //Get target pivot rotation by lerping over time
+                    wristPivot.localEulerAngles = newPivotRot;           //Set new wrist pivot rotation
+                }
+
+                //Change blade length:
+                Vector3 bladeExtendPos = bladeOriginPos + (Vector3.forward * settings.bladeTraverseDistance); //Get origin position blade is moving from
+                Vector3 bladeDeflectPos = bladeOriginPos + (Vector3.forward * settings.deflectRadius);        //Get target position blade is moving to
+                bladeTip.localPosition = Vector3.Lerp(bladeExtendPos, bladeDeflectPos, timeInterpolant);      //Move blade tip to target position
+                UpdateBladeExtender();                                                                        //Update blade middle
+
+                //Extend wrist:
+                if (settings.wristExtendDistance > 0)
+                {
+                    Vector3 wristStartPos = wristOriginPos + (Vector3.forward * settings.wristExtendDistance);
+                    Vector3 wristExtendPos = wristOriginPos + (Vector3.forward * (settings.deflectWristExtend + settings.wristExtendDistance));
+                    wrist.localPosition = Vector3.Lerp(wristStartPos, wristExtendPos, timeInterpolant);
+                }
+            }
+
+            //Rotate wrist:
+            Quaternion targetWristRot = wrist.localRotation * Quaternion.AngleAxis(wristRotAngle, Vector3.forward);
+            wrist.localRotation = targetWristRot;
+
+            //targetWristRot = Quaternion.RotateTowards(wrist.parent.rotation, targetWristRot, settings.maxWristAngle);  //Clamp rotation to set angular limit
+            //wrist.rotation = Quaternion.Lerp(wrist.rotation, targetWristRot, settings.wristLerpRate * Time.deltaTime); //Lerp wrist toward target rotation
+
+            //Reverse grip:
+            if (wristPivot.localEulerAngles.y != -settings.reverseGripAngle)
+            {
+                Vector3 newPivotRot = wristPivot.localEulerAngles;                                                                         //Get current eulers from pivot
+                newPivotRot.y = Mathf.LerpAngle(newPivotRot.y, -settings.reverseGripAngle, settings.reverseGripLerpRate * Time.deltaTime); //Get new lerped y rotation value for pivot
+                wristPivot.localEulerAngles = newPivotRot;                                                                                 //Apply new eulers to pivot
+            }
+        }
     }
     private protected override void FixedUpdate()
     {
@@ -267,5 +346,19 @@ public class NewChainsawController : PlayerEquipment
         reverseGrip = false;             //Clear reverse grip input
         gripValue = 0;                   //Clear grip input (chainsaw will begin sheathing)
         triggerValue = 0;                //Clear trigger input
+    }
+
+    //UTILITY METHODS:
+    /// <summary>
+    /// Updates position of blade extender to match position of blade tip.
+    /// </summary>
+    private void UpdateBladeExtender()
+    {
+        Vector3 newExtenderScale = bladeExtender.localScale; newExtenderScale.z = bladeTip.localPosition.z;                            //Match Z scale of extender to Z position of blade tip (should be fine if everything is set up right)
+        bladeExtender.localScale = newExtenderScale;                                                                                   //Set blade extender's local scale so that it reaches and connects with blade tip
+        newExtenderScale = bladeExtenderBack.localScale;                                                                               //Switch to modifying scale of rear blade extender
+        float backExtenderInterpolant = Mathf.InverseLerp(bladeOriginPos.z, settings.bladeTraverseDistance, bladeTip.localPosition.z); //Get interpolant for back extender downscaling based on current blade length percentage
+        newExtenderScale.z = Mathf.Lerp(bladeBackOriginSize, 0, backExtenderInterpolant);                                              //Use interpolant to scale down back extender as blade gets longer
+        bladeExtenderBack.localScale = newExtenderScale;                                                                               //Apply new scale to back extender
     }
 }

@@ -42,6 +42,7 @@ public class NetworkPlayer : MonoBehaviour
     private bool visible = true; //Whether or not this network player is currently visible
     internal Color currentColor; //Current player color this networkPlayer instance is set to
     private int lastTubeNumber;  //Number of the tube this player was latest spawned at
+    public bool inTube = false;
 
     //RUNTIME METHODS:
     private void Awake()
@@ -53,6 +54,8 @@ public class NetworkPlayer : MonoBehaviour
         photonView = GetComponent<PhotonView>();                      //Get photonView component from local object
         bodyRenderer = GetComponentInChildren<SkinnedMeshRenderer>(); //Get body renderer component from model in children
         trail = GetComponentInChildren<TrailRenderer>();              //Get trail renderer component from children (there should only be one)
+
+        PhotonNetwork.AutomaticallySyncScene = true;
 
         //Set up rig:
         foreach (PhotonTransformView view in GetComponentsInChildren<PhotonTransformView>()) //Iterate through each network-tracked component
@@ -163,6 +166,7 @@ public class NetworkPlayer : MonoBehaviour
             //Generic scene load checks:
             foreach (Collider c in transform.GetComponentsInChildren<Collider>()) c.enabled = !GameManager.Instance.InMenu(); //Always disable colliders if networkPlayer is in a menu scene
         }
+        inTube = false;
     }
 
     //FUNCTIONALITY METHODS:
@@ -467,14 +471,14 @@ public class NetworkPlayer : MonoBehaviour
     [PunRPC]
     public void RPC_GiveMeSpawnpoint(int myViewID)
     {
-        if (SpawnManager2.instance != null)
+        if (SpawnManager2.instance != null && !inTube)
         {
             LockerTubeController spawnTube = SpawnManager2.instance.GetEmptyTube();
             if (spawnTube != null)
             {
-                spawnTube.occupied = true;
                 Player targetPlayer = PhotonNetwork.GetPhotonView(myViewID).Owner;
                 photonView.RPC("RPC_RemoteSpawnPlayer", targetPlayer, spawnTube.GetTubeNumber());
+                inTube = true;
             }
         }
     }
