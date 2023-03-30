@@ -34,6 +34,7 @@ public class ChainsawSettings : ScriptableObject
     [Min(0), Tooltip("How long it takes for blade to move into (and from) deflect position.")] public float deflectTransTime;
     [Min(0), Tooltip("Radius of deflection area while deflection is active.")]                 public float deflectRadius;
     [Min(0), Tooltip("Speed at which blade rotates during deflection mode.")]                  public float deflectRotRate;
+    [Min(0), Tooltip("Distance wrist extends forward during deflection mode.")]                public float deflectWristExtend;
     [Space()]
     [Range(0, 180), Tooltip("Angle blade turns to when set to reverse mode.")]                          public float reverseGripAngle;
     [Min(0), Tooltip("How rapidly blade moves to and from reverse grip position.")]                     public float reverseGripLerpRate;
