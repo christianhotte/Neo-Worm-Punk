@@ -12,13 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75231b2903c64f74bbd587426850c128, type: 3}
   m_Name: ChainsawSettings_Hotte1
   m_EditorClassIdentifier: 
-  grindSpeed: 70
+  grindSpeedRange: {x: 70, y: 130}
+  grindAccelTime: 2
   grindLayers:
     serializedVersion: 2
     m_Bits: 257
-  triggerGrindMultiplier: 1.5
   grindSweetSpot: {x: 0.11164844, y: 0.2250574}
   bladeWidth: 0.17
+  disengageForce: 27
   bladePreRetractDistance: 0.08
   bladePreRetractCurve:
     serializedVersion: 2
@@ -123,11 +124,15 @@ MonoBehaviour:
   maxWristAngle: 80
   wristLerpRate: 7.7
   wristRotReturnRate: 400
+  deflectTransTime: 0.1
+  deflectRadius: 0.5
+  deflectRotRate: 1400
+  deflectWristExtend: 0.3
   reverseGripAngle: 105
   reverseGripLerpRate: 7
   reverseGripReturnRate: 500
-  triggerThreshold: 0.9
-  releaseThreshold: 0.5
+  gripThresholds: {x: 0.62314534, y: 0.76083076}
+  triggerThresholds: {x: 0.39169136, y: 0.64985144}
   swingSpeedRange: {x: 0.5, y: 2}
   extendSound: {fileID: 8300000, guid: f7a515930a8dc6741a608db1e42a190c, type: 3}
   runningSound: {fileID: 0}

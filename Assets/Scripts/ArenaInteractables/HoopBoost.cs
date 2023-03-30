@@ -4,27 +4,37 @@ using UnityEngine;
 
 public class HoopBoost : MonoBehaviour
 {
-    public Transform hoopCenter;
+    public Transform hoopCenter, hoopOuter, hoopInner;
     public TrapTrigger triggerScript;
     private PlayerController PC;
     private Rigidbody playerRB;
     public float boostAmount;
     public bool maintainsOtherVelocity;
     internal bool launchin = false,slimed=false;
-    public Transform hoopInner;
-    public Transform hoopOuter;
+    internal AudioSource HoopAud;
+    public AudioClip HoopSound;
+    public GameObject SlimeModel;
     // Start is called before the first frame update
     void Start()
-    {        
+    {
+        HoopAud = this.GetComponent<AudioSource>();
     }
     // Update is called once per frame
     void Update()
     {
         RotateHoop(hoopInner, new Vector3(0.75f, 0, 0));
         RotateHoop(hoopOuter, new Vector3(0f, 0, 0));
+
+        if (slimed)
+        {
+            SlimeModel.SetActive(true);
+        }
+        else
+        {
+            SlimeModel.SetActive(false);
+        }
+
     }
-
-
     private void RotateHoop(Transform hoopPart, Vector3 hoopRotateAmount)
     {
         hoopPart.Rotate(hoopRotateAmount);
@@ -39,7 +49,7 @@ public class HoopBoost : MonoBehaviour
         {
             yield return null;
         }
-
+        if(HoopSound!=null)HoopAud.PlayOneShot(HoopSound);
         if(maintainsOtherVelocity)
         {
             //just add the boostAmount to the velocity of the player
@@ -58,10 +68,16 @@ public class HoopBoost : MonoBehaviour
         yield return new WaitForSeconds(0.2f);//cooldown so only one boost given
         launchin = false;
     }
-    public IEnumerator SlimeTime()
+    public IEnumerator SlimeHoop()
     {
         yield return new WaitForSeconds(10.0f);
         slimed = false;
     }
-
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.name == "XR Origin" && !launchin)
+        {
+            StartCoroutine(HoopLaunch(other));
+        }
+    }
 }

@@ -3,17 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 
-public class CrusherTrap : MonoBehaviour
+public class CrusherTrap : NetworkedArenaElement
 {
     public bool cooldown = false;
-    internal TrapTrigger triggerScript;
+    internal TrapTrigger connectedTrigger;
     public GameObject IndicatorLight;
-    List<NetworkPlayer> PlayersInTrap = new List<NetworkPlayer>();
+    public List<NetworkPlayer> PlayersInTrap = new List<NetworkPlayer>();
+    private NetworkedArenaElement networkScript;
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        networkScript = GameObject.FindGameObjectWithTag("NetworkManager").GetComponent<NetworkedArenaElement>();
     }
 
     // Update is called once per frame
@@ -29,6 +30,15 @@ public class CrusherTrap : MonoBehaviour
                 IndicatorLight.SetActive(false);
             }
        
+    }
+    public void ActivateCrusher(int PlayerID)
+    {
+        if (!cooldown)
+        {
+            cooldown = true;
+            networkScript.ActivateTrap(PlayerID, this, PlayersInTrap);
+        }
+
     }
     private void OnTriggerEnter(Collider other)
     {
@@ -46,28 +56,5 @@ public class CrusherTrap : MonoBehaviour
         {
             PlayersInTrap.Remove(other.GetComponent<NetworkPlayer>());
         }
-    }
-    public void ActivateCrusher()
-    {
-        Debug.Log("Activated");
-        cooldown = true;
-        foreach (NetworkPlayer player in PlayersInTrap)
-        {
-            Debug.Log(triggerScript.ActivatingPlayer.photonView.ViewID);
-            Debug.Log(player.name);
-
-            player.RPC_Hit(100, triggerScript.ActivatingPlayer.photonView.ViewID);
-            Debug.Log("BOOSH");
-        }
-        PlayersInTrap.Clear();
-        StartCoroutine(CrusherCooldown());
-    }
-    public IEnumerator CrusherCooldown()
-    {
-        yield return new WaitForSeconds(5.0f);
-        Debug.Log("CooldownDone");
-        cooldown = false;
-        PlayersInTrap.Clear();
-        triggerScript.cooldown = false;
     }
 }

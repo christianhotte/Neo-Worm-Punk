@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-public class WormHole : MonoBehaviour
+using Photon.Pun;
+using Unity.XR.CoreUtils;
+public class WormHole : NetworkedArenaElement
 {
     public Transform holePos1, holePos2,wormZone,playerHead,wormZoneShifted;
     public GameObject wormZoneParticles,wormZoneInstance,playerCam;
@@ -12,9 +13,12 @@ public class WormHole : MonoBehaviour
     public PlayerController PC;
     public GameObject playerOrigin;
     public static List<WormHole> ActiveWormholes = new List<WormHole>();
+    public AudioSource wormHoleAud;
+    public AudioClip enterSound;
     private WormHoleTrigger triggerScript,EntryTrigger;
     void Start()
     {
+        wormHoleAud = this.GetComponent<AudioSource>();
     }
     void Update()
     {
@@ -55,7 +59,15 @@ public class WormHole : MonoBehaviour
                 grapple.hook.Stow();
             }
         }
+       // PC.attachedEquipment.shu
+       foreach(PlayerEquipment pe in PC.attachedEquipment)
+        {
+            pe.Shutdown(waitTime);
+        }
+        if (enterSound != null) wormHoleAud.PlayOneShot(enterSound);
+        PlayerController.photonView.RPC("RPC_MakeInvisible", RpcTarget.Others);
         playerOBJ.transform.position = wormZoneShifted.position; //Player enters worm zone here
+
         float entryDiff = playerCam.transform.eulerAngles.y - wormZoneShifted.eulerAngles.y; //difference for player to face down wormhole
         playerOBJ.transform.rotation = Quaternion.Euler(playerOBJ.transform.eulerAngles.x, playerOBJ.transform.eulerAngles.y - entryDiff, playerOBJ.transform.eulerAngles.z);
         float startRot = playerCam.transform.eulerAngles.y;//reference the starting rotation of the players camera
@@ -70,6 +82,7 @@ public class WormHole : MonoBehaviour
         diff = diff - exitDiff;
         playerOBJ.transform.rotation = Quaternion.Euler(playerOBJ.transform.eulerAngles.x, playerOBJ.transform.eulerAngles.y - diff, playerOBJ.transform.eulerAngles.z);//turns the player to face out of the worhole
         playerOBJ.transform.position = exitPos.position; //takes the player out of the wormhole
+        PlayerController.photonView.RPC("RPC_MakeVisible", RpcTarget.Others);
         playerRB.useGravity = true; //Bring back Gravity
         playerRB.velocity = exitPos.forward * exitSpeed;    //launch out of wormhole
         triggerScript.exiting = false;

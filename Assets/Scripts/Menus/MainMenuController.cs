@@ -102,6 +102,9 @@ public class MainMenuController : MonoBehaviour
 
             timeElapsed += Time.deltaTime;
 
+            if (GameManager.Instance.levelTransitionActive)
+                break;
+
             yield return null;
         }
     }
@@ -118,8 +121,8 @@ public class MainMenuController : MonoBehaviour
 
     private IEnumerator TeleportPlayerToLobby()
     {
+        GameManager.Instance.levelTransitionActive = true;
         yield return new WaitForSeconds(2.0f);
-        NetworkManagerScript.instance.JoinLobby();
         FadeScreen playerScreenFader = PlayerController.instance.GetComponentInChildren<FadeScreen>();
         playerScreenFader.FadeOut();
         yield return new WaitForSeconds(playerScreenFader.GetFadeDuration());
@@ -127,7 +130,7 @@ public class MainMenuController : MonoBehaviour
         playerObject.position = lobbyLocation.position;
         yield return new WaitForSeconds(0.5f);
         playerScreenFader.FadeIn();
-        StopAllCoroutines();
+        GameManager.Instance.levelTransitionActive = false;
     }
 
     public void FadeToLockerRoom()

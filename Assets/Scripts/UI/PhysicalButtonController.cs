@@ -31,11 +31,13 @@ public class PhysicalButtonController : MonoBehaviour
     private IEnumerator buttonCoroutine; //The button coroutine
 
     private Color defaultColor;
+    private Transform buttonClicker;
 
     private void Start()
     {
         buttonTransform = transform.Find("Button");
-        defaultColor = buttonTransform.Find("Clicker").GetComponent<MeshRenderer>().material.color;
+        buttonClicker = buttonTransform.Find("Clicker");
+        defaultColor = buttonClicker.GetComponent<MeshRenderer>().material.GetColor("_BaseColor");
         startPos = buttonTransform.localPosition;
         endPos = startPos;
         endPos.z += threshold;
@@ -44,7 +46,10 @@ public class PhysicalButtonController : MonoBehaviour
 
     private void OnEnable()
     {
-        if(buttonTransform != null)
+        if(defaultColor != null && buttonClicker != null)
+            ChangeButtonColor(defaultColor, false);
+
+        if (buttonTransform != null)
             buttonTransform.localPosition = startPos;
         isPressed = false;
     }
@@ -139,11 +144,13 @@ public class PhysicalButtonController : MonoBehaviour
     /// <param name="setToDefault">If true, this sets the button's default color as well.</param>
     public void ChangeButtonColor(Color newColor, bool setToDefault = true)
     {
-        buttonTransform.Find("Clicker").GetComponent<MeshRenderer>().material.color = newColor;
+        buttonClicker.GetComponent<MeshRenderer>().material.SetColor("_BaseColor", newColor);
 
         if (setToDefault)
             defaultColor = newColor;
     }
+
+    public Color GetButtonColor() => buttonClicker.GetComponent<MeshRenderer>().material.GetColor("_BaseColor");
 
     /// <summary>
     /// Shows the text that is on top of the button.
@@ -158,7 +165,7 @@ public class PhysicalButtonController : MonoBehaviour
     /// Locks or unlocks the button's position.
     /// </summary>
     /// <param name="locked">If true, the position of the button is locked. If false, the button can be pressed freely.</param>
-    private void LockButton(bool locked)
+    public void LockButton(bool locked)
     {
         isLocked = locked;
     }

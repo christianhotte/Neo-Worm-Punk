@@ -13,6 +13,7 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
     {
         instance = this;
     }
+
     void Start()
     {
         demoPlayer = PlayerController.instance.gameObject;
@@ -33,67 +34,80 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
         {
             PlayerController.photonView.RPC("RPC_GiveMeSpawnpoint", RpcTarget.MasterClient, PlayerController.photonView.ViewID);
         }
+
+        //Wait until the local player tube is assigned
+        StartCoroutine(WaitUntilLocalPlayerTube());
     }
+
+    /// <summary>
+    /// Waits until the local player tube is assigned to update the ReadyUpManager status.
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator WaitUntilLocalPlayerTube()
+    {
+        yield return new WaitUntil(() => ReadyUpManager.instance != null && ReadyUpManager.instance.localPlayerTube != null);
+        // Updates the ReadyUpManager
+        ReadyUpManager.instance.UpdateStatus(ReadyUpManager.instance.localPlayerTube.GetTubeNumber());
+    }
+
     private void OnDestroy()
     {
         instance = null;
     }
 
-    // Moves the local demo player to a spawn point.
-    public void MoveDemoPlayerToSpawnPoint()
+    /// <summary>
+    /// Moves a player to a spawn point in the tube.
+    /// </summary>
+    /// <param name="tubeIndex">The index for the tube that we want to put the player into.</param>
+    public void MoveDemoPlayerToSpawnPoint(int tubeIndex = 0)
     {
-        LockerTubeController spawnTube = GetEmptyTube();
+        LockerTubeController spawnTube;
+        if (tubeIndex == 0)
+            spawnTube = GetEmptyTube();
+        else
+            spawnTube = FindObjectOfType<TubeManager>().GetTubeByNumber(tubeIndex);
+
+        Debug.Log("Tube Being Occupied: TestTube" + spawnTube.GetTubeNumber() + " By " + NetworkManagerScript.instance.GetLocalPlayerName());
+
         if (spawnTube != null)
         {
             spawnTube.occupied = true;
             PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
             PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
 
-            LeverController lever = spawnTube.GetComponentInChildren<LeverController>();
-            lever.OnStateChanged.AddListener(ReadyUpManager.instance.LeverStateChanged);
-
             if (ReadyUpManager.instance != null)
             {
-                ReadyUpManager.instance.UpdateStatus(spawnTube.tubeNumber);
                 ReadyUpManager.instance.localPlayerTube = spawnTube;
-            }
-            
-        }
-    }
-    public void MoveDemoPlayerToSpawnPoint(int tubeIndex)
-    {
-        LockerTubeController spawnTube = LockerTubeController.GetTubeByNumber(tubeIndex);
-        if (spawnTube != null)
-        {
-            spawnTube.occupied = true;
-            PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
-            PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
-
-            //Add lever listener
-            LeverController lever = spawnTube.GetComponentInChildren<LeverController>();
-            lever.OnStateChanged.AddListener(ReadyUpManager.instance.LeverStateChanged);
-
-            if (ReadyUpManager.instance != null)
-            {
-                ReadyUpManager.instance.UpdateStatus(spawnTube.tubeNumber);
-                ReadyUpManager.instance.localPlayerTube = spawnTube;
+                ReadyUpManager.instance.UpdateStatus(spawnTube.GetTubeNumber());
+                ReadyUpManager.instance.localPlayerTube.SpawnPlayerName(NetworkManagerScript.instance.GetLocalPlayerName());
+                NetworkManagerScript.localNetworkPlayer.UpdateTakenColorsOnJoin();
+                ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
+                if (PhotonNetwork.IsMasterClient)
+                    ReadyUpManager.instance.localPlayerTube.ShowHostSettings(true); //Show the settings if the player being moved is the master client
             }
         }
     }
 
     public LockerTubeController GetEmptyTube()
     {
-        for (int x = 0; x < LockerTubeController.tubes.Count; x++)
+        TubeManager tubeManager = FindObjectOfType<TubeManager>();
+
+        for (int x = 1; x <= tubeManager.roomTubes.Count; x++)
         {
-            foreach (LockerTubeController tube in LockerTubeController.tubes)
+            foreach (LockerTubeController tube in tubeManager.roomTubes)
             {
-                if (tube.tubeNumber == x + 1)
+                if (tube.GetTubeNumber() == x)
                 {
-                    if (!tube.occupied) return tube;
+                    if (!tube.occupied)
+                    {
+                        tube.occupied = true;
+                        return tube;
+                    }
                 }
             }
         }
 
+        Debug.LogError("Error: Could Not Find An Empty Tube.");
         return null;
     }
 }

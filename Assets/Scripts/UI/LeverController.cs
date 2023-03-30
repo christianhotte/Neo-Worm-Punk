@@ -7,7 +7,8 @@ public class LeverController : MonoBehaviour
 {
     public enum HingeJointState { Min, Max, None }
 
-    [SerializeField, Tooltip("Angle Threshold If Limit Is Reached")] float angleBetweenThreshold = 8f;
+    [SerializeField, Tooltip("Angle Threshold If Min Limit Is Reached")] float angleBetweenMinThreshold = 8f;
+    [SerializeField, Tooltip("Angle Threshold If Max Limit Is Reached")] float angleBetweenMaxThreshold = 8f;
     public HingeJointState hingeJointState = HingeJointState.None;  //The state of the hinge joint
 
     [SerializeField, Tooltip("If true, the lever locks when a limit is reached.")] private bool lockOnMinimumLimit, lockOnMaximumLimit;
@@ -49,13 +50,14 @@ public class LeverController : MonoBehaviour
     private void Start()
     {
         firstCheck = true;
+        handle = GetComponentInChildren<LeverHandleController>();
     }
 
     private void OnEnable()
     {
         handle = GetComponentInChildren<LeverHandleController>();
         if (startingAngle != 0)
-            handle.MoveToAngle(startingAngle);
+            handle.MoveToAngle(this, startingAngle);
 
         currentMoveTimer = waitUntilAutoMoveTimer;
     }
@@ -74,7 +76,7 @@ public class LeverController : MonoBehaviour
         if  (debugActivate)
         {
             debugActivate = false;
-            handle.MoveToAngle(maximumAngle);
+            handle.MoveToAngle(this, maximumAngle);
         }
 
         //If there is an active level transition, don't do anything
@@ -89,7 +91,7 @@ public class LeverController : MonoBehaviour
             float angleWithMaxLimit = Mathf.Abs(handle.GetAngle() - maximumAngle);
 
             //If the angle has hit the minimum limit and is not already at the limit
-            if (angleWithMinLimit < angleBetweenThreshold)
+            if (angleWithMinLimit < angleBetweenMinThreshold)
             {
                 if (hingeJointState != HingeJointState.Min && !firstCheck)
                 {
@@ -97,7 +99,7 @@ public class LeverController : MonoBehaviour
                     OnMinLimitReached.Invoke();
 
                     //Move the hinge to the upper limit
-                    handle.transform.localEulerAngles = new Vector3(minimumAngle, handle.transform.localEulerAngles.y, handle.transform.localEulerAngles.z);
+                    handle.MoveToAngle(this, minimumAngle);
 
                     if (onClickSoundEffect != null)
                         GetComponent<AudioSource>().PlayOneShot(onClickSoundEffect, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
@@ -111,7 +113,7 @@ public class LeverController : MonoBehaviour
                 hingeJointState = HingeJointState.Min;
             }
             //If the angle has hit the maximum limit and is not already at the limit
-            else if (angleWithMaxLimit < angleBetweenThreshold)
+            else if (angleWithMaxLimit < angleBetweenMaxThreshold)
             {
                 if (hingeJointState != HingeJointState.Max && !firstCheck)
                 {
@@ -119,7 +121,7 @@ public class LeverController : MonoBehaviour
                     OnMaxLimitReached.Invoke();
 
                     //Move the hinge to the lower limit
-                    handle.transform.localEulerAngles = new Vector3(maximumAngle, handle.transform.localEulerAngles.y, handle.transform.localEulerAngles.z);
+                    handle.MoveToAngle(this, maximumAngle);
 
                     if (onClickSoundEffect != null)
                         GetComponent<AudioSource>().PlayOneShot(onClickSoundEffect, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
@@ -156,16 +158,16 @@ public class LeverController : MonoBehaviour
                 }
             }
         }
-        else if (snapToLimit && !leverAutomaticallyMoving)
+        else if (snapToLimit && !leverAutomaticallyMoving && !handle.IsGrabbed())
         {
             //If the hinge is not at a limit
             if(hingeJointState == HingeJointState.None)
             {
-                Debug.Log("Time Until Auto Move: " + currentMoveTimer + " seconds...");
+                //Debug.Log("Time Until Auto Move: " + currentMoveTimer + " seconds...");
                 currentMoveTimer -= Time.deltaTime;
                 if(currentMoveTimer < 0)
                 {
-                    Debug.Log("Moving Lever...");
+                    //Debug.Log("Moving Lever...");
                     if (handle.GetAngle() < 0)
                         MoveToLimit(minimumAngle);
                     else
@@ -202,13 +204,13 @@ public class LeverController : MonoBehaviour
         {
             float t = timeElapsed / snapMovementSpeed;
 
-            handle.MoveToAngle(Mathf.Lerp(handle.GetAngle(), newPos, t));
+            handle.MoveToAngle(this, Mathf.Lerp(handle.GetAngle(), newPos, t));
 
             timeElapsed += Time.deltaTime;
             yield return null;
         }
 
-        handle.MoveToAngle(newPos);
+        handle.MoveToAngle(this, newPos);
         leverAutomaticallyMoving = false;
     }
 
@@ -238,6 +240,10 @@ public class LeverController : MonoBehaviour
     }
 
     public float GetMinimumAngle() => minimumAngle;
+    public float GetMinimumAngleWithLimit() => Mathf.Abs(handle.GetAngle() - minimumAngle);
     public float GetMaximumAngle() => maximumAngle;
+    public float GetMaximumAngleWithLimit() => Mathf.Abs(handle.GetAngle() - maximumAngle);
     public HingeJointState GetLeverState() => hingeJointState;
+    public float GetLeverMinThreshold() => angleBetweenMinThreshold;
+    public float GetLeverMaxThreshold() => angleBetweenMaxThreshold;
 }

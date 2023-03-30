@@ -28,7 +28,7 @@ public class ExplosionController : MonoBehaviour
     private void Awake()
     {
         //Get objects & components:
-        mat = GetComponent<MeshRenderer>().material; //Material which will be getting more and more transparent throughout explosion
+        if (TryGetComponent(out MeshRenderer r)) mat = r.material; //Material which will be getting more and more transparent throughout explosion
     }
     private void Update()
     {
@@ -38,16 +38,19 @@ public class ExplosionController : MonoBehaviour
         float timeInterpolant = timeAlive / duration;  //Get interpolant to apply to progression curves
 
         //Update color:
-        Color newColor = mat.color;                               //Initialize color value to change
-        newColor.a = transparencyCurve.Evaluate(timeInterpolant); //Adjust new alpha color based on evaluation of curve
-        mat.color = newColor;                                     //Set new material color
+        if (mat != null)
+        {
+            Color newColor = mat.color;                               //Initialize color value to change
+            newColor.a = transparencyCurve.Evaluate(timeInterpolant); //Adjust new alpha color based on evaluation of curve
+            mat.color = newColor;                                     //Set new material color
+        }
 
         //Update scale:
         float newScale = scaleCurve.Evaluate(timeInterpolant) * maxScale; //Get new scale value based on evaluation of curve
         transform.localScale = Vector3.one * newScale;                    //Apply new scale to transform
 
         //Check for player hits:
-        if (PlayerController.photonView.ViewID == originPlayerID) //Only have master version of explosions check for hits
+        if (PlayerController.photonView != null && PlayerController.photonView.ViewID == originPlayerID) //Only have master version of explosions check for hits
         {
             foreach (NetworkPlayer player in NetworkPlayer.instances) //Iterate through all player instances in scene
             {

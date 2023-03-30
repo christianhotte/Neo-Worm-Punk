@@ -34,8 +34,10 @@ public class NewGrapplerController : PlayerEquipment
     public IEnumerator TryToInitialize()
     {
         yield return new WaitUntil(() => PlayerController.photonView != null);                                                                       //Wait until player's network player has been spawned
+        yield return new WaitUntil(() => PhotonNetwork.InRoom);                                                                                      //Wait until player is in a room to connect
         hook = PhotonNetwork.Instantiate("Projectiles/" + settings.hookResourceName, barrel.position, hand.rotation).GetComponent<HookProjectile>(); //Instantiate hook projectile on the network
         hook.Stow(this);                                                                                                                             //Immediately do a stow initialization on new projectile
+        player.UpdateWeaponry();                                                                                                                     //Hide hook if in a network scene
     }
 
     //RUNTIME METHODS:
@@ -48,9 +50,6 @@ public class NewGrapplerController : PlayerEquipment
         if (handedness == Handedness.None) { Debug.LogError("GrapplingHook cannot recognize which side it is on. Make sure parent has the word Left or Right in its name."); Destroy(this); } //Make sure grappling hook knows which hand it is associated with
         if (!hookVisibleOnBarrel) { stowPoint = transform.Find("StowPoint"); if (stowPoint == null) stowPoint = transform; } //Get stow position (use own transform if none is given)
         barrel = transform.Find("Barrel"); if (barrel == null) barrel = transform;                                           //Get barrel position (use own transform if none is given)
-
-        //Set up projectile:
-        StartCoroutine(TryToInitialize()); //Begin trying to spawn hook (NOTE: will break if player leaves a room)
     }
     private protected override void Start()
     {
@@ -62,6 +61,15 @@ public class NewGrapplerController : PlayerEquipment
         {
             if (equipment != this && equipment.handedness == handedness) { handWeapon = equipment; break; } //Try to get weapon used by same hand
         }
+
+        //Set up projectile:
+        if (!PhotonNetwork.IsConnected) //Player is not connected to the network but still needs a hook
+        {
+            hook = ((GameObject)Instantiate(Resources.Load("Projectiles/" + settings.hookResourceName), barrel.position, hand.rotation)).GetComponent<HookProjectile>(); //Instantiate hook projectile not on the network
+            hook.Stow(this);                                                                                                                                             //Immediately do a stow initialization on new projectile
+            player.UpdateWeaponry();                                                                                                                                     //Hide hook if in a network scene
+        }
+        else StartCoroutine(TryToInitialize()); //Begin trying to spawn hook on the network
     }
     private protected override void Update()
     {
@@ -74,8 +82,13 @@ public class NewGrapplerController : PlayerEquipment
     }
     private protected override void OnDestroy()
     {
-        base.OnDestroy();                                         //Call base destruction method
-        if (hook != null) PhotonNetwork.Destroy(hook.gameObject); //Destroy hook object when destroying this equipment
+        base.OnDestroy(); //Call base destruction method
+        if (hook != null)
+        {
+            if (PhotonNetwork.IsConnected) PhotonNetwork.Destroy(hook.gameObject); //Destroy hook object when destroying this equipment
+            else Destroy(hook.gameObject);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  //Peepee poopoo, destroy on local
+        }
+            
     }
 
     //INPUT METHODS:
@@ -96,6 +109,16 @@ public class NewGrapplerController : PlayerEquipment
 
     //FEEDBACK METHODS:
     /// <summary>
+    /// Called when hook is stowed back into launcher.
+    /// </summary>
+    public void Stowed()
+    {
+        audioSource.loop = false; //Stop audiosource looping
+        audioSource.Stop();       //Stop playing whatever sound is playing
+        if (settings.bounceSound != null) audioSource.PlayOneShot(settings.hitSound); //Play sound effect
+        SendHapticImpulse(settings.hitHaptics); //Play haptic impulse
+    }
+    /// <summary>
     /// Called when hook successfully locks onto a surface.
     /// </summary>
     public void HookedObstacle()
@@ -103,8 +126,14 @@ public class NewGrapplerController : PlayerEquipment
         hookedHandPos = RelativePosition; //Get position of hand at moment of contact
 
         //Effects:
-        if (settings.hitSound != null) audioSource.PlayOneShot(settings.hitSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play sound effect
-        SendHapticImpulse(settings.hitHaptics);                                    //Play haptic impulse
+        if (settings.hitSound != null) hook.audioSource.PlayOneShot(settings.hitSound); //Play sound effect
+        if (settings.reelSound != null)
+        {
+            audioSource.loop = true;               //Set audiosource to loop
+            audioSource.clip = settings.reelSound; //Queue up reel sound
+            audioSource.Play();                    //Play reel sound on loop
+        }
+        SendHapticImpulse(settings.hitHaptics); //Play haptic impulse
     }
     /// <summary>
     /// Called when hook successfully locks onto a player.
@@ -113,15 +142,23 @@ public class NewGrapplerController : PlayerEquipment
     {
         hookedHandPos = RelativePosition; //Get position of hand at moment of contact
 
-        if (settings.playerHitSound != null) audioSource.PlayOneShot(settings.playerHitSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play sound effect
-        SendHapticImpulse(settings.hitHaptics);                                                //Play haptic impulse
+        if (settings.playerHitSound != null) hook.audioSource.PlayOneShot(settings.playerHitSound); //Play sound effect
+        if (settings.reelSound != null)
+        {
+            audioSource.loop = true;               //Set audiosource to loop
+            audioSource.clip = settings.reelSound; //Queue up reel sound
+            audioSource.Play();                    //Play reel sound on loop
+        }
+        SendHapticImpulse(settings.hitHaptics); //Play haptic impulse
     }
     /// <summary>
     /// Called when hook automatically releases itself for some reason.
     /// </summary>
     public void ForceReleased()
     {
-        if (settings.releaseSound != null) audioSource.PlayOneShot(settings.releaseSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play sound effect
+        audioSource.loop = false; //Make audiosource stop looping reel sound
+        audioSource.Stop();       //Make sure audiosource stops playing reel sound
+        if (settings.releaseSound != null) audioSource.PlayOneShot(settings.releaseSound); //Play sound effect
         SendHapticImpulse(settings.releaseHaptics);                                        //Play haptic impulse
     }
     /// <summary>
@@ -129,8 +166,8 @@ public class NewGrapplerController : PlayerEquipment
     /// </summary>
     public void Bounced()
     {
-        if (settings.bounceSound != null) audioSource.PlayOneShot(settings.bounceSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play sound effect
-        SendHapticImpulse(settings.releaseHaptics);                                      //Play haptic impulse
+        if (settings.bounceSound != null) hook.audioSource.PlayOneShot(settings.bounceSound); //Play sound effect (on projectile)
+        SendHapticImpulse(settings.releaseHaptics);                                           //Play haptic impulse
     }
 
     //FUNCTIONALITY METHODS:
@@ -169,11 +206,11 @@ public class NewGrapplerController : PlayerEquipment
             }
 
             hook.punchWhipped = true;                                                    //Indicate to hook that it has been punch=whipped
-            if (settings.whipSound != null) audioSource.PlayOneShot(settings.whipSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play sound effect
+            if (settings.whipSound != null) audioSource.PlayOneShot(settings.whipSound); //Play sound effect
         }
         else //Normal launch effects
         {
-            if (settings.launchSound != null) audioSource.PlayOneShot(settings.launchSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play sound effect
+            if (settings.launchSound != null) audioSource.PlayOneShot(settings.launchSound); //Play sound effect
         }
         if (settings.holstersWeapon) handWeapon.Holster(); //Holster gun while grappling (if set to do so)
         SendHapticImpulse(settings.launchHaptics);         //Play haptic impulse
@@ -188,5 +225,14 @@ public class NewGrapplerController : PlayerEquipment
 
         //Release hook:
         hook.Release(); //Indicate to hook that it is being released and needs to return to player
+    }
+    /// <summary>
+    /// Immediately stows grappling hook and resets all cooldowns.
+    /// </summary>
+    /// <param name="disableInputTime">Also disables player input for this number of seconds (0 does not disable player input, less than 0 disables it indefinitely)</param>
+    public override void Shutdown(float disableInputTime = 0)
+    {
+        base.Shutdown(disableInputTime); //Call base functionality
+        hook.Stow();                     //Stow hook
     }
 }

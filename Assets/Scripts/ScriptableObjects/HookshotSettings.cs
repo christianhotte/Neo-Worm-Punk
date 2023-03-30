@@ -36,6 +36,8 @@ public class HookshotSettings : ScriptableObject
     [Range(0, 1), Tooltip("How much the player must squeeze the grip in order to launch the grappling hook.")] public float deployThreshold = 1;
     [Range(0, 1), Tooltip("How much the player must release the grip for the grappling hook to reel back.")]   public float releaseThreshold = 0.5f;
     [Min(1), Tooltip("Scale hook grows to when not stowed.")]                                                  public float hookTravelScale;
+    [Min(0), Tooltip("How hard player is pushed off of wall when they hit their grappling hook.")]             public float wallBounceForce;
+    [Min(0), Tooltip("Distance from wall at which player will be ejected from hook system.")]                  public float wallBounceDist;
     [Header("Extras:")]
     [Min(0), Tooltip("How much velocity player must punch with to trigger Insta-Hook system.")]                                              public float punchWhipSpeed;
     [Min(0), Tooltip("Minimum distance at which full punch whip can be triggered on an object (also distance at which hook will release).")] public float minPunchWhipDist;
@@ -43,10 +45,10 @@ public class HookshotSettings : ScriptableObject
     [Min(0), Tooltip("Amount of time grappler needs to cool down for after completing a punch-whip.")]                                       public float punchWhipCooldown;
     [Tooltip("Causes weapon on matching hand to become holstered while grappling hook is in use.")]                                          public bool holstersWeapon;
     [Header("Haptics:")]
-    [Tooltip("Haptic vibration made when player launches the hook.")]          public PlayerEquipment.HapticData launchHaptics;
-    [Tooltip("Haptic vibration made when hook is traveling through the air.")] public PlayerEquipment.HapticData reelHaptics;
-    [Tooltip("Haptic vibration made when hook hits something.")]               public PlayerEquipment.HapticData hitHaptics;
-    [Tooltip("Haptic vibration made when player releases the hook.")]          public PlayerEquipment.HapticData releaseHaptics;
+    [Tooltip("Haptic vibration made when player launches the hook.")]          public PlayerController.HapticData launchHaptics;
+    [Tooltip("Haptic vibration made when hook is traveling through the air.")] public PlayerController.HapticData reelHaptics;
+    [Tooltip("Haptic vibration made when hook hits something.")]               public PlayerController.HapticData hitHaptics;
+    [Tooltip("Haptic vibration made when player releases the hook.")]          public PlayerController.HapticData releaseHaptics;
     [Header("Sounds:")]
     [Tooltip("Sound played when hook is launched and while it is in the air.")] public AudioClip launchSound;
     [Tooltip("Sound played when player lands a successful punch-whip.")]        public AudioClip whipSound;

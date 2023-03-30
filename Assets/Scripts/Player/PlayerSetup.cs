@@ -13,7 +13,7 @@ public class PlayerSetup : MonoBehaviour
     /// </summary>
     public void ApplyAllSettings()
     {
-        SetColor(PlayerSettingsController.Instance.charData.testColor); //DEMO: Set player color
+        SetColor(PlayerSettingsController.Instance.charData.playerColor); //DEMO: Set player color
     }
     /// <summary>
     /// DEMO FUNCTION: Set a color on the player.
@@ -24,12 +24,12 @@ public class PlayerSetup : MonoBehaviour
         Debug.Log("Setting Player Color To " + newColor.ToString() + " ...");
 
         //Change color of player body:
-        foreach(Material mat in PlayerController.instance.bodyRenderer.materials) mat.color = newColor; //Set every material in player body to new color
+        foreach(Material mat in PlayerController.instance.bodyRenderer.materials) mat.SetColor("_Color", newColor); //Set every material in player body to new color
 
         //Change color of player hands (TEMP):
         foreach (var controller in FindObjectsOfType<ActionBasedController>()) //Iterate through each hand in player
         {
-            if (controller.GetComponentInChildren<MeshRenderer>() != null) controller.GetComponentInChildren<MeshRenderer>().material.color = newColor; //Change hand color (if possible, may be deprecated)
+            if (controller.GetComponentInChildren<MeshRenderer>() != null) controller.GetComponentInChildren<MeshRenderer>().material.SetColor("_Color", newColor); //Change hand color (if possible, may be deprecated)
         }
     }
 }
