@@ -219,6 +219,19 @@ public class NetworkPlayer : MonoBehaviour
     {
         NetworkManagerScript.instance.AddDeathToJumbotron(killerName, victimName);
     }
+    public void UpdateRoomSettingsDisplay()
+    {
+        Debug.Log("Updating Room Settings...");
+        photonView.RPC("RPC_UpdateRoomSettings", RpcTarget.AllBuffered);
+    }
+
+    [PunRPC]
+    public void RPC_UpdateRoomSettings()
+    {
+        //Update any instance of the room settings display
+        foreach (var display in FindObjectsOfType<RoomSettingsDisplay>())
+            display.UpdateRoomSettingsDisplay();
+    }
 
     /// <summary>
     /// Syncs and applies settings data (such as color) between all versions of this network player (only call this on the network player local to the client who's settings you want to use).
