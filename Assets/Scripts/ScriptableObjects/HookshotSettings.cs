@@ -45,10 +45,10 @@ public class HookshotSettings : ScriptableObject
     [Min(0), Tooltip("Amount of time grappler needs to cool down for after completing a punch-whip.")]                                       public float punchWhipCooldown;
     [Tooltip("Causes weapon on matching hand to become holstered while grappling hook is in use.")]                                          public bool holstersWeapon;
     [Header("Haptics:")]
-    [Tooltip("Haptic vibration made when player launches the hook.")]          public PlayerEquipment.HapticData launchHaptics;
-    [Tooltip("Haptic vibration made when hook is traveling through the air.")] public PlayerEquipment.HapticData reelHaptics;
-    [Tooltip("Haptic vibration made when hook hits something.")]               public PlayerEquipment.HapticData hitHaptics;
-    [Tooltip("Haptic vibration made when player releases the hook.")]          public PlayerEquipment.HapticData releaseHaptics;
+    [Tooltip("Haptic vibration made when player launches the hook.")]          public PlayerController.HapticData launchHaptics;
+    [Tooltip("Haptic vibration made when hook is traveling through the air.")] public PlayerController.HapticData reelHaptics;
+    [Tooltip("Haptic vibration made when hook hits something.")]               public PlayerController.HapticData hitHaptics;
+    [Tooltip("Haptic vibration made when player releases the hook.")]          public PlayerController.HapticData releaseHaptics;
     [Header("Sounds:")]
     [Tooltip("Sound played when hook is launched and while it is in the air.")] public AudioClip launchSound;
     [Tooltip("Sound played when player lands a successful punch-whip.")]        public AudioClip whipSound;

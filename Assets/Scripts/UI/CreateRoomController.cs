@@ -89,6 +89,7 @@ public class CreateRoomController : MonoBehaviour
     /// <returns>A random string that serves as a room code.</returns>
     public string GenerateRoomCode()
     {
+        Random.InitState(System.DateTime.Now.Millisecond);
         string roomCode = "";
         for(int i = 0; i < GameSettings.roomCodeLength; i++)
         {

@@ -44,7 +44,7 @@ public class RemoteShotgunController : MonoBehaviourPunCallbacks
                     if (equipment.handedness == handedness && equipment.TryGetComponent(out clientGun)) break; //Break once matching shotgun has been found
                 }
             }
-            if (clientGun == null) { Debug.LogError("RemoteShotgunController could not find matching client weapon on player!"); Destroy(gameObject); } //Post warning if client weapon could not be found
+            if (clientGun == null) { Debug.LogWarning("RemoteShotgunController could not find matching client weapon on player!"); Destroy(gameObject); } //Post warning if client weapon could not be found
 
             //Initialize:
         }

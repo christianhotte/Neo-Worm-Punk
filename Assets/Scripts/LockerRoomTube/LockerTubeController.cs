@@ -20,6 +20,7 @@ public class LockerTubeController : MonoBehaviour
     [SerializeField, Tooltip("The parent that holds all of the ready lights.")] private Transform readyLights;
     [SerializeField, Tooltip("The spawn point for the player's name.")] private Transform playerNameSpawnPoint;
     [SerializeField, Tooltip("The prefab that displays the player's name.")] private GameObject playerNamePrefab;
+    [SerializeField, Tooltip("The GameObject for the host settings.")] private GameObject hostSettings;
 
     //internal int tubeNumber;
     public bool occupied = false;
@@ -61,6 +62,15 @@ public class LockerTubeController : MonoBehaviour
 
             playerNameObject.GetComponentInChildren<TextMeshProUGUI>().text = playerName;
         }
+    }
+
+    /// <summary>
+    /// Shows the host settings in the tube.
+    /// </summary>
+    /// <param name="showSettings">If true, the host settings are shown. If false, they are hidden.</param>
+    public void ShowHostSettings(bool showSettings)
+    {
+        hostSettings.SetActive(showSettings);
     }
 
     public int GetTubeNumber()

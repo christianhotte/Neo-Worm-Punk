@@ -519,6 +519,8 @@ MonoBehaviour:
   torsoVerticalOffset: 2
   keepTorsoCentered: 1
   flickStickThreshold: 0.7
+  slipSpeed: 10
+  slipAngleRange: {x: 10, y: 70}
   targetHitSound: {fileID: 8300000, guid: 531eac65f6344cf478fc990cb0396400, type: 3}
   targetKillSound: {fileID: 8300000, guid: 378c37037d928094099c1401ff5cafd5, type: 3}
   useSpawnPoint: 1
@@ -789,6 +791,7 @@ GameObject:
   - component: {fileID: 1952950443538666958}
   - component: {fileID: 3178438073289734660}
   - component: {fileID: 1366384011876555693}
+  - component: {fileID: 4383279064317496636}
   m_Layer: 3
   m_Name: XR Origin
   m_TagString: Player
@@ -874,6 +877,18 @@ CapsuleCollider:
   m_Height: 2.2
   m_Direction: 1
   m_Center: {x: -0, y: 1.01, z: 0}
+--- !u!114 &4383279064317496636
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1952950443538666959}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5585c874cd88f34ebdeaba3d94239ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1952950443738959620
 GameObject:
   m_ObjectHideFlags: 0
