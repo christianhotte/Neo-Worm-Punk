@@ -243,6 +243,10 @@ public class PlayerController : MonoBehaviour
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         CenterCamera(); //Center player camera whenever a new scene is loaded
+
+        //If the player is in a room, set their default health to whatever the room setting for health is
+        if (PhotonNetwork.InRoom)
+            healthSettings.defaultHealth = (int)PhotonNetwork.CurrentRoom.CustomProperties["PlayerHP"];
     }
     private void OnDestroy()
     {

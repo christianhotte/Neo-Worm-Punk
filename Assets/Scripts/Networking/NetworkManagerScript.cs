@@ -135,6 +135,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         {
             customRoomSettings = new Hashtable();
             customRoomSettings.Add("RoundLength", GameSettings.testMatchLength);
+            customRoomSettings.Add("PlayerHP", GameSettings.HPDefault);
         }
 
         roomOptions.IsOpen = true; // The room is open.
