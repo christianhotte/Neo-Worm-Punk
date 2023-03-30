@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
 public class NetworkedArenaElement : MonoBehaviour
 {
@@ -22,6 +23,18 @@ public class NetworkedArenaElement : MonoBehaviour
     {
         for(int i = 0; i <= trap.shotsStored; i++)
         {
+            Projectile newProjectile; //Initialize reference container for spawned projectile
+            if (!PhotonNetwork.InRoom) //Weapon is in local fire mode
+            {
+                newProjectile = ((GameObject)Instantiate(Resources.Load("Projectiles/HotteProjectile"))).GetComponent<Projectile>(); //Instantiate projectile
+                newProjectile.FireDumb(trap.barrelPos);                                                                              //Initialize projectile
+            }
+            else //Weapon is firing on the network
+            {
+                newProjectile = PhotonNetwork.Instantiate("Projectiles/HotteProjectile", trap.barrelPos.position, trap.barrelPos.rotation).GetComponent<Projectile>(); //Instantiate projectile on network
+                newProjectile.photonView.RPC("RPC_Fire", RpcTarget.All, trap.barrelPos.position, trap.barrelPos.rotation, PlayerController.photonView.ViewID);         //Initialize all projectiles simultaneously
+            }
+
             GameObject projInstace = Instantiate(trap.ProjectilePrefab);
             projInstace.transform.position = trap.barrelPos.position;
             projScript = projInstace.GetComponent<Projectile>();
