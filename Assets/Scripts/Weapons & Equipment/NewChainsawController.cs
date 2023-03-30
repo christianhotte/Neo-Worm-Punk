@@ -52,6 +52,9 @@ public class NewChainsawController : PlayerEquipment
     private float bladeBackOriginSize; //Initial length of rear blade extender
 
     //RUNTIME METHODS:
+    /// <summary>
+    /// lmao nerd
+    /// </summary>
     private protected override void Awake()
     {
         //Initialization:
@@ -96,7 +99,7 @@ public class NewChainsawController : PlayerEquipment
         if (grinding) grindTime += Time.deltaTime; //Update grind time tracker
 
         //Extend/Retract blade:
-        if (mode == BladeMode.Sheathed && gripValue >= settings.triggerThreshold) //Grip has been squeezed enough to activate the chainsaw
+        if (mode == BladeMode.Sheathed && gripValue >= settings.triggerThresholds.y) //Grip has been squeezed enough to activate the chainsaw
         {
             //Switch modes:
             if (handWeapon != null) handWeapon.Holster();     //Holster weapon held in hand if possible
@@ -106,7 +109,7 @@ public class NewChainsawController : PlayerEquipment
             timeInMode = 0;                                   //Reset mode time tracker
             timeUntilPulse = settings.extendHaptics.duration; //Set pulse timer to begin pulsing as soon as extend haptics have finished
         }
-        else if (mode == BladeMode.Extended && gripValue < settings.releaseThreshold) //Grip has been released enough to re-sheath the chainsaw (always check in case of early release)
+        else if (mode == BladeMode.Extended && gripValue < settings.triggerThresholds.x) //Grip has been released enough to re-sheath the chainsaw (always check in case of early release)
         {
             //Switch mode:
             if (handWeapon != null) handWeapon.Holster(false); //Un-holster weapon held in hand if possible
@@ -127,7 +130,7 @@ public class NewChainsawController : PlayerEquipment
         {
             //Initialize:
             float timeInterpolant = timeInMode / settings.bladeExtendTime;                                                  //Get interpolant value representing percentage of blade animation completed so far
-            float gripInterpolant = settings.bladePreRetractCurve.Evaluate(gripValue / settings.triggerThreshold);          //Get multiplier to apply to retraction distance for true retracted position
+            float gripInterpolant = settings.bladePreRetractCurve.Evaluate(gripValue / settings.triggerThresholds.y);       //Get multiplier to apply to retraction distance for true retracted position
             Vector3 bladeExtendPos = bladeOriginPos + (Vector3.forward * settings.bladeTraverseDistance);                   //Get target position blade is extending to (or retracting from)
             Vector3 bladeRetractPos = bladeOriginPos + (gripInterpolant * settings.bladePreRetractDistance * Vector3.back); //Get target position blade is retracting to (or extending from)
             Vector3 wristExtendPos = wristOriginPos + (Vector3.forward * settings.wristExtendDistance);                     //Get extended target position of wrist
@@ -157,8 +160,8 @@ public class NewChainsawController : PlayerEquipment
                     wrist.localRotation = Quaternion.identity;      //Return wrist to base rotation
                     wristPivot.localRotation = Quaternion.identity; //Return wrist pivot to base rotation
                 }
-                mode = (mode == BladeMode.Extending ? BladeMode.Extended : BladeMode.Sheathed);            //Progress mode to stable state
-                timeInMode = 0;                                                                            //Reset mode timer
+                mode = (mode == BladeMode.Extending ? BladeMode.Extended : BladeMode.Sheathed); //Progress mode to stable state
+                timeInMode = 0;                                                                 //Reset mode timer
             }
 
             //Stretch blade extender:
@@ -238,7 +241,7 @@ public class NewChainsawController : PlayerEquipment
                 gripValue = context.ReadValue<float>(); //Get current amount by which player is squeezing the grip
                 if (mode == BladeMode.Sheathed) //Blade is currently sheathed
                 {
-                    float gripInterpolant = settings.bladePreRetractCurve.Evaluate(gripValue / settings.triggerThreshold);         //Get multiplier to apply to retraction distance in order to pull blade back slightly
+                    float gripInterpolant = settings.bladePreRetractCurve.Evaluate(gripValue / settings.triggerThresholds.y);      //Get multiplier to apply to retraction distance in order to pull blade back slightly
                     bladeTip.localPosition = bladeOriginPos + (gripInterpolant * settings.bladePreRetractDistance * Vector3.back); //Set blade tip position based on how much player is squeezing the grip
                 }
                 break;

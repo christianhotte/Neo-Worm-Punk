@@ -102,6 +102,9 @@ public class PlayerEquipment : MonoBehaviour
     /// <returns></returns>
     private IEnumerator MoveHolster(bool holster = true)
     {
+        //Validation:
+        yield return new WaitUntil(() => player.cam.transform.parent != null);
+
         //Initialize:
         holsterTransitioning = true;                                                                                                                    //Indicate that equipment is in the process of being holstered
         Transform localSpaceParent = player.cam.transform.parent;                                                                                       //Use camera offset as local space because hands are childed to it
@@ -264,20 +267,26 @@ public class PlayerEquipment : MonoBehaviour
     }
     private protected virtual void Update()
     {
-        if (debugUpdateSettings && Application.isEditor) ConfigureJoint(); //Reconfigure joint every update if debug setting is selected (only necessary in Unity Editor)
+        if (!inStasis && debugUpdateSettings && Application.isEditor) ConfigureJoint(); //Reconfigure joint every update if debug setting is selected (only necessary in Unity Editor)
     }
     private protected virtual void FixedUpdate()
     {
-        //Update position memory:
-        relPosMem.Insert(0, RelativePosition);                                                       //Add current relative position to beginning of memory list
-        if (relPosMem.Count > jointSettings.positionMemory) relPosMem.RemoveAt(relPosMem.Count - 1); //Keep list size constrained to designated amount (removing oldest entries)
+        if (!inStasis) //Only update equipment if not in stasis
+        {
+            //Update position memory:
+            relPosMem.Insert(0, RelativePosition);                                                       //Add current relative position to beginning of memory list
+            if (relPosMem.Count > jointSettings.positionMemory) relPosMem.RemoveAt(relPosMem.Count - 1); //Keep list size constrained to designated amount (removing oldest entries)
 
-        //Cleanup:
-        PerformFollowerUpdate(); //Update follower transform
+            //Cleanup:
+            PerformFollowerUpdate(); //Update follower transform
+        }
     }
     private protected virtual void OnPreRender()
     {
-        PerformFollowerUpdate(); //Update follower transform
+        if (!inStasis) //Only update equipment if not in stasis
+        {
+            PerformFollowerUpdate(); //Update follower transform
+        }
     }
     private protected virtual void OnDestroy()
     {
@@ -287,6 +296,7 @@ public class PlayerEquipment : MonoBehaviour
     private void TryGiveInput(InputAction.CallbackContext context)
     {
         //Input exception states:
+        if (inStasis) return;                          //Ignore equipment input while equipment is in stasis
         if (!player.InCombat()) return;                //Ignore equipment input while not in combat
         if (holstered || holsterTransitioning) return; //Ignore input while equipment is holstered or being holstered
         if (!inputEnabled) return;                     //Ignore input while inputs are explicitly disabled
@@ -309,6 +319,9 @@ public class PlayerEquipment : MonoBehaviour
     /// </summary>
     public void UnEquip()
     {
+        //Remove instantiated stuff:
+
+
         //Cleanup:
         if (player != null) player.attachedEquipment.Remove(this); //Remove this item from player's running list of attached equipment
         inStasis = true;                                           //Indicate that equipment is now safely in stasis and will not messily try to update itself

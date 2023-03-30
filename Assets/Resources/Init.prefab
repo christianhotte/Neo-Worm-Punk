@@ -30,7 +30,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 9205200279148560531}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -75,7 +76,6 @@ MonoBehaviour:
   roomScene: NetworkLockerRoom
   networkPlayerName: NewNetworkPlayer
   readyUpManagerName: ReadyUpManager
-  useFunnyWords: 1
   wormAdjectives:
   - word: Unfortunate
     wordSounds: 00000000000000000000000000000000
@@ -143,8 +143,6 @@ MonoBehaviour:
     wordSounds: 0000000000000000
   - word: Incontinent
     wordSounds: 00000000000000000000000000000000
-  - word: Incontinent
-    wordSounds: 00000000000000000000000000000000
   wormNouns:
   - word: Invertebrate
     wordSounds: 00000000000000000000000000000000
@@ -206,31 +204,176 @@ MonoBehaviour:
     wordSounds: 00000000000000000000000000000000
   - word: Bwarp
     wordSounds: 00000000000000000000000000000000
+  wormAdjectivesGood:
+  - word: Honorable
+    wordSounds: 00000000000000000000000000000000
+  - word: Fine
+    wordSounds: 00000000
+  - word: Distinguished
+    wordSounds: 000000000000000000000000
+  - word: Eloquent
+    wordSounds: 000000000000000000000000
+  - word: Refined
+    wordSounds: 0000000000000000
+  - word: Tasteful
+    wordSounds: 0000000000000000
+  wormNounsGood:
+  - word: Gentleworm
+    wordSounds: 000000000000000000000000
   wormAdjectivesBad:
   - word: Guzzling
-    wordSounds: 00000000000000000000000000000000
+    wordSounds: 000000000000000000000000
   - word: Fleshy
-    wordSounds: 00000000000000000000000000000000
+    wordSounds: 0000000000000000
   - word: Sopping
-    wordSounds: 00000000000000000000000000000000
+    wordSounds: 0000000000000000
   - word: Throbbing
-    wordSounds: 00000000000000000000000000000000
+    wordSounds: 0000000000000000
   - word: Promiscuous
     wordSounds: 00000000000000000000000000000000
   - word: Flaccid
-    wordSounds: 00000000000000000000000000000000
+    wordSounds: 0000000000000000
   - word: Erect
-    wordSounds: 00000000000000000000000000000000
+    wordSounds: 0000000000000000
   - word: Gaping
-    wordSounds: 00000000000000000000000000000000
+    wordSounds: 0000000000000000
   wormNounsBad:
   - word: Guzzler
-    wordSounds: 00000000000000000000000000000000
+    wordSounds: 0000000000000000
   - word: Pervert
-    wordSounds: 00000000000000000000000000000000
+    wordSounds: 0000000000000000
   - word: Fucko
-    wordSounds: 00000000000000000000000000000000
+    wordSounds: 0000000000000000
   - word: Pissbaby
-    wordSounds: 00000000000000000000000000000000
+    wordSounds: 000000000000000000000000
   - word: Shit
     wordSounds: 00000000
+--- !u!1 &5977610472763199594
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9205200279148560531}
+  - component: {fileID: 257223962589671436}
+  - component: {fileID: 4709753837328926217}
+  - component: {fileID: 5893669566549301673}
+  m_Layer: 0
+  m_Name: PhotonVoiceManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &9205200279148560531
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5977610472763199594}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2321952038745907983}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &257223962589671436
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5977610472763199594}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81d9debcbaf99472bb70ffc2f99cb23f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DisconnectAfterKeepAlive: 0
+  KeepAliveInBackground: 60000
+  ApplyDontDestroyOnLoad: 1
+  runInBackground: 1
+  statsResetInterval: 1000
+  speakerPrefab: {fileID: 5947097724825286896, guid: 836738025e8d81545a48ed932b69b58f, type: 3}
+  primaryRecorder: {fileID: 4709753837328926217}
+  usePrimaryRecorder: 1
+  Settings:
+    AppIdRealtime: 66ef2e59-3cdd-4c83-a932-ce42d1c1fd9c
+    AppIdFusion: 
+    AppIdChat: 
+    AppIdVoice: ff990731-a4f5-4eef-b086-f7ced5177cbe
+    AppVersion: 
+    UseNameServer: 1
+    FixedRegion: us
+    Server: 
+    Port: 0
+    ProxyServer: 
+    Protocol: 0
+    EnableProtocolFallback: 1
+    AuthMode: 0
+    EnableLobbyStatistics: 0
+    NetworkLogging: 1
+  ShowSettings: 1
+  AutoConnectAndJoin: 1
+  AutoLeaveAndDisconnect: 1
+  usePunAppSettings: 1
+  usePunAuthValues: 1
+--- !u!114 &4709753837328926217
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5977610472763199594}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91175dcc15224463780e01a8a98b1b60, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  voiceDetection: 1
+  voiceDetectionThreshold: 0.01
+  voiceDetectionDelayMs: 200
+  interestGroup: 0
+  debugEchoMode: 1
+  reliableMode: 0
+  encrypt: 0
+  transmitEnabled: 1
+  samplingRate: 24000
+  frameDuration: 20000
+  bitrate: 30000
+  sourceType: 0
+  microphoneType: 0
+  audioClip: {fileID: 0}
+  loopAudioClip: 1
+  recordingEnabled: 1
+  audioSessionParameters:
+    Category: 4
+    Mode: 0
+    CategoryOptions: 0800000004000000
+  editorAudioSessionPreset: 0
+  androidNativeMicrophoneSettings:
+    AcousticEchoCancellation: 1
+    AutomaticGainControl: 1
+    NoiseSuppression: 1
+  stopRecordingWhenPaused: 1
+  useOnAudioFilterRead: 0
+  useMicrophoneTypeFallback: 1
+  recordWhenJoined: 1
+--- !u!114 &5893669566549301673
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5977610472763199594}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a3986deb98168394684c41606a9495af, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  amplificationFactor: 1
