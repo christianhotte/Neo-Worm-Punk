@@ -295,6 +295,10 @@ public class NewChainsawController : PlayerEquipment
             Quaternion targetWristRot = wrist.localRotation * Quaternion.AngleAxis(wristRotAngle, Vector3.forward);
             wrist.localRotation = targetWristRot;
 
+            //Pull player forward:
+            Vector3 pullForce = settings.deflectPullForce * Time.deltaTime * transform.forward; //Get force by which player is being pulled forward
+            player.bodyRb.AddForce(pullForce, ForceMode.Acceleration);                          //Add force to player body
+
             //targetWristRot = Quaternion.RotateTowards(wrist.parent.rotation, targetWristRot, settings.maxWristAngle);  //Clamp rotation to set angular limit
             //wrist.rotation = Quaternion.Lerp(wrist.rotation, targetWristRot, settings.wristLerpRate * Time.deltaTime); //Lerp wrist toward target rotation
 
