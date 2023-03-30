@@ -472,7 +472,6 @@ public class NetworkPlayer : MonoBehaviour
             LockerTubeController spawnTube = SpawnManager2.instance.GetEmptyTube();
             if (spawnTube != null)
             {
-                spawnTube.occupied = true;
                 Player targetPlayer = PhotonNetwork.GetPhotonView(myViewID).Owner;
                 photonView.RPC("RPC_RemoteSpawnPlayer", targetPlayer, spawnTube.GetTubeNumber());
             }
