@@ -98,7 +98,11 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
             {
                 if (tube.GetTubeNumber() == x)
                 {
-                    if (!tube.occupied) return tube;
+                    if (!tube.occupied)
+                    {
+                        tube.occupied = true;
+                        return tube;
+                    }
                 }
             }
         }
