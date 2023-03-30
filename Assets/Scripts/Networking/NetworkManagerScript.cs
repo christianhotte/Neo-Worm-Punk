@@ -563,10 +563,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         yield return new WaitForSeconds(playerScreenFader.GetFadeDuration());
         yield return null;
 
-        if (PhotonNetwork.IsMasterClient)
-        {
-            PhotonNetwork.LoadLevel(sceneName);
-        }
+        PhotonNetwork.LoadLevel(sceneName);
 
         // Unready
         localNetworkPlayer.SetNetworkPlayerProperties("IsReady", false);

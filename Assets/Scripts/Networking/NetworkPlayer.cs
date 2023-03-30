@@ -55,8 +55,6 @@ public class NetworkPlayer : MonoBehaviour
         bodyRenderer = GetComponentInChildren<SkinnedMeshRenderer>(); //Get body renderer component from model in children
         trail = GetComponentInChildren<TrailRenderer>();              //Get trail renderer component from children (there should only be one)
 
-        PhotonNetwork.AutomaticallySyncScene = true;
-
         //Set up rig:
         foreach (PhotonTransformView view in GetComponentsInChildren<PhotonTransformView>()) //Iterate through each network-tracked component
         {
