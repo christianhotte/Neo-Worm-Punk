@@ -42,7 +42,7 @@ public class NetworkPlayer : MonoBehaviour
     private bool visible = true; //Whether or not this network player is currently visible
     internal Color currentColor; //Current player color this networkPlayer instance is set to
     private int lastTubeNumber;  //Number of the tube this player was latest spawned at
-    internal bool inTube = false;
+    public bool inTube = false;
 
     //RUNTIME METHODS:
     private void Awake()
@@ -54,6 +54,8 @@ public class NetworkPlayer : MonoBehaviour
         photonView = GetComponent<PhotonView>();                      //Get photonView component from local object
         bodyRenderer = GetComponentInChildren<SkinnedMeshRenderer>(); //Get body renderer component from model in children
         trail = GetComponentInChildren<TrailRenderer>();              //Get trail renderer component from children (there should only be one)
+
+        PhotonNetwork.AutomaticallySyncScene = true;
 
         //Set up rig:
         foreach (PhotonTransformView view in GetComponentsInChildren<PhotonTransformView>()) //Iterate through each network-tracked component
