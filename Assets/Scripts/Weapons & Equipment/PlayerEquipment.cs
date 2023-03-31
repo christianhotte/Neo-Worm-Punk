@@ -30,6 +30,7 @@ public class PlayerEquipment : MonoBehaviour
     [SerializeField, Tooltip("Settings defining this equipment's physical joint behavior.")]                                         private protected EquipmentJointSettings jointSettings;
     [SerializeField, Tooltip("Only enable this on equipment which needs it, best practice is to have only one such piece per arm.")] private bool canMoveHandRig = false;
     [SerializeField, Tooltip("Enables constant joint updates for testing purposes.")]                                                private protected bool debugUpdateSettings;
+    [SerializeField, Tooltip("Unequips equipment and puts it into stasis.")]                                                         private bool debugUnequip;
     private protected Transform positionMemoryReference; //Transform used to track position and velocity memory, defaults to targetTransform
 
     //Runtime Variables:
@@ -102,6 +103,9 @@ public class PlayerEquipment : MonoBehaviour
     /// <returns></returns>
     private IEnumerator MoveHolster(bool holster = true)
     {
+        //Validation:
+        yield return new WaitUntil(() => player.cam.transform.parent != null);
+
         //Initialize:
         holsterTransitioning = true;                                                                                                                    //Indicate that equipment is in the process of being holstered
         Transform localSpaceParent = player.cam.transform.parent;                                                                                       //Use camera offset as local space because hands are childed to it

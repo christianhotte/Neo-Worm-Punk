@@ -6,7 +6,8 @@ using UnityEngine.Events;
 public class LeverController : MonoBehaviour
 {
     public enum HingeJointState { Min, Max, None }
-
+    [SerializeField, Tooltip("The handle of the lever.")] private LeverHandleController handle;
+    [Space(10)]
     [SerializeField, Tooltip("Angle Threshold If Min Limit Is Reached")] float angleBetweenMinThreshold = 8f;
     [SerializeField, Tooltip("Angle Threshold If Max Limit Is Reached")] float angleBetweenMaxThreshold = 8f;
     public HingeJointState hingeJointState = HingeJointState.None;  //The state of the hinge joint
@@ -34,7 +35,6 @@ public class LeverController : MonoBehaviour
     [SerializeField, Tooltip("The sound that plays when the lever reaches a limit.")] private AudioClip onClickSoundEffect;
 
     private float previousValue, currentValue;  //The previous and current frame's value of the lever
-    private LeverHandleController handle;
 
     private IEnumerator leverAutoCoroutine;
 
@@ -50,12 +50,10 @@ public class LeverController : MonoBehaviour
     private void Start()
     {
         firstCheck = true;
-        handle = GetComponentInChildren<LeverHandleController>();
     }
 
     private void OnEnable()
     {
-        handle = GetComponentInChildren<LeverHandleController>();
         if (startingAngle != 0)
             handle.MoveToAngle(this, startingAngle);
 
@@ -239,6 +237,7 @@ public class LeverController : MonoBehaviour
         isLocked = lockLever;
     }
 
+    public LeverHandleController GetLeverHandle() => handle;
     public float GetMinimumAngle() => minimumAngle;
     public float GetMinimumAngleWithLimit() => Mathf.Abs(handle.GetAngle() - minimumAngle);
     public float GetMaximumAngle() => maximumAngle;

@@ -592,6 +592,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inRangeMat: {fileID: 2100000, guid: d27f6b66feebe5548b956ea6568990de, type: 2}
   grabbedMat: {fileID: 2100000, guid: 9ec1755bacf57604da871490dcd78577, type: 2}
+  dialTransform: {fileID: 3478549885078771926}
   snapRotationAmount: 25
   angleTolerance: 5
   minVal: 0
@@ -600,6 +601,9 @@ MonoBehaviour:
   rightHandModel: {fileID: 0}
   useDummyHands: 0
   OnValueChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  OnDialTurned:
     m_PersistentCalls:
       m_Calls: []
   onSnapSoundEffect: {fileID: 8300000, guid: c78f4a75ec5f7df4996c5d567faa2a57, type: 3}

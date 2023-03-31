@@ -42,6 +42,7 @@ public class NetworkPlayer : MonoBehaviour
     private bool visible = true; //Whether or not this network player is currently visible
     internal Color currentColor; //Current player color this networkPlayer instance is set to
     private int lastTubeNumber;  //Number of the tube this player was latest spawned at
+    public bool inTube = false;
 
     //RUNTIME METHODS:
     private void Awake()
@@ -163,6 +164,7 @@ public class NetworkPlayer : MonoBehaviour
             //Generic scene load checks:
             foreach (Collider c in transform.GetComponentsInChildren<Collider>()) c.enabled = !GameManager.Instance.InMenu(); //Always disable colliders if networkPlayer is in a menu scene
         }
+        inTube = false;
     }
 
     //FUNCTIONALITY METHODS:
@@ -216,6 +218,19 @@ public class NetworkPlayer : MonoBehaviour
     public void RPC_DeathLog(string killerName, string victimName)
     {
         NetworkManagerScript.instance.AddDeathToJumbotron(killerName, victimName);
+    }
+    public void UpdateRoomSettingsDisplay()
+    {
+        Debug.Log("Updating Room Settings...");
+        photonView.RPC("RPC_UpdateRoomSettings", RpcTarget.AllBuffered);
+    }
+
+    [PunRPC]
+    public void RPC_UpdateRoomSettings()
+    {
+        //Update any instance of the room settings display
+        foreach (var display in FindObjectsOfType<RoomSettingsDisplay>())
+            display.UpdateRoomSettingsDisplay();
     }
 
     /// <summary>
@@ -467,14 +482,14 @@ public class NetworkPlayer : MonoBehaviour
     [PunRPC]
     public void RPC_GiveMeSpawnpoint(int myViewID)
     {
-        if (SpawnManager2.instance != null)
+        if (SpawnManager2.instance != null && !inTube)
         {
             LockerTubeController spawnTube = SpawnManager2.instance.GetEmptyTube();
             if (spawnTube != null)
             {
-                spawnTube.occupied = true;
                 Player targetPlayer = PhotonNetwork.GetPhotonView(myViewID).Owner;
                 photonView.RPC("RPC_RemoteSpawnPlayer", targetPlayer, spawnTube.GetTubeNumber());
+                inTube = true;
             }
         }
     }
