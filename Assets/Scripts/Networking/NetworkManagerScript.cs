@@ -54,7 +54,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         //Get objects & components:
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
-
     void Start()
     {
         // Subscribes event handlers
@@ -88,7 +87,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
-
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         // If we are loaded into the Network Locker scene, and we are the master client
@@ -113,7 +111,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     {
         if (!PhotonNetwork.IsConnected) { ConnectToServer(); }
     }
-
     void ConnectToServer()
     {
         PhotonNetwork.ConnectUsingSettings();

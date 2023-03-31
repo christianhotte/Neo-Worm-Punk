@@ -42,7 +42,7 @@ public class NetworkPlayer : MonoBehaviour
     private bool visible = true; //Whether or not this network player is currently visible
     internal Color currentColor; //Current player color this networkPlayer instance is set to
     private int lastTubeNumber;  //Number of the tube this player was latest spawned at
-    public bool inTube = false;
+    internal bool inTube = false;
 
     //RUNTIME METHODS:
     private void Awake()
