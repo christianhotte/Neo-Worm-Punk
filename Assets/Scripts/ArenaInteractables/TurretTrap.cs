@@ -8,7 +8,7 @@ public class TurretTrap : NetworkedArenaElement
     public bool firing = false, Reset = false, hasTarget = false;
     public Transform barrelPos,barrelReset;
     public TrapTrigger connectedTrigger;
-    public GameObject turret;
+    public GameObject turret,spotLight;
     private NetworkedArenaElement NetworkController;
     public GameObject[] PlayersInRange;
 
