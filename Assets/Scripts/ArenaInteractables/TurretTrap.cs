@@ -28,6 +28,7 @@ public class TurretTrap : NetworkedArenaElement
             if (PlayersInRange[0] != null)
             {
                 turret.transform.LookAt(PlayersInRange[0].transform);
+                spotLight.SetActive(true);
                 Reset = false;
             }
         }
@@ -45,7 +46,6 @@ public class TurretTrap : NetworkedArenaElement
     {
         if (other.name == "XR Origin")
         {
-            Debug.Log("PlayerAdded");
             hasTarget = true;
             Debug.Log(other.name);
             PlayersInRange[0] = other.gameObject;
@@ -55,9 +55,9 @@ public class TurretTrap : NetworkedArenaElement
     {
         if (other.name == "XR Origin")
         {
-            Debug.Log("PlayerRemoved");
             hasTarget = false;
             turret.transform.LookAt(barrelReset);
+            spotLight.SetActive(false);
             PlayersInRange[0] = null;
         }
     }
