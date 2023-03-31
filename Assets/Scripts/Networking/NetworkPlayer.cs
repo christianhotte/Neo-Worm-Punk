@@ -42,7 +42,7 @@ public class NetworkPlayer : MonoBehaviour
     private bool visible = true; //Whether or not this network player is currently visible
     internal Color currentColor; //Current player color this networkPlayer instance is set to
     private int lastTubeNumber;  //Number of the tube this player was latest spawned at
-    public bool inTube = false;
+    internal bool inTube = false;
 
     //RUNTIME METHODS:
     private void Awake()
@@ -151,7 +151,7 @@ public class NetworkPlayer : MonoBehaviour
                 }
                 else if (scene.name == NetworkManagerScript.instance.roomScene)
                 {
-                    PhotonNetwork.AutomaticallySyncScene = true;                    // Start syncing scene with other players
+                    //PhotonNetwork.AutomaticallySyncScene = true;                    // Start syncing scene with other players
                     photonView.RPC("RPC_MakeVisible", RpcTarget.OthersBuffered);    //Show all remote players when entering locker room
                 }
             }

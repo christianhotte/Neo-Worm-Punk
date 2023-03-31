@@ -78,6 +78,7 @@ public class LevelTimer : MonoBehaviour
                 currentTime -= Time.deltaTime;
                 DisplayTime();
             }
+
             //If there is no time, end the timer and call the subscribed event(s)
             else if (!timerEnded)
             {
@@ -105,7 +106,7 @@ public class LevelTimer : MonoBehaviour
     /// </summary>
     public void BackToLockerRoom()
     {
-        NetworkManagerScript.instance.LoadSceneWithFade(NetworkManagerScript.instance.roomScene);
+        NetworkManagerScript.instance.LoadSceneWithFade(NetworkManagerScript.instance.roomScene, false);
     }
 
     public string GetMinutes() => Mathf.FloorToInt(currentTime / 60f < 0? 0: currentTime / 60f).ToString();
