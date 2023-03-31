@@ -106,7 +106,10 @@ public class LevelTimer : MonoBehaviour
     /// </summary>
     public void BackToLockerRoom()
     {
-        NetworkManagerScript.instance.LoadSceneWithFade(NetworkManagerScript.instance.roomScene);
+        if (PhotonNetwork.IsMasterClient)
+        {
+            NetworkManagerScript.instance.LoadSceneWithFade(NetworkManagerScript.instance.roomScene);
+        }
     }
 
     public string GetMinutes() => Mathf.FloorToInt(currentTime / 60f < 0? 0: currentTime / 60f).ToString();
