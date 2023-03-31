@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Photon.Voice.PUN;
+using Photon.Voice.Unity;
 
 public class AudioSettingsController : MonoBehaviour
 {
@@ -26,6 +28,7 @@ public class AudioSettingsController : MonoBehaviour
         sfxSlider.value = PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * 10f;
         voiceChatSlider.value = PlayerPrefs.GetFloat("VoiceChatVolume", GameSettings.defaultVoiceSound) * 10f;
         muteMicToggle.isOn = PlayerPrefs.GetInt("MuteMic", 0) == 1? true: false;
+        UpdateMuteMic();
     }
 
     /// <summary>
@@ -71,5 +74,11 @@ public class AudioSettingsController : MonoBehaviour
     public void ToggleMuteMic(bool isOn)
     {
         PlayerPrefs.SetInt("MuteMic", isOn? 1: 0);
+        UpdateMuteMic();
+    }
+
+    private void UpdateMuteMic()
+    {
+        FindObjectOfType<Recorder>().TransmitEnabled = PlayerPrefs.GetInt("MuteMic") != 1;
     }
 }
