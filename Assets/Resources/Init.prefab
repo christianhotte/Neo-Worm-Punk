@@ -32,6 +32,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 9205200279148560531}
+  - {fileID: 2023776719440167044}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -248,6 +249,51 @@ MonoBehaviour:
     wordSounds: 000000000000000000000000
   - word: Shit
     wordSounds: 00000000
+--- !u!1 &3489850592192487331
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2023776719440167044}
+  - component: {fileID: 8198421380065546642}
+  m_Layer: 0
+  m_Name: VoiceLogger
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2023776719440167044
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3489850592192487331}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2321952038745907983}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8198421380065546642
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3489850592192487331}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a86f533fd9917dd4da8601e9eb542c96, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  LogLevel: 2
 --- !u!1 &5977610472763199594
 GameObject:
   m_ObjectHideFlags: 0
@@ -259,7 +305,7 @@ GameObject:
   - component: {fileID: 9205200279148560531}
   - component: {fileID: 257223962589671436}
   - component: {fileID: 4709753837328926217}
-  - component: {fileID: 5893669566549301673}
+  - component: {fileID: 8609566728291069338}
   m_Layer: 0
   m_Name: PhotonVoiceManager
   m_TagString: Untagged
@@ -296,7 +342,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DisconnectAfterKeepAlive: 0
   KeepAliveInBackground: 60000
-  ApplyDontDestroyOnLoad: 0
+  ApplyDontDestroyOnLoad: 1
   runInBackground: 1
   statsResetInterval: 1000
   speakerPrefab: {fileID: 5947097724825286896, guid: 836738025e8d81545a48ed932b69b58f, type: 3}
@@ -339,15 +385,15 @@ MonoBehaviour:
   voiceDetectionThreshold: 0.05
   voiceDetectionDelayMs: 200
   interestGroup: 0
-  debugEchoMode: 1
+  debugEchoMode: 0
   reliableMode: 0
   encrypt: 0
   transmitEnabled: 1
-  samplingRate: 48000
+  samplingRate: 24000
   frameDuration: 20000
-  bitrate: 130000
+  bitrate: 30000
   sourceType: 0
-  microphoneType: 1
+  microphoneType: 0
   audioClip: {fileID: 0}
   loopAudioClip: 1
   recordingEnabled: 1
@@ -364,7 +410,7 @@ MonoBehaviour:
   useOnAudioFilterRead: 0
   useMicrophoneTypeFallback: 1
   recordWhenJoined: 1
---- !u!114 &5893669566549301673
+--- !u!114 &8609566728291069338
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -376,4 +422,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3986deb98168394684c41606a9495af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  amplificationFactor: 15
+  amplificationFactor: 8

@@ -135,10 +135,15 @@ public class MainMenuController : MonoBehaviour
 
     public void FadeToLockerRoom()
     {
-        StartCoroutine(FadeRoutine());
+        StartCoroutine(FadeRoutine(GameSettings.roomScene));
     }
 
-    private IEnumerator FadeRoutine()
+    public void FadeToTutorials()
+    {
+        StartCoroutine(FadeRoutine(GameSettings.tutorialScene));
+    }
+
+    private IEnumerator FadeRoutine(string newScene)
     {
         playerObject.GetComponentInChildren<FadeScreen>().FadeOut();
 
@@ -146,6 +151,6 @@ public class MainMenuController : MonoBehaviour
         yield return null;
 
         menuAudioSource.Stop();
-        GameManager.Instance.LoadGame(GameSettings.roomScene);
+        GameManager.Instance.LoadGame(newScene);
     }
 }
