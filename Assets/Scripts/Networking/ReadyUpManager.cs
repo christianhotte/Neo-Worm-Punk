@@ -31,12 +31,12 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     //Called when a scene is loaded
     private void OnSceneLoad(Scene scene, LoadSceneMode loadSceneMode)
     {
-/*        //If the locker room was loaded, update the locker text and the player colors
-        if(scene.name == GameSettings.roomScene)
-        {
-            playersInRoom = NetworkManagerScript.instance.GetMostRecentRoom().PlayerCount;
-            UpdateReadyText();
-        }*/
+        /*        //If the locker room was loaded, update the locker text and the player colors
+                if(scene.name == GameSettings.roomScene)
+                {
+                    playersInRoom = NetworkManagerScript.instance.GetMostRecentRoom().PlayerCount;
+                    UpdateReadyText();
+                }*/
     }
 
     private void Update()
@@ -126,6 +126,9 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
                 //Reset all players
                 foreach (var player in NetworkPlayer.instances)
                     player.networkPlayerStats = new PlayerStats();
+
+                if(PhotonNetwork.IsMasterClient)
+                    PhotonNetwork.AutomaticallySyncScene = true;    // Start syncing scene with other players
 
                 NetworkManagerScript.instance.LoadSceneWithFade(GameSettings.arenaScene);
             }
