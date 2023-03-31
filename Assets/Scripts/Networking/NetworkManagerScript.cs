@@ -548,12 +548,12 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         return playerNameList;
     }
 
-    public void LoadSceneWithFade(string sceneName)
+    public void LoadSceneWithFade(string sceneName, bool asyncLoad = true)
     {
-        StartCoroutine(FadeLevelRoutine(sceneName));
+        StartCoroutine(FadeLevelRoutine(sceneName, asyncLoad));
     }
 
-    private IEnumerator FadeLevelRoutine(string sceneName)
+    private IEnumerator FadeLevelRoutine(string sceneName, bool asyncLoad)
     {
         GameManager.Instance.levelTransitionActive = true;
 
@@ -563,7 +563,13 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         yield return new WaitForSeconds(playerScreenFader.GetFadeDuration());
         yield return null;
 
-        PhotonNetwork.LoadLevel(sceneName);
+        if (PhotonNetwork.IsMasterClient)
+        {
+            if (asyncLoad)
+                PhotonNetwork.LoadLevel(sceneName);
+            else
+                SceneManager.LoadScene(sceneName);
+        }
 
         // Unready
         localNetworkPlayer.SetNetworkPlayerProperties("IsReady", false);
