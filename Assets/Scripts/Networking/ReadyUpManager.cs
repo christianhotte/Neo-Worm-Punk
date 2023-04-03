@@ -101,7 +101,6 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     {
         if(FindObjectOfType<TubeManager>() != null)
         {
-            tubeID = tubeID - 1;
             LockerTubeController tube = FindObjectOfType<TubeManager>().GetTubeByNumber(tubeID);
             if (tube != null) tube.UpdateLights(updatedPlayerReady);
 
