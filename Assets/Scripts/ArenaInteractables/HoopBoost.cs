@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HoopBoost : MonoBehaviour
+public class HoopBoost : NetworkedArenaElement
 {
     public Transform hoopCenter, hoopOuter, hoopInner;
     public TrapTrigger triggerScript;
