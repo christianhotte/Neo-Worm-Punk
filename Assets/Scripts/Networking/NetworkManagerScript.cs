@@ -6,6 +6,7 @@ using Photon.Realtime;
 using UnityEngine.SceneManagement;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using ExitGames.Client.Photon;
+using Photon.Voice.Unity;
 
 /* Code was referenced from https://www.youtube.com/watch?v=KHWuTBmT1oI
  * https://www.youtube.com/watch?v=zPZK7C5_BQo&list=PLhsVv9Uw1WzjI8fEBjBQpTyXNZ6Yp1ZLw */
@@ -361,6 +362,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         Debug.Log("Joined " + PhotonNetwork.CurrentRoom.Name + " room."); //Indicate that room has been joined
         SpawnNetworkPlayer();                                             //Always spawn a network player instance when joining a room
         localNetworkPlayer.SetNetworkPlayerProperties("IsReady", false);
+
+        AdjustVoiceVolume();
     }
 
     public override void OnJoinRoomFailed(short returnCode, string message)
@@ -388,6 +391,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         {
             lobbyUI.UpdateRoomList();
         }
+
+        AdjustVoiceVolume();
     }
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
@@ -533,6 +538,16 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     }
 
     //UTILITY METHODS:
+
+    /// <summary>
+    /// Adjusts the volumes of all speaking players.
+    /// </summary>
+    public void AdjustVoiceVolume()
+    {
+        foreach (var speaker in FindObjectsOfType<Speaker>())
+            speaker.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat("VoiceChatVolume", GameSettings.defaultVoiceSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound);
+    }
+
     public List<string> GetPlayerNameList()
     {
         List<string> playerNameList = new List<string>();
