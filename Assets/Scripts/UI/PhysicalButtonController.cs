@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.XR;
 using UnityEngine.Events;
 
 public class PhysicalButtonController : MonoBehaviour
@@ -75,6 +76,9 @@ public class PhysicalButtonController : MonoBehaviour
             {
                 buttonCoroutine = PlayButtonAni();
                 StartCoroutine(buttonCoroutine);
+
+                InputDeviceRole playerHand = other.name == "LeftHand" ? InputDeviceRole.LeftHanded : InputDeviceRole.RightHanded;
+                PlayerController.instance.SendHapticImpulse(playerHand, new Vector2(0.5f, 0.1f));
             }
             //If nothing applies, play the disabled sound effect
             else if(!isInteractable || isLocked)

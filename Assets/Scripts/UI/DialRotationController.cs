@@ -178,6 +178,8 @@ public class DialRotationController : GrabbableUI
         OnDialTurned.Invoke(1);
         if (onSnapSoundEffect != null)
             GetComponent<AudioSource>().PlayOneShot(onSnapSoundEffect, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
+
+        SendHapticsFeedback(0.4f, 0.2f);
     }
 
     /// <summary>
@@ -202,6 +204,8 @@ public class DialRotationController : GrabbableUI
         OnDialTurned.Invoke(-1);
         if (onSnapSoundEffect != null)
             GetComponent<AudioSource>().PlayOneShot(onSnapSoundEffect, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
+
+        SendHapticsFeedback(0.4f, 0.2f);
     }
 
     private float GetDialValue(float angle)
