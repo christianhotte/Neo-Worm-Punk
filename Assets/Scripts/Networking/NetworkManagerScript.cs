@@ -391,6 +391,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         {
             lobbyUI.UpdateRoomList();
         }
+
+        AdjustVoiceVolume();
     }
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
