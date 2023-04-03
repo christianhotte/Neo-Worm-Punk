@@ -79,6 +79,8 @@ public class NetworkPlayer : MonoBehaviour
             PlayerController.instance.playerSetup.ApplyAllSettings();                                //Apply default settings to player
             SyncData();                                                                              //Sync settings between every version of this network player
             foreach (Renderer r in transform.GetComponentsInChildren<Renderer>()) r.enabled = false; //Local player should never be able to see their own NetworkPlayer
+
+            NetworkManagerScript.instance.AdjustVoiceVolume();  //Adjusts the volume of all players
         }
 
         //Event subscriptions:

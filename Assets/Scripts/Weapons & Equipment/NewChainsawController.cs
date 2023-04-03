@@ -350,6 +350,7 @@ public class NewChainsawController : PlayerEquipment
         reverseGrip = false;             //Clear reverse grip input
         gripValue = 0;                   //Clear grip input (chainsaw will begin sheathing)
         triggerValue = 0;                //Clear trigger input
+        if (mode != BladeMode.Sheathed) mode = BladeMode.Retracting;
     }
 
     //UTILITY METHODS:
