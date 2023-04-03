@@ -16,11 +16,12 @@ public class TrapTrigger : Targetable
     internal bool cooldown = false,multiTrigger=false;
     internal NetworkPlayer ActivatingPlayer;
     public UnityEvent onTrapActivated;
+    public TrapController netController;
 
     // Start is called before the first frame update
     void Start()
     {
-
+        netController = GameObject.FindGameObjectWithTag("NetworkManager").GetComponent<TrapController>();
     }
     // Update is called once per frame
     void Update()

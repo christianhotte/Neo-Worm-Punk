@@ -545,12 +545,12 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         return playerNameList;
     }
 
-    public void LoadSceneWithFade(string sceneName)
+    public void LoadSceneWithFade(string sceneName, bool asyncLoad = true)
     {
-        StartCoroutine(FadeLevelRoutine(sceneName));
+        StartCoroutine(FadeLevelRoutine(sceneName, asyncLoad));
     }
 
-    private IEnumerator FadeLevelRoutine(string sceneName)
+    private IEnumerator FadeLevelRoutine(string sceneName, bool asyncLoad)
     {
         GameManager.Instance.levelTransitionActive = true;
 

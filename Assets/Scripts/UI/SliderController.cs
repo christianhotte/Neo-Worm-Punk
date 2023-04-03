@@ -32,7 +32,7 @@ public class SliderController : MonoBehaviour
     void Update()
     {
         //If the slider is grabbed, check for hand movement
-        if (sliderHandle.IsGrabbed())
+        if (sliderHandle.IsGrabbed() && sliderHandle.GetFollowObject() != null)
         {
             MoveToHand();
         }

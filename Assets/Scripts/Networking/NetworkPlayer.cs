@@ -42,6 +42,7 @@ public class NetworkPlayer : MonoBehaviour
     private bool visible = true; //Whether or not this network player is currently visible
     internal Color currentColor; //Current player color this networkPlayer instance is set to
     private int lastTubeNumber;  //Number of the tube this player was latest spawned at
+    internal bool inTube = false;
 
     //RUNTIME METHODS:
     private void Awake()
@@ -150,7 +151,7 @@ public class NetworkPlayer : MonoBehaviour
                 }
                 else if (scene.name == NetworkManagerScript.instance.roomScene)
                 {
-                    PhotonNetwork.AutomaticallySyncScene = true;                    // Start syncing scene with other players
+                    //PhotonNetwork.AutomaticallySyncScene = true;                    // Start syncing scene with other players
                     photonView.RPC("RPC_MakeVisible", RpcTarget.OthersBuffered);    //Show all remote players when entering locker room
                 }
             }
@@ -163,6 +164,7 @@ public class NetworkPlayer : MonoBehaviour
             //Generic scene load checks:
             foreach (Collider c in transform.GetComponentsInChildren<Collider>()) c.enabled = !GameManager.Instance.InMenu(); //Always disable colliders if networkPlayer is in a menu scene
         }
+        inTube = false;
     }
 
     //FUNCTIONALITY METHODS:
@@ -367,6 +369,7 @@ public class NetworkPlayer : MonoBehaviour
             if (killedPlayer)
             {
                 networkPlayerStats.numOfDeaths++;                                                                      //Increment death counter
+                PlayerPrefs.SetInt("LifetimeDeaths", PlayerPrefs.GetInt("LifetimeDeaths") + 1); //Add to the lifetime deaths counter 
                 PlayerController.instance.combatHUD.UpdatePlayerStats(networkPlayerStats);
                 SyncStats();
                 AddToKillBoard(PhotonNetwork.GetPhotonView(enemyID).Owner.NickName, PhotonNetwork.LocalPlayer.NickName);
@@ -403,6 +406,7 @@ public class NetworkPlayer : MonoBehaviour
         if (photonView.IsMine)
         {
             networkPlayerStats.numOfKills++;
+            PlayerPrefs.SetInt("LifetimeKills", PlayerPrefs.GetInt("LifetimeKills") + 1); //Add to the lifetime kills counter 
             print(PhotonNetwork.LocalPlayer.NickName + " killed enemy with index " + enemyID);
             PlayerController.instance.combatHUD.UpdatePlayerStats(networkPlayerStats);
             SyncStats();
@@ -480,14 +484,14 @@ public class NetworkPlayer : MonoBehaviour
     [PunRPC]
     public void RPC_GiveMeSpawnpoint(int myViewID)
     {
-        if (SpawnManager2.instance != null)
+        if (SpawnManager2.instance != null && !inTube)
         {
             LockerTubeController spawnTube = SpawnManager2.instance.GetEmptyTube();
             if (spawnTube != null)
             {
-                spawnTube.occupied = true;
                 Player targetPlayer = PhotonNetwork.GetPhotonView(myViewID).Owner;
                 photonView.RPC("RPC_RemoteSpawnPlayer", targetPlayer, spawnTube.GetTubeNumber());
+                inTube = true;
             }
         }
     }

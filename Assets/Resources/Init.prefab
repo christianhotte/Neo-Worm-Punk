@@ -144,6 +144,12 @@ MonoBehaviour:
     wordSounds: 0000000000000000
   - word: Incontinent
     wordSounds: 00000000000000000000000000000000
+  - word: Solid
+    wordSounds: 0000000000000000
+  - word: The
+    wordSounds: 00000000
+  - word: Goofy
+    wordSounds: 0000000000000000
   wormNouns:
   - word: Invertebrate
     wordSounds: 00000000000000000000000000000000
@@ -205,6 +211,10 @@ MonoBehaviour:
     wordSounds: 00000000000000000000000000000000
   - word: Bwarp
     wordSounds: 00000000000000000000000000000000
+  - word: Git
+    wordSounds: 0000000000000000
+  - word: Goober
+    wordSounds: 0000000000000000
   wormAdjectivesGood:
   - word: Honorable
     wordSounds: 00000000000000000000000000000000
@@ -305,6 +315,7 @@ GameObject:
   - component: {fileID: 9205200279148560531}
   - component: {fileID: 257223962589671436}
   - component: {fileID: 4709753837328926217}
+  - component: {fileID: 8609566728291069338}
   m_Layer: 0
   m_Name: PhotonVoiceManager
   m_TagString: Untagged
@@ -409,3 +420,16 @@ MonoBehaviour:
   useOnAudioFilterRead: 0
   useMicrophoneTypeFallback: 1
   recordWhenJoined: 1
+--- !u!114 &8609566728291069338
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5977610472763199594}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a3986deb98168394684c41606a9495af, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  amplificationFactor: 8
