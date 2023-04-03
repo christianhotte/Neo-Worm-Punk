@@ -96,7 +96,13 @@ public class WormHole : NetworkedArenaElement
         yield return new WaitForSeconds(0.2f);  //Wait for the player to get clear of the wormhole
         ActiveWormholes.Remove(this);
         Destroy(wormZoneInstance);
-        locked = false;   //Unlock the Womrhole circut
-        
+        // locked = false;   //Unlock the Womrhole circut
+        StartCoroutine(TimedLock());
+    }
+
+    public IEnumerator TimedLock()
+    {
+        yield return new WaitForSeconds(3.0f);
+        locked = false;
     }
 }
