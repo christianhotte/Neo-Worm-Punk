@@ -31,12 +31,13 @@ public class ChainsawSettings : ScriptableObject
     [Min(0), Tooltip("How quickly wrist lerps to match player hand rotation while chainsaw is deployed.")]        public float wristLerpRate;
     [Min(0), Tooltip("Speed (in degrees per second) at which wrist returns to base rotation during retraction.")] public float wristRotReturnRate;
     [Header("Deflection:")]
-    [Min(0), Tooltip("How long it takes for blade to move into (and from) deflect position.")]        public float deflectTransTime;
-    [Min(0), Tooltip("Radius of deflection area while deflection is active.")]                        public float deflectRadius;
-    [Min(0), Tooltip("Speed at which blade rotates during deflection mode.")]                         public float deflectRotRate;
-    [Min(0), Tooltip("Distance wrist extends forward during deflection mode.")]                       public float deflectWristExtend;
-    [Min(0), Tooltip("Additive force used to pull player while in deflect mode (helicopter-style).")] public float deflectPullForce;
-    [Min(0), Tooltip("Maximum amount of time player can spend in deflection mode.")]                  public float deflectTime;
+    [Min(0), Tooltip("How long it takes for blade to move into (and from) deflect position.")]          public float deflectTransTime;
+    [Min(0), Tooltip("Radius of deflection area while deflection is active.")]                          public float deflectRadius;
+    [Min(0), Tooltip("Speed at which blade rotates during deflection mode.")]                           public float deflectRotRate;
+    [Min(0), Tooltip("Distance wrist extends forward during deflection mode.")]                         public float deflectWristExtend;
+    [Min(0), Tooltip("Additive force used to pull player while in deflect mode (helicopter-style).")]   public float deflectPullForce;
+    [Min(0), Tooltip("Maximum amount of time player can spend in deflection mode.")]                    public float deflectTime;
+    [Min(0), Tooltip("How many seconds of deflect time player recovers per second of not deflecting.")] public float deflectCooldownRate;
     [Space()]
     [Range(0, 180), Tooltip("Angle blade turns to when set to reverse mode.")]                          public float reverseGripAngle;
     [Min(0), Tooltip("How rapidly blade moves to and from reverse grip position.")]                     public float reverseGripLerpRate;
