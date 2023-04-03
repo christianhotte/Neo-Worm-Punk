@@ -7,6 +7,7 @@ using Photon.Realtime;
 public class SpawnManager3 : MonoBehaviourPunCallbacks
 {
     [SerializeField] private Transform[] spawnPoints;
+    [SerializeField] private LockerTubeController[] tubes;
 
     private Dictionary<int, Transform> playerSpawnPoints = new Dictionary<int, Transform>();
     private int nextSpawnPointIndex = 0;
@@ -28,8 +29,19 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
             return;
         }
 
+        //Wait until the local player tube is assigned
+        StartCoroutine(WaitUntilLocalPlayerTube());
+
         // Assigns the player a spawn point when they get into the locker scene.
         AssignSpawnPointsToPlayers();
+    }
+
+    // Waits until the local player tube is assigned to update the ReadyUpManager status.
+    private IEnumerator WaitUntilLocalPlayerTube()
+    {
+        yield return new WaitUntil(() => ReadyUpManager.instance != null && ReadyUpManager.instance.localPlayerTube != null);
+        // Updates the ReadyUpManager
+        ReadyUpManager.instance.UpdateStatus(ReadyUpManager.instance.localPlayerTube.GetTubeNumber());
     }
 
     // The players gets a spawn point from their player ID when they join a room.
@@ -67,26 +79,53 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
     }
 
     // If we don't already have a network player we can spawn one later. This function is not needed.
-    private void SpawnPlayer(Player player)
+    /*private void SpawnPlayer(Player player)
     {
         PhotonView photonView = PlayerController.photonView;
         if (photonView != null)
         {
             photonView.TransferOwnership(player.ActorNumber);
         }
-    }
+    }*/
 
     // Assigns the spawn points to the player ONLY when they join the scene.
     private void AssignSpawnPointsToPlayers()
     {
+        // Loops through the list of players and searches for the specific player ID.
         for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
         {
             int playerId = PhotonNetwork.PlayerList[i].ActorNumber;
-            Transform spawnPoint = spawnPoints[i % spawnPoints.Length];
+            int spawnNumber = i % spawnPoints.Length;
+            Transform spawnPoint = spawnPoints[spawnNumber];
             playerSpawnPoints.Add(playerId, spawnPoint);
+
+            LockerTubeController spawnTube = tubes[spawnNumber];
+            if (spawnTube != null)
+            {
+                spawnTube.occupied = true;
+                PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
+                PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
+
+                if (ReadyUpManager.instance != null)
+                {
+                    ReadyUpManager.instance.localPlayerTube = spawnTube;
+                    ReadyUpManager.instance.UpdateStatus(spawnNumber);
+                    ReadyUpManager.instance.localPlayerTube.SpawnPlayerName(NetworkManagerScript.instance.GetLocalPlayerName());
+                    NetworkManagerScript.localNetworkPlayer.UpdateTakenColorsOnJoin();
+                    ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
+                    if (PhotonNetwork.IsMasterClient)
+                        ReadyUpManager.instance.localPlayerTube.ShowHostSettings(true); //Show the settings if the player being moved is the master client
+                }
+            }
+
+            else
+            {
+                Debug.LogError("Spawn problem with spawn number " + spawnNumber);
+            }
         }
     }
 
+    // Assigns the spawn points to the player ONLY when they join the scene.
     public void AssignSpawnPointToPlayer(int playerId)
     {
         if (!playerSpawnPoints.ContainsKey(playerId))
@@ -96,6 +135,7 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
         }
     }
 
+    // Frees open the spawn point for when the player leaves.
     public void ReleaseSpawnPointForPlayer(int playerId)
     {
         if (playerSpawnPoints.ContainsKey(playerId))
@@ -104,5 +144,29 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
             playerSpawnPoints.Remove(playerId);
             ReleaseSpawnPoint(spawnPoint);
         }
+    }
+
+    // Looks for an empty tube.
+    public LockerTubeController GetAssignedTube()
+    {
+        TubeManager tubeManager = FindObjectOfType<TubeManager>();
+
+        /*for (int x = 0; x = spawnPoints.Length; x++)
+        {
+            foreach (LockerTubeController tube in tubeManager.roomTubes)
+            {
+                if (tube.GetTubeNumber() == x)
+                {
+                    if (!tube.occupied)
+                    {
+                        tube.occupied = true;
+                        return tube;
+                    }
+                }
+            }
+        }*/
+
+        Debug.LogError("Error: Could Not Find An Empty Tube.");
+        return null;
     }
 }

@@ -9,7 +9,7 @@ public class TubeManager : MonoBehaviour
     public LockerTubeController GetTubeByNumber(int number)
     {
         if (roomTubes.Count > 0)
-            return roomTubes[number - 1];
+            return roomTubes[number];
 
         Debug.LogError("Failed to get tube number " + number + " | Tube count = " + roomTubes.Count);
         return null;
@@ -20,5 +20,4 @@ public class TubeManager : MonoBehaviour
         if (ReadyUpManager.instance != null)
             ReadyUpManager.instance.LeverStateChanged();
     }
-
 }
