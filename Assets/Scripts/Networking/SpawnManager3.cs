@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
+using UnityEngine.SceneManagement;
 
 public class SpawnManager3 : MonoBehaviourPunCallbacks
 {
@@ -11,6 +12,12 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
 
     private Dictionary<int, Transform> playerSpawnPoints = new Dictionary<int, Transform>();
     private int nextSpawnPointIndex = 0;
+
+    private void Awake()
+    {
+        // Event subscription
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
 
     // Start is called before the first frame update
     private void Start()
@@ -34,6 +41,18 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
 
         // Assigns the player a spawn point when they get into the locker scene.
         AssignSpawnPointsToPlayers();
+    }
+
+    // Hard resets the dictionary of spawn points everytime you load into the scene.
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        playerSpawnPoints.Clear();
+    }
+
+    // Cleanup
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
     // Waits until the local player tube is assigned to update the ReadyUpManager status.
@@ -99,6 +118,7 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
             Transform spawnPoint = spawnPoints[spawnNumber];
             playerSpawnPoints.Add(playerId, spawnPoint);
 
+            // Assigns the spawn points to the corresponding tube and calling ReadyUpManager functions
             LockerTubeController spawnTube = tubes[spawnNumber];
             if (spawnTube != null)
             {
