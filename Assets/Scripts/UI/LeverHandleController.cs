@@ -35,7 +35,7 @@ public class LeverHandleController : GrabbableUI
 
             float localAngle = (localLookAngle.eulerAngles.x > 180) ? localLookAngle.eulerAngles.x - 360 : localLookAngle.eulerAngles.x;
 
-            Debug.Log("Local Lever Angle: " + localAngle);
+            //Debug.Log("Local Lever Angle: " + localAngle);
 
             //If the player angle is not in the threshold area, allow free lever movement
             if (localAngle > leverController.GetMinimumAngle() + leverController.GetLeverMinThreshold() && localAngle < leverController.GetMaximumAngle() - leverController.GetLeverMaxThreshold())

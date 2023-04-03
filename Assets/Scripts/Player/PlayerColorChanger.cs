@@ -8,16 +8,23 @@ public class PlayerColorChanger : MonoBehaviour
 {
     private PhysicalButtonController[] colorButtons;
 
+    private void Awake()
+    {
+        colorButtons = GetComponentsInChildren<PhysicalButtonController>();
+    }
+
     // Start is called before the first frame update
     void Start()
     {
-        colorButtons = GetComponentsInChildren<PhysicalButtonController>();
+        Debug.Log("Color Buttons Length: " + colorButtons.Length);
         for (int i = 0; i < colorButtons.Length; i++)
             AdjustButtonColor(colorButtons[i], i);
     }
 
     private void AdjustButtonColor(PhysicalButtonController currentButton, int colorOption)
     {
+        Debug.Log("Changing Initial Button Color To: " + (ColorOptions)colorOption);
+
         Color newColor;
 
         newColor = PlayerSettingsController.playerColors[colorOption];

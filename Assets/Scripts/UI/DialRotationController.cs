@@ -172,7 +172,8 @@ public class DialRotationController : GrabbableUI
         //Snap rotation of dial
         dialTransform.localEulerAngles = new Vector3(dialTransform.localEulerAngles.x, dialTransform.localEulerAngles.y + snapRotationAmount, dialTransform.localEulerAngles.z);
 
-        Debug.Log("Rotating " + gameObject.name + " Clockwise.");
+        //Debug.Log("Rotating " + gameObject.name + " Clockwise.");
+
         OnValueChanged.Invoke(GetDialValue(dialTransform.localEulerAngles.y));
         OnDialTurned.Invoke(1);
         if (onSnapSoundEffect != null)
@@ -195,7 +196,7 @@ public class DialRotationController : GrabbableUI
         //Snap rotation of dial
         dialTransform.localEulerAngles = new Vector3(dialTransform.localEulerAngles.x, dialTransform.localEulerAngles.y - snapRotationAmount, dialTransform.localEulerAngles.z);
 
-        Debug.Log("Rotating " + gameObject.name + " Counter-Clockwise.");
+        //Debug.Log("Rotating " + gameObject.name + " Counter-Clockwise.");
 
         OnValueChanged.Invoke(GetDialValue(dialTransform.localEulerAngles.y));
         OnDialTurned.Invoke(-1);
@@ -229,9 +230,9 @@ public class DialRotationController : GrabbableUI
     /// <param name="clicks">The number of clicks to move the dial. Positive moves the dial right and negative moves the dial left.</param>
     public void MoveDial(int clicks)
     {
-        Debug.Log("Starting Y: " + dialTransform.localEulerAngles.y);
+/*        Debug.Log("Starting Y: " + dialTransform.localEulerAngles.y);
         Debug.Log("Snap: " + snapRotationAmount);
-        Debug.Log("Clicks: " + clicks);
+        Debug.Log("Clicks: " + clicks);*/
         dialTransform.localEulerAngles = new Vector3(dialTransform.localEulerAngles.x, dialTransform.localEulerAngles.y + (snapRotationAmount * clicks), dialTransform.localEulerAngles.z);
     }
 }
