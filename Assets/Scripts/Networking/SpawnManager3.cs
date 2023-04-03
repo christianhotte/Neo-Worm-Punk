@@ -4,7 +4,7 @@ using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 
-public class LockerTubeSpawner : MonoBehaviourPunCallbacks
+public class SpawnManager3 : MonoBehaviourPunCallbacks
 {
     [SerializeField] private Transform[] spawnPoints;
     [SerializeField] private LockerTubeController[] tubes;
