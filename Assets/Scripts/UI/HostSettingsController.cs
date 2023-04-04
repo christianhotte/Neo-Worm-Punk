@@ -7,6 +7,8 @@ using Photon.Pun;
 using Photon.Realtime;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 
+public enum GameMode { TimeAttack, CaptureTheFlag }
+
 public class HostSettingsController : MonoBehaviour
 {
     [Header("Labels")]
@@ -18,6 +20,11 @@ public class HostSettingsController : MonoBehaviour
     [SerializeField] private LeverController roomTypeController;
     [SerializeField] private DialRotationController matchDial;
     [SerializeField] private SliderController HPSlider;
+    [Space(10)]
+
+    [Header("Game Mode and Preset Settings")]
+    [SerializeField] private Transform gameModeCapsuleSpawner;
+    [SerializeField] private GameObject capsulePrefab;
 
     private bool isInitialized = false; //Checks to see if the current room settings are initialized on the room settings UI
 
@@ -130,6 +137,17 @@ public class HostSettingsController : MonoBehaviour
         Hashtable currentRoomSettings = GetRoom().CustomProperties;
         currentRoomSettings[key] = value;
         GetRoom().SetCustomProperties(currentRoomSettings);
+    }
+
+    public void SpawnGameModeCapsule(int gameMode)
+    {
+        GameObject newGameMode = Instantiate(capsulePrefab, gameModeCapsuleSpawner.transform.position, Quaternion.identity);
+        newGameMode.GetComponent<SettingsCapsule>().SetGameMode((GameMode)gameMode);
+    }
+
+    public void SetGameMode(GameObject gameModeCapsule)
+    {
+        Debug.Log("Game Mode: " + gameModeCapsule.GetComponent<SettingsCapsule>().GetGameMode());
     }
 
     private Room GetRoom() => PhotonNetwork.CurrentRoom;
