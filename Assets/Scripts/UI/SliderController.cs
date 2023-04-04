@@ -36,10 +36,10 @@ public class SliderController : MonoBehaviour
         {
             MoveToHand();
         }
-        else if (GameSettings.debugMode)
+/*        else if (GameSettings.debugMode)
         {
             DebugSliderMovement();
-        }
+        }*/
     }
 
     /// <summary>
@@ -123,6 +123,7 @@ public class SliderController : MonoBehaviour
     /// <param name="value">The value of the slider.</param>
     public void MoveToValue(float value)
     {
+        Debug.Log("Percent: " + (value - outputRange.x) / (outputRange.y - outputRange.x));
         float valuePercent = Mathf.Clamp((value - outputRange.x) / (outputRange.y - outputRange.x), 0f, 1f);
         sliderHandle.transform.localPosition = Vector3.Lerp(boundLeft.localPosition, boundRight.localPosition, valuePercent);
     }

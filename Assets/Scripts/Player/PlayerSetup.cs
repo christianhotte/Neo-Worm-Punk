@@ -14,7 +14,6 @@ public class PlayerSetup : MonoBehaviour
     public void ApplyAllSettings()
     {
         SetColor(PlayerSettingsController.Instance.charData.playerColor); //DEMO: Set player color
-        SetNickname();
     }
     /// <summary>
     /// DEMO FUNCTION: Set a color on the player.
@@ -32,11 +31,5 @@ public class PlayerSetup : MonoBehaviour
         {
             if (controller.GetComponentInChildren<MeshRenderer>() != null) controller.GetComponentInChildren<MeshRenderer>().material.SetColor("_Color", newColor); //Change hand color (if possible, may be deprecated)
         }
-    }
-
-    public void SetNickname()
-    {
-        if(NetworkManagerScript.localNetworkPlayer != null)
-            NetworkManagerScript.localNetworkPlayer.SetWormNicknameText(NetworkManagerScript.instance.GetLocalPlayerName());
     }
 }

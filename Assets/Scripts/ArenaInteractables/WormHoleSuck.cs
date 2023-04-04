@@ -9,18 +9,19 @@ public class WormHoleSuck : MonoBehaviour
     public Transform womrHoleCenter;
     internal GameObject player;
     internal Rigidbody playerRB;
+    internal WormHole WHS;
     // Start is called before the first frame update
     void Start()
     {
-        
+        WHS = GetComponentInParent<WormHole>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (suckin)
+        if (suckin&&!WHS.locked)
         {
-            Debug.Log("TrynaSuck");
+          //  Debug.Log("TrynaSuck");
             Vector3 newVel;
             womrHoleCenter.LookAt(player.transform);
             newVel = ((pullForce *Time.deltaTime) *-womrHoleCenter.forward);

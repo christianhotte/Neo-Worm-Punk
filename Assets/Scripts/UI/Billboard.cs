@@ -10,7 +10,7 @@ public class Billboard : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        playerLookAt = FindObjectOfType<PlayerController>().GetComponentInChildren<Camera>().transform;
+        playerLookAt = PlayerController.instance.GetComponentInChildren<Camera>().transform;
     }
 
     // Follows the player's camera.
