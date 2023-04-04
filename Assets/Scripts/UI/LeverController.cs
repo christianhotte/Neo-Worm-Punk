@@ -95,6 +95,7 @@ public class LeverController : MonoBehaviour
                 {
                     Debug.Log(transform.name + " Minimum Limit Reached.");
                     OnMinLimitReached.Invoke();
+                    handle.SendHapticsFeedback(0.5f, 0.2f);
 
                     //Move the hinge to the upper limit
                     handle.MoveToAngle(this, minimumAngle);
@@ -117,6 +118,7 @@ public class LeverController : MonoBehaviour
                 {
                     Debug.Log(transform.name + " Maximum Limit Reached.");
                     OnMaxLimitReached.Invoke();
+                    handle.SendHapticsFeedback(0.5f, 0.2f);
 
                     //Move the hinge to the lower limit
                     handle.MoveToAngle(this, maximumAngle);

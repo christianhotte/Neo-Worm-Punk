@@ -8,18 +8,17 @@ public class ReadyLightController : MonoBehaviour
     private Color notReadyColor;
     private Material readyLightMaterial;
 
-    // Start is called before the first frame update
-    void Start()
+    private void Awake()
     {
         readyLightMaterial = GetComponentInChildren<MeshRenderer>().material;
-        notReadyColor = readyLightMaterial.color;
+        notReadyColor = readyLightMaterial.GetColor("_BaseColor");
     }
 
     public void ActivateLight(bool isActivated)
     {
         if (isActivated)
-            readyLightMaterial.color = readyColor;
+            readyLightMaterial.SetColor("_BaseColor", readyColor);
         else
-            readyLightMaterial.color = notReadyColor;
+            readyLightMaterial.SetColor("_BaseColor", notReadyColor);
     }
 }
