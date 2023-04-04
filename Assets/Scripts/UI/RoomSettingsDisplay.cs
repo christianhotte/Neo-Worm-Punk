@@ -9,8 +9,7 @@ public class RoomSettingsDisplay : MonoBehaviour
 {
     private TextMeshProUGUI roomSettingsText;   //The room settings that are displayed
 
-    // Start is called before the first frame update
-    void Start()
+    private void Awake()
     {
         roomSettingsText = GetComponentInChildren<TextMeshProUGUI>();
     }
