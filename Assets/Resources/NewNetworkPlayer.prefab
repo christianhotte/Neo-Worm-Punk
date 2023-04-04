@@ -362,6 +362,7 @@ GameObject:
   - component: {fileID: 7403460867532869628}
   - component: {fileID: 1744203148846544441}
   - component: {fileID: 1992121235972741239}
+  - component: {fileID: 107210552787631931}
   m_Layer: 0
   m_Name: NetworkPlayerCanvas
   m_TagString: Untagged
@@ -478,10 +479,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47c96a87314104846901fb25af36270d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minimumDistance: 5
-  maximumDistance: 50
+  minimumDistance: 150
+  maximumDistance: 2000
   minimumScale: 1
-  maximumScale: 6
+  maximumScale: 20
+--- !u!114 &107210552787631931
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1000126128452447708}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf4f35e133026fc4ba84f3fe290aec75, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onlyYRotation: 0
 --- !u!1 &1004862580152559754
 GameObject:
   m_ObjectHideFlags: 0
