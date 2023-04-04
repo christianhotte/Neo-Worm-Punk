@@ -251,7 +251,7 @@ public class NewChainsawController : PlayerEquipment
                 NetworkPlayer hitPlayer = hitInfo.collider.GetComponentInParent<NetworkPlayer>(); //Try to get networkplayer from hit
                 if (hitPlayer != null && !hitPlayer.photonView.IsMine) //Player (other than self) has been hit by blade
                 {
-                    hitPlayer.photonView.RPC("RPC_Hit", Photon.Pun.RpcTarget.AllBuffered, 3, PlayerController.photonView.ViewID); //Hit target
+                    hitPlayer.photonView.RPC("RPC_Hit", Photon.Pun.RpcTarget.AllBuffered, 3, PlayerController.photonView.ViewID, Vector3.zero); //Hit target
                 }
             }
         }

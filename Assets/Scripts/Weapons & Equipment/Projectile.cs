@@ -431,13 +431,8 @@ public class Projectile : MonoBehaviourPunCallbacks
 
             //Hit using player:
             print("Projectile with origin ID " + originPlayerID + " hit player with ID " + targetPlayer.photonView.ViewID);
-            targetPlayer.photonView.RPC("RPC_Hit", RpcTarget.All, settings.damage, originPlayerID);                                //Indicate to player that it has been hit
+            targetPlayer.photonView.RPC("RPC_Hit", RpcTarget.All, settings.damage, originPlayerID, velocity);                      //Indicate to player that it has been hit (by projectile with given amount of velocity)
             if (!dumbFired && originPlayerID != 0) PhotonNetwork.GetPhotonView(originPlayerID).RPC("RPC_HitEnemy", RpcTarget.All); //Indicate to origin player that it has shot something
-            if (settings.knockback > 0) //Projectile has player knockback
-            {
-                Vector3 knockback = transform.forward * settings.knockback;          //Get value by which to launch hit player
-                targetPlayer.photonView.RPC("RPC_Launch", RpcTarget.All, knockback); //Add force to player rigidbody based on knockback amount
-            }
 
             //Player hit effect:
             if (settings.playerHitPrefab != null)
