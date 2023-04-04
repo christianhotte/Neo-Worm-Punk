@@ -28,7 +28,6 @@ public class AudioSettingsController : MonoBehaviour
         sfxSlider.value = PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * 10f;
         voiceChatSlider.value = PlayerPrefs.GetFloat("VoiceChatVolume", GameSettings.defaultVoiceSound) * 10f;
         muteMicToggle.isOn = PlayerPrefs.GetInt("MuteMic", 0) == 1? true: false;
-        UpdateMuteMic();
     }
 
     /// <summary>
@@ -65,6 +64,7 @@ public class AudioSettingsController : MonoBehaviour
     public void AdjustVoiceChatVolume(float newVolume)
     {
         PlayerPrefs.SetFloat("VoiceChatVolume", newVolume / 10f);
+        NetworkManagerScript.instance.AdjustVoiceVolume();
     }
 
     /// <summary>
