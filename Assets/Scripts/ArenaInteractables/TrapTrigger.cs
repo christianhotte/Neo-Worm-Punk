@@ -9,6 +9,7 @@ public class TrapTrigger : Targetable
 {
     private CrusherTrap crushScript;
     private HoopBoost hoopScript;
+    public PowerUp powerScript;
     private int lastPlayerID;
     private TurretTrap turretScript;
     public GameObject indicatorLight,attatchedTrap;
