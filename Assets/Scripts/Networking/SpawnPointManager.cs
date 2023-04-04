@@ -20,6 +20,6 @@ public class SpawnPointManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        PhotonNetwork.Destroy(gameObject);
+        Destroy(gameObject);
     }
 }
