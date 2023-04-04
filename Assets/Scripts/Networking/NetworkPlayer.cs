@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
+using TMPro;
 using Photon.Pun;
 using Photon.Realtime;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
@@ -44,6 +45,8 @@ public class NetworkPlayer : MonoBehaviour
     private int lastTubeNumber;  //Number of the tube this player was latest spawned at
     internal bool inTube = false;
 
+    private TextMeshProUGUI wormName;
+
     //RUNTIME METHODS:
     private void Awake()
     {
@@ -54,6 +57,7 @@ public class NetworkPlayer : MonoBehaviour
         photonView = GetComponent<PhotonView>();                      //Get photonView component from local object
         bodyRenderer = GetComponentInChildren<SkinnedMeshRenderer>(); //Get body renderer component from model in children
         trail = GetComponentInChildren<TrailRenderer>();              //Get trail renderer component from children (there should only be one)
+        wormName = GetComponentInChildren<TextMeshProUGUI>();
 
         //Set up rig:
         foreach (PhotonTransformView view in GetComponentsInChildren<PhotonTransformView>()) //Iterate through each network-tracked component
@@ -104,6 +108,7 @@ public class NetworkPlayer : MonoBehaviour
         {
             RigToActivePlayer();                                                                                                                                  //Rig to active player immediately
             foreach (Renderer r in GetComponentsInChildren<Renderer>()) r.enabled = false;                                                                        //Client NetworkPlayer is always invisible to them
+            GetComponentInChildren<Canvas>().enabled = false;
             trail.enabled = false;                                                                                                                                //Disable local player trail
             if (SceneManager.GetActiveScene().name == NetworkManagerScript.instance.mainMenuScene) photonView.RPC("RPC_MakeInvisible", RpcTarget.OthersBuffered); //Remote instances are hidden while client is in the main menu
         }
@@ -155,6 +160,7 @@ public class NetworkPlayer : MonoBehaviour
                 {
                     //PhotonNetwork.AutomaticallySyncScene = true;                    // Start syncing scene with other players
                     photonView.RPC("RPC_MakeVisible", RpcTarget.OthersBuffered);    //Show all remote players when entering locker room
+                    UpdateAllRoomSettingsDisplays();
                 }
             }
             else
@@ -170,6 +176,11 @@ public class NetworkPlayer : MonoBehaviour
     }
 
     //FUNCTIONALITY METHODS:
+    public void SetWormNicknameText(string nickName)
+    {
+        wormName.text = nickName;
+    }
+
     private void ChangeVisibility(bool makeEnabled)
     {
         //Enable/Disable components:
@@ -231,6 +242,11 @@ public class NetworkPlayer : MonoBehaviour
     public void RPC_UpdateRoomSettings()
     {
         //Update any instance of the room settings display
+        UpdateAllRoomSettingsDisplays();
+    }
+
+    public void UpdateAllRoomSettingsDisplays()
+    {
         foreach (var display in FindObjectsOfType<RoomSettingsDisplay>())
             display.UpdateRoomSettingsDisplay();
     }
@@ -348,6 +364,7 @@ public class NetworkPlayer : MonoBehaviour
         currentColor = settings.playerColor;                                  //Store color currently being used for player
 
         //Apply settings:
+        SetWormNicknameText(photonView.Owner.NickName);
         foreach (Material mat in bodyRenderer.materials) mat.color = currentColor; //Apply color to entire player body
         for (int x = 0; x < trail.colorGradient.colorKeys.Length; x++) //Iterate through color keys in trail gradient
         {

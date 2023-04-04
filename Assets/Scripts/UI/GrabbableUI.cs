@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.XR;
 
 public class GrabbableUI : MonoBehaviour
 {
@@ -49,6 +50,7 @@ public class GrabbableUI : MonoBehaviour
             isGrabbable = true;
             followObject = other.transform;
             SetAllMaterials(inRangeMat);
+            SendHapticsFeedback(0.3f, 0.2f);
         }
     }
 
@@ -77,6 +79,7 @@ public class GrabbableUI : MonoBehaviour
             //Debug.Log("Grabbing Object...");
             isGrabbed = true;
             SetAllMaterials(grabbedMat);
+            SendHapticsFeedback(0.4f, 0.15f);
         }
     }
 
@@ -85,6 +88,7 @@ public class GrabbableUI : MonoBehaviour
         if (isGrabbed)
         {
             //Debug.Log("Releasing Object...");
+            SendHapticsFeedback(0.1f, 0.2f);
             isGrabbed = false;
             followObject = null;
             SetDefaultMaterials();
@@ -104,6 +108,20 @@ public class GrabbableUI : MonoBehaviour
         for (int i = 0; i < handleRenderers.Length; i++)
         {
             handleRenderers[i].material = defaultMats[i];
+        }
+    }
+
+    /// <summary>
+    /// Sends a haptic impulse to the hand.
+    /// </summary>
+    /// <param name="amplitude">The strength of the impulse.</param>
+    /// <param name="duration">The duration of the impulse.</param>
+    public void SendHapticsFeedback(float amplitude, float duration)
+    {
+        if(followObject != null)
+        {
+            InputDeviceRole playerHand = followObject.name == "LeftHand" ? InputDeviceRole.LeftHanded : InputDeviceRole.RightHanded;
+            PlayerController.instance.SendHapticImpulse(playerHand, new Vector2(amplitude, duration));
         }
     }
 
