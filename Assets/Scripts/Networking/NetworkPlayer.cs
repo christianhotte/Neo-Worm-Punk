@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
+using TMPro;
 using Photon.Pun;
 using Photon.Realtime;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
@@ -44,6 +45,8 @@ public class NetworkPlayer : MonoBehaviour
     private int lastTubeNumber;  //Number of the tube this player was latest spawned at
     internal bool inTube = false;
 
+    private TextMeshProUGUI wormName;
+
     //RUNTIME METHODS:
     private void Awake()
     {
@@ -54,6 +57,7 @@ public class NetworkPlayer : MonoBehaviour
         photonView = GetComponent<PhotonView>();                      //Get photonView component from local object
         bodyRenderer = GetComponentInChildren<SkinnedMeshRenderer>(); //Get body renderer component from model in children
         trail = GetComponentInChildren<TrailRenderer>();              //Get trail renderer component from children (there should only be one)
+        wormName = GetComponentInChildren<TextMeshProUGUI>();
 
         //Set up rig:
         foreach (PhotonTransformView view in GetComponentsInChildren<PhotonTransformView>()) //Iterate through each network-tracked component
@@ -71,6 +75,7 @@ public class NetworkPlayer : MonoBehaviour
         {
             //Object & component setup:
             PlayerController.photonView = photonView; //Give playerController a reference to local client photon view component
+            wormName.text = photonView.Owner.NickName;
 
             //Local initialization:
 
