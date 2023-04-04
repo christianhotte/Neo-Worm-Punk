@@ -160,6 +160,7 @@ public class NetworkPlayer : MonoBehaviour
                 {
                     //PhotonNetwork.AutomaticallySyncScene = true;                    // Start syncing scene with other players
                     photonView.RPC("RPC_MakeVisible", RpcTarget.OthersBuffered);    //Show all remote players when entering locker room
+                    UpdateAllRoomSettingsDisplays();
                 }
             }
             else
@@ -241,6 +242,11 @@ public class NetworkPlayer : MonoBehaviour
     public void RPC_UpdateRoomSettings()
     {
         //Update any instance of the room settings display
+        UpdateAllRoomSettingsDisplays();
+    }
+
+    public void UpdateAllRoomSettingsDisplays()
+    {
         foreach (var display in FindObjectsOfType<RoomSettingsDisplay>())
             display.UpdateRoomSettingsDisplay();
     }
