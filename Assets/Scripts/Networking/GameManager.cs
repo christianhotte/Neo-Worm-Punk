@@ -9,6 +9,7 @@ using System.Linq;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
+    public List<Transform> spawnPoints = new List<Transform>();
 
     internal bool levelTransitionActive = false;
     internal string prevSceneName;
@@ -20,6 +21,7 @@ public class GameManager : MonoBehaviour
     }
     private void OnDestroy()
     {
+        Instance = null;
         SceneManager.sceneUnloaded -= OnSceneUnloaded;
     }
 

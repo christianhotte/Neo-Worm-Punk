@@ -36,6 +36,9 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
             return;
         }
 
+        GameManager gameManager = FindObjectOfType<GameManager>();
+        //spawnPoints = gameManager.spawnPoints;
+
         //Wait until the local player tube is assigned
         StartCoroutine(WaitUntilLocalPlayerTube());
 
@@ -129,7 +132,7 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
                 if (ReadyUpManager.instance != null)
                 {
                     ReadyUpManager.instance.localPlayerTube = spawnTube;
-                    ReadyUpManager.instance.UpdateStatus(spawnNumber);
+                    ReadyUpManager.instance.UpdateStatus(spawnNumber + 1);
                     ReadyUpManager.instance.localPlayerTube.SpawnPlayerName(NetworkManagerScript.instance.GetLocalPlayerName());
                     NetworkManagerScript.localNetworkPlayer.UpdateTakenColorsOnJoin();
                     ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
