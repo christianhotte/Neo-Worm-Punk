@@ -15,6 +15,8 @@ public class CanvasDistanceScaler : MonoBehaviour
     void Update()
     {
         transform.LookAt(PlayerController.instance.xrOrigin.transform, Vector3.up);
+        transform.Rotate(0f, 180f, 0f);
+
         float currentDistance = Mathf.Clamp(Vector3.Distance(transform.position, PlayerController.instance.xrOrigin.transform.position), minimumDistance, maximumDistance);
         float currentScale = Mathf.Lerp(minimumScale, maximumScale, GetPercentBetweenRange(currentDistance));
         transform.localScale = Vector3.one * (0.01f * currentScale);
