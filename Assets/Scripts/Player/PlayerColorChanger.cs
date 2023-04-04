@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum ColorOptions { DEFAULT, RED, ORANGE, YELLOW, GREEN, BLUE, CYAN, VIOLET, RAZZMATAZZ, LAVENDER }
+public enum ColorOptions { DEFAULT, PINK, ORANGE, YELLOW, GREEN, CYAN, VIOLET, RAZZMATAZZ, WHITE }
 
 public class PlayerColorChanger : MonoBehaviour
 {
@@ -35,8 +35,8 @@ public class PlayerColorChanger : MonoBehaviour
 
         switch (colorOption)
         {
-            case (int)ColorOptions.RED:
-                newColorText = "RED";
+            case (int)ColorOptions.PINK:
+                newColorText = "PINK";
                 break;
             case (int)ColorOptions.ORANGE:
                 newColorText = "ORANGE";
@@ -47,9 +47,6 @@ public class PlayerColorChanger : MonoBehaviour
             case (int)ColorOptions.GREEN:
                 newColorText = "GREEN";
                 break;
-            case (int)ColorOptions.BLUE:
-                newColorText = "BLUE";
-                break;
             case (int)ColorOptions.CYAN:
                 newColorText = "CYAN";
                 break;
@@ -59,8 +56,8 @@ public class PlayerColorChanger : MonoBehaviour
             case (int)ColorOptions.RAZZMATAZZ:
                 newColorText = "RAZZMATAZZ";
                 break;
-            case (int)ColorOptions.LAVENDER:
-                newColorText = "LAVENDER";
+            case (int)ColorOptions.WHITE:
+                newColorText = "WHITE";
                 break;
             default:
                 newColorText = "DEFAULT";
