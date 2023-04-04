@@ -42,6 +42,7 @@ public class NewChainsawController : PlayerEquipment
     private BladeMode prevMode = BladeMode.Sheathed; //Previous mode blade was in
     internal bool grinding;          //Whether or not player is currently grinding on a surface
     private float grindTime = 0;     //Amount of time chainsaw has been grinding on surface for
+    private float deflectTime = 0;   //Amount of time chainsaw is able to deflect for (recharges when not in use)
     private RaycastHit lastGrindHit; //Data for last surface chainsaw has ground on
     private float timeInMode;        //How long weapon has been in current mode for
     private float timeUntilPulse;    //Time until next haptic pulse should be triggered (used for repeated pulses while saw is active)
@@ -76,6 +77,7 @@ public class NewChainsawController : PlayerEquipment
 
         //Late object & component get:
         hand = (handedness == 0 ? player.leftHand : player.rightHand).transform; //Get a reference to the relevant player hand
+        deflectTime = settings.deflectTime;                                      //Set deflect time to max
         foreach (PlayerEquipment equipment in player.attachedEquipment) //Iterate through all equipment attached to player
         {
             if (equipment != this && equipment.handedness == handedness) { handWeapon = equipment; break; } //Try to get weapon used by same hand
@@ -98,6 +100,7 @@ public class NewChainsawController : PlayerEquipment
                 timeUntilPulse = newPulse.duration + Random.Range(-settings.activeHapticFrequencyVariance, settings.activeHapticFrequencyVariance); //Schedule new pulse with slight variation in activation time
             }
         }
+        if (mode != BladeMode.Deflecting && deflectTime < settings.deflectTime) deflectTime = Mathf.Min(deflectTime + (Time.deltaTime * settings.deflectCooldownRate), settings.deflectTime);
         if (grinding) grindTime += Time.deltaTime; //Update grind time tracker
 
         //Extend/Retract blade:
@@ -350,7 +353,7 @@ public class NewChainsawController : PlayerEquipment
         reverseGrip = false;             //Clear reverse grip input
         gripValue = 0;                   //Clear grip input (chainsaw will begin sheathing)
         triggerValue = 0;                //Clear trigger input
-        if (mode != BladeMode.Sheathed) mode = BladeMode.Retracting;
+        if (mode != BladeMode.Sheathed) mode = BladeMode.Retracting; //Skip grinding disengagement mode
     }
 
     //UTILITY METHODS:
