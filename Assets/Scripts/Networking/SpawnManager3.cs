@@ -15,8 +15,9 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
 
     private void Awake()
     {
-        // Event subscription
-        SceneManager.sceneLoaded += OnSceneLoaded;
+        //SceneManager.sceneLoaded += OnSceneLoaded;
+
+        
     }
 
     // Start is called before the first frame update
@@ -46,7 +47,7 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
         AssignSpawnPointsToPlayers();
     }
 
-    // Hard resets the dictionary of spawn points everytime you load into the scene.
+    /*// Hard resets the dictionary of spawn points everytime you load into the scene.
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         playerSpawnPoints.Clear();
@@ -56,7 +57,7 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
     private void OnDestroy()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
-    }
+    }*/
 
     // Waits until the local player tube is assigned to update the ReadyUpManager status.
     private IEnumerator WaitUntilLocalPlayerTube()

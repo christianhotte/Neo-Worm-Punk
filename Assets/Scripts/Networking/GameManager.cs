@@ -19,11 +19,13 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+        SceneManager.sceneLoaded += OnSceneLoaded;
         SceneManager.sceneUnloaded += OnSceneUnloaded;
     }
     private void OnDestroy()
     {
         Instance = null;
+        SceneManager.sceneLoaded -= OnSceneLoaded;
         SceneManager.sceneUnloaded -= OnSceneUnloaded;
     }
 
@@ -42,7 +44,10 @@ public class GameManager : MonoBehaviour
     public void OnSceneUnloaded(Scene scene)
     {
         prevSceneName = scene.name;
+    }
 
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
         if (scene.name == "NetworkLockerRoom")
         {
             // find all spawn points in the scene

@@ -26,9 +26,6 @@ public class SpawnManager4 : MonoBehaviourPunCallbacks
             player.transform.position = spawnPoint.position;
             player.transform.rotation = spawnPoint.rotation;
 
-            // Increase the index of the next available spawn point
-            nextSpawnPointIndex = (nextSpawnPointIndex + 1) % spawnPoints.Count;
-
             // Loops through the list of players and searches for the specific player ID.
             for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
             {
@@ -40,8 +37,8 @@ public class SpawnManager4 : MonoBehaviourPunCallbacks
                 if (spawnTube != null)
                 {
                     spawnTube.occupied = true;
-                    PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
-                    PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
+                    //PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
+                    //PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
 
                     if (ReadyUpManager.instance != null)
                     {
@@ -60,6 +57,9 @@ public class SpawnManager4 : MonoBehaviourPunCallbacks
                     Debug.LogError("Spawn problem with spawn number " + spawnNumber);
                 }
             }
+
+            // Increase the index of the next available spawn point
+            nextSpawnPointIndex = (nextSpawnPointIndex + 1) % spawnPoints.Count;
         }
 
         else
@@ -71,8 +71,7 @@ public class SpawnManager4 : MonoBehaviourPunCallbacks
             player.transform.position = spawnPoint.position;
             player.transform.rotation = spawnPoint.rotation;
 
-            // Increase the index of the next available spawn point
-            nextSpawnPointIndex = (nextSpawnPointIndex + 1) % spawnPoints.Count;
+
 
             // Loops through the list of players and searches for the specific player ID.
             for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
@@ -85,8 +84,8 @@ public class SpawnManager4 : MonoBehaviourPunCallbacks
                 if (spawnTube != null)
                 {
                     spawnTube.occupied = true;
-                    PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
-                    PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
+                    //PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
+                    //PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
 
                     if (ReadyUpManager.instance != null)
                     {
@@ -105,6 +104,9 @@ public class SpawnManager4 : MonoBehaviourPunCallbacks
                     Debug.LogError("Spawn problem with spawn number " + spawnNumber);
                 }
             }
+
+            // Increase the index of the next available spawn point
+            nextSpawnPointIndex = (nextSpawnPointIndex + 1) % spawnPoints.Count;
         }
     }
 }
