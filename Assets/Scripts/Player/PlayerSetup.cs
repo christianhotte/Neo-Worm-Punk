@@ -36,6 +36,7 @@ public class PlayerSetup : MonoBehaviour
 
     public void SetNickname()
     {
-        NetworkManagerScript.localNetworkPlayer.SetWormNicknameText(NetworkManagerScript.instance.GetLocalPlayerName());
+        if(NetworkManagerScript.localNetworkPlayer != null)
+            NetworkManagerScript.localNetworkPlayer.SetWormNicknameText(NetworkManagerScript.instance.GetLocalPlayerName());
     }
 }
