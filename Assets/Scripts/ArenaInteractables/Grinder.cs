@@ -38,7 +38,7 @@ public class Grinder : MonoBehaviour
         if (!Activated && Closed)
         {
             LevelTimePercent = jumbotronObject.GetLevelTimer().LevelTimePercentage();
-            if (LevelTimePercent >= 75)
+            if (LevelTimePercent >= 60)
             {
                 Activated = true;
                 if(GrindnerSound!=null)GrinderAud.PlayOneShot(GrindnerSound);
