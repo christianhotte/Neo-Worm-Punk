@@ -75,7 +75,6 @@ public class NetworkPlayer : MonoBehaviour
         {
             //Object & component setup:
             PlayerController.photonView = photonView; //Give playerController a reference to local client photon view component
-            wormName.text = photonView.Owner.NickName;
 
             //Local initialization:
 
@@ -175,6 +174,11 @@ public class NetworkPlayer : MonoBehaviour
     }
 
     //FUNCTIONALITY METHODS:
+    public void SetWormNicknameText(string nickName)
+    {
+        wormName.text = nickName;
+    }
+
     private void ChangeVisibility(bool makeEnabled)
     {
         //Enable/Disable components:

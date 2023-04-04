@@ -123,7 +123,7 @@ public class SliderController : MonoBehaviour
     /// <param name="value">The value of the slider.</param>
     public void MoveToValue(float value)
     {
-        float valuePercent = Mathf.Clamp(100f - ((outputRange.y - value) / Mathf.Abs(outputRange.x - outputRange.y) * 100f), 0f, 100f);
-        sliderHandle.transform.localPosition = Vector3.Lerp(boundLeft.localPosition, boundRight.localPosition, valuePercent / 100f);
+        float valuePercent = Mathf.Clamp((value - outputRange.x) / (outputRange.y - outputRange.x), 0f, 1f);
+        sliderHandle.transform.localPosition = Vector3.Lerp(boundLeft.localPosition, boundRight.localPosition, valuePercent);
     }
 }
