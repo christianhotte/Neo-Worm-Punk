@@ -20,6 +20,6 @@ public class SpawnPointManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        Destroy(gameObject);
+        Destroy(gameObject.GetComponent<PhotonView>());
     }
 }
