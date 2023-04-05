@@ -61,6 +61,15 @@ public class PowerUp : Targetable
                 Vector3 newVel = (2 * (Vector3.Dot(rb.velocity, Vector3.Normalize(point.normal))) * Vector3.Normalize(point.normal) - rb.velocity) * -1;
                 newVel = newVel.normalized * bounceForce;
                 rb.velocity = newVel;
+                foreach(var player in NetworkPlayer.instances)
+                {
+                    if (player == NetworkManagerScript.localNetworkPlayer)
+                        continue;
+                    else
+                    {
+                        //Do stuff
+                    }
+                }
             }
         }
     }

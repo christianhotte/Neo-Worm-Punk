@@ -30,6 +30,8 @@ public class NetworkPlayer : MonoBehaviour
     internal PlayerStats networkPlayerStats = new PlayerStats(); //The stats for the network player
     internal Hashtable photonPlayerSettings;
 
+    private Material[] defaultPlayerMaterials;
+
     private Transform headTarget;      //True local position of player head
     private Transform leftHandTarget;  //True local position of player left hand
     private Transform rightHandTarget; //True local position of player right hand
@@ -58,6 +60,8 @@ public class NetworkPlayer : MonoBehaviour
         bodyRenderer = GetComponentInChildren<SkinnedMeshRenderer>(); //Get body renderer component from model in children
         trail = GetComponentInChildren<TrailRenderer>();              //Get trail renderer component from children (there should only be one)
         wormName = GetComponentInChildren<TextMeshProUGUI>();
+
+        defaultPlayerMaterials = bodyRenderer.materials;
 
         //Set up rig:
         foreach (PhotonTransformView view in GetComponentsInChildren<PhotonTransformView>()) //Iterate through each network-tracked component
@@ -373,6 +377,25 @@ public class NetworkPlayer : MonoBehaviour
         }
         if (currentColor == Color.black) { trail.startColor = Color.white; trail.endColor = Color.white; }
         else { trail.startColor = currentColor; trail.endColor = currentColor; } //Set actual trail colors (just in case)
+    }
+
+    /// <summary>
+    /// Changes the NetworkPlayer's materials.
+    /// </summary>
+    /// <param name="newMaterial">The new NetworkPlayer materials.</param>
+    public void ChangeNetworkPlayerMaterial(Material newMaterial)
+    {
+        for (int i = 0; i < bodyRenderer.materials.Length; i++)
+            bodyRenderer.materials[i] = newMaterial;
+    }
+
+    /// <summary>
+    /// Resets the NetworkPlayer materials to the default ones.
+    /// </summary>
+    public void ResetNetworkPlayerMaterials()
+    {
+        for (int i = 0; i < bodyRenderer.materials.Length; i++)
+            bodyRenderer.materials[i] = defaultPlayerMaterials[i];
     }
 
     /// <summary>
