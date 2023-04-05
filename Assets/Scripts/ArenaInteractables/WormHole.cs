@@ -25,6 +25,7 @@ public class WormHole : NetworkedArenaElement
     }
     public IEnumerator StartWormhole(GameObject startHole,GameObject playerOBJ)
     {
+        PlayerController.instance.UnHolsterAll();
         locked = true; // Locks the worm whole circut      
         Transform exitPos;                                                           //define Exit Point
         Rigidbody playerRB;

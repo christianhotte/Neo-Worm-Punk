@@ -25,6 +25,7 @@ public class HookshotSettings : ScriptableObject
     [Tooltip("Name of hook prefab used by this tool (make sure this refers to a projectile in the Resources/Projectiles folder).")] public string hookResourceName;
     [Tooltip("Layers which hookshot will bounce off of automatically and cannot be used on.")]                                      public LayerMask bounceLayers;
     [Tooltip("Layers which hookshot will check for when looking for line intersections (should just be most obstructions).")]       public LayerMask lineCheckLayers;
+    [Tooltip("Layers which, when hooked, will not cause player to disengage from wall when reached.")]                              public LayerMask noDisengageLayers;
     [Tooltip("Determines what happens when a non-player collider intersects the tether line while hook is traveling.")]             public LineIntersectBehavior travelIntersectBehavior = LineIntersectBehavior.Ignore;
     [Tooltip("Determines what happens when a non-player collider intersects the tether line while hook is locked on.")]             public LineIntersectBehavior hookedIntersectBehavior = LineIntersectBehavior.Ignore;
     [Min(0), Tooltip("Base speed at which hook pulls player toward hooked objects.")]                                               public float basePullSpeed;
