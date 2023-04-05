@@ -53,7 +53,7 @@ public class Grinder : MonoBehaviour
             // hitPlayer = other.GetComponent<PlayerController>();
             netPlayer = PlayerController.photonView.GetComponent<NetworkPlayer>();
             // Debug.Log(netPlayer.name);
-            netPlayer.photonView.RPC("RPC_Hit", RpcTarget.All, 100, netPlayer.photonView.ViewID);
+            netPlayer.photonView.RPC("RPC_Hit", RpcTarget.All, 100, netPlayer.photonView.ViewID, Vector3.zero);
         }
     }
 
