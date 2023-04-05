@@ -66,6 +66,7 @@ public class UpgradeSpawner : MonoBehaviour
         spawners.Add(this);
 
         if (spawnPoint == null) spawnPoint = transform;
+        thisAud = this.GetComponent<AudioSource>();
         jumboScript = FindObjectOfType<Jumbotron>();
     }
     private void OnDestroy()
