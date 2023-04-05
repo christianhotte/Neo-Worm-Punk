@@ -402,15 +402,32 @@ public class NetworkPlayer : MonoBehaviour
     /// Indicates that this player has been hit by a networked projectile.
     /// </summary>
     /// <param name="damage">How much damage the projectile dealt.</param>
+    /// <param name="enemyID">Identify of player who shot this projectile.</param>
+    /// <param name="projectileVel">Speed and direction projectile was moving at/in when it struck this player.</param>
     [PunRPC]
-    public void RPC_Hit(int damage, int enemyID)
+    public void RPC_Hit(int damage, int enemyID, Vector3 projectileVel)
     {
         if (photonView.IsMine)
         {
+            //Checks:
+            if (PlayerController.instance.isDead) return; //Prevent dead players from being killed
+            foreach (PlayerEquipment equipment in PlayerController.instance.attachedEquipment)
+            {
+                if (equipment.TryGetComponent(out NewChainsawController chainsaw)) //Equipment is a chainsaw
+                {
+                    if (chainsaw.mode == NewChainsawController.BladeMode.Deflecting) //Chainsaw is in deflect mode
+                    {
+                        print("Deflected!");
+                        return;
+                    }
+                }
+            }
+
+            //Damage & death:
             bool killedPlayer = PlayerController.instance.IsHit(damage); //Inflict damage upon local player
             if (killedPlayer)
             {
-                networkPlayerStats.numOfDeaths++;                                                                      //Increment death counter
+                networkPlayerStats.numOfDeaths++;                                               //Increment death counter
                 PlayerPrefs.SetInt("LifetimeDeaths", PlayerPrefs.GetInt("LifetimeDeaths") + 1); //Add to the lifetime deaths counter 
                 PlayerController.instance.combatHUD.UpdatePlayerStats(networkPlayerStats);
                 SyncStats();

@@ -12,7 +12,6 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
 
     private Dictionary<int, Transform> playerSpawnPoints = new Dictionary<int, Transform>();
     private int nextSpawnPointIndex = 0;
-    [SerializeField] bool hasBeenSpawned = false;
 
     private void Awake()
     {
@@ -45,10 +44,7 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
         StartCoroutine(WaitUntilLocalPlayerTube());
 
         // Assigns the player a spawn point when they get into the locker scene.
-        if (hasBeenSpawned == false)
-        {
-            AssignSpawnPointsToPlayers();
-        }
+        AssignSpawnPointsToPlayers();
     }
 
     /*// Hard resets the dictionary of spawn points everytime you load into the scene.
@@ -122,6 +118,7 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
         for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
         {
             int playerId = PhotonNetwork.PlayerList[i].ActorNumber;
+            if (playerId != PhotonNetwork.LocalPlayer.ActorNumber) continue;
             int spawnNumber = i % spawnPoints.Length;
             print("My PlayerID = " + playerId + " | My SpawnNumber = " + spawnNumber);
             Transform spawnPoint = spawnPoints[spawnNumber];
@@ -129,12 +126,12 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
 
             // Assigns the spawn points to the corresponding tube and calling ReadyUpManager functions
             LockerTubeController spawnTube = tubes[spawnNumber];
-            if (spawnTube != null && hasBeenSpawned == false)
+            if (spawnTube != null)
             {
+                // Moves the player to the spawn point.
                 spawnTube.occupied = true;
                 PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
                 PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
-                hasBeenSpawned = true;
 
                 if (ReadyUpManager.instance != null)
                 {

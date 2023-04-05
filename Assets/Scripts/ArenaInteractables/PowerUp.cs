@@ -38,9 +38,9 @@ public class PowerUp : Targetable
     }
     private void FixedUpdate()
     {
-        if (rb.drag > 0 && rb.velocity.magnitude < restingSpeed) rb.drag = 0;
+        if (photonView.IsMine && rb.drag > 0 && rb.velocity.magnitude < restingSpeed) rb.drag = 0;
     }
-    public override void IsHit(int damage, int playerID)
+    public override void IsHit(int damage, int playerID, Vector3 velocity)
     {
         if (playerID <= 0) return;
 
@@ -49,7 +49,7 @@ public class PowerUp : Targetable
             UpgradeSpawner.primary.StartCoroutine(UpgradeSpawner.primary.DoPowerUp(powerType, PowerupTime));
         }
 
-        Vector3 hitForce = Random.insideUnitSphere.normalized * 100; //TEMP
+        Vector3 hitForce = velocity.normalized * bounceForce;
         photonView.RPC("RPC_IsHit", RpcTarget.All, damage, hitForce);
     }
     private void OnCollisionEnter(Collision collision)
