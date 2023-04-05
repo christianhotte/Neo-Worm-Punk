@@ -48,8 +48,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 816546d0c6353ac47975e5888ff934bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spawnPoints: []
-  tubes: []
 --- !u!114 &9171637839990913460
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -105,7 +103,7 @@ MonoBehaviour:
   - word: Hideous
     wordSounds: 00000000000000000000000000000000
   - word: Glum
-    wordSounds: 00000000000000000000000000000000
+    wordSounds: 00000000
   - word: Blasphemous
     wordSounds: 00000000000000000000000000000000
   - word: Malignant
@@ -178,9 +176,11 @@ MonoBehaviour:
     wordSounds: 0000000000000000
   - word: Sweaty
     wordSounds: 0000000000000000
-  - word: Drooling
+  - word: Plundering
+    wordSounds: 000000000000000000000000
+  - word: Corrupt
     wordSounds: 0000000000000000
-  - word: Slobbering
+  - word: Visceral
     wordSounds: 000000000000000000000000
   wormNouns:
   - word: Invertebrate
@@ -257,6 +257,8 @@ MonoBehaviour:
     wordSounds: 0000000000000000
   - word: Pringle
     wordSounds: 0000000000000000
+  - word: Greeble
+    wordSounds: 0000000000000000
   wormAdjectivesGood:
   - word: Honorable
     wordSounds: 00000000000000000000000000000000
@@ -274,9 +276,19 @@ MonoBehaviour:
     wordSounds: 0000000000000000
   - word: Respectful
     wordSounds: 000000000000000000000000
+  - word: Swell
+    wordSounds: 00000000
+  - word: Charming
+    wordSounds: 0000000000000000
   wormNounsGood:
   - word: Gentleworm
     wordSounds: 000000000000000000000000
+  - word: Lad
+    wordSounds: 00000000
+  - word: Fellow
+    wordSounds: 0000000000000000
+  - word: Chap
+    wordSounds: 00000000
   wormAdjectivesBad:
   - word: Guzzling
     wordSounds: 000000000000000000000000
@@ -310,7 +322,7 @@ MonoBehaviour:
     wordSounds: 0000000000000000
   - word: Phallic
     wordSounds: 0000000000000000
-  - word: Tantalizing
+  - word: Gushing
     wordSounds: 0000000000000000
   wormNounsBad:
   - word: Guzzler
