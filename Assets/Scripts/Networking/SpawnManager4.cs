@@ -36,7 +36,7 @@ public class SpawnManager4 : MonoBehaviourPunCallbacks
                 LockerTubeController spawnTube = tubes[spawnNumber];
                 if (spawnTube != null)
                 {
-                    spawnTube.occupied = true;
+                    //spawnTube.occupied = true;
                     //PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
                     //PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
 
@@ -83,7 +83,7 @@ public class SpawnManager4 : MonoBehaviourPunCallbacks
                 LockerTubeController spawnTube = tubes[spawnNumber];
                 if (spawnTube != null)
                 {
-                    spawnTube.occupied = true;
+                    //spawnTube.occupied = true;
                     //PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
                     //PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
 
