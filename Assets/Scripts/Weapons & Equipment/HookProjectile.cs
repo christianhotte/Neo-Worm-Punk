@@ -162,6 +162,10 @@ public class HookProjectile : Projectile
             {
                 Release(); //Release hook
                 if (lastHit.collider.transform.TryGetComponent(out JumpPad jumpPad)) jumpPad.Bounce();
+                else if (controller.settings.noDisengageLayers == (controller.settings.noDisengageLayers | (1 << lastHit.collider.gameObject.layer)))
+                {
+                    print("Grappler released but with no disengagement.");
+                }
                 else if (controller.settings.wallBounceForce > 0) controller.player.bodyRb.velocity = lastHit.normal * controller.settings.wallBounceForce; //Bounce player away from wall with designated amount of force
             }
         }

@@ -5,7 +5,7 @@ using Photon.Pun;
 
 public class PowerUp : Targetable
 {
-    public enum PowerUpType { None, MultiShot, HeatVision }
+    public enum PowerUpType { None, MultiShot, HeatVision, InfiniShot }
 
     public PowerUpType powerType;
     public float PowerupTime=10.0f;
@@ -15,7 +15,8 @@ public class PowerUp : Targetable
     public float bounceForce = 100;
     private MeshRenderer thisModel;
     private int currentHealth;
-
+    private AudioSource powerUpAud;
+    public AudioClip powerUpHit;
     private PhotonView photonView;
     internal Rigidbody rb;
 
@@ -24,7 +25,7 @@ public class PowerUp : Targetable
         base.Awake();
         photonView = GetComponent<PhotonView>();
         thisModel = GetComponent<MeshRenderer>();
-        
+        powerUpAud = this.GetComponent<AudioSource>();
         currentHealth = health;
 
         if (photonView.IsMine)
@@ -37,9 +38,9 @@ public class PowerUp : Targetable
     }
     private void FixedUpdate()
     {
-        if (rb.drag > 0 && rb.velocity.magnitude < restingSpeed) rb.drag = 0;
+        if (photonView.IsMine && rb.drag > 0 && rb.velocity.magnitude < restingSpeed) rb.drag = 0;
     }
-    public override void IsHit(int damage, int playerID)
+    public override void IsHit(int damage, int playerID, Vector3 velocity)
     {
         if (playerID <= 0) return;
 
@@ -48,7 +49,7 @@ public class PowerUp : Targetable
             UpgradeSpawner.primary.StartCoroutine(UpgradeSpawner.primary.DoPowerUp(powerType, PowerupTime));
         }
 
-        Vector3 hitForce = Random.insideUnitSphere.normalized * 100; //TEMP
+        Vector3 hitForce = velocity.normalized * bounceForce;
         photonView.RPC("RPC_IsHit", RpcTarget.All, damage, hitForce);
     }
     private void OnCollisionEnter(Collision collision)
@@ -61,6 +62,7 @@ public class PowerUp : Targetable
                 Vector3 newVel = (2 * (Vector3.Dot(rb.velocity, Vector3.Normalize(point.normal))) * Vector3.Normalize(point.normal) - rb.velocity) * -1;
                 newVel = newVel.normalized * bounceForce;
                 rb.velocity = newVel;
+               
             }
         }
     }
@@ -76,6 +78,7 @@ public class PowerUp : Targetable
         currentHealth -= damage;
         if (photonView.IsMine)
         {
+            powerUpAud.PlayOneShot(powerUpHit);
             if (currentHealth <= 0) Delete();
             else
             {

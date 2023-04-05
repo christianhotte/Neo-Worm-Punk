@@ -30,6 +30,8 @@ public class NetworkPlayer : MonoBehaviour
     internal PlayerStats networkPlayerStats = new PlayerStats(); //The stats for the network player
     internal Hashtable photonPlayerSettings;
 
+    private Material[] defaultPlayerMaterials;
+
     private Transform headTarget;      //True local position of player head
     private Transform leftHandTarget;  //True local position of player left hand
     private Transform rightHandTarget; //True local position of player right hand
@@ -58,6 +60,8 @@ public class NetworkPlayer : MonoBehaviour
         bodyRenderer = GetComponentInChildren<SkinnedMeshRenderer>(); //Get body renderer component from model in children
         trail = GetComponentInChildren<TrailRenderer>();              //Get trail renderer component from children (there should only be one)
         wormName = GetComponentInChildren<TextMeshProUGUI>();
+
+        defaultPlayerMaterials = bodyRenderer.materials;
 
         //Set up rig:
         foreach (PhotonTransformView view in GetComponentsInChildren<PhotonTransformView>()) //Iterate through each network-tracked component
@@ -99,6 +103,7 @@ public class NetworkPlayer : MonoBehaviour
     {
         photonPlayerSettings.Add("Color", 0);
         photonPlayerSettings.Add("IsReady", false);
+        photonPlayerSettings.Add("TubeID", -1);
         PlayerController.photonView.Owner.SetCustomProperties(photonPlayerSettings);
     }
 
@@ -142,6 +147,7 @@ public class NetworkPlayer : MonoBehaviour
         //Reference cleanup:
         instances.Remove(this);                                                                                 //Remove from instance list
         if (photonView.IsMine && PlayerController.photonView == photonView) PlayerController.photonView = null; //Clear client photonView reference
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
@@ -376,18 +382,54 @@ public class NetworkPlayer : MonoBehaviour
     }
 
     /// <summary>
+    /// Changes the NetworkPlayer's materials.
+    /// </summary>
+    /// <param name="newMaterial">The new NetworkPlayer materials.</param>
+    public void ChangeNetworkPlayerMaterial(Material newMaterial)
+    {
+        for (int i = 0; i < bodyRenderer.materials.Length; i++)
+            bodyRenderer.materials[i] = newMaterial;
+    }
+
+    /// <summary>
+    /// Resets the NetworkPlayer materials to the default ones.
+    /// </summary>
+    public void ResetNetworkPlayerMaterials()
+    {
+        for (int i = 0; i < bodyRenderer.materials.Length; i++)
+            bodyRenderer.materials[i] = defaultPlayerMaterials[i];
+    }
+
+    /// <summary>
     /// Indicates that this player has been hit by a networked projectile.
     /// </summary>
     /// <param name="damage">How much damage the projectile dealt.</param>
+    /// <param name="enemyID">Identify of player who shot this projectile.</param>
+    /// <param name="projectileVel">Speed and direction projectile was moving at/in when it struck this player.</param>
     [PunRPC]
-    public void RPC_Hit(int damage, int enemyID)
+    public void RPC_Hit(int damage, int enemyID, Vector3 projectileVel)
     {
         if (photonView.IsMine)
         {
+            //Checks:
+            if (PlayerController.instance.isDead) return; //Prevent dead players from being killed
+            foreach (PlayerEquipment equipment in PlayerController.instance.attachedEquipment)
+            {
+                if (equipment.TryGetComponent(out NewChainsawController chainsaw)) //Equipment is a chainsaw
+                {
+                    if (chainsaw.mode == NewChainsawController.BladeMode.Deflecting) //Chainsaw is in deflect mode
+                    {
+                        print("Deflected!");
+                        return;
+                    }
+                }
+            }
+
+            //Damage & death:
             bool killedPlayer = PlayerController.instance.IsHit(damage); //Inflict damage upon local player
             if (killedPlayer)
             {
-                networkPlayerStats.numOfDeaths++;                                                                      //Increment death counter
+                networkPlayerStats.numOfDeaths++;                                               //Increment death counter
                 PlayerPrefs.SetInt("LifetimeDeaths", PlayerPrefs.GetInt("LifetimeDeaths") + 1); //Add to the lifetime deaths counter 
                 PlayerController.instance.combatHUD.UpdatePlayerStats(networkPlayerStats);
                 SyncStats();
