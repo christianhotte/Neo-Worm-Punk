@@ -53,6 +53,6 @@ public class Targetable : MonoBehaviour
 
     //FUNCTIONALITY METHODS:
     public virtual void IsHit(int damage) { }
-    public virtual void IsHit(int damage, int playerID) { }
+    public virtual void IsHit(int damage, int playerID, Vector3 velocity) { }
   
 }

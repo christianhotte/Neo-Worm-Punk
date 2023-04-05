@@ -444,8 +444,8 @@ public class Projectile : MonoBehaviourPunCallbacks
         else //Hit object is not a player
         {
             //Hit through targetable:
-            Targetable targetObject = hitInfo.collider.GetComponent<Targetable>();         //Try to get targetable script from target
-            if (targetObject != null) targetObject.IsHit(settings.damage, originPlayerID); //Indicate to targetable that it has been hit
+            Targetable targetObject = hitInfo.collider.GetComponent<Targetable>();                   //Try to get targetable script from target
+            if (targetObject != null) targetObject.IsHit(settings.damage, originPlayerID, velocity); //Indicate to targetable that it has been hit
 
             //Surface explosion:
             if (settings.explosionPrefab != null) //Only explode if projectile has an explosion prefab
