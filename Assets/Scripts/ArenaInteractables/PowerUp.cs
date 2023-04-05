@@ -5,7 +5,7 @@ using Photon.Pun;
 
 public class PowerUp : Targetable
 {
-    public enum PowerUpType { None, MultiShot, HeatVision }
+    public enum PowerUpType { None, MultiShot, HeatVision, InfiniShot }
 
     public PowerUpType powerType;
     public float PowerupTime=10.0f;
