@@ -88,8 +88,6 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
             playerSpawnPoints.Remove(playerId);
             ReleaseSpawnPoint(spawnPoint);
         }
-
-        NetworkManagerScript.instance.SetTubeOccupantStatus((int)otherPlayer.CustomProperties["TubeID"], false);
     }
 
     // Gets the next available spawn point.
@@ -236,5 +234,10 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
 
         Debug.LogError("Error: Could Not Find An Empty Tube.");
         return null;
+    }
+
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 }

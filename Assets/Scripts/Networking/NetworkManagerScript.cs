@@ -406,6 +406,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         // Raises an event on player left room.
         PhotonNetwork.RaiseEvent(1, otherPlayer.ActorNumber, RaiseEventOptions.Default, SendOptions.SendReliable);
         localNetworkPlayer.SyncColors();
+
+        SetTubeOccupantStatus((int)otherPlayer.CustomProperties["TubeID"], false);
     }
 
     // This method is called when a custom event is received
