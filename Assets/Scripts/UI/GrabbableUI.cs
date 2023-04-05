@@ -120,7 +120,7 @@ public class GrabbableUI : MonoBehaviour
     {
         if(followObject != null)
         {
-            InputDeviceRole playerHand = followObject.name == "LeftHand" ? InputDeviceRole.LeftHanded : InputDeviceRole.RightHanded;
+            InputDeviceRole playerHand = followObject.name.Contains("LeftHand") ? InputDeviceRole.LeftHanded : InputDeviceRole.RightHanded;
             PlayerController.instance.SendHapticImpulse(playerHand, new Vector2(amplitude, duration));
         }
     }

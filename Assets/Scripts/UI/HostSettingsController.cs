@@ -20,6 +20,8 @@ public class HostSettingsController : MonoBehaviour
     [SerializeField] private LeverController roomTypeController;
     [SerializeField] private DialRotationController matchDial;
     [SerializeField] private SliderController HPSlider;
+    [SerializeField] private LockController gameModeArea;
+    [SerializeField] private LockController presetsArea;
     [Space(10)]
 
     [Header("Game Mode and Preset Settings")]
@@ -32,11 +34,15 @@ public class HostSettingsController : MonoBehaviour
     {
         //Wait a frame before calling this so that all of the objects can call their OnEnable functions first
         Invoke("InitiateRoomSettings", Time.deltaTime);
+        gameModeArea.OnUnlocked.AddListener(SetGameMode);
+        presetsArea.OnUnlocked.AddListener(SetPreset);
     }
 
     private void OnDisable()
     {
         isInitialized = false;
+        gameModeArea.OnUnlocked.RemoveListener(SetGameMode);
+        presetsArea.OnUnlocked.RemoveListener(SetPreset);
     }
 
     /// <summary>
@@ -145,9 +151,14 @@ public class HostSettingsController : MonoBehaviour
         newGameMode.GetComponent<SettingsCapsule>().SetGameMode((GameMode)gameMode);
     }
 
-    public void SetGameMode(GameObject gameModeCapsule)
+    public void SetGameMode(GameObject gameModeCapsule, bool isUnlocked)
     {
         Debug.Log("Game Mode: " + gameModeCapsule.GetComponent<SettingsCapsule>().GetGameMode());
+    }
+
+    public void SetPreset(GameObject gameModeCapsule, bool isUnlocked)
+    {
+
     }
 
     private Room GetRoom() => PhotonNetwork.CurrentRoom;

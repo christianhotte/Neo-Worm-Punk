@@ -41,7 +41,7 @@ public class LockController : MonoBehaviour
         //If the current object inside of the lock is the key, unlock
         if (args.interactableObject.transform.gameObject.name == keyToUnlock.name)
         {
-
+            Debug.Log("Unlocked.");
             OnUnlocked.Invoke(args.interactableObject.transform.gameObject, true);
 
             if (destroyOnLock)
@@ -55,10 +55,10 @@ public class LockController : MonoBehaviour
     /// <param name="args"></param>
     public void OnItemExit(SelectExitEventArgs args)
     {
-        //If the current object inside of the lock is the key, unlock
+/*        //If the current object inside of the lock is the key, unlock
         if (args.interactableObject.transform.gameObject.name == keyToUnlock.name)
         {
             OnUnlocked.Invoke(args.interactableObject.transform.gameObject, false);
-        }
+        }*/
     }
 }
