@@ -87,17 +87,7 @@ public class Leaderboards : MonoBehaviourPunCallbacks
                 List<char> nameCharacters = new List<char>();
                 foreach (char c in rankedPlayers[x].GetName().ToCharArray())
                 {
-                    if (c == '#') continue;
-                    if (c == '0') continue;
-                    if (c == '1') continue;
-                    if (c == '2') continue;
-                    if (c == '3') continue;
-                    if (c == '4') continue;
-                    if (c == '5') continue;
-                    if (c == '6') continue;
-                    if (c == '7') continue;
-                    if (c == '8') continue;
-                    if (c == '9') continue;
+                    if (c == '#' || c == '0' || c == '1' || c == '2' || c == '3' || c == '4' || c == '5' || c == '6' || c == '7' || c == '8' || c == '9') continue;
                     nameCharacters.Add(c);
                 }
                 newName.text = new string(nameCharacters.ToArray());                              //Display player name
