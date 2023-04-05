@@ -129,11 +129,12 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
 
             // Assigns the spawn points to the corresponding tube and calling ReadyUpManager functions
             LockerTubeController spawnTube = tubes[spawnNumber];
-            if (spawnTube != null)
+            if (spawnTube != null && hasBeenSpawned == false)
             {
                 spawnTube.occupied = true;
                 PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
                 PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
+                hasBeenSpawned = true;
 
                 if (ReadyUpManager.instance != null)
                 {
@@ -152,8 +153,6 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
                 Debug.LogError("Spawn problem with spawn number " + spawnNumber);
             }
         }
-
-        hasBeenSpawned = true;
     }
 
     // Assigns the spawn points to the player ONLY when they join the scene.
