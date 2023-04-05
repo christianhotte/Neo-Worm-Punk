@@ -36,7 +36,7 @@ public class NetworkedArenaElement : MonoBehaviour
         {
 
 
-            player.RPC_Hit(100, Trapper);
+            player.RPC_Hit(100, Trapper, Vector3.zero);
         }
         PlayersInTrap.Clear();
         StartCoroutine(TrapCooldown(cooldownTime,trap));
