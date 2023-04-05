@@ -4,6 +4,7 @@ using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.SceneManagement;
+using ExitGames.Client.Photon;
 
 public class SpawnManager3 : MonoBehaviourPunCallbacks
 {
@@ -37,8 +38,11 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
             return;
         }
 
-        GameManager gameManager = FindObjectOfType<GameManager>();
-        //spawnPoints = gameManager.spawnPoints;
+        /*GameManager gameManager = FindObjectOfType<GameManager>();
+        spawnPoints = gameManager.spawnPoints;*/
+
+        // Subscribes event handlers
+        PhotonNetwork.AddCallbackTarget(this);
 
         //Wait until the local player tube is assigned
         StartCoroutine(WaitUntilLocalPlayerTube());
@@ -86,8 +90,8 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
             ReleaseSpawnPoint(spawnPoint);
         }
 
-        // Reassigns the players to a new tube when a player leaves so when they rejoin, it won't be in the same tube.
-        AssignSpawnPointsToPlayers();
+        // Raises an event on player left room.
+        PhotonNetwork.RaiseEvent(2, otherPlayer.ActorNumber, RaiseEventOptions.Default, SendOptions.SendReliable);
     }
 
     // Gets the next available spawn point.
@@ -198,5 +202,18 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
 
         Debug.LogError("Error: Could Not Find An Empty Tube.");
         return null;
+    }
+
+    // This method is called when a custom event is received
+    public void OnEvent(byte eventCode, object content, int senderId)
+    {
+        if (eventCode == 2)
+        {
+            int actorNumber = (int)content;
+            // Do something with the actorNumber of the player who left
+
+            // Reassigns spawn points to all remaining players after someone left.
+            AssignSpawnPointsToPlayers();
+        }
     }
 }
