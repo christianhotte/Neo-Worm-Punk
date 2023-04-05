@@ -56,6 +56,12 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
         }
     }
 
+    public void OnLeverStateChanged()
+    {
+        if (ReadyUpManager.instance != null)
+            ReadyUpManager.instance.LeverStateChanged();
+    }
+
     public LockerTubeController[] GetTubeList() => tubes;
     public LockerTubeController GetTubeByIndex(int index)
     {
