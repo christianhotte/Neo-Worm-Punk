@@ -311,10 +311,17 @@ public class NewShotgunController : PlayerEquipment
 
         //Fire projectile(s):
         List<Projectile> spawnedProjectiles = new List<Projectile>(); //Initialize list of projectiles spawned by shot
-        for (int x = 0; x < gunSettings.projectilesPerShot; x++) //Iterate for number of projectiles spawned by shot
+        int shots = gunSettings.projectilesPerShot;
+        float spread = gunSettings.shotSpread;
+        if (UpgradeSpawner.primary != null && UpgradeSpawner.primary.currentPowerUp == PowerUp.PowerUpType.MultiShot)
+        {
+            shots *= UpgradeSpawner.primary.settings.MS_projectileMultiplier;
+            spread += UpgradeSpawner.primary.settings.MS_spreadAdd;
+        }
+        for (int x = 0; x < shots; x++) //Iterate for number of projectiles spawned by shot
         {
             //Reposition barrel:
-            Vector2 randomAngles = Random.insideUnitCircle * gunSettings.shotSpread;                            //Get random angles of shot spread
+            Vector2 randomAngles = Random.insideUnitCircle * spread;                                            //Get random angles of shot spread
             currentBarrel.localEulerAngles = origBarrelEulers + new Vector3(randomAngles.x, randomAngles.y, 0); //Rotate barrel using random angular values
 
             //Generate new projectiles:
@@ -406,7 +413,7 @@ public class NewShotgunController : PlayerEquipment
             currentBarrelIndex += 1;                                          //Index current barrel number by one
             if (currentBarrelIndex >= barrels.Length) currentBarrelIndex = 0; //Overflow barrel index if relevant
         }
-        loadedShots = Mathf.Max(loadedShots - 1, 0); //Spend one shot (floor at zero)
+        if (!(UpgradeSpawner.primary != null && UpgradeSpawner.primary.currentPowerUp == PowerUp.PowerUpType.InfiniShot)) loadedShots = Mathf.Max(loadedShots - 1, 0); //Spend one shot (floor at zero)
         return spawnedProjectiles.ToArray(); //Return reference to the master script of the projectile(s) spawned
     }
     /// <summary>
