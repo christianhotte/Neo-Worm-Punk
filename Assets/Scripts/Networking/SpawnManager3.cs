@@ -83,7 +83,7 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
         if (playerSpawnPoints.ContainsKey(playerId))
         {
             Transform spawnPoint = playerSpawnPoints[playerId];
-            playerSpawnPoints.Remove(playerId);
+            //playerSpawnPoints.Remove(playerId);
             ReleaseSpawnPoint(spawnPoint);
         }
 
@@ -117,6 +117,8 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
     // Assigns the spawn points to the player ONLY when they join the scene.
     private void AssignSpawnPointsToPlayers()
     {
+        playerSpawnPoints.Clear();  //Clears the player spawn points
+
         // Loops through the list of players and searches for the specific player ID.
         for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
         {
