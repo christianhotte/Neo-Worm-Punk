@@ -61,7 +61,7 @@ public class Leaderboards : MonoBehaviourPunCallbacks
                     PlayerStats otherStats = rankedPlayers[x].networkPlayerStats;      //Get stats from other player
                     float otherK = otherStats.numOfKills;                              //Get KD of other player
                     float otherD = otherStats.numOfDeaths;
-                    if (otherK < currentK || (otherK == currentK && otherD < currentK)) { rankedPlayers.Insert(x, player); break; } //Insert current player above the first player it outranks
+                    if (otherK < currentK || (otherK == currentK && otherD > currentD)) { rankedPlayers.Insert(x, player); break; } //Insert current player above the first player it outranks
                 }
                 if (!rankedPlayers.Contains(player)) rankedPlayers.Add(player); //Add player in last if it doesn't outrank anyone
             }
