@@ -119,6 +119,7 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
         {
             int playerId = PhotonNetwork.PlayerList[i].ActorNumber;
             int spawnNumber = i % spawnPoints.Length;
+            print("My PlayerID = " + playerId + " | My SpawnNumber = " + spawnNumber);
             Transform spawnPoint = spawnPoints[spawnNumber];
             playerSpawnPoints.Add(playerId, spawnPoint);
 
