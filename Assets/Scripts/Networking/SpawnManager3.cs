@@ -12,6 +12,7 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
 
     private Dictionary<int, Transform> playerSpawnPoints = new Dictionary<int, Transform>();
     private int nextSpawnPointIndex = 0;
+    [SerializeField] bool hasBeenSpawned = false;
 
     private void Awake()
     {
@@ -44,7 +45,10 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
         StartCoroutine(WaitUntilLocalPlayerTube());
 
         // Assigns the player a spawn point when they get into the locker scene.
-        AssignSpawnPointsToPlayers();
+        if (hasBeenSpawned == false)
+        {
+            AssignSpawnPointsToPlayers();
+        }
     }
 
     /*// Hard resets the dictionary of spawn points everytime you load into the scene.
@@ -148,17 +152,19 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
                 Debug.LogError("Spawn problem with spawn number " + spawnNumber);
             }
         }
+
+        hasBeenSpawned = true;
     }
 
     // Assigns the spawn points to the player ONLY when they join the scene.
-    public void AssignSpawnPointToPlayer(int playerId)
+    /*public void AssignSpawnPointToPlayer(int playerId)
     {
         if (!playerSpawnPoints.ContainsKey(playerId))
         {
             Transform spawnPoint = GetNextAvailableSpawnPoint();
             playerSpawnPoints[playerId] = spawnPoint;
         }
-    }
+    }*/
 
     // Frees open the spawn point for when the player leaves.
     public void ReleaseSpawnPointForPlayer(int playerId)
