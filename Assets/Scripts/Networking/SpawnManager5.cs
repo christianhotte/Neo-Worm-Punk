@@ -42,7 +42,7 @@ public class SpawnManager5 : MonoBehaviourPunCallbacks
             // Assign ownership of Spawn Point to player who spawned at it
             PhotonView spawnPointPhotonView = spawnPoint.GetPhotonView();
             spawnPointPhotonView.TransferOwnership(PhotonNetwork.LocalPlayer);
-            spawnPointOwners[spawnPointPhotonView.ViewID] = PhotonNetwork.LocalPlayer;
+            //spawnPointOwners[spawnPointPhotonView.ViewID] = PhotonNetwork.LocalPlayer.gameObject;
 
             // Spawn player at selected Spawn Point
             Transform spawnTransform = spawnPoint.GetComponent<Transform>();
