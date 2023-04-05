@@ -17,9 +17,4 @@ public class SpawnPointManager : MonoBehaviour
             photonView.TransferOwnership(PhotonNetwork.MasterClient);
         }
     }
-
-    private void OnDestroy()
-    {
-        Destroy(gameObject.GetComponent<PhotonView>());
-    }
 }

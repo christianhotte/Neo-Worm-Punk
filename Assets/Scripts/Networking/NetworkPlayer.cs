@@ -103,6 +103,7 @@ public class NetworkPlayer : MonoBehaviour
     {
         photonPlayerSettings.Add("Color", 0);
         photonPlayerSettings.Add("IsReady", false);
+        photonPlayerSettings.Add("TubeID", -1);
         PlayerController.photonView.Owner.SetCustomProperties(photonPlayerSettings);
     }
 
@@ -146,6 +147,7 @@ public class NetworkPlayer : MonoBehaviour
         //Reference cleanup:
         instances.Remove(this);                                                                                 //Remove from instance list
         if (photonView.IsMine && PlayerController.photonView == photonView) PlayerController.photonView = null; //Clear client photonView reference
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {

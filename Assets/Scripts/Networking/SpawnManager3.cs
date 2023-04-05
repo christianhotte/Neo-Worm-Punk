@@ -16,9 +16,7 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
 
     private void Awake()
     {
-        //SceneManager.sceneLoaded += OnSceneLoaded;
-
-        
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
     // Start is called before the first frame update
@@ -41,14 +39,15 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
         /*GameManager gameManager = FindObjectOfType<GameManager>();
         spawnPoints = gameManager.spawnPoints;*/
 
-        // Subscribes event handlers
-        PhotonNetwork.AddCallbackTarget(this);
-
         //Wait until the local player tube is assigned
         StartCoroutine(WaitUntilLocalPlayerTube());
 
         // Assigns the player a spawn point when they get into the locker scene.
-        AssignSpawnPointsToPlayers();
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        MoveToSpawnPoint();
     }
 
     /*// Hard resets the dictionary of spawn points everytime you load into the scene.
@@ -89,9 +88,6 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
             playerSpawnPoints.Remove(playerId);
             ReleaseSpawnPoint(spawnPoint);
         }
-
-        // Raises an event on player left room.
-        PhotonNetwork.RaiseEvent(2, otherPlayer.ActorNumber, RaiseEventOptions.Default, SendOptions.SendReliable);
     }
 
     // Gets the next available spawn point.
@@ -121,9 +117,12 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
     // Assigns the spawn points to the player ONLY when they join the scene.
     private void AssignSpawnPointsToPlayers()
     {
+/*        playerSpawnPoints.Clear();  //Clears the player spawn points
+
         // Loops through the list of players and searches for the specific player ID.
         for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
         {
+            Debug.Log("Player Being Checked: " + PhotonNetwork.PlayerList[i].NickName);
             int playerId = PhotonNetwork.PlayerList[i].ActorNumber;
             if (playerId != PhotonNetwork.LocalPlayer.ActorNumber) continue;
             int spawnNumber = i % spawnPoints.Length;
@@ -155,6 +154,39 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
             else
             {
                 Debug.LogError("Spawn problem with spawn number " + spawnNumber);
+            }
+        }*/
+    }
+
+    public void MoveToSpawnPoint()
+    {
+        int tubeID = (int)NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["TubeID"];
+
+        if (tubeID < 0)
+        {
+            NetworkManagerScript.instance.OccupyNextAvailableTube();
+            tubeID = (int)NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["TubeID"];
+        }
+
+        Debug.Log("Tube ID: " + tubeID);
+
+        LockerTubeController spawnTube = tubes[tubeID];
+        if (spawnTube != null)
+        {
+            // Moves the player to the spawn point.
+            spawnTube.occupied = true;
+            PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
+            PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
+
+            if (ReadyUpManager.instance != null)
+            {
+                ReadyUpManager.instance.localPlayerTube = spawnTube;
+                ReadyUpManager.instance.UpdateStatus(tubeID + 1);
+                ReadyUpManager.instance.localPlayerTube.SpawnPlayerName(NetworkManagerScript.instance.GetLocalPlayerName());
+                NetworkManagerScript.localNetworkPlayer.UpdateTakenColorsOnJoin();
+                ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
+                if (PhotonNetwork.IsMasterClient)
+                    ReadyUpManager.instance.localPlayerTube.ShowHostSettings(true); //Show the settings if the player being moved is the master client
             }
         }
     }
@@ -204,16 +236,8 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
         return null;
     }
 
-    // This method is called when a custom event is received
-    public void OnEvent(byte eventCode, object content, int senderId)
+    private void OnDestroy()
     {
-        if (eventCode == 2)
-        {
-            int actorNumber = (int)content;
-            // Do something with the actorNumber of the player who left
-
-            // Reassigns spawn points to all remaining players after someone left.
-            AssignSpawnPointsToPlayers();
-        }
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 }
