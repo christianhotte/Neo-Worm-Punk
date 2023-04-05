@@ -85,6 +85,9 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
             playerSpawnPoints.Remove(playerId);
             ReleaseSpawnPoint(spawnPoint);
         }
+
+        // Reassigns the players to a new tube when a player leaves so when they rejoin, it won't be in the same tube.
+        AssignSpawnPointsToPlayers();
     }
 
     // Gets the next available spawn point.
