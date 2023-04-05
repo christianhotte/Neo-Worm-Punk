@@ -366,6 +366,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         SpawnNetworkPlayer();                                             //Always spawn a network player instance when joining a room
         localNetworkPlayer.SetNetworkPlayerProperties("IsReady", false);;
         AdjustVoiceVolume();
+        OccupyNextAvailableTube();
     }
 
     public override void OnJoinRoomFailed(short returnCode, string message)
@@ -607,10 +608,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     public bool[] GetTubeOccupancy()
     {
         if (PhotonNetwork.InRoom)
-        {
-            Debug.Log("Getting Tubes...");
-            return(bool[])(PhotonNetwork.CurrentRoom.CustomProperties["TubeOccupants"]);
-        }
+            return (bool[])(PhotonNetwork.CurrentRoom.CustomProperties["TubeOccupants"]);
         return null;
     }
 
@@ -627,7 +625,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     public void SetTubeOccupantStatus(int tubeID, bool isOccupied)
     {
         bool[] tubeList = GetTubeOccupancy();
-        tubeList[tubeID] = isOccupied ? true : false;
+        tubeList[tubeID] = isOccupied;
         UpdateRoomSettings("TubeOccupants", tubeList);
     }
 
