@@ -6,6 +6,7 @@ public class TubeManager : MonoBehaviour
 {
     public List<LockerTubeController> roomTubes;
 
+    // -1 because it goes by index
     public LockerTubeController GetTubeByNumber(int number)
     {
         if (roomTubes.Count > 0)
@@ -20,5 +21,4 @@ public class TubeManager : MonoBehaviour
         if (ReadyUpManager.instance != null)
             ReadyUpManager.instance.LeverStateChanged();
     }
-
 }

@@ -52,14 +52,16 @@ public class Leaderboards : MonoBehaviourPunCallbacks
 
                 //Get stats:
                 PlayerStats stats = player.networkPlayerStats; //Get current player's stats from last round
-                float currentH = stats.numOfKills;             //Get KD of current player
+                float currentK = stats.numOfKills;             //Get KD of current player
+                float currentD = stats.numOfDeaths;
 
                 //Rank against competitors:
                 for (int x = 0; x < rankedPlayers.Count; x++) //Iterate through ranked player list
                 {
                     PlayerStats otherStats = rankedPlayers[x].networkPlayerStats;      //Get stats from other player
-                    float otherH = otherStats.numOfKills;                              //Get KD of other player
-                    if (otherH < currentH) { rankedPlayers.Insert(x, player); break; } //Insert current player above the first player it outranks
+                    float otherK = otherStats.numOfKills;                              //Get KD of other player
+                    float otherD = otherStats.numOfDeaths;
+                    if (otherK < currentK || (otherK == currentK && otherD > currentK)) { rankedPlayers.Insert(x, player); break; } //Insert current player above the first player it outranks
                 }
                 if (!rankedPlayers.Contains(player)) rankedPlayers.Add(player); //Add player in last if it doesn't outrank anyone
             }
@@ -117,7 +119,9 @@ public class Leaderboards : MonoBehaviourPunCallbacks
                 //Place K/D:
                 TMP_Text newKD = Instantiate(ratios, ratios.transform.parent).GetComponent<TMP_Text>();        //Instantiate new text object
                 newKD.rectTransform.localPosition -= Vector3.down * yHeight;                                   //Move text to target position
-                float KD = ((float)stats.numOfKills / (stats.numOfDeaths > 0 ? (float)stats.numOfDeaths : 1));
+                float divider = stats.numOfKills + stats.numOfDeaths;
+                if (divider == 0) divider = 1;
+                float KD = stats.numOfKills / divider;
                 newKD.text = KD.ToString("F2");                                                                //Display KD ratio
                 newKD.color = playerColor;                                                                     //Set text color to given player color
             }

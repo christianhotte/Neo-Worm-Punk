@@ -13,11 +13,15 @@ public class UpgradeSpawner : MonoBehaviour
     /// </summary>
     public Transform spawnPoint;
     private Jumbotron jumboScript;
+    private bool alertin = false;
+    private AudioSource thisAud;
+    public AudioClip upgradeAlert;
+    public Material heatVision;
     private int spawnedPowerups=0;
     //Settings:
     [Header("Settings:")]
     public PowerUpSettings settings;
-    [SerializeField] private string upgradeResourceName = "PowerUpTest";
+    [SerializeField] private string[] upgradeResourceNames = { "PowerUpTest" };
     [SerializeField] private float ejectForce = 10;
     [Space()]
     [SerializeField] private bool debugSpawn;
@@ -29,7 +33,29 @@ public class UpgradeSpawner : MonoBehaviour
     public IEnumerator DoPowerUp(PowerUp.PowerUpType powerType, float waitTime)
     {
         currentPowerUp = powerType;
-        yield return new WaitForSeconds(waitTime);
+        if (currentPowerUp == PowerUp.PowerUpType.HeatVision)
+        {
+            foreach (var player in NetworkPlayer.instances)
+            {
+                if (player == NetworkManagerScript.localNetworkPlayer)
+                    continue;
+                else
+                {
+                    player.ChangeNetworkPlayerMaterial(heatVision);
+                }
+            }
+            yield return new WaitForSeconds(waitTime);
+            foreach (var player in NetworkPlayer.instances)
+            {
+                if (player == NetworkManagerScript.localNetworkPlayer)
+                    continue;
+                else
+                {
+                    player.ResetNetworkPlayerMaterials();
+                }
+            }
+        }
+        else yield return new WaitForSeconds(waitTime);
         currentPowerUp = PowerUp.PowerUpType.None;
     }
 
@@ -40,16 +66,31 @@ public class UpgradeSpawner : MonoBehaviour
         spawners.Add(this);
 
         if (spawnPoint == null) spawnPoint = transform;
+        thisAud = this.GetComponent<AudioSource>();
         jumboScript = FindObjectOfType<Jumbotron>();
     }
     private void OnDestroy()
     {
         if (spawners.Contains(this)) spawners.Remove(this);
+
+        if (currentPowerUp == PowerUp.PowerUpType.HeatVision)
+        {
+            foreach (var player in NetworkPlayer.instances)
+            {
+                if (player == NetworkManagerScript.localNetworkPlayer)
+                    continue;
+                else
+                {
+                    player.ResetNetworkPlayerMaterials();
+                }
+            }
+        }
     }
     private void Update()
     {
         if (debugSpawn)
         {
+            StartCoroutine(SpawnAlert());
             debugSpawn = false;
             SpawnUpgrade();
         }
@@ -58,16 +99,19 @@ public class UpgradeSpawner : MonoBehaviour
         {
             if (LevelTimePercent > 25 && spawnedPowerups < 1)
             {
+                StartCoroutine(SpawnAlert());
                 SpawnRandomUpgrade();
                 spawnedPowerups++;
             }
             else if (LevelTimePercent > 50 && spawnedPowerups < 2)
             {
+                StartCoroutine(SpawnAlert());
                 SpawnRandomUpgrade();
                 spawnedPowerups++;
             }
             else if (LevelTimePercent > 75 && spawnedPowerups < 3)
             {
+                StartCoroutine(SpawnAlert());
                 SpawnRandomUpgrade();
                 spawnedPowerups++;
             }
@@ -79,7 +123,9 @@ public class UpgradeSpawner : MonoBehaviour
     {
         if (!PhotonNetwork.IsMasterClient) return;
 
-        PowerUp newUpgrade = PhotonNetwork.Instantiate("PowerUps/" + upgradeResourceName, spawnPoint.position, spawnPoint.rotation).GetComponent<PowerUp>();
+
+        string resourceName = "PowerUps/" + upgradeResourceNames[Random.Range(0, upgradeResourceNames.Length)];
+        PowerUp newUpgrade = PhotonNetwork.Instantiate(resourceName, spawnPoint.position, spawnPoint.rotation).GetComponent<PowerUp>();
         newUpgrade.rb.AddForce(spawnPoint.up * ejectForce, ForceMode.Impulse);
     }
     public static void SpawnRandomUpgrade()
@@ -87,5 +133,14 @@ public class UpgradeSpawner : MonoBehaviour
         if (spawners.Count == 0) return;
         UpgradeSpawner chosenSpawner = spawners[Random.Range(0, spawners.Count)];
         chosenSpawner.SpawnUpgrade();
+    }
+    public IEnumerator SpawnAlert()
+    {
+        thisAud.PlayOneShot(upgradeAlert);
+        yield return new WaitForSeconds(0.7f);
+        thisAud.PlayOneShot(upgradeAlert);
+        yield return new WaitForSeconds(0.7f);
+        thisAud.PlayOneShot(upgradeAlert);
+        yield return new WaitForSeconds(0.7f);
     }
 }

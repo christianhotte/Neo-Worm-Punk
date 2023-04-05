@@ -211,9 +211,9 @@ public class NewChainsawController : PlayerEquipment
         if (mode == BladeMode.Extended || mode == BladeMode.Extending) //Blade is currently deployed or is being deployed
         {
             //Update wrist rotation:
-            Quaternion targetWristRot = Quaternion.LookRotation(hand.forward, -hand.right);                            //Get target wrist rotation from rotation of hand (in order to make weapon more controllable)
-            targetWristRot = Quaternion.RotateTowards(wrist.parent.rotation, targetWristRot, settings.maxWristAngle);  //Clamp rotation to set angular limit
-            wrist.rotation = Quaternion.Lerp(wrist.rotation, targetWristRot, settings.wristLerpRate * Time.deltaTime); //Lerp wrist toward target rotation
+            Quaternion targetWristRot = Quaternion.LookRotation(hand.forward, hand.right * (handedness == CustomEnums.Handedness.Right ? -1 : 1)); //Get target wrist rotation from rotation of hand (in order to make weapon more controllable)
+            targetWristRot = Quaternion.RotateTowards(wrist.parent.rotation, targetWristRot, settings.maxWristAngle);                              //Clamp rotation to set angular limit
+            wrist.rotation = Quaternion.Lerp(wrist.rotation, targetWristRot, settings.wristLerpRate * Time.deltaTime);                             //Lerp wrist toward target rotation
 
             //Reverse grip:
             float targetPivotRot = reverseGrip ? -settings.reverseGripAngle : 0; //Get target Y rotation for wrist pivot
@@ -231,6 +231,7 @@ public class NewChainsawController : PlayerEquipment
             {
                 //Adjust player velocity:
                 Vector3 grindDirection = Vector3.Cross(hitInfo.normal, wrist.up).normalized;                                 //Get target direction of grind
+                if (handedness == CustomEnums.Handedness.Left) grindDirection *= -1;                                         //Grind in opposite direction if blade is flipped
                 float grindTimeInterpolant = Mathf.Clamp01(grindTime / settings.grindAccelTime);                             //Get interpolant for how long player has been grinding
                 float grindSpeed = Mathf.Lerp(settings.grindSpeedRange.x, settings.grindSpeedRange.y, grindTimeInterpolant); //Determine grind speed based on how long player has been grinding for
                 playerBody.velocity = grindDirection * grindSpeed;                                                           //Modify player velocity based on grind values
@@ -251,7 +252,7 @@ public class NewChainsawController : PlayerEquipment
                 NetworkPlayer hitPlayer = hitInfo.collider.GetComponentInParent<NetworkPlayer>(); //Try to get networkplayer from hit
                 if (hitPlayer != null && !hitPlayer.photonView.IsMine) //Player (other than self) has been hit by blade
                 {
-                    hitPlayer.photonView.RPC("RPC_Hit", Photon.Pun.RpcTarget.AllBuffered, 3, PlayerController.photonView.ViewID); //Hit target
+                    hitPlayer.photonView.RPC("RPC_Hit", Photon.Pun.RpcTarget.AllBuffered, 3, PlayerController.photonView.ViewID, Vector3.zero); //Hit target
                 }
             }
         }
