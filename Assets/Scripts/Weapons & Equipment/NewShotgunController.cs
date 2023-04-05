@@ -413,7 +413,7 @@ public class NewShotgunController : PlayerEquipment
             currentBarrelIndex += 1;                                          //Index current barrel number by one
             if (currentBarrelIndex >= barrels.Length) currentBarrelIndex = 0; //Overflow barrel index if relevant
         }
-        loadedShots = Mathf.Max(loadedShots - 1, 0); //Spend one shot (floor at zero)
+        if (!(UpgradeSpawner.primary != null && UpgradeSpawner.primary.currentPowerUp == PowerUp.PowerUpType.InfiniShot)) loadedShots = Mathf.Max(loadedShots - 1, 0); //Spend one shot (floor at zero)
         return spawnedProjectiles.ToArray(); //Return reference to the master script of the projectile(s) spawned
     }
     /// <summary>
