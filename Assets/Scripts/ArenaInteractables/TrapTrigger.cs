@@ -38,7 +38,7 @@ public class TrapTrigger : Targetable
             this.active = false;
         }
     }
-    public override void IsHit(int damage, int playerID)
+    public override void IsHit(int damage, int playerID, Vector3 velocity)
   {
       if (playerID <= 0) return;
       if (PhotonNetwork.GetPhotonView(playerID).TryGetComponent(out NetworkPlayer player))
