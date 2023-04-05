@@ -44,10 +44,7 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
         StartCoroutine(WaitUntilLocalPlayerTube());
 
         // Assigns the player a spawn point when they get into the locker scene.
-        if (hasBeenSpawned == false)
-        {
-            AssignSpawnPointsToPlayers();
-        }
+        AssignSpawnPointsToPlayers();
     }
 
     /*// Hard resets the dictionary of spawn points everytime you load into the scene.
