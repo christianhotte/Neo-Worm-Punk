@@ -16,9 +16,7 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
 
     private void Awake()
     {
-        //SceneManager.sceneLoaded += OnSceneLoaded;
-
-        
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
     // Start is called before the first frame update
@@ -45,7 +43,11 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
         StartCoroutine(WaitUntilLocalPlayerTube());
 
         // Assigns the player a spawn point when they get into the locker scene.
-        AssignSpawnPointsToPlayers();
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        MoveToSpawnPoint();
     }
 
     /*// Hard resets the dictionary of spawn points everytime you load into the scene.
@@ -83,11 +85,11 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
         if (playerSpawnPoints.ContainsKey(playerId))
         {
             Transform spawnPoint = playerSpawnPoints[playerId];
-            //playerSpawnPoints.Remove(playerId);
+            playerSpawnPoints.Remove(playerId);
             ReleaseSpawnPoint(spawnPoint);
         }
 
-        AssignSpawnPointsToPlayers();
+        NetworkManagerScript.instance.SetTubeOccupantStatus((int)otherPlayer.CustomProperties["TubeID"], false);
     }
 
     // Gets the next available spawn point.
@@ -117,7 +119,7 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
     // Assigns the spawn points to the player ONLY when they join the scene.
     private void AssignSpawnPointsToPlayers()
     {
-        playerSpawnPoints.Clear();  //Clears the player spawn points
+/*        playerSpawnPoints.Clear();  //Clears the player spawn points
 
         // Loops through the list of players and searches for the specific player ID.
         for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
@@ -154,6 +156,39 @@ public class SpawnManager3 : MonoBehaviourPunCallbacks
             else
             {
                 Debug.LogError("Spawn problem with spawn number " + spawnNumber);
+            }
+        }*/
+    }
+
+    public void MoveToSpawnPoint()
+    {
+        int tubeID = (int)NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["TubeID"];
+
+        if (tubeID < 0)
+        {
+            NetworkManagerScript.instance.OccupyNextAvailableTube();
+            tubeID = (int)NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["TubeID"];
+        }
+
+        Debug.Log("Tube ID: " + tubeID);
+
+        LockerTubeController spawnTube = tubes[tubeID];
+        if (spawnTube != null)
+        {
+            // Moves the player to the spawn point.
+            spawnTube.occupied = true;
+            PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
+            PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
+
+            if (ReadyUpManager.instance != null)
+            {
+                ReadyUpManager.instance.localPlayerTube = spawnTube;
+                ReadyUpManager.instance.UpdateStatus(tubeID + 1);
+                ReadyUpManager.instance.localPlayerTube.SpawnPlayerName(NetworkManagerScript.instance.GetLocalPlayerName());
+                NetworkManagerScript.localNetworkPlayer.UpdateTakenColorsOnJoin();
+                ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
+                if (PhotonNetwork.IsMasterClient)
+                    ReadyUpManager.instance.localPlayerTube.ShowHostSettings(true); //Show the settings if the player being moved is the master client
             }
         }
     }
