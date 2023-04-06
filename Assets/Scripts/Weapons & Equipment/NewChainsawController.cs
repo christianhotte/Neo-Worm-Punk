@@ -29,6 +29,7 @@ public class NewChainsawController : PlayerEquipment
 
     private Transform hand;             //Real position of player hand used by this equipment
     private PlayerEquipment handWeapon; //Player weapon held in the same hand as this chainsaw
+    private NewGrapplerController otherHandGrapple; 
 
     //Settings:
     [Header("Settings:")]
@@ -81,6 +82,7 @@ public class NewChainsawController : PlayerEquipment
         foreach (PlayerEquipment equipment in player.attachedEquipment) //Iterate through all equipment attached to player
         {
             if (equipment != this && equipment.handedness == handedness) { handWeapon = equipment; break; } //Try to get weapon used by same hand
+            if (equipment.GetComponent<NewGrapplerController>() != null) otherHandGrapple = equipment.GetComponent<NewGrapplerController>();
         }
     }
     private protected override void Update()
@@ -235,6 +237,12 @@ public class NewChainsawController : PlayerEquipment
                 float grindTimeInterpolant = Mathf.Clamp01(grindTime / settings.grindAccelTime);                             //Get interpolant for how long player has been grinding
                 float grindSpeed = Mathf.Lerp(settings.grindSpeedRange.x, settings.grindSpeedRange.y, grindTimeInterpolant); //Determine grind speed based on how long player has been grinding for
                 playerBody.velocity = grindDirection * grindSpeed;                                                           //Modify player velocity based on grind values
+
+                //Grind beginning:
+                if (!grinding) //Player was not previously grinding
+                {
+                    if (otherHandGrapple != null && otherHandGrapple.hook.state != HookProjectile.HookState.Stowed) otherHandGrapple.hook.Release();
+                }
 
                 //Cleanup:
                 lastGrindHit = hitInfo; //Store hit info for later

@@ -13,16 +13,12 @@ public class UpgradeSpawner : MonoBehaviour
     /// </summary>
     public Transform spawnPoint;
     private Jumbotron jumboScript;
-    private bool alertin = false;
     private AudioSource thisAud;
-    public AudioClip upgradeAlert;
-    public Material heatVision;
     private int spawnedPowerups=0;
     //Settings:
     [Header("Settings:")]
     public PowerUpSettings settings;
     [SerializeField] private string[] upgradeResourceNames = { "PowerUpTest" };
-    [SerializeField] private float ejectForce = 10;
     [Space()]
     [SerializeField] private bool debugSpawn;
 
@@ -35,28 +31,17 @@ public class UpgradeSpawner : MonoBehaviour
         currentPowerUp = powerType;
         if (currentPowerUp == PowerUp.PowerUpType.HeatVision)
         {
-            Debug.Log("startedHeatVison");
-            foreach (var player in NetworkPlayer.instances)
+            print("Network players being made visible = " + NetworkPlayer.instances.Count);
+            foreach (NetworkPlayer player in NetworkPlayer.instances)
             {
-                Debug.Log("EnteredHeatLoop");
-                if (player == NetworkManagerScript.localNetworkPlayer)
-                    continue;
-                else
-                {
-                    Debug.Log("TryingtoGiveColor");
-                    player.ChangeNetworkPlayerMaterial(heatVision,0);
-                }
+                if (player == NetworkManagerScript.localNetworkPlayer) continue;
+                player.ChangeNetworkPlayerMaterial(settings.HeatVisMat,0);
             }
-            yield return new WaitForSeconds(waitTime);
-            Debug.Log("WaitDone");
-            foreach (var player in NetworkPlayer.instances)
+            yield return new WaitForSeconds(settings.HeatVisionTime);
+            foreach (NetworkPlayer player in NetworkPlayer.instances)
             {
-                if (player == NetworkManagerScript.localNetworkPlayer)
-                    continue;
-                else
-                {
-                    player.ResetNetworkPlayerMaterials();
-                }
+                if (player == NetworkManagerScript.localNetworkPlayer) continue;
+                player.ResetNetworkPlayerMaterials();
             }
         }
         else yield return new WaitForSeconds(waitTime);
@@ -130,7 +115,7 @@ public class UpgradeSpawner : MonoBehaviour
 
         string resourceName = "PowerUps/" + upgradeResourceNames[Random.Range(0, upgradeResourceNames.Length)];
         PowerUp newUpgrade = PhotonNetwork.Instantiate(resourceName, spawnPoint.position, spawnPoint.rotation).GetComponent<PowerUp>();
-        newUpgrade.rb.AddForce(spawnPoint.up * ejectForce, ForceMode.Impulse);
+        newUpgrade.rb.AddForce(spawnPoint.up * settings.LaunchForce, ForceMode.Impulse);
     }
     public static void SpawnRandomUpgrade()
     {
@@ -140,11 +125,11 @@ public class UpgradeSpawner : MonoBehaviour
     }
     public IEnumerator SpawnAlert()
     {
-        thisAud.PlayOneShot(upgradeAlert);
+        thisAud.PlayOneShot(settings.AlertSound);
         yield return new WaitForSeconds(0.7f);
-        thisAud.PlayOneShot(upgradeAlert);
+        thisAud.PlayOneShot(settings.AlertSound);
         yield return new WaitForSeconds(0.7f);
-        thisAud.PlayOneShot(upgradeAlert);
+        thisAud.PlayOneShot(settings.AlertSound);
         yield return new WaitForSeconds(0.7f);
     }
 }
