@@ -160,13 +160,21 @@ public class HookProjectile : Projectile
             //Check for wall bounce:
             if (Vector3.Distance(controller.barrel.position, tetherPoint.position) <= controller.settings.wallBounceDist) //Player is very close to hook
             {
+                //Disengagement types:
                 Release(); //Release hook
-                if (lastHit.collider.transform.TryGetComponent(out JumpPad jumpPad)) jumpPad.Bounce();
-                else if (controller.settings.noDisengageLayers == (controller.settings.noDisengageLayers | (1 << lastHit.collider.gameObject.layer)))
+                if (lastHit.collider.transform.TryGetComponent(out JumpPad jumpPad)) jumpPad.Bounce(); //Bounce pad has been hit
+                else if (controller.settings.noDisengageLayers == (controller.settings.noDisengageLayers | (1 << lastHit.collider.gameObject.layer))) //No disengage layer has been hit
                 {
-                    print("Grappler released but with no disengagement.");
+                    //print("Grappler released but with no disengagement.");
                 }
-                else if (controller.settings.wallBounceForce > 0) controller.player.bodyRb.velocity = lastHit.normal * controller.settings.wallBounceForce; //Bounce player away from wall with designated amount of force
+                else if (controller.otherHandChainsaw != null && controller.otherHandChainsaw.mode != NewChainsawController.BladeMode.Sheathed) //No disengage if chainsaw is active
+                {
+                    //print("Grappler tether distance was too short for disengagement");
+                }
+                else if (controller.settings.wallBounceForce > 0) //Normal disengagement is occurring
+                {
+                    controller.player.bodyRb.velocity = lastHit.normal * controller.settings.wallBounceForce; //Bounce player away from wall with designated amount of force
+                }
             }
         }
 
@@ -313,8 +321,13 @@ public class HookProjectile : Projectile
         hitPlayer = hitInfo.collider.GetComponentInParent<NetworkPlayer>();                //Try to get network player from hit collider
         if (hitPlayer == null) hitPlayer = hitInfo.collider.GetComponent<NetworkPlayer>(); //Try again for network player if it was not initially gotten
         if (hitPlayer != null) HookToPlayer(hitPlayer);                                    //Hook is attaching to a player
-        else HookToPoint(hitInfo.point);                                                   //Hook to given point
-        lastHit = hitInfo;                                                                 //Store data from hit
+        else
+        {
+            Vector3 hookPoint = hitInfo.point;
+            if (hitInfo.collider.TryGetComponent(out Targetable target) && target.hookToCenter) { hookPoint = target.transform.position; print("OOg"); }
+            HookToPoint(hookPoint); //Hook to given point
+        }
+        lastHit = hitInfo; //Store data from hit
 
         //Cleanup:
         tetherDistance = Vector3.Distance(hitInfo.point, controller.barrel.position); //Get exact max length of tether

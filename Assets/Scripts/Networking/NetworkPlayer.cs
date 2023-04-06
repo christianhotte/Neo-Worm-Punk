@@ -29,6 +29,7 @@ public class NetworkPlayer : MonoBehaviour
     private TrailRenderer trail;                                 //Renderer for trail that makes players more visible to each other
     internal PlayerStats networkPlayerStats = new PlayerStats(); //The stats for the network player
     internal Hashtable photonPlayerSettings;
+    public Material[] altMaterials;
 
     private Material[] defaultPlayerMaterials;
     private Material[] defaultTrailMaterials;
@@ -387,16 +388,10 @@ public class NetworkPlayer : MonoBehaviour
     /// Changes the NetworkPlayer's materials.
     /// </summary>
     /// <param name="newMaterial">The new NetworkPlayer materials.</param>
-    /// <param name="trailMaterialIndex">The index of the trail material array.</param>
-    public void ChangeNetworkPlayerMaterial(Material newMaterial, int trailMaterialIndex = 0)
+    public void ChangeNetworkPlayerMaterial(Material newMaterial)
     {
-        for (int i = 0; i < bodyRenderer.materials.Length; i++)
-        {
-            Debug.Log("ChangeNetwrokPlayerMatStart");
-            bodyRenderer.materials[i] = newMaterial;
-            trail.materials[trailMaterialIndex] = newMaterial;
-            Debug.Log("ChangeNetwrokPlayerMatComplete");
-        }
+        bodyRenderer.material = newMaterial;
+        trail.material = newMaterial;
     }
 
     /// <summary>
@@ -404,12 +399,8 @@ public class NetworkPlayer : MonoBehaviour
     /// </summary>
     public void ResetNetworkPlayerMaterials()
     {
-        Debug.Log("ResetNetwrokPlayerMatStart");
-        for (int i = 0; i < bodyRenderer.materials.Length; i++)
-            bodyRenderer.materials[i] = defaultPlayerMaterials[i];
-
+        bodyRenderer.materials = defaultPlayerMaterials;
         trail.materials = defaultTrailMaterials;
-        Debug.Log("ResetNetwrokPlayerMatComplete");
     }
 
     /// <summary>
@@ -500,6 +491,12 @@ public class NetworkPlayer : MonoBehaviour
     public void RPC_ChangeVisibility()
     {
         print("why"); //This should never be called
+    }
+    [PunRPC]
+    public void RPC_ChangeMaterial(int materialIndex)
+    {
+        if (materialIndex == -1) { ResetNetworkPlayerMaterials(); return; }
+        ChangeNetworkPlayerMaterial(altMaterials[materialIndex]);
     }
     /// <summary>
     /// Makes this player visible to the whole network and enables remote collisions (can also be used to clear their trail).

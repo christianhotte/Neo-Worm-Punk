@@ -13,18 +13,15 @@ public class UpgradeSpawner : MonoBehaviour
     /// </summary>
     public Transform spawnPoint;
     private Jumbotron jumboScript;
-    private bool alertin = false;
     private AudioSource thisAud;
-    public AudioClip upgradeAlert;
-    public Material heatVision;
     private int spawnedPowerups=0;
     //Settings:
     [Header("Settings:")]
     public PowerUpSettings settings;
     [SerializeField] private string[] upgradeResourceNames = { "PowerUpTest" };
-    [SerializeField] private float ejectForce = 10;
     [Space()]
     [SerializeField] private bool debugSpawn;
+    [SerializeField] private bool debugGiveSelectedUpgrade;
 
     //Runtime Variables:
     public PowerUp.PowerUpType currentPowerUp;
@@ -35,29 +32,20 @@ public class UpgradeSpawner : MonoBehaviour
         currentPowerUp = powerType;
         if (currentPowerUp == PowerUp.PowerUpType.HeatVision)
         {
-            Debug.Log("startedHeatVison");
-            foreach (var player in NetworkPlayer.instances)
+            print("Network players being made visible = " + NetworkPlayer.instances.Count);
+            foreach (NetworkPlayer player in NetworkPlayer.instances)
             {
-                Debug.Log("EnteredHeatLoop");
-                if (player == NetworkManagerScript.localNetworkPlayer)
-                    continue;
-                else
-                {
-                    Debug.Log("TryingtoGiveColor");
-                    player.ChangeNetworkPlayerMaterial(heatVision,0);
-                }
+                if (player == NetworkManagerScript.localNetworkPlayer) continue;
+                player.ChangeNetworkPlayerMaterial(settings.HeatVisMat);
             }
-            yield return new WaitForSeconds(waitTime);
-            Debug.Log("WaitDone");
-            foreach (var player in NetworkPlayer.instances)
+            PlayerController.photonView.RPC("RPC_ChangeMaterial", RpcTarget.Others, 0);
+            yield return new WaitForSeconds(settings.HeatVisionTime);
+            foreach (NetworkPlayer player in NetworkPlayer.instances)
             {
-                if (player == NetworkManagerScript.localNetworkPlayer)
-                    continue;
-                else
-                {
-                    player.ResetNetworkPlayerMaterials();
-                }
+                if (player == NetworkManagerScript.localNetworkPlayer) continue;
+                player.ResetNetworkPlayerMaterials();
             }
+            PlayerController.photonView.RPC("RPC_ChangeMaterial", RpcTarget.Others, -1);
         }
         else yield return new WaitForSeconds(waitTime);
         currentPowerUp = PowerUp.PowerUpType.None;
@@ -98,6 +86,12 @@ public class UpgradeSpawner : MonoBehaviour
             debugSpawn = false;
             SpawnUpgrade();
         }
+        if (debugGiveSelectedUpgrade)
+        {
+            debugGiveSelectedUpgrade = false;
+            StartCoroutine(DoPowerUp(currentPowerUp, 15));
+        }
+
         float LevelTimePercent = jumboScript.GetLevelTimer().LevelTimePercentage();
         if (primary == this && PhotonNetwork.IsMasterClient)
         {
@@ -130,7 +124,7 @@ public class UpgradeSpawner : MonoBehaviour
 
         string resourceName = "PowerUps/" + upgradeResourceNames[Random.Range(0, upgradeResourceNames.Length)];
         PowerUp newUpgrade = PhotonNetwork.Instantiate(resourceName, spawnPoint.position, spawnPoint.rotation).GetComponent<PowerUp>();
-        newUpgrade.rb.AddForce(spawnPoint.up * ejectForce, ForceMode.Impulse);
+        newUpgrade.rb.AddForce(spawnPoint.up * settings.LaunchForce, ForceMode.Impulse);
     }
     public static void SpawnRandomUpgrade()
     {
@@ -140,11 +134,11 @@ public class UpgradeSpawner : MonoBehaviour
     }
     public IEnumerator SpawnAlert()
     {
-        thisAud.PlayOneShot(upgradeAlert);
+        thisAud.PlayOneShot(settings.AlertSound);
         yield return new WaitForSeconds(0.7f);
-        thisAud.PlayOneShot(upgradeAlert);
+        thisAud.PlayOneShot(settings.AlertSound);
         yield return new WaitForSeconds(0.7f);
-        thisAud.PlayOneShot(upgradeAlert);
+        thisAud.PlayOneShot(settings.AlertSound);
         yield return new WaitForSeconds(0.7f);
     }
 }
