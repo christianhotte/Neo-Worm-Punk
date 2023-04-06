@@ -4,8 +4,10 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.XR.Interaction.Toolkit;
 
-public class DialRotationController : MonoBehaviour
+public class DialRotationController : GrabbableUI
 {
+    [SerializeField, Tooltip("The dial transform, what needs to be rotated.")] private Transform dialTransform;
+    [Space(10)]
     [SerializeField, Tooltip("The number of degrees to rotate the dial on one click.")] private int snapRotationAmount = 25;
     [SerializeField, Tooltip("The minimum amount that the player must rotate the dial to start registering input.")] private float angleTolerance;
 
@@ -15,69 +17,20 @@ public class DialRotationController : MonoBehaviour
     [SerializeField, Tooltip("Dummy models to show when grabbing the dial.")] private GameObject leftHandModel, rightHandModel;
     [SerializeField, Tooltip("Determine if a dummy model is shown when rotating the dial.")] private bool useDummyHands;
 
-    [SerializeField, Tooltip("The event called when the dial has been rotated, sends the angle rotation.")] private UnityEvent<float> OnValueChanged;
-
-    private Transform dialTransform;    //The dial transform, what needs to be rotated
+    [SerializeField, Tooltip("The event called when the dial has been rotated, sends the angle rotation.")] public UnityEvent<float> OnValueChanged;
+    [SerializeField, Tooltip("The event called when the dial has been rotated, sends -1 if turned counter-clockwise and 1 if turned clockwise.")] public UnityEvent<int> OnDialTurned;
+    [SerializeField, Tooltip("The sound that plays when the dial clicks into a position.")] private AudioClip onSnapSoundEffect;
     private float startAngle;   //The starting angle for the dial
     private bool requiresStartAngle = true; //Requires the dial to be at the start angle to rotate
     private bool shouldGetHandRotation = false; //If the dial should be checking for hand rotation
 
-    private Transform followObject;
-    private bool isGrabbable;
-    private bool isGrabbed;
-
-    private HotteInputActions inputActions;
-
-    private void Awake()
+    public override void OnGrab()
     {
-        inputActions = new HotteInputActions();
-        inputActions.XRILeftHandInteraction.Grip.performed += _ => GrabDial();
-        inputActions.XRIRightHandInteraction.Grip.performed += _ => GrabDial();
-        inputActions.XRILeftHandInteraction.Grip.canceled += _ => ReleaseDial();
-        inputActions.XRIRightHandInteraction.Grip.canceled += _ => ReleaseDial();
-    }
+        base.OnGrab();
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        dialTransform = transform.Find("Dial");
-    }
-
-    private void OnEnable()
-    {
-        inputActions.Enable();
-    }
-
-    private void OnDisable()
-    {
-        inputActions.Disable();
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("PlayerHand") && !isGrabbable)
-        {
-            isGrabbable = true;
-            followObject = other.transform;
-        }
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.CompareTag("PlayerHand"))
-        {
-            isGrabbable = false;
-            if (!isGrabbed)
-                followObject = null;
-        }
-    }
-
-    private void GrabDial()
-    {
-        if (!isGrabbed)
+        if (isGrabbed)
         {
             //Start checking for hand rotation
-            isGrabbed = true;
             shouldGetHandRotation = true;
             startAngle = 0f;
 
@@ -85,19 +38,17 @@ public class DialRotationController : MonoBehaviour
         }
     }
 
-    private void ReleaseDial()
+    public override void OnRelease()
     {
-        if (isGrabbed)
-        {
-            Debug.Log("Dial Grab End");
+        base.OnRelease();
 
+        if (!isGrabbed)
+        {
             //Stop checking for hand rotation
-            isGrabbed = false;
             shouldGetHandRotation = false;
             requiresStartAngle = true;
 
             HandModelVisibility(false); //Hide the dummy hand model if applicable
-            followObject = null;
         }
     }
 
@@ -132,9 +83,7 @@ public class DialRotationController : MonoBehaviour
     /// Gets current rotation of our controller.
     /// </summary>
     /// <returns></returns>
-    public float GetInteractorRotation() => (followObject.localEulerAngles.z > 180) ? followObject.localEulerAngles.z - 360 : followObject.localEulerAngles.z;
-
-
+    public float GetInteractorRotation() => (followObject.eulerAngles.z > 180) ? followObject.eulerAngles.z - 360 : followObject.eulerAngles.z;
 
     /// <summary>
     /// 
@@ -144,6 +93,8 @@ public class DialRotationController : MonoBehaviour
     {
         if (!requiresStartAngle)
         {
+            //Debug.Log("Start Angle - " + startAngle + " | Current Angle - " + currentAngle);
+
             float angleDifference = Mathf.Abs(startAngle - currentAngle);   //The angle difference between the start angle and the current angle to see how much it's moved
 
             if(angleDifference > angleTolerance)
@@ -210,6 +161,10 @@ public class DialRotationController : MonoBehaviour
     /// </summary>
     private void RotateDialClockwise()
     {
+        //If the dial is not grabbed, don't do anything
+        if (!isGrabbed)
+            return;
+
         //If there is an active level transition, don't do anything
         if (GameManager.Instance.levelTransitionActive)
             return;
@@ -217,8 +172,14 @@ public class DialRotationController : MonoBehaviour
         //Snap rotation of dial
         dialTransform.localEulerAngles = new Vector3(dialTransform.localEulerAngles.x, dialTransform.localEulerAngles.y + snapRotationAmount, dialTransform.localEulerAngles.z);
 
-        Debug.Log("Rotating " + gameObject.name + " Clockwise.");
+        //Debug.Log("Rotating " + gameObject.name + " Clockwise.");
+
         OnValueChanged.Invoke(GetDialValue(dialTransform.localEulerAngles.y));
+        OnDialTurned.Invoke(1);
+        if (onSnapSoundEffect != null)
+            GetComponent<AudioSource>().PlayOneShot(onSnapSoundEffect, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
+
+        SendHapticsFeedback(0.4f, 0.2f);
     }
 
     /// <summary>
@@ -226,6 +187,10 @@ public class DialRotationController : MonoBehaviour
     /// </summary>
     private void RotateDialCounterClockwise()
     {
+        //If the dial is not grabbed, don't do anything
+        if (!isGrabbed)
+            return;
+
         //If there is an active level transition, don't do anything
         if (GameManager.Instance.levelTransitionActive)
             return;
@@ -233,13 +198,45 @@ public class DialRotationController : MonoBehaviour
         //Snap rotation of dial
         dialTransform.localEulerAngles = new Vector3(dialTransform.localEulerAngles.x, dialTransform.localEulerAngles.y - snapRotationAmount, dialTransform.localEulerAngles.z);
 
-        Debug.Log("Rotating " + gameObject.name + " Counter-Clockwise.");
+        //Debug.Log("Rotating " + gameObject.name + " Counter-Clockwise.");
 
         OnValueChanged.Invoke(GetDialValue(dialTransform.localEulerAngles.y));
+        OnDialTurned.Invoke(-1);
+        if (onSnapSoundEffect != null)
+            GetComponent<AudioSource>().PlayOneShot(onSnapSoundEffect, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
+
+        SendHapticsFeedback(0.4f, 0.2f);
     }
 
     private float GetDialValue(float angle)
     {
         return minVal + (angle / 360f * maxVal);
+    }
+
+    /// <summary>
+    /// Moves the dial back to 0.
+    /// </summary>
+    /// <param name="invokeValueChange">If true, call the OnValueChanged function.</param>
+    public void ResetDial(bool invokeValueChange = false)
+    {
+        dialTransform.localEulerAngles = new Vector3(dialTransform.localEulerAngles.x, 0f, dialTransform.localEulerAngles.z);
+        if (invokeValueChange)
+        {
+            OnValueChanged.Invoke(GetDialValue(dialTransform.localEulerAngles.y));
+            if (onSnapSoundEffect != null)
+                GetComponent<AudioSource>().PlayOneShot(onSnapSoundEffect, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
+        }
+    }
+
+    /// <summary>
+    /// Rotates the dial a set amount of times based on the snap amount.
+    /// </summary>
+    /// <param name="clicks">The number of clicks to move the dial. Positive moves the dial right and negative moves the dial left.</param>
+    public void MoveDial(int clicks)
+    {
+/*        Debug.Log("Starting Y: " + dialTransform.localEulerAngles.y);
+        Debug.Log("Snap: " + snapRotationAmount);
+        Debug.Log("Clicks: " + clicks);*/
+        dialTransform.localEulerAngles = new Vector3(dialTransform.localEulerAngles.x, dialTransform.localEulerAngles.y + (snapRotationAmount * clicks), dialTransform.localEulerAngles.z);
     }
 }

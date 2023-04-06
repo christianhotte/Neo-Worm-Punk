@@ -5,6 +5,8 @@ using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.SceneManagement;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
+using ExitGames.Client.Photon;
+using Photon.Voice.Unity;
 
 /* Code was referenced from https://www.youtube.com/watch?v=KHWuTBmT1oI
  * https://www.youtube.com/watch?v=zPZK7C5_BQo&list=PLhsVv9Uw1WzjI8fEBjBQpTyXNZ6Yp1ZLw */
@@ -23,10 +25,24 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     [Tooltip("Name of primary menu scene.")]                                            public string mainMenuScene;
     [Tooltip("Name of primary multiplayer room scene.")]                                public string roomScene;
     [SerializeField, Tooltip("Name of network player prefab in Resources folder.")]     private string networkPlayerName;
-    [SerializeField, Tooltip("Allow use of some of the worse words in our vocabulary")] private bool useFunnyWords;
+    [SerializeField]                                                                    private string readyUpManagerName = "ReadyUpManager";
+
+    [SerializeField] private WordStructure[] wormAdjectives = { new WordStructure("Unfortunate", new int[4]), new WordStructure("Sad", new int[4]), new WordStructure("Despairing", new int[4]), new WordStructure("Grotesque", new int[4]), new WordStructure("Despicable", new int[4]), new WordStructure("Abhorrent", new int[4]), new WordStructure("Regrettable", new int[4]), new WordStructure("Incorrigible", new int[4]), new WordStructure("Greasy", new int[4]), new WordStructure("Platonic", new int[4]), new WordStructure("Sinister", new int[4]), new WordStructure("Hideous", new int[4]), new WordStructure("Glum", new int[4]), new WordStructure("Blasphemous", new int[4]), new WordStructure("Malignant", new int[4]), new WordStructure("Undulating", new int[4]), new WordStructure("Treacherous", new int[4]), new WordStructure("Hostile", new int[4]), new WordStructure("Slimy", new int[4]), new WordStructure("Squirming", new int[4]), new WordStructure("Blubbering", new int[4]), new WordStructure("Twisted", new int[4]), new WordStructure("Manic", new int[4]), new WordStructure("Slippery", new int[4]), new WordStructure("Wet", new int[4]), new WordStructure("Moist", new int[4]), new WordStructure("Lugubrious", new int[4]), new WordStructure("Tubular", new int[4]), new WordStructure("Little", new int[4]), new WordStructure("Erratic", new int[4]), new WordStructure("Pathetic", new int[4]) };
+    [SerializeField] private WordStructure[] wormNouns = { new WordStructure("Invertebrate", new int[4]), new WordStructure("Wormlet", new int[4]), new WordStructure("Creature", new int[4]), new WordStructure("Critter", new int[4]), new WordStructure("Fool", new int[4]), new WordStructure("Goon", new int[4]), new WordStructure("Specimen", new int[4]), new WordStructure("Homonculus", new int[4]), new WordStructure("Grubling", new int[4]), new WordStructure("Snotling", new int[4]), new WordStructure("Wormling", new int[4]), new WordStructure("Nightcrawler", new int[4]), new WordStructure("Stinker", new int[4]), new WordStructure("Rapscallion", new int[4]), new WordStructure("Scalliwag", new int[4]), new WordStructure("Beastling", new int[4]), new WordStructure("Crawler", new int[4]), new WordStructure("Larva", new int[4]), new WordStructure("Dingus", new int[4]), new WordStructure("Freak", new int[4]), new WordStructure("Blighter", new int[4]), new WordStructure("Cretin", new int[4]), new WordStructure("Dink", new int[4]), new WordStructure("Unit", new int[4]), new WordStructure("Denizen", new int[4]), new WordStructure("Parasite", new int[4]), new WordStructure("Organism", new int[4]), new WordStructure("Worm", new int[4]), new WordStructure("Oonge", new int[4]), new WordStructure("Bwarp", new int[4]) };
+    [SerializeField] private WordStructure[] wormAdjectivesGood;
+    [SerializeField] private WordStructure[] wormNounsGood;
+    [SerializeField] private WordStructure[] wormAdjectivesBad = { new WordStructure("Guzzling", new int[4]), new WordStructure("Fleshy", new int[4]), new WordStructure("Sopping", new int[4]), new WordStructure("Throbbing", new int[4]), new WordStructure("Promiscuous", new int[4]), new WordStructure("Flaccid", new int[4]), new WordStructure("Erect", new int[4]), new WordStructure("Gaping", new int[4]) };
+    [SerializeField] private WordStructure[] wormNounsBad = { new WordStructure("Guzzler", new int[4]), new WordStructure("Pervert", new int[4]), new WordStructure("Fucko", new int[4]), new WordStructure("Pissbaby", new int[4]) };
+
+    List<WordStructure> availableWormAdjectives = new List<WordStructure>();
+    List<WordStructure> availableWormNouns = new List<WordStructure>();
+
+    List<WordStructure> totalWormAdjectives = new List<WordStructure>();
+    List<WordStructure> totalWormNouns = new List<WordStructure>();
+
+    private bool useFunnyWords;
 
     private Room mostRecentRoom;
-
 
     //RUNTIME METHODS:
     private void Awake()
@@ -34,11 +50,61 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         //Initialize:
         if (instance == null) { instance = this; } else Destroy(gameObject); //Singleton-ize this script instance
 
+        SetNameOnStart();
+
         //Get objects & components:
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
     void Start()
     {
-        ConnectAndGiveDavidYourIPAddress(); //Immediately start trying to connect to master server
+        // Subscribes event handlers
+        PhotonNetwork.AddCallbackTarget(this);
+
+        if (FindObjectOfType<AutoJoinRoom>() != null)
+            ConnectAndGiveDavidYourIPAddress(); //Immediately start trying to connect to master server
+    }
+
+    private void SetNameOnStart()
+    {
+        useFunnyWords = PlayerPrefs.GetInt("FunnyWords") == 1;
+        SetGlobalWormNameList();        //Generates the total list of potential worm names
+        RefreshWormNames();             //Generates the list of available worm names
+        //Generates a random nickname on start if the player does not have a saved name
+        if (PlayerPrefs.GetInt("WormAdjective", -1) == -1 || PlayerPrefs.GetInt("WormNoun", -1) == -1)
+            GenerateRandomNickname(true);
+        else
+        {
+            SetPlayerNickname(totalWormAdjectives[PlayerPrefs.GetInt("WormAdjective")], totalWormNouns[PlayerPrefs.GetInt("WormNoun")]);
+
+            LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
+
+            //If there is a lobby in the scene, update the player name text
+            if (lobbyUI != null)
+                lobbyUI.UpdateNameText(PlayerPrefs.GetInt("WormAdjective"), PlayerPrefs.GetInt("WormNoun"));
+        }
+    }
+
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+    public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // If we are loaded into the Network Locker scene, and we are the master client
+        if (scene.name == GameSettings.roomScene)
+        {
+            // The master client is only spawning 1 ReadyUpManager.
+            if (ReadyUpManager.instance == null && PhotonNetwork.IsMasterClient)
+            {
+                //PhotonNetwork.Instantiate(readyUpManagerName, Vector3.zero, Quaternion.identity);
+                PhotonNetwork.InstantiateRoomObject(readyUpManagerName, Vector3.zero, Quaternion.identity);
+            }
+        }
+
+        if(scene.name == GameSettings.titleScreenScene)
+        {
+            SetNameOnStart();
+        }
     }
 
     //NETWORK FUNCTIONS:
@@ -51,14 +117,31 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         PhotonNetwork.ConnectUsingSettings();
         Debug.Log("Trying To Connect To Server...");
     }
-    public void OnCreateRoom(string roomName)
+
+    public void DisconnectFromServer()
     {
-        RoomOptions roomOptions = new RoomOptions();
-        Hashtable customRoomSettings = new Hashtable();
+        PhotonNetwork.Disconnect();
+        Debug.Log("Disconnecting From Server...");
+    }
 
-        customRoomSettings.Add("RoundLength", 300);
+    public void OnCreateRoom(string roomName, RoomOptions roomOptions = null, Hashtable customRoomSettings = null)
+    {
+        if(roomOptions == null)
+        {
+            roomOptions = new RoomOptions();
+            roomOptions.IsVisible = true; // The player is able to see the room
+        }
 
-        roomOptions.IsVisible = true; // The player is able to see the room
+        if (customRoomSettings == null)
+        {
+            customRoomSettings = new Hashtable();
+            customRoomSettings.Add("RoundLength", GameSettings.testMatchLength);
+            customRoomSettings.Add("PlayerHP", GameSettings.HPDefault);
+        }
+        customRoomSettings.Add("TubeOccupants", new bool[6] { false, false, false, false, false, false});
+
+        Debug.Log("Tube Occupants On Create Room: " + customRoomSettings["TubeOccupants"]);
+
         roomOptions.IsOpen = true; // The room is open.
         roomOptions.EmptyRoomTtl = 0; // Leave the room open for 0 milliseconds after the room is empty
         roomOptions.MaxPlayers = 6;
@@ -74,6 +157,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
         if (PhotonNetwork.InRoom) Debug.Log("Successfully Connected To " + roomName);
     }
+
     public void LeaveRoom()
     {
         LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
@@ -81,7 +165,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         if (lobbyUI != null)
         {
             lobbyUI.UpdateRoomList();
-            lobbyUI.ShowLaunchButton(false);
+            lobbyUI.ShowMenuState(LobbyMenuState.NICKNAME, true);
         }
 
         PhotonNetwork.LeaveRoom();
@@ -94,10 +178,14 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         base.OnConnectedToMaster();
 
         // Setting up the lobby
-        if (joinRoomOnLoad && !PhotonNetwork.InRoom)
+        LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
+        //Update room information
+        if (lobbyUI != null)
         {
-            JoinLobby();
+            lobbyUI.UpdateLoadingScreenMessage("Joining The Lobby...");
         }
+
+        JoinLobby();
     }
 
     public void JoinLobby()
@@ -119,43 +207,116 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         //If there is a lobby in the scene, show the title screen
         if (lobbyUI != null)
         {
-            lobbyUI.OpenMenu("title");
+            lobbyUI.SwitchMenu(LobbyMenuState.ONLINE);
         }
 
         Debug.Log("Joined a lobby.");
         base.OnJoinedLobby();
 
-        GenerateRandomNickname();
-
         // Setting up the room options
         if (joinRoomOnLoad && !PhotonNetwork.InRoom)
         {
-            OnCreateRoom("Dev. Test Room");
+            if(FindObjectOfType<AutoJoinRoom>() != null)
+                OnCreateRoom(FindObjectOfType<AutoJoinRoom>().GetRoomName());
+            else
+                OnCreateRoom("Dev. Test Room");
         }
     }
 
-    //List of random adjectives and nouns to name random players
-    private readonly string[] wormAdjectives = { "Unfortunate", "Sad", "Despairing", "Grotesque", "Despicable", "Abhorrent", "Regrettable", "Incorrigible", "Greasy", "Platonic", "Sinister", "Hideous", "Glum", "Blasphemous", "Malignant", "Undulating", "Treacherous", "Hostile", "Slimy", "Squirming", "Blubbering", "Twisted", "Manic", "Slippery", "Wet", "Moist", "Lugubrious", "Tubular", "Little", "Erratic", "Pathetic" };
-    private readonly string[] wormNouns = { "Invertebrate", "Creature", "Critter", "Fool", "Goon", "Specimen", "Homonculus", "Grubling", "Wormling", "Nightcrawler", "Stinker", "Rapscallion", "Scalliwag", "Beastling", "Crawler", "Larva", "Dingus", "Freak", "Blighter", "Cretin", "Dink", "Unit", "Denizen", "Creepy-Crawlie", "Parasite", "Organism" };
-    private readonly string[] wormAdjectivesBad = { "Guzzling", "Fleshy", "Sopping", "Throbbing", "Promiscuous", "Flaccid", "Erect" };
-    private readonly string[] wormNounsBad = { "Guzzler", "Pervert", "Fucko" };
+    /// <summary>
+    /// Refreshes the list of potential worm adjectives and nouns.
+    /// </summary>
+    public void RefreshWormNames()
+    {
+        availableWormAdjectives = new List<WordStructure>();
+        availableWormNouns = new List<WordStructure>();
+
+        availableWormAdjectives.AddRange(wormAdjectives);
+        availableWormNouns.AddRange(wormNouns);
+
+        if (useFunnyWords)
+        {
+            availableWormAdjectives.AddRange(wormAdjectivesBad);
+            availableWormNouns.AddRange(wormNounsBad);
+        }
+    }
+
+    private void SetGlobalWormNameList()
+    {
+        totalWormAdjectives = new List<WordStructure>();
+        totalWormNouns = new List<WordStructure>();
+
+        totalWormAdjectives.AddRange(wormAdjectives);
+        totalWormNouns.AddRange(wormNouns);
+        totalWormAdjectives.AddRange(wormAdjectivesBad);
+        totalWormNouns.AddRange(wormNounsBad);
+    }
 
     /// <summary>
     /// Generates a random nickname for the player.
     /// </summary>
-    private void GenerateRandomNickname()
+    /// <param name="setNickname">If true, this sets the name for the player.</param>
+    public void GenerateRandomNickname(bool setNickname = false)
+    {
+        Debug.Log("Generating Random Nickname...");
+
+        RefreshWormNames();
+        int adjectiveIndex = GenerateRandomAdjective();
+        int nounIndex = GenerateRandomNoun();
+        WordStructure currentAdjective = availableWormAdjectives[adjectiveIndex];
+        WordStructure currentNoun = availableWormNouns[nounIndex];
+
+        LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
+
+        //If there is a lobby in the scene, update the player name text
+        if (lobbyUI != null)
+            lobbyUI.UpdateNameText(adjectiveIndex, nounIndex);
+
+        //If set nickname is true, set the player nickname in the settings
+        if (setNickname)
+        {
+            PlayerPrefs.SetInt("WormAdjective", adjectiveIndex);
+            PlayerPrefs.SetInt("WormNoun", nounIndex);
+            SetPlayerNickname(currentAdjective, currentNoun);
+        }
+    }
+
+    /// <summary>
+    /// Generates a random adjective for the player nickname.
+    /// </summary>
+    /// <returns>A random adjective index.</returns>
+    private int GenerateRandomAdjective()
     {
         Random.InitState(System.DateTime.Now.Millisecond);  //Seeds the randomizer
-        List<string> realWormAdjectives = new List<string>(wormAdjectives);
-        List<string> realWormNouns = new List<string>(wormNouns);
-        if (useFunnyWords)
-        {
-            realWormAdjectives.AddRange(wormAdjectivesBad);
-            realWormNouns.AddRange(wormNounsBad);
-        }
+        return Random.Range(0, availableWormAdjectives.Count);
+    }
 
-        string currentWormName = realWormAdjectives[Random.Range(0, realWormAdjectives.Count)] + " " + realWormNouns[Random.Range(0, realWormNouns.Count)];
-        SetPlayerNickname(currentWormName + " #" + Random.Range(0, 1000).ToString("0000"));
+    /// <summary>
+    /// Generates a random noun for the player nickname.
+    /// </summary>
+    /// <returns>A random noun index.</returns>
+    private int GenerateRandomNoun()
+    {
+        Random.InitState(System.DateTime.Now.Millisecond);  //Seeds the randomizer
+        return Random.Range(0, availableWormNouns.Count);
+    }
+
+    public void UpdateFunnyWords(bool funnyWords)
+    {
+        useFunnyWords = funnyWords;
+        PlayerPrefs.SetInt("FunnyWords", useFunnyWords? 1: 0);
+        RefreshWormNames();
+    }
+
+    /// <summary>
+    /// Adds death information to the jumbotron.
+    /// </summary>
+    /// <param name="killerName">The killer's user name.</param>
+    /// <param name="victimName">The victim's user name.</param>
+    public void AddDeathToJumbotron(string killerName, string victimName)
+    {
+        foreach(var jumbotron in FindObjectsOfType<Jumbotron>())
+            jumbotron.AddToDeathInfoBoard(killerName, victimName);
     }
 
     public override void OnCreatedRoom()
@@ -165,7 +326,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         //If there is a lobby in the scene, display room information
         if (lobbyUI != null)
         {
-            lobbyUI.OpenMenu("room");
+            lobbyUI.SwitchMenu(LobbyMenuState.ROOM);
         }
     }
     public override void OnCreateRoomFailed(short returnCode, string message)
@@ -181,24 +342,32 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         if (lobbyUI != null)
         {
             lobbyUI.UpdateErrorMessage(errorMessage);
-            lobbyUI.OpenMenu("error");
+            lobbyUI.SwitchMenu(LobbyMenuState.ERROR);
         }
     }
     public override void OnJoinedRoom()
     {
+        //Automatically load the player into the locker room if the auto join script calls for it
+        AutoJoinRoom autoJoin = FindObjectOfType<AutoJoinRoom>();
+        if (autoJoin != null && autoJoin.GoToLockerRoom())
+            autoJoin.AutoLoadScene(GameSettings.roomScene);
+
         //Update lobby UI:
         LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
         if (lobbyUI != null) //If there is a lobby in the scene, display room information
         {
             lobbyUI.UpdateRoomList();
-            lobbyUI.OpenMenu("room");
-            lobbyUI.ShowLaunchButton(true);
+            lobbyUI.SwitchMenu(LobbyMenuState.ROOM);
+            lobbyUI.ShowMenuState(LobbyMenuState.NICKNAME, false);
         }
 
         //Cleanup:
         Debug.Log("Joined " + PhotonNetwork.CurrentRoom.Name + " room."); //Indicate that room has been joined
         SpawnNetworkPlayer();                                             //Always spawn a network player instance when joining a room
+        localNetworkPlayer.SetNetworkPlayerProperties("IsReady", false);;
+        AdjustVoiceVolume();
     }
+
     public override void OnJoinRoomFailed(short returnCode, string message)
     {
         Debug.LogError("Join Room Failed. Reason: " + message);
@@ -209,13 +378,13 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         if (lobbyUI != null)
         {
             lobbyUI.UpdateErrorMessage("Join Room Failed. Reason: " + message);
-            lobbyUI.OpenMenu("error");
+            lobbyUI.SwitchMenu(LobbyMenuState.ERROR);
         }
     }
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
         base.OnPlayerEnteredRoom(newPlayer);
-        Debug.Log("A new player has joined the room.");
+        Debug.Log(newPlayer.NickName + " has joined.");
 
         LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
 
@@ -224,20 +393,53 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         {
             lobbyUI.UpdateRoomList();
         }
+
+        AdjustVoiceVolume();
     }
+
+    public override void OnPlayerLeftRoom(Player otherPlayer)
+    {
+        base.OnPlayerLeftRoom(otherPlayer);
+        Debug.Log(otherPlayer.NickName + " has left or disconnected.");
+
+        // Raises an event on player left room.
+        PhotonNetwork.RaiseEvent(1, otherPlayer.ActorNumber, RaiseEventOptions.Default, SendOptions.SendReliable);
+        localNetworkPlayer.SyncColors();
+
+        SetTubeOccupantStatus((int)otherPlayer.CustomProperties["TubeID"], false);
+    }
+
+    // This method is called when a custom event is received
+    public void OnEvent(byte eventCode, object content, int senderId)
+    {
+        if (eventCode == 1)
+        {
+            int actorNumber = (int)content;
+            // Do something with the actorNumber of the player who left
+
+            // Updates the ReadyUpManager
+            if (ReadyUpManager.instance != null)
+            {
+                ReadyUpManager.instance.UpdateStatus(ReadyUpManager.instance.localPlayerTube.GetTubeNumber());
+            }
+        }
+    }
+
     public override void OnLeftRoom()
     {
         //Update lobby script:
         LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
         if (lobbyUI != null)
         {
-            lobbyUI.OpenMenu("title");
+            lobbyUI.SwitchMenu(LobbyMenuState.ONLINE);
         }
 
         //Cleanup:
-        localNetworkPlayer.LeftRoom();
         DeSpawnNetworkPlayer(); //De-spawn local network player whenever player leaves a room
+        if (SceneManager.GetActiveScene().name != GameSettings.titleScreenScene)
+            PhotonNetwork.LoadLevel(GameSettings.titleScreenScene);
     }
+
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
         //base.OnRoomListUpdate(roomList);
@@ -252,31 +454,109 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             lobbyUI.UpdateLobbyList(roomList);
         }
     }
+
     public override void OnDisconnected(DisconnectCause cause)
     {
         Debug.Log("Disconnected from server for reason " + cause.ToString());
+
+        LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
+
+        //If there is a lobby in the scene, go back to the starting menu
+        if (lobbyUI != null)
+        {
+            lobbyUI.SwitchMenu(LobbyMenuState.START);
+        }
+    }
+
+    // When the master client leaves the room, we transfer object ownership to new master client.
+    public override void OnMasterClientSwitched(Player newMasterClient)
+    {
+        Debug.Log("New Master Client: " + newMasterClient.NickName);
+
+        // Transfer ownership of all objects owned by the old master client to the new master client
+        PhotonView[] views = PhotonView.FindObjectsOfType<PhotonView>();
+        // photonView components have to be instantiated on the Photon network for ownership to transfer.
+        foreach (PhotonView view in views)
+        {
+            if (view.Owner == PhotonNetwork.MasterClient)
+            {
+                view.TransferOwnership(newMasterClient);
+
+                // Updates the ReadyUpManager
+                if (ReadyUpManager.instance != null)
+                {
+                    ReadyUpManager.instance.HideTubeHostSettings();
+                    ReadyUpManager.instance.UpdateStatus(ReadyUpManager.instance.localPlayerTube.GetTubeNumber());
+                    ReadyUpManager.instance.localPlayerTube.ShowHostSettings(true);
+                }
+            }
+        }
     }
 
     //FUNCTIONALITY METHODS:
+    public void UpdateRoomSettings(string key, object value)
+    {
+        Hashtable currentRoomSettings = PhotonNetwork.CurrentRoom.CustomProperties;
+        currentRoomSettings[key] = value;
+        PhotonNetwork.CurrentRoom.SetCustomProperties(currentRoomSettings);
+    }
+
     public void SpawnNetworkPlayer()
     {
         if (localNetworkPlayer != null) { Debug.LogError("Tried to spawn a second NetworkPlayer for local client."); return; }              //Abort if player already has a network player
         localNetworkPlayer = PhotonNetwork.Instantiate(networkPlayerName, Vector3.zero, Quaternion.identity).GetComponent<NetworkPlayer>(); //Spawn instance of network player and get reference to its script
 
         Debug.Log("Actor Number For " + GetLocalPlayerName() + ": " + PhotonNetwork.LocalPlayer.ActorNumber);
+        OccupyNextAvailableTube();
     }
+
     public void DeSpawnNetworkPlayer()
     {
         if (localNetworkPlayer != null) PhotonNetwork.Destroy(localNetworkPlayer.gameObject); //Destroy local network player if possible
         localNetworkPlayer = null;                                                            //Remove reference to destroyed reference player
     }
-    public void SetPlayerNickname(string name)
+
+    public void SetPlayerNickname(WordStructure adjective, WordStructure noun, bool playWormSound = false)
     {
-        PhotonNetwork.NickName = name;
-        PlayerSettingsController.Instance.charData.playerName = PhotonNetwork.NickName;
+        string currentName = adjective.word + " " + noun.word;
+        bool duplicateNameExists = true;
+        int counter = 2;
+
+        while (duplicateNameExists)
+        {
+            if (GetPlayerNameList().Contains(currentName))
+            {
+                currentName = name + " " + counter.ToString();
+                counter++;
+            }
+
+            else
+            {
+                duplicateNameExists = false;
+            }
+        }
+
+        PhotonNetwork.NickName = currentName;
+        PlayerSettingsController.Instance.charData.playerAdjective = adjective;
+        PlayerSettingsController.Instance.charData.playerNoun = noun;
+
+        if (playWormSound)
+        {
+            //Plays the sound of the worm's nickname when setting it
+        }
     }
 
     //UTILITY METHODS:
+
+    /// <summary>
+    /// Adjusts the volumes of all speaking players.
+    /// </summary>
+    public void AdjustVoiceVolume()
+    {
+        foreach (var speaker in FindObjectsOfType<Speaker>())
+            speaker.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat("VoiceChatVolume", GameSettings.defaultVoiceSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound);
+    }
+
     public List<string> GetPlayerNameList()
     {
         List<string> playerNameList = new List<string>();
@@ -289,28 +569,77 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         return playerNameList;
     }
 
-    public void LoadSceneWithFade(string sceneName)
+    public void LoadSceneWithFade(string sceneName, bool asyncLoad = true)
     {
-        StartCoroutine(FadeLevelRoutine(sceneName));
+        StartCoroutine(FadeLevelRoutine(sceneName, asyncLoad));
     }
 
-    private IEnumerator FadeLevelRoutine(string sceneName)
+    private IEnumerator FadeLevelRoutine(string sceneName, bool asyncLoad)
     {
+        GameManager.Instance.levelTransitionActive = true;
+
         FadeScreen playerScreenFader = PlayerController.instance.GetComponentInChildren<FadeScreen>();
         playerScreenFader.FadeOut();
 
         yield return new WaitForSeconds(playerScreenFader.GetFadeDuration());
         yield return null;
 
-        if (PhotonNetwork.IsMasterClient)
-        {
-            PhotonNetwork.LoadLevel(sceneName);
-        }
+        PhotonNetwork.LoadLevel(sceneName);
+
+        // Unready
+        localNetworkPlayer.SetNetworkPlayerProperties("IsReady", false);
+
+        GameManager.Instance.levelTransitionActive = false;
     }
+
+    public List<WordStructure> GetTotalWormAdjectives() => totalWormAdjectives;
+    public List<WordStructure> GetTotalWormNouns() => totalWormNouns;
+    public List<WordStructure> GetAvailableWormAdjectives() => availableWormAdjectives;
+    public List<WordStructure> GetAvailableWormNouns() => availableWormNouns;
+    public bool IsUsingFunnyWords() => useFunnyWords;
 
     public Room GetMostRecentRoom() => mostRecentRoom;
     public string GetCurrentRoom() => PhotonNetwork.CurrentRoom.Name;
     public Player[] GetPlayerList() => PhotonNetwork.PlayerList;
     public string GetLocalPlayerName() => PhotonNetwork.LocalPlayer.NickName;
     public bool IsLocalPlayerInRoom() => PhotonNetwork.InRoom;
+
+    public bool[] GetTubeOccupancy()
+    {
+        if (PhotonNetwork.InRoom)
+            return (bool[])(PhotonNetwork.CurrentRoom.CustomProperties["TubeOccupants"]);
+        return null;
+    }
+
+    public void DebugDisplayRoomOccupancy()
+    {
+        if (GameSettings.debugMode)
+        {
+            for (int i = 0; i < GetTubeOccupancy().Length; i++)
+                Debug.Log("Tube " + (i + 1) + ": " + (GetTubeOccupancy()[i] ? "Occupied" : "Vacant").ToString());
+        }
+    }
+
+    public void SetTubeOccupantStatus(int tubeID, bool isOccupied)
+    {
+        bool[] tubeList = GetTubeOccupancy();
+        tubeList[tubeID] = isOccupied;
+        UpdateRoomSettings("TubeOccupants", tubeList);
+    }
+
+    public void OccupyNextAvailableTube()
+    {
+        DebugDisplayRoomOccupancy();
+
+        for (int i = 0; i < GetTubeOccupancy().Length; i++)
+        {
+            if (!GetTubeOccupancy()[i])
+            {
+                Debug.Log("Assigning " + GetLocalPlayerName() + " to Tube #" + (i + 1).ToString());
+                localNetworkPlayer.SetNetworkPlayerProperties("TubeID", i);
+                SetTubeOccupantStatus(i, true);
+                break;
+            }
+        }
+    }
 }

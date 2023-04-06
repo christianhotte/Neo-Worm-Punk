@@ -5,37 +5,69 @@ using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.SceneManagement;
 using TMPro;
+using UnityEngine.Events;
 
 public class ReadyUpManager : MonoBehaviourPunCallbacks
 {
     // Can probably have a button that lights up green or red to show if a player is ready through the network.
     //[SerializeField] private GameObject readyButton;
+    public static ReadyUpManager instance;
 
     [SerializeField] private TextMeshProUGUI playerReadyText;
-
-    [SerializeField] private LockerTubeController[] lockerTubes;
+    public bool debugReadyUpAll;
 
     private const int MINIMUM_PLAYERS_NEEDED = 2;   // The minimum number of players needed for a round to start
-    [SerializeField] private string sceneToLoad = "DM_0.11_Arena";
 
-    private int playersReady, playersInRoom;
-    
-    // Is called upon the first frame.
-    private void Start()
+    private int playersReady;
+    internal LockerTubeController localPlayerTube;
+
+    private void Awake()
     {
-        UpdateReadyText();
+        instance = this;
+        DontDestroyOnLoad(gameObject);
+        SceneManager.sceneLoaded += OnSceneLoad;
+    }
+
+    //Called when a scene is loaded
+    private void OnSceneLoad(Scene scene, LoadSceneMode loadSceneMode)
+    {
+/*        //If the locker room was loaded, update the locker text and the player colors
+        if(scene.name == GameSettings.roomScene)
+        {
+            playersInRoom = NetworkManagerScript.instance.GetMostRecentRoom().PlayerCount;
+            UpdateReadyText();
+        }*/
+    }
+
+    private void Update()
+    {
+        if (debugReadyUpAll)
+        {
+            debugReadyUpAll = false;
+            if (!GameManager.Instance.levelTransitionActive)
+            {
+                //Reset all players
+                foreach (var player in NetworkPlayer.instances)
+                    player.networkPlayerStats = new PlayerStats();
+
+                NetworkManagerScript.instance.LoadSceneWithFade(GameSettings.arenaScene);
+            }
+        }
+    }
+
+    public void LeverStateChanged()
+    {
+        LeverController localLever = localPlayerTube.GetComponentInChildren<LeverController>();
+        NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().isReady = (localLever.GetLeverState() == LeverController.HingeJointState.Max);
+        NetworkManagerScript.localNetworkPlayer.SetNetworkPlayerProperties("IsReady", NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().isReady);
+        NetworkManagerScript.localNetworkPlayer.SyncStats();
+        UpdateStatus(localPlayerTube.GetTubeNumber());
     }
 
     // Once the room is joined.
     public override void OnJoinedRoom()
     {
         UpdateReadyText();
-
-        // If the amount of players in the room is maxed out, close the room so no more people are able to join.
-/*        if (PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
-        {
-            PhotonNetwork.CurrentRoom.IsOpen = false;
-        }*/
     }
 
     // When a player leaves the room
@@ -45,23 +77,10 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
         {
             if (NetworkManagerScript.instance.GetMostRecentRoom().PlayerCount > 0)
             {
-                playersInRoom = NetworkManagerScript.instance.GetMostRecentRoom().PlayerCount;
                 UpdateReadyText();
             }
         }
-
-        // The room becomes open to let more people come in.
-/*        if (PhotonNetwork.CurrentRoom.PlayerCount < PhotonNetwork.CurrentRoom.MaxPlayers)
-        {
-            if (PhotonNetwork.InRoom) PhotonNetwork.CurrentRoom.IsOpen = true;
-        }*/
-    }
-
-    // Once the level is pulled to signify that the player is ready...
-    public void ReadyLeverPulled(LeverController currentLever)
-    {
-        NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().isReady = currentLever.GetLeverValue() == 1;
-        NetworkManagerScript.localNetworkPlayer.SyncStats();
+        UpdateReadyText();
     }
 
     public void UpdateStatus(int tubeID)
@@ -74,39 +93,83 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     [PunRPC]
     public void RPC_UpdateReadyStatus(int tubeID, bool updatedPlayerReady)
     {
-        lockerTubes[tubeID].UpdateLights(updatedPlayerReady);
-
-        // Get the number of players that have readied up
-        playersReady = GetAllPlayersReady();
-        playersInRoom = PhotonNetwork.CurrentRoom.PlayerCount;
-
-        UpdateReadyText();
-
-        // If all players are ready, load the game scene
-        if (playersReady == playersInRoom && (playersInRoom >= MINIMUM_PLAYERS_NEEDED || GameSettings.debugMode))
+        if(FindObjectOfType<LockerTubeSpawner>() != null)
         {
-            //Reset all players
-            foreach (var player in NetworkPlayer.instances)
-                player.networkPlayerStats = new PlayerStats();
+            Debug.Log("Tube ID is: " + tubeID);
+            LockerTubeController tube = FindObjectOfType<LockerTubeSpawner>().GetTubeByIndex(tubeID);
+            if (tube != null) tube.UpdateLights(updatedPlayerReady);
 
-            NetworkManagerScript.instance.LoadSceneWithFade(sceneToLoad);
+            // Get the number of players that have readied up
+            int playersInRoom = PhotonNetwork.CurrentRoom.PlayerCount;
+
+            UpdateReadyText();
+
+            bool forceLoadViaMasterClient = false;
+
+            foreach (var player in NetworkPlayer.instances)
+            {
+                print("Player " + player.photonView.ViewID + " ready status: " + (player.networkPlayerStats.isReady ? "READY" : "NOT READY"));
+
+                //If in debug mode, force the game to load when the master client readies up
+                if(player.photonView.Owner.IsMasterClient && player.networkPlayerStats.isReady && GameSettings.debugMode)
+                    forceLoadViaMasterClient = true;
+            }
+
+            // If all players are ready, load the game scene
+            if (forceLoadViaMasterClient || !GameManager.Instance.levelTransitionActive && (playersReady == playersInRoom && (playersInRoom >= MINIMUM_PLAYERS_NEEDED || GameSettings.debugMode)))
+            {
+                //Reset all players
+                foreach (var player in NetworkPlayer.instances)
+                    player.networkPlayerStats = new PlayerStats();
+
+                NetworkManagerScript.instance.LoadSceneWithFade(GameSettings.arenaScene);
+            }
         }
     }
 
     /// <summary>
     /// Updates the text in the center of the room.
     /// </summary>
-    private void UpdateReadyText()
+    public void UpdateReadyText()
     {
-        string message = "Players Ready: " + playersReady.ToString() + "/" + playersInRoom;
-
-        if (playersInRoom < MINIMUM_PLAYERS_NEEDED && !GameSettings.debugMode)
+        if (PhotonNetwork.IsConnectedAndReady)
         {
-            message += "\n<size=500>Not Enough Players To Start.</size>";
-        }
+            playersReady = GetAllPlayersReady();
+            if (playerReadyText == null)
+            {
+                foreach (TextMeshProUGUI tmp in FindObjectsOfType<TextMeshProUGUI>())
+                {
+                    if (tmp.gameObject.name == "PlayerReadyText") { playerReadyText = tmp; break; }
+                }
 
-        Debug.Log(message);
-        playerReadyText.text = message; // Display the message in the scene
+                if (playerReadyText == null) return;
+            }
+
+            string message = "Players Ready: " + playersReady.ToString() + "/" + PhotonNetwork.CurrentRoom.PlayerCount;
+
+            if (PhotonNetwork.CurrentRoom.PlayerCount < MINIMUM_PLAYERS_NEEDED && !GameSettings.debugMode)
+            {
+                message += "\n<size=25>Not Enough Players To Start.</size>";
+            }
+
+            Debug.Log(message);
+            playerReadyText.text = message; // Display the message in the scene
+        }
+        else
+            playerReadyText.text = "Not Connected To The Network";
+    }
+
+    /// <summary>
+    /// Hides the host settings in all of the tubes.
+    /// </summary>
+    public void HideTubeHostSettings()
+    {
+        if(SceneManager.GetActiveScene().name == GameSettings.roomScene)
+        {
+            //Hide the host settings for all tubes
+            foreach (var tube in FindObjectOfType<LockerTubeSpawner>().GetTubeList())
+                tube.ShowHostSettings(false);
+        }
     }
 
     /// <summary>
@@ -116,10 +179,9 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     {
         int playersReady = 0;
 
-        // Gets the amount of players that have a readied lever at lowest state.
-        foreach(var players in FindObjectsOfType<NetworkPlayer>())
+        foreach(var player in NetworkManagerScript.instance.GetPlayerList())
         {
-            if (players.GetNetworkPlayerStats().isReady)
+            if ((bool)player.CustomProperties["IsReady"])
                 playersReady++;
         }
 

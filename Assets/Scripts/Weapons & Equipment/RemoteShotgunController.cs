@@ -37,11 +37,14 @@ public class RemoteShotgunController : MonoBehaviourPunCallbacks
         if (networkPlayer.photonView.IsMine) //Weapon is on master version of networkPlayer
         {
             //Get matching shotgun controller:
-            foreach (PlayerEquipment equipment in PlayerController.instance.attachedEquipment) //Iterate through list of equipment attached to player
+            if (PlayerController.instance != null)
             {
-                if (equipment.handedness == handedness && equipment.TryGetComponent(out clientGun)) break; //Break once matching shotgun has been found
+                foreach (PlayerEquipment equipment in PlayerController.instance.attachedEquipment) //Iterate through list of equipment attached to player
+                {
+                    if (equipment.handedness == handedness && equipment.TryGetComponent(out clientGun)) break; //Break once matching shotgun has been found
+                }
             }
-            if (clientGun == null) { Debug.LogError("RemoteShotgunController could not find matching client weapon on player!"); Destroy(gameObject); } //Post warning if client weapon could not be found
+            if (clientGun == null) { Debug.LogWarning("RemoteShotgunController could not find matching client weapon on player!"); Destroy(gameObject); } //Post warning if client weapon could not be found
 
             //Initialize:
         }

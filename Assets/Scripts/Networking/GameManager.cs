@@ -9,6 +9,9 @@ using System.Linq;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
+    public List<Transform> spawnPoints = new List<Transform>();
+    //public List<SpawnPointManager> spawnPointsManager = new List<SpawnPointManager>();
+    public List<LockerTubeController> tubes = new List<LockerTubeController>();
 
     internal bool levelTransitionActive = false;
     internal string prevSceneName;
@@ -16,28 +19,45 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+        SceneManager.sceneLoaded += OnSceneLoaded;
         SceneManager.sceneUnloaded += OnSceneUnloaded;
     }
     private void OnDestroy()
     {
+        Instance = null;
+        SceneManager.sceneLoaded -= OnSceneLoaded;
         SceneManager.sceneUnloaded -= OnSceneUnloaded;
     }
 
     /// <summary>
     /// Loads the new scene when starting the game.
     /// </summary>
-    /// <param name="sceneIndex"></param>
-    public void LoadGame(SceneIndexes sceneIndex)
+    /// <param name="sceneName">The name of the scene.</param>
+    public void LoadGame(string sceneName)
     {
-        Debug.Log("Loading Scene - " + sceneIndex.ToString());
-        //SceneManager.LoadScene((int)sceneIndex);
-        PhotonNetwork.LoadLevel((int)sceneIndex);
+        Debug.Log("Loading Scene - " + sceneName);
+
+        PhotonNetwork.LoadLevel(sceneName);
         levelTransitionActive = false;
     }
 
     public void OnSceneUnloaded(Scene scene)
     {
         prevSceneName = scene.name;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == "NetworkLockerRoom")
+        {
+            // find all spawn points in the scene
+            GameObject[] spawnPointObjects = GameObject.FindGameObjectsWithTag("SpawnPoint");
+            foreach (GameObject spawnPointObject in spawnPointObjects)
+            {
+                // add the transform of each spawn point to the list
+                spawnPoints.Add(spawnPointObject.transform);
+            }
+        }
     }
 
     /// <summary>
@@ -48,6 +68,8 @@ public class GameManager : MonoBehaviour
     {
         switch (SceneManager.GetActiveScene().name)
         {
+            case "Init":
+                return true;
             case "MainMenu":
                 return true;
             case "NetworkLockerRoom":

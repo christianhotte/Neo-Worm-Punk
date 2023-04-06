@@ -1,25 +1,29 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class LockerTubeController : MonoBehaviour
 {
-    public static List<LockerTubeController> tubes = new List<LockerTubeController>();
+    private LockerTubeSpawner spawnManager;
 
     [SerializeField, Tooltip("The parent that holds all of the ready lights.")] private Transform readyLights;
-    internal int tubeNumber;
-    internal bool occupied = false;
+    [SerializeField, Tooltip("The spawn point for the player's name.")] private Transform playerNameSpawnPoint;
+    [SerializeField, Tooltip("The prefab that displays the player's name.")] private GameObject playerNamePrefab;
+    [SerializeField, Tooltip("The GameObject for the host settings.")] private GameObject hostSettings;
+
+    //internal int tubeNumber;
+    //public bool occupied = false;
+    /// <summary>
+    /// ID of player which is currently in this tube.
+    /// </summary>
+    internal int currentPlayerID;
     internal Transform spawnPoint;
 
     private void Awake()
     {
-        tubeNumber = int.Parse(name.Replace("TestTube", ""));
-        tubes.Add(this);
+        spawnManager = FindObjectOfType<LockerTubeSpawner>();
         spawnPoint = transform.Find("Spawnpoint");
-    }
-    private void OnDestroy()
-    {
-        tubes.Remove(this);
     }
 
     /// <summary>
@@ -31,13 +35,41 @@ public class LockerTubeController : MonoBehaviour
         foreach (var light in readyLights.GetComponentsInChildren<ReadyLightController>())
             light.ActivateLight(isActivated);
     }
-    public static LockerTubeController GetTubeByNumber(int number)
+
+    /// <summary>
+    /// Spawns the player name in the tube.
+    /// </summary>
+    /// <param name="playerName">The name of the player.</param>
+    public void SpawnPlayerName(string playerName)
     {
-        foreach (LockerTubeController tube in tubes)
+        //If there is not a name in the tube, add a name
+        if(playerNameSpawnPoint.childCount == 0)
         {
-            if (tube.tubeNumber == number) return tube;
+            GameObject playerNameObject = Instantiate(playerNamePrefab, playerNameSpawnPoint);
+            playerNameObject.transform.localPosition = Vector3.zero;
+
+            playerNameObject.GetComponentInChildren<TextMeshProUGUI>().text = playerName;
         }
-        Debug.LogError("Failed to get tube number " + number);
-        return null;
+    }
+
+    /// <summary>
+    /// Shows the host settings in the tube.
+    /// </summary>
+    /// <param name="showSettings">If true, the host settings are shown. If false, they are hidden.</param>
+    public void ShowHostSettings(bool showSettings)
+    {
+        hostSettings.SetActive(showSettings);
+    }
+
+    public int GetTubeNumber()
+    {
+        for(int i = 0; i < spawnManager.GetTubeList().Length; i++)
+        {
+            if (spawnManager.GetTubeList()[i] == this)
+                return i + 1;
+        }
+
+        Debug.LogError("Failed to get " + name + " | Tube count = " + spawnManager.GetTubeList().Length);
+        return -1;
     }
 }

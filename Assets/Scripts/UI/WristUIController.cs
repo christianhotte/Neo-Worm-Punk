@@ -71,7 +71,7 @@ public class WristUIController : MonoBehaviour
     private void UpdateLeaveRoomButton()
     {
         //If the player is in a room, not in the main menu, and the leave button is not showing, activate the leave room button.
-        if (PhotonNetwork.InRoom && SceneManager.GetActiveScene().name != "JustinMenuScene")
+        if (PhotonNetwork.InRoom && SceneManager.GetActiveScene().name != GameSettings.titleScreenScene)
         {
             if (!leaveRoomButton.activeInHierarchy)
                 leaveRoomButton.SetActive(true);
@@ -88,8 +88,7 @@ public class WristUIController : MonoBehaviour
     {
         PhotonNetwork.LeaveRoom();  //Leave the room
         PhotonNetwork.LeaveLobby(); //Leave the lobby
-
-        SceneManager.LoadScene((int)SceneIndexes.TITLESCREEN);    //Go back to the main menu
+        PhotonNetwork.Disconnect(); //Disconnects from the server
     }
 
     /// <summary>

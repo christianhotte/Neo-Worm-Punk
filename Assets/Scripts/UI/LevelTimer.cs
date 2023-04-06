@@ -7,14 +7,14 @@ using Photon.Pun;
 
 public class LevelTimer : MonoBehaviour
 {
+    public static bool timerEnded; //If true, the timer has ended. If false, the timer has not ended
     private int levelTime;  //The desired timer for the level
     private float currentTime;  //The current time left
 
     private TextMeshProUGUI timerText;  //The timer text component
 
-    private bool timerActivated;  //If true, the timer has been activated. If false, the timer has not been activated
-    private bool timerActive;   //If true, the timer is active. If false, the timer is not active
-    private bool timerEnded;    //If true, the timer has ended. If false, the timer has not ended
+    private bool timerActivated; //If true, the timer has been activated. If false, the timer has not been activated
+    private bool timerActive;    //If true, the timer is active. If false, the timer is not active
 
     public UnityEvent OnTimerEnd;  //The event to call when the timer ends
 
@@ -32,6 +32,10 @@ public class LevelTimer : MonoBehaviour
     {
         OnTimerEnd.AddListener(BackToLockerRoom);
     }
+    private void OnDestroy()
+    {
+        timerEnded = false;
+    }
 
     /// <summary>
     /// Gets the room's round length and applies it to the timer.
@@ -40,7 +44,7 @@ public class LevelTimer : MonoBehaviour
     {
         if (PhotonNetwork.CurrentRoom != null && !timerActivated)
         {
-            Debug.Log("Round Length: " + (int)PhotonNetwork.CurrentRoom.CustomProperties["RoundLength"]);
+           // Debug.Log("Round Length: " + (int)PhotonNetwork.CurrentRoom.CustomProperties["RoundLength"]);
             if ((int)PhotonNetwork.CurrentRoom.CustomProperties["RoundLength"] < 0)
             {
                 timerActive = false;
@@ -49,7 +53,7 @@ public class LevelTimer : MonoBehaviour
             }
             else
             {
-                Debug.Log("Timer Started!");
+              //  Debug.Log("Timer Started!");
                 SetLevelTime((int)PhotonNetwork.CurrentRoom.CustomProperties["RoundLength"]);
                 currentTime = levelTime;
                 timerActive = true;
@@ -74,13 +78,14 @@ public class LevelTimer : MonoBehaviour
                 currentTime -= Time.deltaTime;
                 DisplayTime();
             }
+
             //If there is no time, end the timer and call the subscribed event(s)
             else if (!timerEnded)
             {
                 currentTime = 0;
                 DisplayTime();
 
-                Debug.Log("Time Is Up!");
+              //  Debug.Log("Time Is Up!");
                 OnTimerEnd.Invoke();
                 timerEnded = true;
                 gameObject.SetActive(false);
@@ -101,11 +106,19 @@ public class LevelTimer : MonoBehaviour
     /// </summary>
     public void BackToLockerRoom()
     {
-        NetworkManagerScript.instance.LoadSceneWithFade(NetworkManagerScript.instance.roomScene);
+        NetworkManagerScript.instance.LoadSceneWithFade(NetworkManagerScript.instance.roomScene, false);
     }
 
-    public string GetMinutes() => Mathf.FloorToInt(currentTime / 60f).ToString();
-    public string GetSeconds() => Mathf.FloorToInt(currentTime % 60f).ToString("00");
+    public string GetMinutes() => Mathf.FloorToInt(currentTime / 60f < 0? 0: currentTime / 60f).ToString();
+    public string GetSeconds() => Mathf.FloorToInt(currentTime % 60f < 0? 0: currentTime % 60f).ToString("00");
+
+    public float GetTotalSecondsLeft() => currentTime;
+
+    /// <summary>
+    /// Gets the level time in terms of percentage. Goes from 0% to 100% completion.
+    /// </summary>
+    /// <returns>The percentage as a float value.</returns>
+    public float LevelTimePercentage() => 100f - ((currentTime / levelTime) * 100f);
 
     public void SetLevelTime(int newLevelTime) => levelTime = newLevelTime;
 }

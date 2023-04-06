@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.XR;
 using Unity.XR.CoreUtils;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.InputSystem;
@@ -16,6 +17,18 @@ using UnityEngine.Rendering;
 /// </summary>
 public class PlayerController : MonoBehaviour
 {
+    //Classes, Enums & Structs:
+    /// <summary>
+    /// Describes a complex haptic event used by PlayerEquipment.
+    /// </summary>
+    [System.Serializable]
+    public struct HapticData
+    {
+        [Min(0), Tooltip("Base intensity of haptic impulse (should be within range 0 - 1).")] public float amplitude;
+        [Min(0), Tooltip("Total length (in seconds) of haptic impulse.")]                     public float duration;
+        [Tooltip("Curve used to modulate magnitude throughout duration of impulse.")]         public AnimationCurve behaviorCurve;
+    }
+
     //Objects & Components:
     [Tooltip("Singleton instance of player controller.")]                                    public static PlayerController instance;
     [Tooltip("Singleton instance of this client's photonNetwork (on their NetworkPlayer).")] public static PhotonView photonView;
@@ -33,11 +46,13 @@ public class PlayerController : MonoBehaviour
     internal Camera cam;                       //Primary camera for VR rendering, located on player head
     internal PlayerInput input;                //Input manager component used by player to send messages to hands and such
     internal SkinnedMeshRenderer bodyRenderer; //Mesh renderer for player's physical worm body
+    internal PlayerBodyManager bodyManager;    //Reference to script on player that manages body collisions and special effects
     private AudioSource audioSource;           //Main player audio source
     private Transform camOffset;               //Object used to offset camera position in case of weirdness
     private InputActionMap inputMap;           //Input map which player uses
     private ScreenShakeVR screenShaker;        //Component used to safely shake player's screen without causing nausea
     private Volume healthVolume;               //Post-processing volume used to visualize player health
+    private Transform playerModel;             //Top component in player body hierarchy, contains VRIK component
 
     //Settings:
     [Header("Components:")]
@@ -46,11 +61,17 @@ public class PlayerController : MonoBehaviour
     [Header("Settings:")]
     [SerializeField, Tooltip("Settings determining player health properties.")] private HealthSettings healthSettings;
     [Space()]
-    [SerializeField, Tooltip("How far player head can get from body before it is sent back to center.")] private float maxHeadDistance;
+    [SerializeField, Tooltip("How far player head can get from body before it is sent back to center.")]                private float maxHeadDistance;
+    [SerializeField, Tooltip("Amount by which to move torso down (allows player to collapse more naturally).")]         private float torsoVerticalOffset = 10f;
+    [SerializeField, Tooltip("Makes sure that player torso is always below player head.")]                              private bool keepTorsoCentered = true;
+    [SerializeField, Range(0, 1), Tooltip("Amount by which player has to pull the thumb stick in order to snap-turn.")] private float flickStickThreshold;
+    [Space()]
+    [Tooltip("How quickly player slides down horizontal inclines.")]                                                            public float slipSpeed = 5;
+    [MinMaxSlider(0, 90), Tooltip("Minimum and maximum angles for determining whether or not player will slide on a surface.")] public Vector2 slipAngleRange;
     [Header("Sound Settings:")]
     [SerializeField, Tooltip("SFX played when player strikes a target.")] private AudioClip targetHitSound;
+    [SerializeField, Tooltip("SFX played when player kills a target.")]   private AudioClip targetKillSound;
     [Header("Debug Options:")]
-    [SerializeField, Tooltip("Enables constant settings checks in order to test changes.")]                                private bool debugUpdateSettings;
     [SerializeField, Tooltip("Enables usage of SpawnManager system to automatically position player upon instantiation.")] private bool useSpawnPoint = true;
     [SerializeField, Tooltip("Click to snap camera back to center of player rigidbody (ignoring height).")]                private bool debugCenterCamera;
     [SerializeField, Tooltip("Manually isntantiate a network player.")]                                                    private bool debugSpawnNetworkPlayer;
@@ -64,17 +85,40 @@ public class PlayerController : MonoBehaviour
     private float timeUntilRegen; //Time (in seconds) until health regeneration can begin
     private bool centeredInScene; //Made false whenever player loads into a scene, triggers camera centering in the first update
     internal bool isDead;         //True while player is dead and is kinda in limbo
+    private float baseDrag;
+    private Vector2 prevRightStick; //Previous position of the right stick
 
     //Misc:
     internal bool Launchin = false; //NOTE: What references this and where is it modified?
-    private GameObject[] weapons;   //A list of active weapons on the player NOTE: Can this be replaced by attachedEquipment?
-    private GameObject[] tools;     //A list of active tools on the player NOTE: Can this be replaced by attachedEquipment?
 
     //Utility Variables:
     /// <summary>
     /// What percentage of maximum player health they currently have.
     /// </summary>
     public float HealthPercent { get { return currentHealth / (float)healthSettings.defaultHealth; } }
+
+    //Events & Coroutines:
+    /// <summary>
+    /// Controls functions which occur while player is dying.
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerator DeathSequence()
+    {
+        yield return new WaitForSeconds(healthSettings.deathTime); //Wait for designated number of seconds in death zone
+
+        if (SpawnManager.current != null && useSpawnPoint) //Spawn manager is present in scene
+        {
+            Transform spawnpoint = SpawnManager.current.GetRandomSpawnPoint();                    //Get spawnpoint from spawnpoint manager
+            xrOrigin.transform.position = spawnpoint.position;                                    //Move spawned player to target position
+            xrOrigin.transform.eulerAngles = Vector3.Project(spawnpoint.eulerAngles, Vector3.up); //Rotate player to designated spawnpoint rotation
+        }
+        foreach (PlayerEquipment equipment in attachedEquipment) equipment.inputEnabled = true; //Re-enable equipment input
+        bodyRb.isKinematic = false; //Re-enable player physics
+
+        photonView.RPC("RPC_MakeVisible", RpcTarget.Others); //Unhide trailrenderers for all other players
+        isDead = false;                                      //Indicate that player is no longer dead
+        CenterCamera();                                      //Center camera (this is worth doing during any major transition)
+    }
 
     //RUNTIME METHODS:
     private void Awake()
@@ -94,6 +138,8 @@ public class PlayerController : MonoBehaviour
         inputMap = GetComponent<PlayerInput>().actions.FindActionMap("XRI Generic Interaction");                                                                               //Get generic input map from PlayerInput component
         combatHUD = GetComponentInChildren<CombatHUDController>();                                                                                                             //Get the combat HUD canvas
         screenShaker = cam.GetComponent<ScreenShakeVR>();                                                                                                                      //Get screenshaker script from camera object
+        playerModel = GetComponentInChildren<VRIK>().transform;                                                                                                                //Get player model component
+        bodyManager = GetComponentInChildren<PlayerBodyManager>(); if (bodyManager == null) bodyRb.gameObject.AddComponent<PlayerBodyManager>();                               //Make sure player has a body manager component
         foreach (Volume volume in GetComponentsInChildren<Volume>()) //Iterate through Volume components in children
         {
             if (volume.name.Contains("Health")) healthVolume = volume; //Get health volume
@@ -115,9 +161,7 @@ public class PlayerController : MonoBehaviour
 
         //Setup runtime variables:
         currentHealth = healthSettings.defaultHealth; //Set base health value
-
-        weapons = GameObject.FindGameObjectsWithTag("PlayerEquipment");
-        tools = GameObject.FindGameObjectsWithTag("Wall");
+        baseDrag = bodyRb.drag;                       //Store base drag value
 
         inCombat = true;
         UpdateWeaponry();
@@ -148,6 +192,7 @@ public class PlayerController : MonoBehaviour
         {
             inMenu = false;
         }
+            
     }
     private void Update()
     {
@@ -157,8 +202,10 @@ public class PlayerController : MonoBehaviour
             centeredInScene = true; //Indicate that player has been centered
             CenterCamera();         //Make sure player camera is in dead center of rigidbody
         }
+        if (keepTorsoCentered) playerModel.transform.position = cam.transform.position + (Vector3.down * torsoVerticalOffset); //Center model to player body position and apply vertical offset
 
-        if (debugUpdateSettings && Application.isEditor) //Debug settings updates are enabled (only necessary while running in Unity Editor)
+        //Debug functions:
+        if (Application.isEditor) //Debug settings updates are enabled (only necessary while running in Unity Editor)
         {
             if (debugSpawnNetworkPlayer)
             {
@@ -196,6 +243,10 @@ public class PlayerController : MonoBehaviour
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         CenterCamera(); //Center player camera whenever a new scene is loaded
+
+        //If the player is in a room, set their default health to whatever the room setting for health is
+        if (PhotonNetwork.InRoom)
+            healthSettings.defaultHealth = (int)PhotonNetwork.CurrentRoom.CustomProperties["PlayerHP"];
     }
     private void OnDestroy()
     {
@@ -231,16 +282,27 @@ public class PlayerController : MonoBehaviour
     /// <summary>
     /// Updates the weaponry so that the player can / can't fight under certain conditions.
     /// </summary>
-    private void UpdateWeaponry()
+    public void UpdateWeaponry()
     {
         if (inMenu)
         {
             inCombat = false;
         }
 
+        bodyRb.isKinematic = !inCombat;
+
         foreach (var weapon in attachedEquipment)
             foreach (var renderer in weapon.GetComponentsInChildren<Renderer>())
                 renderer.enabled = inCombat;
+
+        foreach (NewGrapplerController grappler in GetComponentsInChildren<NewGrapplerController>())
+        {
+            if (grappler.hook != null)
+            {
+                foreach (Renderer renderer in grappler.hook.GetComponentsInChildren<Renderer>())
+                    renderer.enabled = inCombat;
+            }
+        }
 
         combatHUDScreen.GetComponent<MeshRenderer>().enabled = inCombat;
     }
@@ -251,6 +313,19 @@ public class PlayerController : MonoBehaviour
         switch (context.action.name) //Determine behavior based on input action
         {
             case "RightStickPress": if (context.started) { CenterCamera(); } break; //Center camera when player presses the right stick
+            case "RightStick":
+                Vector2 stickValue = context.ReadValue<Vector2>(); //Get input value from thumbstick
+                if (stickValue.magnitude > flickStickThreshold && prevRightStick.magnitude < flickStickThreshold) //Flick stick action has just begun
+                {
+                    Vector3 stickDir = new Vector3(stickValue.x, 0, stickValue.y);                   //Convert stick value to a flat vector3
+                    Quaternion playerRotator = Quaternion.FromToRotation(Vector3.forward, stickDir); //Get a rotation that points the player in the direction of the stick
+                    bodyRb.transform.rotation = playerRotator * bodyRb.transform.rotation;           //Rotate the player
+                    Vector3 newEulers = bodyRb.transform.eulerAngles;
+                    newEulers.z = 0; newEulers.x = 0;
+                    bodyRb.transform.eulerAngles = newEulers;
+                }
+                prevRightStick = stickValue; //Store stick value for later
+                break;
         }
     }
     /// <summary>
@@ -258,7 +333,14 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     public void HitEnemy()
     {
-        if (targetHitSound != null) audioSource.PlayOneShot(targetHitSound, PlayerPrefs.GetFloat("SFXVolume", 0.5f) * PlayerPrefs.GetFloat("MasterVolume", 0.5f)); //Play hit sound when player shoots (or damages) a target
+        if (targetHitSound != null) audioSource.PlayOneShot(targetHitSound); //Play hit sound when player shoots (or damages) a target
+    }
+    /// <summary>
+    /// Called when player hits and kills an enemy with a projectile.
+    /// </summary>
+    public void KilledEnemy()
+    {
+        if (targetKillSound != null) audioSource.PlayOneShot(targetKillSound); //Play kill sound when player kills a target
     }
     /// <summary>
     /// Method called when this player is hit by a projectile.
@@ -278,7 +360,7 @@ public class PlayerController : MonoBehaviour
         }
         else //Player is being hurt by this projectile hit
         {
-            audioSource.PlayOneShot(healthSettings.hurtSound != null ? healthSettings.hurtSound : (AudioClip)Resources.Load("Sounds/Default_Hurt_Sound"), PlayerPrefs.GetFloat("SFXVolume", 0.5f) * PlayerPrefs.GetFloat("MasterVolume", 0.5f)); //Play hurt sound
+            audioSource.PlayOneShot(healthSettings.hurtSound != null ? healthSettings.hurtSound : (AudioClip)Resources.Load("Sounds/Default_Hurt_Sound")); //Play hurt sound
             if (healthSettings.regenSpeed > 0) timeUntilRegen = healthSettings.regenPauseTime;                                                             //Optionally begin regeneration sequence
             return false;
         }
@@ -288,8 +370,11 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     public void IsKilled()
     {
+        //Validity checks:
+        if (isDead) return; //Do not allow dead players to be killed
+
         //Effects:
-        audioSource.PlayOneShot(healthSettings.deathSound != null ? healthSettings.deathSound : (AudioClip)Resources.Load("Sounds/Temp_Death_Sound"), PlayerPrefs.GetFloat("SFXVolume", 0.5f) * PlayerPrefs.GetFloat("MasterVolume", 0.5f)); //Play death sound
+        audioSource.PlayOneShot(healthSettings.deathSound != null ? healthSettings.deathSound : (AudioClip)Resources.Load("Sounds/Temp_Death_Sound")); //Play death sound
         
         //Weapon cleanup:
         foreach (NewGrapplerController hookShot in GetComponentsInChildren<NewGrapplerController>()) //Iterate through any hookshots player may have equipped
@@ -298,20 +383,30 @@ public class PlayerController : MonoBehaviour
         }
 
         //Put player in limbo:
-        bodyRb.velocity = Vector3.zero;                              //Reset player velocity
-        CenterCamera();                                              //Center camera (this is worth doing during any major transition)
-        photonView.RPC("RPC_MakeVisible", RpcTarget.OthersBuffered); //Reset trail
+        photonView.RPC("RPC_MakeInvisible", RpcTarget.Others);                           //Hide trailrenderers for all other players
+        bodyRb.velocity = Vector3.zero;                                                  //Reset player velocity
+        CenterCamera();                                                                  //Center camera (this is worth doing during any major transition)
+        foreach (PlayerEquipment equipment in attachedEquipment) equipment.Shutdown(-1); //Stow and disable all equipment on player
+        bodyRb.isKinematic = true;                                                       //Disable body physics
 
         //Cleanup:
         isDead = true; //Indicate that this player is dead
-        if (SpawnManager.current != null && useSpawnPoint) //Spawn manager is present in scene
-        {
-            Transform spawnpoint = SpawnManager.current.GetRandomSpawnPoint(); //Get spawnpoint from spawnpoint manager
-            xrOrigin.transform.position = spawnpoint.position;                 //Move spawned player to target position
-        }
-        currentHealth = healthSettings.defaultHealth; //Reset to max health
-        healthVolume.weight = 0;                      //Reset health volume weight
+        xrOrigin.transform.position = SpawnManager.current.deathZone.position; //Move player to death zone
+        xrOrigin.transform.rotation = Quaternion.identity;                     //Zero out player rotation
+        StartCoroutine(DeathSequence());                                       //Begin death sequence
+        currentHealth = healthSettings.defaultHealth;                          //Reset to max health
+        healthVolume.weight = 0;                                               //Reset health volume weight
+        timeUntilRegen = 0;                                                    //Reset regen timer
+        UnHolsterAll();
         print("Local player has been killed!");
+    }
+    private void MakeNotWiggly()
+    {
+        //foreach (Rigidbody rigidbody in playerModel.GetComponentsInChildren<Rigidbody>()).
+    }
+    public void UnHolsterAll()
+    {
+        foreach (PlayerEquipment equipment in attachedEquipment) if (equipment.holstered) equipment.Holster(false);
     }
     /// <summary>
     /// Safely shakes the player's eyeballs.
@@ -323,6 +418,39 @@ public class PlayerController : MonoBehaviour
     public void ShakeScreen(Vector2 shakeSettings) { screenShaker.Shake(shakeSettings.x, shakeSettings.y); }
 
     //UTILITY METHODS:
+    /// <summary>
+    /// Sends a haptic impulse to this equipment's associated controller.
+    /// </summary>
+    /// <param name="amplitude">Strength of vibration (between 0 and 1).</param>
+    /// <param name="duration">Duration of vibration (in seconds).</param>
+    public void SendHapticImpulse(InputDeviceRole deviceRole, float amplitude, float duration)
+    {
+        List<UnityEngine.XR.InputDevice> devices = new List<UnityEngine.XR.InputDevice>(); //Initialize list to store input devices
+        #pragma warning disable CS0618                                                     //Disable obsolescence warning
+        UnityEngine.XR.InputDevices.GetDevicesWithRole(deviceRole, devices);               //Find all input devices counted as right hand
+        #pragma warning restore CS0618                                                     //Re-enable obsolescence warning
+        foreach (var device in devices) //Iterate through list of devices identified as right hand
+        {
+            if (device.TryGetHapticCapabilities(out HapticCapabilities capabilities)) //Device has haptic capabilities
+            {
+                if (capabilities.supportsImpulse) device.SendHapticImpulse(0, amplitude, duration); //Send impulse if supported by device
+            }
+        }
+    }
+    public void SendHapticImpulse(InputDeviceRole deviceRole, Vector2 properties) { SendHapticImpulse(deviceRole, properties.x, properties.y); }
+    /// <summary>
+    /// Sends a haptic impulse to the given hand (or both).
+    /// </summary>
+    /// <param name="hand"></param>
+    /// <param name="amplitude"></param>
+    /// <param name="duration"></param>
+    public void SendHapticImpulse(CustomEnums.Handedness hand, float amplitude, float duration)
+    {
+        InputDeviceRole role = InputDeviceRole.Generic;                                    //Default to using generic device role
+        if (hand == CustomEnums.Handedness.Left) role = InputDeviceRole.LeftHanded;        //Use left hand if indicated
+        else if (hand == CustomEnums.Handedness.Right) role = InputDeviceRole.RightHanded; //Use right hand if indicated
+        SendHapticImpulse(role, amplitude, duration);                                      //Pass to actual haptic method
+    }
     public bool InCombat() => inCombat;
     public bool InMenu() => inMenu;
     public void SetCombat(bool combat)
@@ -335,4 +463,5 @@ public class PlayerController : MonoBehaviour
     /// Generic method to make sure UnityActions always have something subscribed to them.
     /// </summary>
     private void SubscriptionDummy() { }
+    public void ResetDrag() { if (bodyRb != null) bodyRb.drag = baseDrag; }
 }

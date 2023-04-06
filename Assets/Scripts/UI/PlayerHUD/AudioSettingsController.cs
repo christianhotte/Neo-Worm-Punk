@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Photon.Voice.PUN;
+using Photon.Voice.Unity;
 
 public class AudioSettingsController : MonoBehaviour
 {
@@ -21,10 +23,10 @@ public class AudioSettingsController : MonoBehaviour
     /// </summary>
     private void UpdateSettings()
     {
-        masterSlider.value = PlayerPrefs.GetFloat("MasterVolume", 0.5f) * 10f;
-        musicSlider.value = PlayerPrefs.GetFloat("MusicVolume", 0.5f) * 10f;
-        sfxSlider.value = PlayerPrefs.GetFloat("SFXVolume", 0.5f) * PlayerPrefs.GetFloat("MasterVolume", 0.5f) * 10f;
-        voiceChatSlider.value = PlayerPrefs.GetFloat("VoiceChatVolume", 0.5f) * 10f;
+        masterSlider.value = PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound) * 10f;
+        musicSlider.value = PlayerPrefs.GetFloat("MusicVolume", GameSettings.defaultMusicSound) * 10f;
+        sfxSlider.value = PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * 10f;
+        voiceChatSlider.value = PlayerPrefs.GetFloat("VoiceChatVolume", GameSettings.defaultVoiceSound) * 10f;
         muteMicToggle.isOn = PlayerPrefs.GetInt("MuteMic", 0) == 1? true: false;
     }
 
@@ -62,6 +64,7 @@ public class AudioSettingsController : MonoBehaviour
     public void AdjustVoiceChatVolume(float newVolume)
     {
         PlayerPrefs.SetFloat("VoiceChatVolume", newVolume / 10f);
+        NetworkManagerScript.instance.AdjustVoiceVolume();
     }
 
     /// <summary>
@@ -71,5 +74,11 @@ public class AudioSettingsController : MonoBehaviour
     public void ToggleMuteMic(bool isOn)
     {
         PlayerPrefs.SetInt("MuteMic", isOn? 1: 0);
+        UpdateMuteMic();
+    }
+
+    private void UpdateMuteMic()
+    {
+        FindObjectOfType<Recorder>().TransmitEnabled = PlayerPrefs.GetInt("MuteMic") != 1;
     }
 }

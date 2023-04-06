@@ -12,18 +12,6 @@ using RootMotion.FinalIK;
 /// </summary>
 public class PlayerEquipment : MonoBehaviour
 {
-    //Classes, Enums & Structs:
-    /// <summary>
-    /// Describes a complex haptic event used by PlayerEquipment.
-    /// </summary>
-    [System.Serializable]
-    public struct HapticData
-    {
-        [Min(0), Tooltip("Base intensity of haptic impulse (should be within range 0 - 1).")] public float amplitude;
-        [Min(0), Tooltip("Total length (in seconds) of haptic impulse.")]                     public float duration;
-        [Tooltip("Curve used to modulate magnitude throughout duration of impulse.")]         public AnimationCurve behaviorCurve;
-    }
-
     //Objects & Components:
     internal PlayerController player;            //Player currently controlling this equipment
     private Transform basePlayerTransform;       //Master player object which all player equipment (and XR Origin) is under
@@ -42,6 +30,8 @@ public class PlayerEquipment : MonoBehaviour
     [SerializeField, Tooltip("Settings defining this equipment's physical joint behavior.")]                                         private protected EquipmentJointSettings jointSettings;
     [SerializeField, Tooltip("Only enable this on equipment which needs it, best practice is to have only one such piece per arm.")] private bool canMoveHandRig = false;
     [SerializeField, Tooltip("Enables constant joint updates for testing purposes.")]                                                private protected bool debugUpdateSettings;
+    [SerializeField, Tooltip("Unequips equipment and puts it into stasis.")]                                                         private bool debugUnequip;
+    private protected Transform positionMemoryReference; //Transform used to track position and velocity memory, defaults to targetTransform
 
     //Runtime Variables:
     /// <summary>
@@ -61,6 +51,10 @@ public class PlayerEquipment : MonoBehaviour
     /// </summary>
     internal bool inStasis = false;
     /// <summary>
+    /// When false, equipment will not accept any player input.
+    /// </summary>
+    internal bool inputEnabled = true;
+    /// <summary>
     /// Indicates that this weapon is currently stowed on the player's body and is not in use.
     /// </summary>
     internal bool holstered = false;
@@ -68,7 +62,8 @@ public class PlayerEquipment : MonoBehaviour
     private InputDeviceRole deviceRole = InputDeviceRole.Generic; //This equipment's equivalent device role (used to determine haptic feedback targets)
     private List<Vector3> relPosMem = new List<Vector3>();        //List of remembered relative positions (taken at FixedUpdate) used to calculate current relative velocity (newest entries are first)
     private Transform preferredHolster;                           //Holster which this equipment will go to when holstered
-    //private bool holsterTransitioning = fal
+    private bool holsterTransitioning = false;                    //True while holster transition is in progress, used to prevent holster transitions from interrupting each other
+    private Vector3 origScale;                                    //Original scale of equipment (set at start)
 
     //Utility Variables:
     /// <summary>
@@ -78,8 +73,13 @@ public class PlayerEquipment : MonoBehaviour
     {
         get
         {
-            if (playerBody == null) return Vector3.zero;                                      //Return nothing if equipment is not attached to a real player
-            else return playerBody.transform.InverseTransformPoint(targetTransform.position); //Use inverse transform point to determine the position of the weapon relative to its player body
+            if (playerBody == null) return Vector3.zero; //Return nothing if equipment is not attached to a real player
+            else //Equipment has a player body to reference
+            {
+                Vector3 positionRef = positionMemoryReference == null ? targetTransform.position : positionMemoryReference.position; //Use given position memory reference (or default to target transform position)
+                return playerBody.transform.InverseTransformPoint(positionRef);                                                      //Use inverse transform point to determine the position of the weapon relative to its player body
+            }
+                
         }
     }
     /// <summary>
@@ -97,50 +97,23 @@ public class PlayerEquipment : MonoBehaviour
 
     //EVENTS & COROUTINES:
     /// <summary>
-    /// Plays a haptic sequence using an AnimationCurve to modify amplitude over time.
-    /// </summary>
-    /// <returns></returns>
-    private IEnumerator HapticEvent(AnimationCurve hapticCurve, float maxAmplitude, float fullDuration)
-    {
-        //Validity checks:
-        if (fullDuration <= 0) { Debug.LogWarning("Tried to play haptic event with duration " + fullDuration + " . This is too small."); yield break; } //Do not run if duration is zero
-
-        //Get valid devices:
-        List<UnityEngine.XR.InputDevice> devices = new List<UnityEngine.XR.InputDevice>(); //Initialize list to store input devices
-        #pragma warning disable CS0618                                                     //Disable obsolescence warning
-        UnityEngine.XR.InputDevices.GetDevicesWithRole(deviceRole, devices);               //Find all input devices counted as right hand
-        #pragma warning restore CS0618                                                     //Re-enable obsolescence warning
-        for (int x = 0; x < devices.Count;) //Iterate through list of input devices (manually indexing iterator)
-        {
-            var device = devices[x];                                                                                                       //Get current device
-            if (device.TryGetHapticCapabilities(out HapticCapabilities capabilities)) if (capabilities.supportsImpulse) { x++; continue; } //Skip devices which are good to go
-            devices.RemoveAt(x);                                                                                                           //Remove incompatible devices from list
-        }
-
-        //Play haptic event over time:
-        for (float timePassed = 0; timePassed <= fullDuration; timePassed += Time.fixedDeltaTime) //Iterate over time for full duration of haptic event
-        {
-            float currentInterpolant = timePassed / fullDuration;                                               //Get interpolant based on current progression of time
-            float currentAmplitude = hapticCurve.Evaluate(currentInterpolant) * maxAmplitude;                   //Use given curve to get an amplitude value
-            foreach (var device in devices) device.SendHapticImpulse(0, currentAmplitude, Time.fixedDeltaTime); //Send a brief haptic pulse at current amplitude (duration is only until next update)
-            yield return new WaitForFixedUpdate();                                                              //Wait for next fixed update
-        }
-    }
-    /// <summary>
     /// Moves preferred holster transform to position of actual holster or back to hand, then updates holster status if moving back to hand.
     /// </summary>
     /// <param name="holster">Pass true if holstering weapon, false if returning it to hand.</param>
     /// <returns></returns>
     private IEnumerator MoveHolster(bool holster = true)
     {
+        //Validation:
+        yield return new WaitUntil(() => player.cam.transform.parent != null);
+
         //Initialize:
-        Transform localSpaceParent = player.cam.transform.parent;                                               //Use camera offset as local space because hands are childed to it
-        preferredHolster.parent = localSpaceParent;                                                             //Child holster to local space so we can use those local transforms
-        Transform actualHolster = handedness == Handedness.Left ? player.leftHolster : player.rightHolster;     //Get acutal holster based on equipment handedness
-        Vector3 relativeHolsterPos = localSpaceParent.InverseTransformPoint(actualHolster.position);            //Get position of holster relative to player body
-        Quaternion relativeHolsterRot = Quaternion.Inverse(localSpaceParent.rotation) * actualHolster.rotation; //Get rotation of holster relative to player body
-        Vector3 initialOriginPos = holster ? targetTransform.localPosition : relativeHolsterPos;                //Get initial position to lerp from (which will stay the same throughout process)
-        Quaternion initialOriginRot = holster ? targetTransform.localRotation : relativeHolsterRot;             //Get initial rotation to lerp from (which will stay the same throughout process)
+        holsterTransitioning = true;                                                                                                                    //Indicate that equipment is in the process of being holstered
+        Transform localSpaceParent = player.cam.transform.parent;                                                                                       //Use camera offset as local space because hands are childed to it
+        preferredHolster.parent = localSpaceParent;                                                                                                     //Child holster to local space so we can use those local transforms
+        Transform actualHolster = handedness == Handedness.Left ? player.leftHolster : player.rightHolster;                                             //Get acutal holster based on equipment handedness
+        Vector3 initialOriginPos = holster ? targetTransform.localPosition : localSpaceParent.InverseTransformPoint(actualHolster.position);            //Get initial position to lerp from (which will stay the same throughout process)
+        Quaternion initialOriginRot = holster ? targetTransform.localRotation : Quaternion.Inverse(localSpaceParent.rotation) * actualHolster.rotation; //Get initial rotation to lerp from (which will stay the same throughout process)
+        Vector3 initialOriginScl = holster ? origScale : (jointSettings.holsterScaleMod * origScale.x * Vector3.one);                                   //Get initial scale to lerp from            
 
         //Move holster:
         for (float timePassed = 0; timePassed < jointSettings.holsterSpeed; timePassed += Time.fixedDeltaTime) //Iterate on update until holster time has passed
@@ -149,6 +122,7 @@ public class PlayerEquipment : MonoBehaviour
             timeInterpolant = jointSettings.holsterCurve.Evaluate(timeInterpolant);                                                                                                                                //Evaluate time over curve to get a more complex animation
             preferredHolster.localPosition = Vector3.Lerp(initialOriginPos, holster ? localSpaceParent.InverseTransformPoint(actualHolster.position) : targetTransform.localPosition, timeInterpolant);            //Move weapon toward holster (or toward hand)
             preferredHolster.localRotation = Quaternion.Lerp(initialOriginRot, holster ? Quaternion.Inverse(localSpaceParent.rotation) * actualHolster.rotation : targetTransform.localRotation, timeInterpolant); //Rotate weapon toward holster (or toward hand)
+            transform.localScale = Vector3.Lerp(initialOriginScl, holster ? (jointSettings.holsterScaleMod * origScale.x * Vector3.one) : origScale, timeInterpolant);                                             //Scale equipment toward holster (or toward hand)
             yield return new WaitForFixedUpdate(); //Wait for next fixed update step
         }
 
@@ -159,7 +133,17 @@ public class PlayerEquipment : MonoBehaviour
             preferredHolster.localPosition = Vector3.zero;        //Clear any remaining movement holster has
             preferredHolster.localRotation = Quaternion.identity; //Clear any remaining rotation holster has
         }
-        holstered = holster; //Update holstered status to false once done, so weapon can resume normal followbody control
+        transform.localScale = holster ? (jointSettings.holsterScaleMod * origScale.x * Vector3.one) : origScale; //Make sure equipment ends at the correct scale
+        holsterTransitioning = false;                                                                             //Indicate that holster transition is finished
+        if (holstered != holster) StartCoroutine(MoveHolster(holstered));                                         //Immediately start new transition if change in holster status is scheduled
+    }
+    /// <summary>
+    /// Enables equipment input after given amount of time.
+    /// </summary>
+    private IEnumerator TimedEnableInput(float timeToEnable)
+    {
+        yield return new WaitForSeconds(timeToEnable); //Wait for given number of seconds
+        inputEnabled = true;                           //Re-enable input once wait is finished
     }
 
     //RUNTIME METHODS:
@@ -253,6 +237,9 @@ public class PlayerEquipment : MonoBehaviour
             jointSettings = (EquipmentJointSettings)Resources.Load("DefaultSettings/DefaultEquipmentJointSettings"); //Load default settings from Resources folder
         }
 
+        //Initialize runtime variables:
+        origScale = transform.localScale; //Get starting scale of equipment
+
         //Setup configurable joint:
         joint = gameObject.AddComponent<ConfigurableJoint>();   //Instantiate a configurable joint on this equipment gameobject
         joint.connectedBody = followerBody;                     //Connect joint to follower transform
@@ -281,20 +268,26 @@ public class PlayerEquipment : MonoBehaviour
     }
     private protected virtual void Update()
     {
-        if (debugUpdateSettings && Application.isEditor) ConfigureJoint(); //Reconfigure joint every update if debug setting is selected (only necessary in Unity Editor)
+        if (!inStasis && debugUpdateSettings && Application.isEditor) ConfigureJoint(); //Reconfigure joint every update if debug setting is selected (only necessary in Unity Editor)
     }
     private protected virtual void FixedUpdate()
     {
-        //Update position memory:
-        relPosMem.Insert(0, RelativePosition);                                                       //Add current relative position to beginning of memory list
-        if (relPosMem.Count > jointSettings.positionMemory) relPosMem.RemoveAt(relPosMem.Count - 1); //Keep list size constrained to designated amount (removing oldest entries)
+        if (!inStasis) //Only update equipment if not in stasis
+        {
+            //Update position memory:
+            relPosMem.Insert(0, RelativePosition);                                                       //Add current relative position to beginning of memory list
+            if (relPosMem.Count > jointSettings.positionMemory) relPosMem.RemoveAt(relPosMem.Count - 1); //Keep list size constrained to designated amount (removing oldest entries)
 
-        //Cleanup:
-        PerformFollowerUpdate(); //Update follower transform
+            //Cleanup:
+            PerformFollowerUpdate(); //Update follower transform
+        }
     }
     private protected virtual void OnPreRender()
     {
-        PerformFollowerUpdate(); //Update follower transform
+        if (!inStasis) //Only update equipment if not in stasis
+        {
+            PerformFollowerUpdate(); //Update follower transform
+        }
     }
     private protected virtual void OnDestroy()
     {
@@ -304,8 +297,10 @@ public class PlayerEquipment : MonoBehaviour
     private void TryGiveInput(InputAction.CallbackContext context)
     {
         //Input exception states:
-        if (!player.InCombat()) return; //Ignore equipment input while not in combat
-        if (holstered) return;          //Ignore input while equipment is holstered
+        if (inStasis) return;                          //Ignore equipment input while equipment is in stasis
+        if (!player.InCombat()) return;                //Ignore equipment input while not in combat
+        if (holstered || holsterTransitioning) return; //Ignore input while equipment is holstered or being holstered
+        if (!inputEnabled) return;                     //Ignore input while inputs are explicitly disabled
 
         InputActionTriggered(context); //Pass along input
     }
@@ -325,6 +320,9 @@ public class PlayerEquipment : MonoBehaviour
     /// </summary>
     public void UnEquip()
     {
+        //Remove instantiated stuff:
+
+
         //Cleanup:
         if (player != null) player.attachedEquipment.Remove(this); //Remove this item from player's running list of attached equipment
         inStasis = true;                                           //Indicate that equipment is now safely in stasis and will not messily try to update itself
@@ -333,17 +331,23 @@ public class PlayerEquipment : MonoBehaviour
     /// Holsters or un-holsters weapon. Disables inputs to this piece of equipment, and stows it in appropriate transform on player.
     /// </summary>
     /// <param name="holster">Pass true to hoster this equipment, false to un-holster it.</param>
-    public void Holster(bool holster = true)
+    public virtual void Holster(bool holster = true)
     {
-        if (holster) //Weapon is being holstered
+        holstered = holster;                                             //Always update holster status
+        if (!holsterTransitioning) StartCoroutine(MoveHolster(holster)); //Move holster to designated position over time
+    }
+    /// <summary>
+    /// Puts equipment into default (stowed) state (contextual based on equipment type), useful for stuff like wormholes.
+    /// </summary>
+    /// <param name="disableInputTime">Also disables player input for this number of seconds (0 does not disable player input, less than 0 disables it indefinitely).</param>
+    public virtual void Shutdown(float disableInputTime = 0)
+    {
+        //Input management:
+        if (disableInputTime != 0) //Input is being disabled
         {
-            holstered = true;//Immediately indicate holster status if holstering weapon
+            inputEnabled = false;                                                         //Immediately disable input
+            if (disableInputTime > 0) StartCoroutine(TimedEnableInput(disableInputTime)); //Enable input after a certain amount of time has passed (if set)
         }
-        else //Weapon is being unholstered
-        {
-            if (TryGetComponent(out NewShotgunController gun)) gun.reverseFireStage = 0; //Make sure weapon does not become unholstered in reverse fire mode
-        }
-        StartCoroutine(MoveHolster(holster)); //Move holster to designated position over time
     }
 
     //UTILITY METHODS:
@@ -405,7 +409,7 @@ public class PlayerEquipment : MonoBehaviour
     /// <summary>
     /// Updates position of rigidbody follower to match position of target.
     /// </summary>
-    private void PerformFollowerUpdate()
+    private protected void PerformFollowerUpdate()
     {
         //Calculate follower position:
         Vector3 targetPos = holstered ? preferredHolster.position : targetTransform.position;                                                     //Get base target position for rigidbody follower (either hand or holster)
@@ -426,8 +430,8 @@ public class PlayerEquipment : MonoBehaviour
         if (handAnchorMover != null && canMoveHandRig) //Player hand re-targeting is enabled
         {
             handAnchorMover.localPosition = currentAddOffset;                                                               //Artificially add movement to player hand
-            if (currentAddRotOffset.magnitude <= 90) handAnchorMover.localRotation = Quaternion.Euler(currentAddRotOffset); //Artificially add rotation to player hand (if it won't break wrist rig)
-            else handAnchorMover.localRotation = Quaternion.identity;                                                       //Use normal rotation otherwise
+            //if (currentAddRotOffset.magnitude <= 90) handAnchorMover.localRotation = Quaternion.Euler(currentAddRotOffset); //Artificially add rotation to player hand (if it won't break wrist rig)
+            //else handAnchorMover.localRotation = Quaternion.identity;                                                       //Use normal rotation otherwise
         }
     }
     /// <summary>
@@ -435,29 +439,11 @@ public class PlayerEquipment : MonoBehaviour
     /// </summary>
     /// <param name="amplitude">Strength of vibration (between 0 and 1).</param>
     /// <param name="duration">Duration of vibration (in seconds).</param>
-    public void SendHapticImpulse(float amplitude, float duration)
-    {
-        List<UnityEngine.XR.InputDevice> devices = new List<UnityEngine.XR.InputDevice>(); //Initialize list to store input devices
-        #pragma warning disable CS0618                                                     //Disable obsolescence warning
-        UnityEngine.XR.InputDevices.GetDevicesWithRole(deviceRole, devices);               //Find all input devices counted as right hand
-        #pragma warning restore CS0618                                                     //Re-enable obsolescence warning
-        foreach (var device in devices) //Iterate through list of devices identified as right hand
-        {
-            if (device.TryGetHapticCapabilities(out HapticCapabilities capabilities)) //Device has haptic capabilities
-            {
-                if (capabilities.supportsImpulse) device.SendHapticImpulse(0, amplitude, duration); //Send impulse if supported by device
-            }
-        }
-    }
+    public void SendHapticImpulse(float amplitude, float duration) { if (player != null) player.SendHapticImpulse(deviceRole, amplitude, duration); }
     public void SendHapticImpulse(Vector2 properties) { SendHapticImpulse(properties.x, properties.y); }
-    public void SendHapticImpulse(HapticData properties)
-    {
-        if (properties.duration == 0 || properties.amplitude == 0) return;                                           //Do nothing if player has given a null haptic setting
-        if (properties.behaviorCurve.keys.Length <= 1) SendHapticImpulse(properties.amplitude, properties.duration); //Use simpler impulse method if no curve is given
-        else StartCoroutine(HapticEvent(properties.behaviorCurve, properties.amplitude, properties.duration));       //Use coroutine to deploy more complex haptic impulses
-    }
+    public void SendHapticImpulse(PlayerController.HapticData properties) { SendHapticImpulse(properties.amplitude, properties.duration); }
     /// <summary>
     /// Plays one-shot of given sound, taking into account current volume settings (specific to SFX) (also checks if sound is null so you don't have to).
     /// </summary>
-    public void PlaySFX(AudioClip sound) { if (sound != null) audioSource.PlayOneShot(sound, PlayerPrefs.GetFloat("MasterVolume") * PlayerPrefs.GetFloat("SFXVolume")); }
+    public void PlaySFX(AudioClip sound) { if (sound != null) audioSource.PlayOneShot(sound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); }
 }
