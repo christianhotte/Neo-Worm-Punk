@@ -15,6 +15,7 @@ public class UpgradeSpawner : MonoBehaviour
     private Jumbotron jumboScript;
     private bool alertin = false;
     private AudioSource thisAud;
+    public float heatVisionTime;
     public AudioClip upgradeAlert;
     private int spawnedPowerups=0;
     //Settings:
@@ -37,15 +38,13 @@ public class UpgradeSpawner : MonoBehaviour
         currentPowerUp = powerType;
         if (currentPowerUp == PowerUp.PowerUpType.HeatVision)
         {
-            Debug.Log("startedHeatVison");
             print("Network players being made visible = " + NetworkPlayer.instances.Count);
             foreach (NetworkPlayer player in NetworkPlayer.instances)
             {
                 if (player == NetworkManagerScript.localNetworkPlayer) continue;
                 player.ChangeNetworkPlayerMaterial(heatVision,0);
             }
-            yield return new WaitForSeconds(waitTime);
-            Debug.Log("WaitDone");
+            yield return new WaitForSeconds(heatVisionTime);
             foreach (NetworkPlayer player in NetworkPlayer.instances)
             {
                 if (player == NetworkManagerScript.localNetworkPlayer) continue;
