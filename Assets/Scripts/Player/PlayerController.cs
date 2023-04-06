@@ -243,6 +243,10 @@ public class PlayerController : MonoBehaviour
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         CenterCamera(); //Center player camera whenever a new scene is loaded
+
+        //If the player is in a room, set their default health to whatever the room setting for health is
+        if (PhotonNetwork.InRoom)
+            healthSettings.defaultHealth = (int)PhotonNetwork.CurrentRoom.CustomProperties["PlayerHP"];
     }
     private void OnDestroy()
     {
@@ -393,11 +397,16 @@ public class PlayerController : MonoBehaviour
         currentHealth = healthSettings.defaultHealth;                          //Reset to max health
         healthVolume.weight = 0;                                               //Reset health volume weight
         timeUntilRegen = 0;                                                    //Reset regen timer
+        UnHolsterAll();
         print("Local player has been killed!");
     }
     private void MakeNotWiggly()
     {
         //foreach (Rigidbody rigidbody in playerModel.GetComponentsInChildren<Rigidbody>()).
+    }
+    public void UnHolsterAll()
+    {
+        foreach (PlayerEquipment equipment in attachedEquipment) if (equipment.holstered) equipment.Holster(false);
     }
     /// <summary>
     /// Safely shakes the player's eyeballs.

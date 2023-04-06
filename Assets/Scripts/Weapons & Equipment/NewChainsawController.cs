@@ -42,6 +42,7 @@ public class NewChainsawController : PlayerEquipment
     private BladeMode prevMode = BladeMode.Sheathed; //Previous mode blade was in
     internal bool grinding;          //Whether or not player is currently grinding on a surface
     private float grindTime = 0;     //Amount of time chainsaw has been grinding on surface for
+    private float deflectTime = 0;   //Amount of time chainsaw is able to deflect for (recharges when not in use)
     private RaycastHit lastGrindHit; //Data for last surface chainsaw has ground on
     private float timeInMode;        //How long weapon has been in current mode for
     private float timeUntilPulse;    //Time until next haptic pulse should be triggered (used for repeated pulses while saw is active)
@@ -76,6 +77,7 @@ public class NewChainsawController : PlayerEquipment
 
         //Late object & component get:
         hand = (handedness == 0 ? player.leftHand : player.rightHand).transform; //Get a reference to the relevant player hand
+        deflectTime = settings.deflectTime;                                      //Set deflect time to max
         foreach (PlayerEquipment equipment in player.attachedEquipment) //Iterate through all equipment attached to player
         {
             if (equipment != this && equipment.handedness == handedness) { handWeapon = equipment; break; } //Try to get weapon used by same hand
@@ -98,6 +100,7 @@ public class NewChainsawController : PlayerEquipment
                 timeUntilPulse = newPulse.duration + Random.Range(-settings.activeHapticFrequencyVariance, settings.activeHapticFrequencyVariance); //Schedule new pulse with slight variation in activation time
             }
         }
+        if (mode != BladeMode.Deflecting && deflectTime < settings.deflectTime) deflectTime = Mathf.Min(deflectTime + (Time.deltaTime * settings.deflectCooldownRate), settings.deflectTime);
         if (grinding) grindTime += Time.deltaTime; //Update grind time tracker
 
         //Extend/Retract blade:
@@ -208,9 +211,9 @@ public class NewChainsawController : PlayerEquipment
         if (mode == BladeMode.Extended || mode == BladeMode.Extending) //Blade is currently deployed or is being deployed
         {
             //Update wrist rotation:
-            Quaternion targetWristRot = Quaternion.LookRotation(hand.forward, -hand.right);                            //Get target wrist rotation from rotation of hand (in order to make weapon more controllable)
-            targetWristRot = Quaternion.RotateTowards(wrist.parent.rotation, targetWristRot, settings.maxWristAngle);  //Clamp rotation to set angular limit
-            wrist.rotation = Quaternion.Lerp(wrist.rotation, targetWristRot, settings.wristLerpRate * Time.deltaTime); //Lerp wrist toward target rotation
+            Quaternion targetWristRot = Quaternion.LookRotation(hand.forward, hand.right * (handedness == CustomEnums.Handedness.Right ? -1 : 1)); //Get target wrist rotation from rotation of hand (in order to make weapon more controllable)
+            targetWristRot = Quaternion.RotateTowards(wrist.parent.rotation, targetWristRot, settings.maxWristAngle);                              //Clamp rotation to set angular limit
+            wrist.rotation = Quaternion.Lerp(wrist.rotation, targetWristRot, settings.wristLerpRate * Time.deltaTime);                             //Lerp wrist toward target rotation
 
             //Reverse grip:
             float targetPivotRot = reverseGrip ? -settings.reverseGripAngle : 0; //Get target Y rotation for wrist pivot
@@ -228,6 +231,7 @@ public class NewChainsawController : PlayerEquipment
             {
                 //Adjust player velocity:
                 Vector3 grindDirection = Vector3.Cross(hitInfo.normal, wrist.up).normalized;                                 //Get target direction of grind
+                if (handedness == CustomEnums.Handedness.Left) grindDirection *= -1;                                         //Grind in opposite direction if blade is flipped
                 float grindTimeInterpolant = Mathf.Clamp01(grindTime / settings.grindAccelTime);                             //Get interpolant for how long player has been grinding
                 float grindSpeed = Mathf.Lerp(settings.grindSpeedRange.x, settings.grindSpeedRange.y, grindTimeInterpolant); //Determine grind speed based on how long player has been grinding for
                 playerBody.velocity = grindDirection * grindSpeed;                                                           //Modify player velocity based on grind values
@@ -248,7 +252,7 @@ public class NewChainsawController : PlayerEquipment
                 NetworkPlayer hitPlayer = hitInfo.collider.GetComponentInParent<NetworkPlayer>(); //Try to get networkplayer from hit
                 if (hitPlayer != null && !hitPlayer.photonView.IsMine) //Player (other than self) has been hit by blade
                 {
-                    hitPlayer.photonView.RPC("RPC_Hit", Photon.Pun.RpcTarget.AllBuffered, 3, PlayerController.photonView.ViewID); //Hit target
+                    hitPlayer.photonView.RPC("RPC_Hit", Photon.Pun.RpcTarget.AllBuffered, 3, PlayerController.photonView.ViewID, Vector3.zero); //Hit target
                 }
             }
         }
@@ -294,6 +298,10 @@ public class NewChainsawController : PlayerEquipment
             //Rotate wrist:
             Quaternion targetWristRot = wrist.localRotation * Quaternion.AngleAxis(wristRotAngle, Vector3.forward);
             wrist.localRotation = targetWristRot;
+
+            //Pull player forward:
+            Vector3 pullForce = settings.deflectPullForce * Time.deltaTime * transform.forward; //Get force by which player is being pulled forward
+            player.bodyRb.AddForce(pullForce, ForceMode.Acceleration);                          //Add force to player body
 
             //targetWristRot = Quaternion.RotateTowards(wrist.parent.rotation, targetWristRot, settings.maxWristAngle);  //Clamp rotation to set angular limit
             //wrist.rotation = Quaternion.Lerp(wrist.rotation, targetWristRot, settings.wristLerpRate * Time.deltaTime); //Lerp wrist toward target rotation
@@ -346,6 +354,7 @@ public class NewChainsawController : PlayerEquipment
         reverseGrip = false;             //Clear reverse grip input
         gripValue = 0;                   //Clear grip input (chainsaw will begin sheathing)
         triggerValue = 0;                //Clear trigger input
+        if (mode != BladeMode.Sheathed) mode = BladeMode.Retracting; //Skip grinding disengagement mode
     }
 
     //UTILITY METHODS:

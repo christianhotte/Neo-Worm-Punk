@@ -8,7 +8,7 @@ public class SliderController : MonoBehaviour
 {
     public enum SliderRestriction { NONE, LOCKED, UP, DOWN }    //Types of slider restrictions
 
-    private SliderHandleController sliderHandle;
+    [SerializeField, Tooltip("The handle of the slider.")] private SliderHandleController sliderHandle;
 
     [SerializeField, Tooltip("The bounds for the slider.")] private Transform boundLeft, boundRight;
     [SerializeField, Tooltip("The minimum and maximum value for the slider.")] private Vector2 outputRange;
@@ -28,23 +28,18 @@ public class SliderController : MonoBehaviour
     private float handMovedSinceGrab;   //The distance moved since grabbing the slider
     private Vector3 handInLocalSpace;   //The hand position relative to the slider
 
-    private void OnEnable()
-    {
-        sliderHandle = GetComponentInChildren<SliderHandleController>();
-    }
-
     // Update is called once per frame
     void Update()
     {
         //If the slider is grabbed, check for hand movement
-        if (sliderHandle.IsGrabbed())
+        if (sliderHandle.IsGrabbed() && sliderHandle.GetFollowObject() != null)
         {
             MoveToHand();
         }
-        else if (GameSettings.debugMode)
+/*        else if (GameSettings.debugMode)
         {
             DebugSliderMovement();
-        }
+        }*/
     }
 
     /// <summary>
@@ -100,11 +95,10 @@ public class SliderController : MonoBehaviour
         sliderHandle.transform.localPosition = new Vector3(newX, handleLocalStartPos.y, handleLocalStartPos.z);
 
         //Get the percent completed of the slider and give it a value based on the output range
-        float percentOfRange = Mathf.InverseLerp(boundLeft.localPosition.x, boundRight.localPosition.x, sliderHandle.transform.localPosition.x);
-        float sliderValue = Mathf.Lerp(outputRange.x, outputRange.y, percentOfRange);
+        float sliderValue = GetSliderValue();
 
         //If the old position is different from the new position, call the OnValueChanged function
-        if(oldX != newX)
+        if (oldX != newX)
         {
             OnValueChanged.Invoke(sliderValue);
             if (onMoveSoundEffect != null)
@@ -115,5 +109,22 @@ public class SliderController : MonoBehaviour
                 }
             }
         }
+    }
+
+    private float GetSliderValue()
+    {
+        float percentOfRange = Mathf.InverseLerp(boundLeft.localPosition.x, boundRight.localPosition.x, sliderHandle.transform.localPosition.x);
+        return Mathf.Lerp(outputRange.x, outputRange.y, percentOfRange);
+    }
+
+    /// <summary>
+    /// Moves the slider to a value.
+    /// </summary>
+    /// <param name="value">The value of the slider.</param>
+    public void MoveToValue(float value)
+    {
+        Debug.Log("Percent: " + (value - outputRange.x) / (outputRange.y - outputRange.x));
+        float valuePercent = Mathf.Clamp((value - outputRange.x) / (outputRange.y - outputRange.x), 0f, 1f);
+        sliderHandle.transform.localPosition = Vector3.Lerp(boundLeft.localPosition, boundRight.localPosition, valuePercent);
     }
 }

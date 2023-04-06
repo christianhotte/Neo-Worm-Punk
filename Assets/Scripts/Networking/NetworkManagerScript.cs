@@ -6,6 +6,7 @@ using Photon.Realtime;
 using UnityEngine.SceneManagement;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using ExitGames.Client.Photon;
+using Photon.Voice.Unity;
 
 /* Code was referenced from https://www.youtube.com/watch?v=KHWuTBmT1oI
  * https://www.youtube.com/watch?v=zPZK7C5_BQo&list=PLhsVv9Uw1WzjI8fEBjBQpTyXNZ6Yp1ZLw */
@@ -54,7 +55,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         //Get objects & components:
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
-
     void Start()
     {
         // Subscribes event handlers
@@ -88,7 +88,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
-
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         // If we are loaded into the Network Locker scene, and we are the master client
@@ -113,7 +112,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     {
         if (!PhotonNetwork.IsConnected) { ConnectToServer(); }
     }
-
     void ConnectToServer()
     {
         PhotonNetwork.ConnectUsingSettings();
@@ -138,7 +136,11 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         {
             customRoomSettings = new Hashtable();
             customRoomSettings.Add("RoundLength", GameSettings.testMatchLength);
+            customRoomSettings.Add("PlayerHP", GameSettings.HPDefault);
         }
+        customRoomSettings.Add("TubeOccupants", new bool[6] { false, false, false, false, false, false});
+
+        Debug.Log("Tube Occupants On Create Room: " + customRoomSettings["TubeOccupants"]);
 
         roomOptions.IsOpen = true; // The room is open.
         roomOptions.EmptyRoomTtl = 0; // Leave the room open for 0 milliseconds after the room is empty
@@ -362,7 +364,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         //Cleanup:
         Debug.Log("Joined " + PhotonNetwork.CurrentRoom.Name + " room."); //Indicate that room has been joined
         SpawnNetworkPlayer();                                             //Always spawn a network player instance when joining a room
-        localNetworkPlayer.SetNetworkPlayerProperties("IsReady", false);
+        localNetworkPlayer.SetNetworkPlayerProperties("IsReady", false);;
+        AdjustVoiceVolume();
     }
 
     public override void OnJoinRoomFailed(short returnCode, string message)
@@ -390,6 +393,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         {
             lobbyUI.UpdateRoomList();
         }
+
+        AdjustVoiceVolume();
     }
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
@@ -400,6 +405,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         // Raises an event on player left room.
         PhotonNetwork.RaiseEvent(1, otherPlayer.ActorNumber, RaiseEventOptions.Default, SendOptions.SendReliable);
         localNetworkPlayer.SyncColors();
+
+        SetTubeOccupantStatus((int)otherPlayer.CustomProperties["TubeID"], false);
     }
 
     // This method is called when a custom event is received
@@ -487,12 +494,20 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     }
 
     //FUNCTIONALITY METHODS:
+    public void UpdateRoomSettings(string key, object value)
+    {
+        Hashtable currentRoomSettings = PhotonNetwork.CurrentRoom.CustomProperties;
+        currentRoomSettings[key] = value;
+        PhotonNetwork.CurrentRoom.SetCustomProperties(currentRoomSettings);
+    }
+
     public void SpawnNetworkPlayer()
     {
         if (localNetworkPlayer != null) { Debug.LogError("Tried to spawn a second NetworkPlayer for local client."); return; }              //Abort if player already has a network player
         localNetworkPlayer = PhotonNetwork.Instantiate(networkPlayerName, Vector3.zero, Quaternion.identity).GetComponent<NetworkPlayer>(); //Spawn instance of network player and get reference to its script
 
         Debug.Log("Actor Number For " + GetLocalPlayerName() + ": " + PhotonNetwork.LocalPlayer.ActorNumber);
+        OccupyNextAvailableTube();
     }
 
     public void DeSpawnNetworkPlayer()
@@ -525,9 +540,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         PlayerSettingsController.Instance.charData.playerAdjective = adjective;
         PlayerSettingsController.Instance.charData.playerNoun = noun;
 
-        Debug.Log("Current Name: " + currentName);
-        Debug.Log("Photon Name: " + PhotonNetwork.NickName);
-
         if (playWormSound)
         {
             //Plays the sound of the worm's nickname when setting it
@@ -535,6 +547,16 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     }
 
     //UTILITY METHODS:
+
+    /// <summary>
+    /// Adjusts the volumes of all speaking players.
+    /// </summary>
+    public void AdjustVoiceVolume()
+    {
+        foreach (var speaker in FindObjectsOfType<Speaker>())
+            speaker.GetComponent<AudioSource>().volume = PlayerPrefs.GetFloat("VoiceChatVolume", GameSettings.defaultVoiceSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound);
+    }
+
     public List<string> GetPlayerNameList()
     {
         List<string> playerNameList = new List<string>();
@@ -547,12 +569,12 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         return playerNameList;
     }
 
-    public void LoadSceneWithFade(string sceneName)
+    public void LoadSceneWithFade(string sceneName, bool asyncLoad = true)
     {
-        StartCoroutine(FadeLevelRoutine(sceneName));
+        StartCoroutine(FadeLevelRoutine(sceneName, asyncLoad));
     }
 
-    private IEnumerator FadeLevelRoutine(string sceneName)
+    private IEnumerator FadeLevelRoutine(string sceneName, bool asyncLoad)
     {
         GameManager.Instance.levelTransitionActive = true;
 
@@ -562,10 +584,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         yield return new WaitForSeconds(playerScreenFader.GetFadeDuration());
         yield return null;
 
-        if (PhotonNetwork.IsMasterClient)
-        {
-            PhotonNetwork.LoadLevel(sceneName);
-        }
+        PhotonNetwork.LoadLevel(sceneName);
 
         // Unready
         localNetworkPlayer.SetNetworkPlayerProperties("IsReady", false);
@@ -584,4 +603,43 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     public Player[] GetPlayerList() => PhotonNetwork.PlayerList;
     public string GetLocalPlayerName() => PhotonNetwork.LocalPlayer.NickName;
     public bool IsLocalPlayerInRoom() => PhotonNetwork.InRoom;
+
+    public bool[] GetTubeOccupancy()
+    {
+        if (PhotonNetwork.InRoom)
+            return (bool[])(PhotonNetwork.CurrentRoom.CustomProperties["TubeOccupants"]);
+        return null;
+    }
+
+    public void DebugDisplayRoomOccupancy()
+    {
+        if (GameSettings.debugMode)
+        {
+            for (int i = 0; i < GetTubeOccupancy().Length; i++)
+                Debug.Log("Tube " + (i + 1) + ": " + (GetTubeOccupancy()[i] ? "Occupied" : "Vacant").ToString());
+        }
+    }
+
+    public void SetTubeOccupantStatus(int tubeID, bool isOccupied)
+    {
+        bool[] tubeList = GetTubeOccupancy();
+        tubeList[tubeID] = isOccupied;
+        UpdateRoomSettings("TubeOccupants", tubeList);
+    }
+
+    public void OccupyNextAvailableTube()
+    {
+        DebugDisplayRoomOccupancy();
+
+        for (int i = 0; i < GetTubeOccupancy().Length; i++)
+        {
+            if (!GetTubeOccupancy()[i])
+            {
+                Debug.Log("Assigning " + GetLocalPlayerName() + " to Tube #" + (i + 1).ToString());
+                localNetworkPlayer.SetNetworkPlayerProperties("TubeID", i);
+                SetTubeOccupantStatus(i, true);
+                break;
+            }
+        }
+    }
 }

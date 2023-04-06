@@ -25,6 +25,7 @@ public class WormHole : NetworkedArenaElement
     }
     public IEnumerator StartWormhole(GameObject startHole,GameObject playerOBJ)
     {
+        PlayerController.instance.UnHolsterAll();
         locked = true; // Locks the worm whole circut      
         Transform exitPos;                                                           //define Exit Point
         Rigidbody playerRB;
@@ -66,15 +67,20 @@ public class WormHole : NetworkedArenaElement
         }
         if (enterSound != null) wormHoleAud.PlayOneShot(enterSound);
         PlayerController.photonView.RPC("RPC_MakeInvisible", RpcTarget.Others);
+        //playerRB.isKinematic = true;
         playerOBJ.transform.position = wormZoneShifted.position; //Player enters worm zone here
 
         float entryDiff = playerCam.transform.eulerAngles.y - wormZoneShifted.eulerAngles.y; //difference for player to face down wormhole
         playerOBJ.transform.rotation = Quaternion.Euler(playerOBJ.transform.eulerAngles.x, playerOBJ.transform.eulerAngles.y - entryDiff, playerOBJ.transform.eulerAngles.z);
         float startRot = playerCam.transform.eulerAngles.y;//reference the starting rotation of the players camera
+      //  playerRB.isKinematic = true;
         wormZoneInstance =Instantiate(wormZoneParticles);//spawns the wormhole instance
         wormZoneInstance.transform.position = new Vector3(PC.cam.transform.position.x , PC.cam.transform.position.y, PC.cam.transform.position.z);//moves the wormhole into position
         wormZoneInstance.transform.eulerAngles = new Vector3(0, startRot, 0); // sets the wormhole to be aligned with your face
         wormZoneSpeed = 120;// The speed you fly through the wormholes at
+
+      //  playerRB.isKinematic = false;
+       // playerRB.velocity = Vector3.zero;
         playerRB.velocity = wormZoneInstance.transform.forward * wormZoneSpeed;//giving the speed to the player
         yield return new WaitForSeconds(waitTime);//time to wait while traveling down worm hole
         float diff = playerCam.transform.eulerAngles.y - exitPos.transform.eulerAngles.y; // gets the difference in angle between the player and the exit
@@ -91,7 +97,13 @@ public class WormHole : NetworkedArenaElement
         yield return new WaitForSeconds(0.2f);  //Wait for the player to get clear of the wormhole
         ActiveWormholes.Remove(this);
         Destroy(wormZoneInstance);
-        locked = false;   //Unlock the Womrhole circut
-        
+        // locked = false;   //Unlock the Womrhole circut
+        StartCoroutine(TimedLock());
+    }
+
+    public IEnumerator TimedLock()
+    {
+        yield return new WaitForSeconds(3.0f);
+        locked = false;
     }
 }

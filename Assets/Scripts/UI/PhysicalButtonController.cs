@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.XR;
 using UnityEngine.Events;
 
 public class PhysicalButtonController : MonoBehaviour
@@ -30,17 +31,23 @@ public class PhysicalButtonController : MonoBehaviour
     private Transform buttonTransform;  //The button transform that moves when the button is pressed
     private IEnumerator buttonCoroutine; //The button coroutine
 
+    private MeshRenderer buttonRenderer;
     private Color defaultColor;
     private Transform buttonClicker;
 
-    private void Start()
+    private void Awake()
     {
         buttonTransform = transform.Find("Button");
         buttonClicker = buttonTransform.Find("Clicker");
-        defaultColor = buttonClicker.GetComponent<MeshRenderer>().material.GetColor("_BaseColor");
+        buttonRenderer = buttonClicker.GetComponent<MeshRenderer>();
+        defaultColor = buttonRenderer.material.GetColor("_BaseColor");
         startPos = buttonTransform.localPosition;
         endPos = startPos;
         endPos.z += threshold;
+    }
+
+    private void Start()
+    {
         isPressed = false;
     }
 
@@ -69,6 +76,9 @@ public class PhysicalButtonController : MonoBehaviour
             {
                 buttonCoroutine = PlayButtonAni();
                 StartCoroutine(buttonCoroutine);
+
+                InputDeviceRole playerHand = other.name.Contains("LeftHand") ? InputDeviceRole.LeftHanded : InputDeviceRole.RightHanded;
+                PlayerController.instance.SendHapticImpulse(playerHand, new Vector2(0.5f, 0.1f));
             }
             //If nothing applies, play the disabled sound effect
             else if(!isInteractable || isLocked)
@@ -144,13 +154,14 @@ public class PhysicalButtonController : MonoBehaviour
     /// <param name="setToDefault">If true, this sets the button's default color as well.</param>
     public void ChangeButtonColor(Color newColor, bool setToDefault = true)
     {
-        buttonClicker.GetComponent<MeshRenderer>().material.SetColor("_BaseColor", newColor);
-
+        MaterialPropertyBlock buttonMat = new MaterialPropertyBlock();
+        buttonMat.SetColor("_BaseColor", newColor);
+        buttonRenderer.SetPropertyBlock(buttonMat);
         if (setToDefault)
             defaultColor = newColor;
     }
 
-    public Color GetButtonColor() => buttonClicker.GetComponent<MeshRenderer>().material.GetColor("_BaseColor");
+    public Color GetButtonColor() => buttonRenderer.material.GetColor("_BaseColor");
 
     /// <summary>
     /// Shows the text that is on top of the button.
