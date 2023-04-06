@@ -65,13 +65,13 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
         if (tubeIndex == 0)
             spawnTube = GetEmptyTube();
         else
-            spawnTube = FindObjectOfType<TubeManager>().GetTubeByNumber(tubeIndex);
+            spawnTube = FindObjectOfType<LockerTubeSpawner>().GetTubeByIndex(tubeIndex);
 
         Debug.Log("Tube Being Occupied: TestTube" + spawnTube.GetTubeNumber() + " By " + NetworkManagerScript.instance.GetLocalPlayerName());
 
         if (spawnTube != null)
         {
-            spawnTube.occupied = true;
+            //spawnTube.occupied = true;
             PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
             PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
 
@@ -90,7 +90,7 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
 
     public LockerTubeController GetEmptyTube()
     {
-        TubeManager tubeManager = FindObjectOfType<TubeManager>();
+/*        TubeManager tubeManager = FindObjectOfType<TubeManager>();
 
         for (int x = 1; x <= tubeManager.roomTubes.Count; x++)
         {
@@ -105,7 +105,7 @@ public class SpawnManager2 : MonoBehaviourPunCallbacks
                     }
                 }
             }
-        }
+        }*/
 
         Debug.LogError("Error: Could Not Find An Empty Tube.");
         return null;

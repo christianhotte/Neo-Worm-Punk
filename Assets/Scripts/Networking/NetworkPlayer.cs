@@ -103,6 +103,7 @@ public class NetworkPlayer : MonoBehaviour
     {
         photonPlayerSettings.Add("Color", 0);
         photonPlayerSettings.Add("IsReady", false);
+        photonPlayerSettings.Add("TubeID", -1);
         PlayerController.photonView.Owner.SetCustomProperties(photonPlayerSettings);
     }
 
@@ -146,6 +147,7 @@ public class NetworkPlayer : MonoBehaviour
         //Reference cleanup:
         instances.Remove(this);                                                                                 //Remove from instance list
         if (photonView.IsMine && PlayerController.photonView == photonView) PlayerController.photonView = null; //Clear client photonView reference
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
@@ -341,8 +343,8 @@ public class NetworkPlayer : MonoBehaviour
         if(ReadyUpManager.instance != null)
         {
             //Refreshes the tubes
-            if (FindObjectOfType<TubeManager>() != null)
-                foreach (var tube in FindObjectOfType<TubeManager>().roomTubes)
+            if (FindObjectOfType<LockerTubeSpawner>() != null)
+                foreach (var tube in FindObjectOfType<LockerTubeSpawner>().GetTubeList())
                     tube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
         }
     }
@@ -526,8 +528,7 @@ public class NetworkPlayer : MonoBehaviour
     {
         if (SpawnManager2.instance != null)
         {
-            LockerTubeController tube = FindObjectOfType<TubeManager>().GetTubeByNumber(tubeNumber);
-            tube.occupied = false;
+            LockerTubeController tube = FindObjectOfType<LockerTubeSpawner>().GetTubeByIndex(tubeNumber);
             tube.UpdateLights(false);
             Debug.Log("TestTube" + tubeNumber + " Is Being Vacated...");
         }
