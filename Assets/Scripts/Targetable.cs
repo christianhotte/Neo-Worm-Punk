@@ -31,6 +31,7 @@ public class Targetable : MonoBehaviour
     //Settings:
     [Tooltip("The point in space which projectiles will target (leave empty to make it this object's transform.")] public Transform targetPoint;
     [Tooltip("Which projectiles will be able to lock on to this targetable instance.")]                            public TargetType type = TargetType.All;
+    [Tooltip("Forces hook projectiles to snap to center of object when hit")]                                      public bool hookToCenter = false;
 
     //Runtime Variables:
     internal bool active = true;
