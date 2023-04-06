@@ -25,10 +25,11 @@ public class NetworkPlayer : MonoBehaviour
     public static List<NetworkPlayer> instances = new List<NetworkPlayer>();
 
     internal PhotonView photonView;                              //PhotonView network component used by this NetworkPlayer to synchronize movement
-    [SerializeField] private SkinnedMeshRenderer bodyRenderer;                    //Renderer component for main player body/skin
+    private SkinnedMeshRenderer bodyRenderer;                    //Renderer component for main player body/skin
     private TrailRenderer trail;                                 //Renderer for trail that makes players more visible to each other
     internal PlayerStats networkPlayerStats = new PlayerStats(); //The stats for the network player
     internal Hashtable photonPlayerSettings;
+    public Material[] altMaterials;
 
     private Material[] defaultPlayerMaterials;
     private Material[] defaultTrailMaterials;
@@ -388,7 +389,7 @@ public class NetworkPlayer : MonoBehaviour
     /// </summary>
     /// <param name="newMaterial">The new NetworkPlayer materials.</param>
     /// <param name="trailMaterialIndex">The index of the trail material array.</param>
-    public void ChangeNetworkPlayerMaterial(Material newMaterial, int trailMaterialIndex = 0)
+    public void ChangeNetworkPlayerMaterial(Material newMaterial)
     {
         bodyRenderer.material = newMaterial;
         trail.material = newMaterial;
@@ -491,6 +492,13 @@ public class NetworkPlayer : MonoBehaviour
     public void RPC_ChangeVisibility()
     {
         print("why"); //This should never be called
+    }
+    [PunRPC]
+    public void RPC_ChangeMaterial(int materialIndex)
+    {
+        if (materialIndex == -1) ResetNetworkPlayerMaterials();
+        if (materialIndex >= altMaterials.Length) { Debug.LogError("Tried to change NetworkPlayer material using index out of range"); return; }
+        ChangeNetworkPlayerMaterial(altMaterials[materialIndex]);
     }
     /// <summary>
     /// Makes this player visible to the whole network and enables remote collisions (can also be used to clear their trail).
