@@ -41,7 +41,7 @@ public class UpgradeSpawner : MonoBehaviour
                     continue;
                 else
                 {
-                    player.ChangeNetworkPlayerMaterial(heatVision);
+                    player.ChangeNetworkPlayerMaterial(heatVision,0);
                 }
             }
             yield return new WaitForSeconds(waitTime);

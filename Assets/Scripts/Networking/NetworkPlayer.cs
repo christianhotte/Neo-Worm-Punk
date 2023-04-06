@@ -31,6 +31,7 @@ public class NetworkPlayer : MonoBehaviour
     internal Hashtable photonPlayerSettings;
 
     private Material[] defaultPlayerMaterials;
+    private Material[] defaultTrailMaterials;
 
     private Transform headTarget;      //True local position of player head
     private Transform leftHandTarget;  //True local position of player left hand
@@ -62,6 +63,7 @@ public class NetworkPlayer : MonoBehaviour
         wormName = GetComponentInChildren<TextMeshProUGUI>();
 
         defaultPlayerMaterials = bodyRenderer.materials;
+        defaultTrailMaterials = trail.materials;
 
         //Set up rig:
         foreach (PhotonTransformView view in GetComponentsInChildren<PhotonTransformView>()) //Iterate through each network-tracked component
@@ -381,10 +383,14 @@ public class NetworkPlayer : MonoBehaviour
     /// Changes the NetworkPlayer's materials.
     /// </summary>
     /// <param name="newMaterial">The new NetworkPlayer materials.</param>
-    public void ChangeNetworkPlayerMaterial(Material newMaterial)
+    /// <param name="trailMaterialIndex">The index of the trail material array.</param>
+    public void ChangeNetworkPlayerMaterial(Material newMaterial, int trailMaterialIndex = 0)
     {
         for (int i = 0; i < bodyRenderer.materials.Length; i++)
+        {
             bodyRenderer.materials[i] = newMaterial;
+            trail.materials[trailMaterialIndex] = newMaterial;
+        }
     }
 
     /// <summary>
@@ -394,6 +400,8 @@ public class NetworkPlayer : MonoBehaviour
     {
         for (int i = 0; i < bodyRenderer.materials.Length; i++)
             bodyRenderer.materials[i] = defaultPlayerMaterials[i];
+
+        trail.materials = defaultTrailMaterials;
     }
 
     /// <summary>
