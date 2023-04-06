@@ -324,9 +324,7 @@ public class HookProjectile : Projectile
         else
         {
             Vector3 hookPoint = hitInfo.point;
-            Targetable target = hitInfo.collider.GetComponent<Targetable>();
-            if (target == null) target = hitInfo.collider.GetComponent<Targetable>();
-            if (target != null && target.hookToCenter) hookPoint = target.transform.position;
+            if (hitInfo.collider.TryGetComponent(out Targetable target) && target.hookToCenter) { hookPoint = target.transform.position; print("OOg"); }
             HookToPoint(hookPoint); //Hook to given point
         }
         lastHit = hitInfo; //Store data from hit
