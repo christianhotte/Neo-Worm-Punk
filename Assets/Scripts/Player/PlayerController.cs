@@ -240,7 +240,7 @@ public class PlayerController : MonoBehaviour
                 healthVolume.weight = 1 - HealthPercent;                                                                               //Update health visualization
             }
         }
-        if (timeUntilVulnerable > 0) timeUntilVulnerable = Mathf.Max(timeUntilVulnerable - Time.deltaTime, 0);
+        if (timeUntilVulnerable > 0) { timeUntilVulnerable = Mathf.Max(timeUntilVulnerable - Time.deltaTime, 0); print(timeUntilVulnerable); }
     }
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
