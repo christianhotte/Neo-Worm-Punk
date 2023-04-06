@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: ProjectileSettings_HeatSeeker
   m_EditorClassIdentifier: 
   damage: 1
-  knockback: 10
+  knockback: 0
   explosionPrefab: {fileID: 5470892112642989696, guid: a01fa86dc420545488942b0fe674d939, type: 3}
   playerHitPrefab: {fileID: 4961703870536909422, guid: 143cb8c4c92491c4483d5f17556557ff, type: 3}
-  initialVelocity: 500
-  range: 250
+  initialVelocity: 350
+  range: 180
   barrelGap: 0
   drop: 0
-  homingStrength: 340
+  homingStrength: 450
   homingStrengthCurve:
     serializedVersion: 2
     m_Curve:
@@ -54,7 +54,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  targetDesignationAngle: {x: 10, y: 60}
+  targetDesignationAngle: {x: 15, y: 70}
   targetAngleCurve:
     serializedVersion: 2
     m_Curve:
@@ -88,7 +88,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  targetingDistance: 150
+  targetingDistance: 200
   targetingDistanceCurve:
     serializedVersion: 2
     m_Curve:
@@ -122,7 +122,7 @@ MonoBehaviour:
     m_Bits: 4832
   ignoreLayers:
     serializedVersion: 2
-    m_Bits: 2147712576
+    m_Bits: 2147712833
   radiusIgnoreLayers:
     serializedVersion: 2
     m_Bits: 2147745601
