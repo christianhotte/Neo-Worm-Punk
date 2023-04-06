@@ -21,6 +21,7 @@ public class UpgradeSpawner : MonoBehaviour
     [SerializeField] private string[] upgradeResourceNames = { "PowerUpTest" };
     [Space()]
     [SerializeField] private bool debugSpawn;
+    [SerializeField] private bool debugGiveSelectedUpgrade;
 
     //Runtime Variables:
     public PowerUp.PowerUpType currentPowerUp;
@@ -85,6 +86,12 @@ public class UpgradeSpawner : MonoBehaviour
             debugSpawn = false;
             SpawnUpgrade();
         }
+        if (debugGiveSelectedUpgrade)
+        {
+            debugGiveSelectedUpgrade = false;
+            StartCoroutine(DoPowerUp(currentPowerUp, 15));
+        }
+
         float LevelTimePercent = jumboScript.GetLevelTimer().LevelTimePercentage();
         if (primary == this && PhotonNetwork.IsMasterClient)
         {

@@ -496,8 +496,7 @@ public class NetworkPlayer : MonoBehaviour
     [PunRPC]
     public void RPC_ChangeMaterial(int materialIndex)
     {
-        if (materialIndex == -1) ResetNetworkPlayerMaterials();
-        if (materialIndex >= altMaterials.Length) { Debug.LogError("Tried to change NetworkPlayer material using index out of range"); return; }
+        if (materialIndex == -1) { ResetNetworkPlayerMaterials(); return; }
         ChangeNetworkPlayerMaterial(altMaterials[materialIndex]);
     }
     /// <summary>
