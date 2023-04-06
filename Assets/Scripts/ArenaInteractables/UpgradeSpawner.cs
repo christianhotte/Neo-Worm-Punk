@@ -15,8 +15,8 @@ public class UpgradeSpawner : MonoBehaviour
     private Jumbotron jumboScript;
     private bool alertin = false;
     private AudioSource thisAud;
+    public float heatVisionTime;
     public AudioClip upgradeAlert;
-    public Material heatVision;
     private int spawnedPowerups=0;
     //Settings:
     [Header("Settings:")]
@@ -25,6 +25,9 @@ public class UpgradeSpawner : MonoBehaviour
     [SerializeField] private float ejectForce = 10;
     [Space()]
     [SerializeField] private bool debugSpawn;
+    [Header("Upgrade-Specific Settings:")]
+    public Material heatVision;
+    public string heatSeekerPrefabName = "ShotgunSlug_Heatseeker";
 
     //Runtime Variables:
     public PowerUp.PowerUpType currentPowerUp;
@@ -35,28 +38,17 @@ public class UpgradeSpawner : MonoBehaviour
         currentPowerUp = powerType;
         if (currentPowerUp == PowerUp.PowerUpType.HeatVision)
         {
-            Debug.Log("startedHeatVison");
-            foreach (var player in NetworkPlayer.instances)
+            print("Network players being made visible = " + NetworkPlayer.instances.Count);
+            foreach (NetworkPlayer player in NetworkPlayer.instances)
             {
-                Debug.Log("EnteredHeatLoop");
-                if (player == NetworkManagerScript.localNetworkPlayer)
-                    continue;
-                else
-                {
-                    Debug.Log("TryingtoGiveColor");
-                    player.ChangeNetworkPlayerMaterial(heatVision,0);
-                }
+                if (player == NetworkManagerScript.localNetworkPlayer) continue;
+                player.ChangeNetworkPlayerMaterial(heatVision,0);
             }
-            yield return new WaitForSeconds(waitTime);
-            Debug.Log("WaitDone");
-            foreach (var player in NetworkPlayer.instances)
+            yield return new WaitForSeconds(heatVisionTime);
+            foreach (NetworkPlayer player in NetworkPlayer.instances)
             {
-                if (player == NetworkManagerScript.localNetworkPlayer)
-                    continue;
-                else
-                {
-                    player.ResetNetworkPlayerMaterials();
-                }
+                if (player == NetworkManagerScript.localNetworkPlayer) continue;
+                player.ResetNetworkPlayerMaterials();
             }
         }
         else yield return new WaitForSeconds(waitTime);
