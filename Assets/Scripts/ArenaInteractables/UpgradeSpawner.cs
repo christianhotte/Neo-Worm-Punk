@@ -13,21 +13,14 @@ public class UpgradeSpawner : MonoBehaviour
     /// </summary>
     public Transform spawnPoint;
     private Jumbotron jumboScript;
-    private bool alertin = false;
     private AudioSource thisAud;
-    public float heatVisionTime;
-    public AudioClip upgradeAlert;
     private int spawnedPowerups=0;
     //Settings:
     [Header("Settings:")]
     public PowerUpSettings settings;
     [SerializeField] private string[] upgradeResourceNames = { "PowerUpTest" };
-    [SerializeField] private float ejectForce = 10;
     [Space()]
     [SerializeField] private bool debugSpawn;
-    [Header("Upgrade-Specific Settings:")]
-    public Material heatVision;
-    public string heatSeekerPrefabName = "ShotgunSlug_Heatseeker";
 
     //Runtime Variables:
     public PowerUp.PowerUpType currentPowerUp;
@@ -42,9 +35,9 @@ public class UpgradeSpawner : MonoBehaviour
             foreach (NetworkPlayer player in NetworkPlayer.instances)
             {
                 if (player == NetworkManagerScript.localNetworkPlayer) continue;
-                player.ChangeNetworkPlayerMaterial(heatVision,0);
+                player.ChangeNetworkPlayerMaterial(settings.HeatVisMat,0);
             }
-            yield return new WaitForSeconds(heatVisionTime);
+            yield return new WaitForSeconds(settings.HeatVisionTime);
             foreach (NetworkPlayer player in NetworkPlayer.instances)
             {
                 if (player == NetworkManagerScript.localNetworkPlayer) continue;
@@ -122,7 +115,7 @@ public class UpgradeSpawner : MonoBehaviour
 
         string resourceName = "PowerUps/" + upgradeResourceNames[Random.Range(0, upgradeResourceNames.Length)];
         PowerUp newUpgrade = PhotonNetwork.Instantiate(resourceName, spawnPoint.position, spawnPoint.rotation).GetComponent<PowerUp>();
-        newUpgrade.rb.AddForce(spawnPoint.up * ejectForce, ForceMode.Impulse);
+        newUpgrade.rb.AddForce(spawnPoint.up * settings.LaunchForce, ForceMode.Impulse);
     }
     public static void SpawnRandomUpgrade()
     {
@@ -132,11 +125,11 @@ public class UpgradeSpawner : MonoBehaviour
     }
     public IEnumerator SpawnAlert()
     {
-        thisAud.PlayOneShot(upgradeAlert);
+        thisAud.PlayOneShot(settings.AlertSound);
         yield return new WaitForSeconds(0.7f);
-        thisAud.PlayOneShot(upgradeAlert);
+        thisAud.PlayOneShot(settings.AlertSound);
         yield return new WaitForSeconds(0.7f);
-        thisAud.PlayOneShot(upgradeAlert);
+        thisAud.PlayOneShot(settings.AlertSound);
         yield return new WaitForSeconds(0.7f);
     }
 }
