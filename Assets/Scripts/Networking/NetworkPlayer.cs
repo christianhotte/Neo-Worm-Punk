@@ -25,12 +25,13 @@ public class NetworkPlayer : MonoBehaviour
     public static List<NetworkPlayer> instances = new List<NetworkPlayer>();
 
     internal PhotonView photonView;                              //PhotonView network component used by this NetworkPlayer to synchronize movement
-    private SkinnedMeshRenderer bodyRenderer;                    //Renderer component for main player body/skin
+    [SerializeField] private SkinnedMeshRenderer bodyRenderer;                    //Renderer component for main player body/skin
     private TrailRenderer trail;                                 //Renderer for trail that makes players more visible to each other
     internal PlayerStats networkPlayerStats = new PlayerStats(); //The stats for the network player
     internal Hashtable photonPlayerSettings;
 
     private Material[] defaultPlayerMaterials;
+    private Material[] defaultTrailMaterials;
 
     private Transform headTarget;      //True local position of player head
     private Transform leftHandTarget;  //True local position of player left hand
@@ -62,6 +63,7 @@ public class NetworkPlayer : MonoBehaviour
         wormName = GetComponentInChildren<TextMeshProUGUI>();
 
         defaultPlayerMaterials = bodyRenderer.materials;
+        defaultTrailMaterials = trail.materials;
 
         //Set up rig:
         foreach (PhotonTransformView view in GetComponentsInChildren<PhotonTransformView>()) //Iterate through each network-tracked component
@@ -281,7 +283,7 @@ public class NetworkPlayer : MonoBehaviour
     /// </summary>
     public void UpdateTakenColorsOnJoin()
     {
-        if(ReadyUpManager.instance != null)
+        if (ReadyUpManager.instance != null)
         {
             List<int> takenColors = new List<int>();
 
@@ -308,7 +310,7 @@ public class NetworkPlayer : MonoBehaviour
             //If the player must replace their color, change their color
             if (mustReplaceColor)
             {
-                for(int i = 0; i < PlayerSettingsController.NumberOfPlayerColors(); i++)
+                for (int i = 0; i < PlayerSettingsController.NumberOfPlayerColors(); i++)
                 {
                     //If the taken color list does not contain the current color list, take it
                     if (!takenColors.Contains(i))
@@ -340,11 +342,11 @@ public class NetworkPlayer : MonoBehaviour
     {
         Debug.Log("Updating Taken Color List...");
 
-        if(ReadyUpManager.instance != null)
+        if (ReadyUpManager.instance != null)
         {
             //Refreshes the tubes
-            if (FindObjectOfType<TubeManager>() != null)
-                foreach (var tube in FindObjectOfType<TubeManager>().roomTubes)
+            if (FindObjectOfType<LockerTubeSpawner>() != null)
+                foreach (var tube in FindObjectOfType<LockerTubeSpawner>().GetTubeList())
                     tube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
         }
     }
@@ -385,10 +387,11 @@ public class NetworkPlayer : MonoBehaviour
     /// Changes the NetworkPlayer's materials.
     /// </summary>
     /// <param name="newMaterial">The new NetworkPlayer materials.</param>
-    public void ChangeNetworkPlayerMaterial(Material newMaterial)
+    /// <param name="trailMaterialIndex">The index of the trail material array.</param>
+    public void ChangeNetworkPlayerMaterial(Material newMaterial, int trailMaterialIndex = 0)
     {
-        for (int i = 0; i < bodyRenderer.materials.Length; i++)
-            bodyRenderer.materials[i] = newMaterial;
+        bodyRenderer.material = newMaterial;
+        trail.material = newMaterial;
     }
 
     /// <summary>
@@ -396,8 +399,8 @@ public class NetworkPlayer : MonoBehaviour
     /// </summary>
     public void ResetNetworkPlayerMaterials()
     {
-        for (int i = 0; i < bodyRenderer.materials.Length; i++)
-            bodyRenderer.materials[i] = defaultPlayerMaterials[i];
+        bodyRenderer.materials = defaultPlayerMaterials;
+        trail.materials = defaultTrailMaterials;
     }
 
     /// <summary>
@@ -528,8 +531,7 @@ public class NetworkPlayer : MonoBehaviour
     {
         if (SpawnManager2.instance != null)
         {
-            LockerTubeController tube = FindObjectOfType<TubeManager>().GetTubeByNumber(tubeNumber);
-            tube.occupied = false;
+            LockerTubeController tube = FindObjectOfType<LockerTubeSpawner>().GetTubeByIndex(tubeNumber);
             tube.UpdateLights(false);
             Debug.Log("TestTube" + tubeNumber + " Is Being Vacated...");
         }

@@ -675,8 +675,10 @@ MonoBehaviour:
   torsoVerticalOffset: 2
   keepTorsoCentered: 1
   flickStickThreshold: 0.7
+  slipSpeed: 5
+  slipAngleRange: {x: 0, y: 0}
   targetHitSound: {fileID: 8300000, guid: 531eac65f6344cf478fc990cb0396400, type: 3}
-  debugUpdateSettings: 0
+  targetKillSound: {fileID: 0}
   useSpawnPoint: 1
   debugCenterCamera: 0
   debugSpawnNetworkPlayer: 0
@@ -763,7 +765,7 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 32767
+    m_Bits: 163839
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0

@@ -68,12 +68,6 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         UpdateReadyText();
-
-        // If the amount of players in the room is maxed out, close the room so no more people are able to join.
-/*        if (PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
-        {
-            PhotonNetwork.CurrentRoom.IsOpen = false;
-        }*/
     }
 
     // When a player leaves the room
@@ -99,10 +93,10 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     [PunRPC]
     public void RPC_UpdateReadyStatus(int tubeID, bool updatedPlayerReady)
     {
-        if(FindObjectOfType<TubeManager>() != null)
+        if(FindObjectOfType<LockerTubeSpawner>() != null)
         {
             Debug.Log("Tube ID is: " + tubeID);
-            LockerTubeController tube = FindObjectOfType<TubeManager>().GetTubeByNumber(tubeID);
+            LockerTubeController tube = FindObjectOfType<LockerTubeSpawner>().GetTubeByIndex(tubeID);
             if (tube != null) tube.UpdateLights(updatedPlayerReady);
 
             // Get the number of players that have readied up
@@ -132,18 +126,6 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
             }
         }
     }
-
-    [PunRPC]
-    public void RPC_UpdateTubeOccupation(bool[] tubeStates)
-    {
-        List<LockerTubeController> roomTubes = FindObjectOfType<TubeManager>().roomTubes;
-
-        for (int i = 0; i < roomTubes.Count; i++)
-        {
-            //roomTubes[i] = 
-        }
-    }
-
 
     /// <summary>
     /// Updates the text in the center of the room.
@@ -182,9 +164,12 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     /// </summary>
     public void HideTubeHostSettings()
     {
-        //Hide the host settings for all tubes
-        foreach (var tube in FindObjectOfType<TubeManager>().roomTubes)
-            tube.ShowHostSettings(false);
+        if(SceneManager.GetActiveScene().name == GameSettings.roomScene)
+        {
+            //Hide the host settings for all tubes
+            foreach (var tube in FindObjectOfType<LockerTubeSpawner>().GetTubeList())
+                tube.ShowHostSettings(false);
+        }
     }
 
     /// <summary>
@@ -193,13 +178,6 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     private int GetAllPlayersReady()
     {
         int playersReady = 0;
-
-/*        // Gets the amount of players that have a readied lever at lowest state.
-        foreach (var players in FindObjectsOfType<NetworkPlayer>())
-        {
-            if (players.GetNetworkPlayerStats().isReady)
-                playersReady++;
-        }*/
 
         foreach(var player in NetworkManagerScript.instance.GetPlayerList())
         {

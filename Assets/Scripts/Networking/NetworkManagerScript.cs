@@ -366,7 +366,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         SpawnNetworkPlayer();                                             //Always spawn a network player instance when joining a room
         localNetworkPlayer.SetNetworkPlayerProperties("IsReady", false);;
         AdjustVoiceVolume();
-        OccupyNextAvailableTube();
     }
 
     public override void OnJoinRoomFailed(short returnCode, string message)
@@ -508,6 +507,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         localNetworkPlayer = PhotonNetwork.Instantiate(networkPlayerName, Vector3.zero, Quaternion.identity).GetComponent<NetworkPlayer>(); //Spawn instance of network player and get reference to its script
 
         Debug.Log("Actor Number For " + GetLocalPlayerName() + ": " + PhotonNetwork.LocalPlayer.ActorNumber);
+        OccupyNextAvailableTube();
     }
 
     public void DeSpawnNetworkPlayer()
@@ -539,9 +539,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         PhotonNetwork.NickName = currentName;
         PlayerSettingsController.Instance.charData.playerAdjective = adjective;
         PlayerSettingsController.Instance.charData.playerNoun = noun;
-
-        Debug.Log("Current Name: " + currentName);
-        Debug.Log("Photon Name: " + PhotonNetwork.NickName);
 
         if (playWormSound)
         {
@@ -618,7 +615,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     {
         if (GameSettings.debugMode)
         {
-            Debug.Log("Tube Occupants: " + (PhotonNetwork.CurrentRoom.CustomProperties["TubeOccupants"]).ToString());
             for (int i = 0; i < GetTubeOccupancy().Length; i++)
                 Debug.Log("Tube " + (i + 1) + ": " + (GetTubeOccupancy()[i] ? "Occupied" : "Vacant").ToString());
         }
@@ -639,6 +635,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         {
             if (!GetTubeOccupancy()[i])
             {
+                Debug.Log("Assigning " + GetLocalPlayerName() + " to Tube #" + (i + 1).ToString());
                 localNetworkPlayer.SetNetworkPlayerProperties("TubeID", i);
                 SetTubeOccupantStatus(i, true);
                 break;

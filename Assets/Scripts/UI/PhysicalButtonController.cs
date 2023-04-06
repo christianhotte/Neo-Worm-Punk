@@ -77,7 +77,7 @@ public class PhysicalButtonController : MonoBehaviour
                 buttonCoroutine = PlayButtonAni();
                 StartCoroutine(buttonCoroutine);
 
-                InputDeviceRole playerHand = other.name == "LeftHand" ? InputDeviceRole.LeftHanded : InputDeviceRole.RightHanded;
+                InputDeviceRole playerHand = other.name.Contains("LeftHand") ? InputDeviceRole.LeftHanded : InputDeviceRole.RightHanded;
                 PlayerController.instance.SendHapticImpulse(playerHand, new Vector2(0.5f, 0.1f));
             }
             //If nothing applies, play the disabled sound effect
