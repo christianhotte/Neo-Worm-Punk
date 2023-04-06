@@ -17,6 +17,8 @@ public class NewGrapplerController : PlayerEquipment
     internal Transform barrel;           //Position hook is launched from, and point where the line begins
     internal PlayerEquipment handWeapon; //Player weapon held in the same hand as this chainsaw
 
+    internal NewChainsawController otherHandChainsaw;
+
     //Settings:
     [Tooltip("Mechanical properties describing hookshot functionality and effects.")]                                         public HookshotSettings settings;
     [Tooltip("When hook is stowed, hook will be visible and will be childed to barrel (weapon will not need a stow point).")] public bool hookVisibleOnBarrel;
@@ -60,6 +62,7 @@ public class NewGrapplerController : PlayerEquipment
         foreach (PlayerEquipment equipment in player.attachedEquipment) //Iterate through all equipment attached to player
         {
             if (equipment != this && equipment.handedness == handedness) { handWeapon = equipment; break; } //Try to get weapon used by same hand
+            if (equipment.GetComponent<NewChainsawController>() != null) otherHandChainsaw = equipment.GetComponent<NewChainsawController>();
         }
 
         //Set up projectile:
