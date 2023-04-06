@@ -388,7 +388,6 @@ public class NetworkPlayer : MonoBehaviour
     /// Changes the NetworkPlayer's materials.
     /// </summary>
     /// <param name="newMaterial">The new NetworkPlayer materials.</param>
-    /// <param name="trailMaterialIndex">The index of the trail material array.</param>
     public void ChangeNetworkPlayerMaterial(Material newMaterial)
     {
         bodyRenderer.material = newMaterial;

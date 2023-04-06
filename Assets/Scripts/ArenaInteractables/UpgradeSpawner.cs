@@ -37,15 +37,15 @@ public class UpgradeSpawner : MonoBehaviour
             {
                 if (player == NetworkManagerScript.localNetworkPlayer) continue;
                 player.ChangeNetworkPlayerMaterial(settings.HeatVisMat);
-                player.photonView.RPC("RPC_ChangeMaterial", RpcTarget.OthersBuffered, 0);
             }
+            PlayerController.photonView.RPC("RPC_ChangeMaterial", RpcTarget.Others, 0);
             yield return new WaitForSeconds(settings.HeatVisionTime);
             foreach (NetworkPlayer player in NetworkPlayer.instances)
             {
                 if (player == NetworkManagerScript.localNetworkPlayer) continue;
                 player.ResetNetworkPlayerMaterials();
-                player.photonView.RPC("RPC_ChangeMaterial", RpcTarget.OthersBuffered, -1);
             }
+            PlayerController.photonView.RPC("RPC_ChangeMaterial", RpcTarget.Others, -1);
         }
         else yield return new WaitForSeconds(waitTime);
         currentPowerUp = PowerUp.PowerUpType.None;
