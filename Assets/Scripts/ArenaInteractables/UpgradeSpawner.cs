@@ -16,7 +16,6 @@ public class UpgradeSpawner : MonoBehaviour
     private bool alertin = false;
     private AudioSource thisAud;
     public AudioClip upgradeAlert;
-    public Material heatVision;
     private int spawnedPowerups=0;
     //Settings:
     [Header("Settings:")]
@@ -25,6 +24,9 @@ public class UpgradeSpawner : MonoBehaviour
     [SerializeField] private float ejectForce = 10;
     [Space()]
     [SerializeField] private bool debugSpawn;
+    [Header("Upgrade-Specific Settings:")]
+    public Material heatVision;
+    public string heatSeekerPrefabName = "ShotgunSlug_Heatseeker";
 
     //Runtime Variables:
     public PowerUp.PowerUpType currentPowerUp;
