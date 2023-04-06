@@ -144,6 +144,8 @@ public class NetworkPlayer : MonoBehaviour
     }
     private void OnDestroy()
     {
+        //photonView.RPC("RPC_TubeVacated", RpcTarget.All, lastTubeNumber);
+
         //Reference cleanup:
         instances.Remove(this);                                                                                 //Remove from instance list
         if (photonView.IsMine && PlayerController.photonView == photonView) PlayerController.photonView = null; //Clear client photonView reference
@@ -215,6 +217,8 @@ public class NetworkPlayer : MonoBehaviour
     private void OnPlayerDisconnected(NetworkPlayer player)
     {
         Debug.Log("Cleaning up after player " + player);
+
+        photonView.RPC("RPC_TubeVacated", RpcTarget.All, lastTubeNumber);
         //RemoveRPCs(player);
         //DestroyPlayerObjects(player);
     }
@@ -520,6 +524,48 @@ public class NetworkPlayer : MonoBehaviour
     public void RPC_Tether(int targetId)
     {
 
+    }
+
+    [PunRPC]
+    public void RPC_RemoteSpawnPlayer(int tubeNumber)
+    {
+        lastTubeNumber = tubeNumber;
+        if (SpawnManager2.instance != null)
+        {
+            SpawnManager2.instance.MoveDemoPlayerToSpawnPoint(tubeNumber);
+        }
+    }
+    [PunRPC]
+    public void RPC_TubeVacated(int tubeNumber)
+    {
+        if (SpawnManager2.instance != null)
+        {
+            LockerTubeController tube = FindObjectOfType<LockerTubeSpawner>().GetTubeByIndex(tubeNumber);
+            tube.UpdateLights(false);
+            Debug.Log("TestTube" + tubeNumber + " Is Being Vacated...");
+        }
+        if (ReadyUpManager.instance != null)
+        {
+            ReadyUpManager.instance.OnLeftRoom();
+            ReadyUpManager.instance.UpdateReadyText();
+        }
+        
+    }
+
+    //BELOW METHODS ONLY GET CALLED ON MASTER CLIENT
+    [PunRPC]
+    public void RPC_GiveMeSpawnpoint(int myViewID)
+    {
+        if (SpawnManager2.instance != null && !inTube)
+        {
+            LockerTubeController spawnTube = SpawnManager2.instance.GetEmptyTube();
+            if (spawnTube != null)
+            {
+                Player targetPlayer = PhotonNetwork.GetPhotonView(myViewID).Owner;
+                photonView.RPC("RPC_RemoteSpawnPlayer", targetPlayer, spawnTube.GetTubeNumber());
+                inTube = true;
+            }
+        }
     }
 
     //UTILITY METHODS:
