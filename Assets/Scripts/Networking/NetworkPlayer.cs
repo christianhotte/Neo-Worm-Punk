@@ -388,8 +388,10 @@ public class NetworkPlayer : MonoBehaviour
     {
         for (int i = 0; i < bodyRenderer.materials.Length; i++)
         {
+            Debug.Log("ChangeNetwrokPlayerMatStart");
             bodyRenderer.materials[i] = newMaterial;
             trail.materials[trailMaterialIndex] = newMaterial;
+            Debug.Log("ChangeNetwrokPlayerMatComplete");
         }
     }
 
@@ -398,10 +400,12 @@ public class NetworkPlayer : MonoBehaviour
     /// </summary>
     public void ResetNetworkPlayerMaterials()
     {
+        Debug.Log("ResetNetwrokPlayerMatStart");
         for (int i = 0; i < bodyRenderer.materials.Length; i++)
             bodyRenderer.materials[i] = defaultPlayerMaterials[i];
 
         trail.materials = defaultTrailMaterials;
+        Debug.Log("ResetNetwrokPlayerMatComplete");
     }
 
     /// <summary>
