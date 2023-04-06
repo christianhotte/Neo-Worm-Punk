@@ -313,10 +313,19 @@ public class NewShotgunController : PlayerEquipment
         List<Projectile> spawnedProjectiles = new List<Projectile>(); //Initialize list of projectiles spawned by shot
         int shots = gunSettings.projectilesPerShot;
         float spread = gunSettings.shotSpread;
-        if (UpgradeSpawner.primary != null && UpgradeSpawner.primary.currentPowerUp == PowerUp.PowerUpType.MultiShot)
+        string activeProjName = projResourceName;
+        if (UpgradeSpawner.primary != null) //Upgrade system modifiers
         {
-            shots *= UpgradeSpawner.primary.settings.MS_projectileMultiplier;
-            spread += UpgradeSpawner.primary.settings.MS_spreadAdd;
+            switch (UpgradeSpawner.primary.currentPowerUp)
+            {
+                case PowerUp.PowerUpType.MultiShot:
+                    shots *= UpgradeSpawner.primary.settings.MS_projectileMultiplier;
+                    spread += UpgradeSpawner.primary.settings.MS_spreadAdd;
+                    break;
+                case PowerUp.PowerUpType.HeatVision:
+                    activeProjName = "Projectiles/" + UpgradeSpawner.primary.heatSeekerPrefabName;
+                    break;
+            }
         }
         for (int x = 0; x < shots; x++) //Iterate for number of projectiles spawned by shot
         {
@@ -328,12 +337,12 @@ public class NewShotgunController : PlayerEquipment
             Projectile newProjectile; //Initialize reference container for spawned projectile
             if (debugFireLocal || !PhotonNetwork.InRoom) //Weapon is in local fire mode
             {
-                newProjectile = ((GameObject)Instantiate(Resources.Load(projResourceName))).GetComponent<Projectile>(); //Instantiate projectile
-                newProjectile.FireDumb(currentBarrel);                                                                  //Initialize projectile
+                newProjectile = ((GameObject)Instantiate(Resources.Load(activeProjName))).GetComponent<Projectile>(); //Instantiate projectile
+                newProjectile.FireDumb(currentBarrel);                                                                //Initialize projectile
             }
             else //Weapon is firing on the network
             {
-                newProjectile = PhotonNetwork.Instantiate(projResourceName, currentBarrel.position, currentBarrel.rotation).GetComponent<Projectile>();      //Instantiate projectile on network
+                newProjectile = PhotonNetwork.Instantiate(activeProjName, currentBarrel.position, currentBarrel.rotation).GetComponent<Projectile>();        //Instantiate projectile on network
                 newProjectile.photonView.RPC("RPC_Fire", RpcTarget.All, currentBarrel.position, currentBarrel.rotation, PlayerController.photonView.ViewID); //Initialize all projectiles simultaneously
             }
             spawnedProjectiles.Add(newProjectile); //Add projectile to spawn list

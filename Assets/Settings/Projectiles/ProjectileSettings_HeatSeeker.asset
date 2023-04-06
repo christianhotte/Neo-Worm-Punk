@@ -1,0 +1,130 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7faa7af77b7e587419bba59ae685ea14, type: 3}
+  m_Name: ProjectileSettings_HeatSeeker
+  m_EditorClassIdentifier: 
+  damage: 1
+  knockback: 10
+  explosionPrefab: {fileID: 5470892112642989696, guid: a01fa86dc420545488942b0fe674d939, type: 3}
+  playerHitPrefab: {fileID: 4961703870536909422, guid: 143cb8c4c92491c4483d5f17556557ff, type: 3}
+  initialVelocity: 500
+  range: 250
+  barrelGap: 0
+  drop: 0
+  homingStrength: 340
+  homingStrengthCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1.4960938
+      inSlope: -4.960938
+      outSlope: -4.960938
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.099999994
+      value: 1
+      inSlope: -4.960938
+      outSlope: -0.5555556
+      tangentMode: 69
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0.5
+      inSlope: -0.5555556
+      outSlope: -0.5555556
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  targetDesignationAngle: {x: 10, y: 60}
+  targetAngleCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 2
+      inSlope: -5
+      outSlope: -5
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.2
+      value: 1
+      inSlope: -5
+      outSlope: -0.12500003
+      tangentMode: 69
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0.9
+      inSlope: -0.12500003
+      outSlope: -0.12500003
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  targetingDistance: 150
+  targetingDistanceCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  LOSTargeting: 0
+  alwaysLookForTarget: 1
+  predictionStrength: 0.65
+  angleDistancePreference: 0.4
+  targetingIgnoreLayers:
+    serializedVersion: 2
+    m_Bits: 4832
+  ignoreLayers:
+    serializedVersion: 2
+    m_Bits: 2147712576
+  radiusIgnoreLayers:
+    serializedVersion: 2
+    m_Bits: 2147745601
+  dumbTargetAquisitionRadius: 1
+  radius: 1.5

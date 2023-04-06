@@ -16,7 +16,6 @@ public class UpgradeSpawner : MonoBehaviour
     private bool alertin = false;
     private AudioSource thisAud;
     public AudioClip upgradeAlert;
-    public Material heatVision;
     private int spawnedPowerups=0;
     //Settings:
     [Header("Settings:")]
@@ -25,6 +24,9 @@ public class UpgradeSpawner : MonoBehaviour
     [SerializeField] private float ejectForce = 10;
     [Space()]
     [SerializeField] private bool debugSpawn;
+    [Header("Upgrade-Specific Settings:")]
+    public Material heatVision;
+    public string heatSeekerPrefabName = "ShotgunSlug_Heatseeker";
 
     //Runtime Variables:
     public PowerUp.PowerUpType currentPowerUp;
@@ -35,24 +37,19 @@ public class UpgradeSpawner : MonoBehaviour
         currentPowerUp = powerType;
         if (currentPowerUp == PowerUp.PowerUpType.HeatVision)
         {
-            foreach (var player in NetworkPlayer.instances)
+            Debug.Log("startedHeatVison");
+            print("Network players being made visible = " + NetworkPlayer.instances.Count);
+            foreach (NetworkPlayer player in NetworkPlayer.instances)
             {
-                if (player == NetworkManagerScript.localNetworkPlayer)
-                    continue;
-                else
-                {
-                    player.ChangeNetworkPlayerMaterial(heatVision,0);
-                }
+                if (player == NetworkManagerScript.localNetworkPlayer) continue;
+                player.ChangeNetworkPlayerMaterial(heatVision,0);
             }
             yield return new WaitForSeconds(waitTime);
-            foreach (var player in NetworkPlayer.instances)
+            Debug.Log("WaitDone");
+            foreach (NetworkPlayer player in NetworkPlayer.instances)
             {
-                if (player == NetworkManagerScript.localNetworkPlayer)
-                    continue;
-                else
-                {
-                    player.ResetNetworkPlayerMaterials();
-                }
+                if (player == NetworkManagerScript.localNetworkPlayer) continue;
+                player.ResetNetworkPlayerMaterials();
             }
         }
         else yield return new WaitForSeconds(waitTime);
