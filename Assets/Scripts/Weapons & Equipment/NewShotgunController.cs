@@ -323,7 +323,7 @@ public class NewShotgunController : PlayerEquipment
                     spread += UpgradeSpawner.primary.settings.MS_spreadAdd;
                     break;
                 case PowerUp.PowerUpType.HeatVision:
-                    activeProjName = "Projectiles/" + UpgradeSpawner.primary.heatSeekerPrefabName;
+                    activeProjName = "Projectiles/" + UpgradeSpawner.primary.settings.heatSeekerPrefabName;
                     break;
             }
         }
