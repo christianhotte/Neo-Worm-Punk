@@ -25,7 +25,7 @@ public class NetworkPlayer : MonoBehaviour
     public static List<NetworkPlayer> instances = new List<NetworkPlayer>();
 
     internal PhotonView photonView;                              //PhotonView network component used by this NetworkPlayer to synchronize movement
-    private SkinnedMeshRenderer bodyRenderer;                    //Renderer component for main player body/skin
+    [SerializeField] private SkinnedMeshRenderer bodyRenderer;                    //Renderer component for main player body/skin
     private TrailRenderer trail;                                 //Renderer for trail that makes players more visible to each other
     internal PlayerStats networkPlayerStats = new PlayerStats(); //The stats for the network player
     internal Hashtable photonPlayerSettings;
@@ -386,13 +386,16 @@ public class NetworkPlayer : MonoBehaviour
     /// <param name="trailMaterialIndex">The index of the trail material array.</param>
     public void ChangeNetworkPlayerMaterial(Material newMaterial, int trailMaterialIndex = 0)
     {
-        for (int i = 0; i < bodyRenderer.materials.Length; i++)
+        bodyRenderer.material = newMaterial;
+        trail.material = newMaterial;
+
+        /*for (int i = 0; i < bodyRenderer.materials.Length; i++)
         {
             Debug.Log("ChangeNetwrokPlayerMatStart");
             bodyRenderer.materials[i] = newMaterial;
-            trail.materials[trailMaterialIndex] = newMaterial;
             Debug.Log("ChangeNetwrokPlayerMatComplete");
-        }
+        }*/
+        //trail.materials[trailMaterialIndex] = newMaterial;
     }
 
     /// <summary>
@@ -401,10 +404,10 @@ public class NetworkPlayer : MonoBehaviour
     public void ResetNetworkPlayerMaterials()
     {
         Debug.Log("ResetNetwrokPlayerMatStart");
-        for (int i = 0; i < bodyRenderer.materials.Length; i++)
-            bodyRenderer.materials[i] = defaultPlayerMaterials[i];
-
+        bodyRenderer.materials = defaultPlayerMaterials;
         trail.materials = defaultTrailMaterials;
+        /*for (int i = 0; i < bodyRenderer.materials.Length; i++)
+            bodyRenderer.materials[i] = defaultPlayerMaterials[i];*/
         Debug.Log("ResetNetwrokPlayerMatComplete");
     }
 
