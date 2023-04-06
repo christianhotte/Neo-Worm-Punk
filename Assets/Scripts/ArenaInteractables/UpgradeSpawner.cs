@@ -35,16 +35,20 @@ public class UpgradeSpawner : MonoBehaviour
         currentPowerUp = powerType;
         if (currentPowerUp == PowerUp.PowerUpType.HeatVision)
         {
+            Debug.Log("startedHeatVison");
             foreach (var player in NetworkPlayer.instances)
             {
+                Debug.Log("EnteredHeatLoop");
                 if (player == NetworkManagerScript.localNetworkPlayer)
                     continue;
                 else
                 {
+                    Debug.Log("TryingtoGiveColor");
                     player.ChangeNetworkPlayerMaterial(heatVision,0);
                 }
             }
             yield return new WaitForSeconds(waitTime);
+            Debug.Log("WaitDone");
             foreach (var player in NetworkPlayer.instances)
             {
                 if (player == NetworkManagerScript.localNetworkPlayer)
