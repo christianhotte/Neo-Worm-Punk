@@ -25,6 +25,7 @@ public class ShotgunSettings : ScriptableObject
     [Min(0), Tooltip("Distance from wall at which wall boost power will begin to take effect (closer means more power).")]            public float maxWallBoostDist;
     [Tooltip("If player fires weapon near a wall, always give them the maximum possible boost.")]                                     public bool alwaysMaxWallBoost = true;
     [Tooltip("Layers which weapon will consider a wall for the purposes of wallboosting.")]                                           public LayerMask wallBoostLayers;
+    [Min(0), Tooltip("Radius of sphere used to check whether or not shotgun is in a wall.")]                                          public float wallCheckSphereRadius = 1f;
     [Min(1), Tooltip("If player fires within this angle of their current velocity, shot will add velocity instead of replacing it.")] public float additiveVelocityMaxAngle;
     [Range(0, 1), Tooltip("Multiplier applied to velocity addition when player is firing multiple times in the same direction.")]     public float additiveVelocityMultiplier;
     [Tooltip("Modulates additive velocity multiplier depending on how aligned shot is with current velocity.")]                       public AnimationCurve additiveVelocityCurve;
