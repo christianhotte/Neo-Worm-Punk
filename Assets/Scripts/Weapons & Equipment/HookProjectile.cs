@@ -160,13 +160,21 @@ public class HookProjectile : Projectile
             //Check for wall bounce:
             if (Vector3.Distance(controller.barrel.position, tetherPoint.position) <= controller.settings.wallBounceDist) //Player is very close to hook
             {
+                //Disengagement types:
                 Release(); //Release hook
-                if (lastHit.collider.transform.TryGetComponent(out JumpPad jumpPad)) jumpPad.Bounce();
-                else if (controller.settings.noDisengageLayers == (controller.settings.noDisengageLayers | (1 << lastHit.collider.gameObject.layer)))
+                if (lastHit.collider.transform.TryGetComponent(out JumpPad jumpPad)) jumpPad.Bounce(); //Bounce pad has been hit
+                else if (controller.settings.noDisengageLayers == (controller.settings.noDisengageLayers | (1 << lastHit.collider.gameObject.layer))) //No disengage layer has been hit
                 {
-                    print("Grappler released but with no disengagement.");
+                    //print("Grappler released but with no disengagement.");
                 }
-                else if (controller.settings.wallBounceForce > 0) controller.player.bodyRb.velocity = lastHit.normal * controller.settings.wallBounceForce; //Bounce player away from wall with designated amount of force
+                else if (controller.otherHandChainsaw != null && controller.otherHandChainsaw.mode != NewChainsawController.BladeMode.Sheathed) //No disengage if chainsaw is active
+                {
+                    //print("Grappler tether distance was too short for disengagement");
+                }
+                else if (controller.settings.wallBounceForce > 0) //Normal disengagement is occurring
+                {
+                    controller.player.bodyRb.velocity = lastHit.normal * controller.settings.wallBounceForce; //Bounce player away from wall with designated amount of force
+                }
             }
         }
 

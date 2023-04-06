@@ -16,4 +16,6 @@ public class HealthSettings : ScriptableObject
     [Header("Effects:")]
     [Tooltip("Base sound object makes when it is damaged.")] public AudioClip hurtSound;
     [Tooltip("Sound object makes when it is destroyed.")]    public AudioClip deathSound;
+    [Header("Gameplay:")]
+    [Min(0), Tooltip("How much time after spawning player has before they become vulnerable.")] public float spawnInvincibilityTime;
 }
