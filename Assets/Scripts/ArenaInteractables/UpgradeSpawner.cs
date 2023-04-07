@@ -21,6 +21,7 @@ public class UpgradeSpawner : MonoBehaviour
     [SerializeField] private string[] upgradeResourceNames = { "PowerUpTest" };
     [Space()]
     [SerializeField] private bool debugSpawn;
+    [SerializeField] private bool debugGiveSelectedUpgrade;
 
     //Runtime Variables:
     public PowerUp.PowerUpType currentPowerUp;
@@ -35,14 +36,16 @@ public class UpgradeSpawner : MonoBehaviour
             foreach (NetworkPlayer player in NetworkPlayer.instances)
             {
                 if (player == NetworkManagerScript.localNetworkPlayer) continue;
-                player.ChangeNetworkPlayerMaterial(settings.HeatVisMat,0);
+                player.ChangeNetworkPlayerMaterial(settings.HeatVisMat);
             }
+            PlayerController.photonView.RPC("RPC_ChangeMaterial", RpcTarget.Others, 0);
             yield return new WaitForSeconds(settings.HeatVisionTime);
             foreach (NetworkPlayer player in NetworkPlayer.instances)
             {
                 if (player == NetworkManagerScript.localNetworkPlayer) continue;
                 player.ResetNetworkPlayerMaterials();
             }
+            PlayerController.photonView.RPC("RPC_ChangeMaterial", RpcTarget.Others, -1);
         }
         else yield return new WaitForSeconds(waitTime);
         currentPowerUp = PowerUp.PowerUpType.None;
@@ -83,6 +86,12 @@ public class UpgradeSpawner : MonoBehaviour
             debugSpawn = false;
             SpawnUpgrade();
         }
+        if (debugGiveSelectedUpgrade)
+        {
+            debugGiveSelectedUpgrade = false;
+            StartCoroutine(DoPowerUp(currentPowerUp, 15));
+        }
+
         float LevelTimePercent = jumboScript.GetLevelTimer().LevelTimePercentage();
         if (primary == this && PhotonNetwork.IsMasterClient)
         {

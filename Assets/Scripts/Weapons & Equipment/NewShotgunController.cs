@@ -384,6 +384,7 @@ public class NewShotgunController : PlayerEquipment
 
             //Wall boost calculations
             bool hitWall = Physics.Raycast(currentBarrel.position, currentBarrel.forward, out RaycastHit hit, gunSettings.maxWallBoostDist, gunSettings.wallBoostLayers); //Determine whether or not play is shooting at a wall
+            if (!hitWall) hitWall = Physics.CheckSphere(transform.position, gunSettings.wallCheckSphereRadius, gunSettings.wallBoostLayers);
             if (hitWall) //Weapon is firing at a nearby wall
             {
                 effectiveFireVel *= gunSettings.maxWallBoost; //Apply multiplier to shot power based on how close player is to the wall

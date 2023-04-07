@@ -40,8 +40,7 @@ public class PlayerController : MonoBehaviour
     [Tooltip("Controller component for player's left hand.")]              internal ActionBasedController leftHand;
     [Tooltip("Controller component for player's right hand.")]             internal ActionBasedController rightHand;
     [Tooltip("Equipment which is currently attached to the player")]       internal List<PlayerEquipment> attachedEquipment = new List<PlayerEquipment>();
-    [Tooltip("Combat HUD Canvas.")]                                        internal CombatHUDController combatHUD;    
-    [SerializeField, Tooltip("Combat Screen GameObject.")]                 internal GameObject combatHUDScreen;
+    [Tooltip("Combat HUD Canvas.")]                                        internal CombatHUDController combatHUD;
 
     internal Camera cam;                       //Primary camera for VR rendering, located on player head
     internal PlayerInput input;                //Input manager component used by player to send messages to hands and such
@@ -87,6 +86,7 @@ public class PlayerController : MonoBehaviour
     internal bool isDead;         //True while player is dead and is kinda in limbo
     private float baseDrag;
     private Vector2 prevRightStick; //Previous position of the right stick
+    private float timeUntilVulnerable = 0; //Time (in combat scenes) that player has of invincibility
 
     //Misc:
     internal bool Launchin = false; //NOTE: What references this and where is it modified?
@@ -239,6 +239,7 @@ public class PlayerController : MonoBehaviour
                 healthVolume.weight = 1 - HealthPercent;                                                                               //Update health visualization
             }
         }
+        if (timeUntilVulnerable > 0) { timeUntilVulnerable = Mathf.Max(timeUntilVulnerable - Time.deltaTime, 0); print(timeUntilVulnerable); }
     }
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
@@ -247,6 +248,10 @@ public class PlayerController : MonoBehaviour
         //If the player is in a room, set their default health to whatever the room setting for health is
         if (PhotonNetwork.InRoom)
             healthSettings.defaultHealth = (int)PhotonNetwork.CurrentRoom.CustomProperties["PlayerHP"];
+        if (!GameManager.Instance.InMenu())
+        {
+            MakeInvulnerable(healthSettings.spawnInvincibilityTime);
+        }
     }
     private void OnDestroy()
     {
@@ -304,7 +309,7 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        combatHUDScreen.GetComponent<MeshRenderer>().enabled = inCombat;
+        combatHUD.GetComponent<Canvas>().enabled = inCombat;
     }
 
     //INPUT METHODS:
@@ -348,6 +353,7 @@ public class PlayerController : MonoBehaviour
     public bool IsHit(int damage)
     {
         //Hit effects:
+        if (timeUntilVulnerable > 0) return false;                              //Do not allow players to be hurt while invulnerable
         currentHealth -= Mathf.Max((float)damage, 0);                           //Deal projectile damage, floor at 0
         healthVolume.weight = 1 - HealthPercent;                                //Update health visualization
         print(damage + " damage dealt to player with ID " + photonView.ViewID); //Indicate that damage has been dealt
@@ -393,6 +399,7 @@ public class PlayerController : MonoBehaviour
         isDead = true; //Indicate that this player is dead
         xrOrigin.transform.position = SpawnManager.current.deathZone.position; //Move player to death zone
         xrOrigin.transform.rotation = Quaternion.identity;                     //Zero out player rotation
+        MakeInvulnerable(healthSettings.spawnInvincibilityTime + healthSettings.deathTime);
         StartCoroutine(DeathSequence());                                       //Begin death sequence
         currentHealth = healthSettings.defaultHealth;                          //Reset to max health
         healthVolume.weight = 0;                                               //Reset health volume weight
@@ -464,4 +471,12 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void SubscriptionDummy() { }
     public void ResetDrag() { if (bodyRb != null) bodyRb.drag = baseDrag; }
+    /// <summary>
+    /// Makes player invulnerable for given amount of time.
+    /// </summary>
+    public void MakeInvulnerable(float time)
+    {
+        timeUntilVulnerable = time;
+
+    }
 }

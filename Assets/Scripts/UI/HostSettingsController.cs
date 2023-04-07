@@ -9,6 +9,22 @@ using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public enum GameMode { TimeAttack, CaptureTheFlag }
 
+public class GameModeDisplay
+{
+    public static string DisplayGameMode(GameMode currentGameMode)
+    {
+        switch (currentGameMode)
+        {
+            case GameMode.TimeAttack:
+                return "Time Attack";
+            case GameMode.CaptureTheFlag:
+                return "Capture The Flag";
+            default:
+                return "Game Mode";
+        }
+    }
+}
+
 public class HostSettingsController : MonoBehaviour
 {
     [Header("Labels")]
@@ -20,15 +36,24 @@ public class HostSettingsController : MonoBehaviour
     [SerializeField] private LeverController roomTypeController;
     [SerializeField] private DialRotationController matchDial;
     [SerializeField] private SliderController HPSlider;
-    [SerializeField] private LockController gameModeArea;
-    [SerializeField] private LockController presetsArea;
     [Space(10)]
 
     [Header("Game Mode and Preset Settings")]
+    [SerializeField] private TextMeshProUGUI gameModeLabel;
+    [SerializeField] private GameObject[] gameModePanels;
+    [SerializeField] private LockController gameModeArea;
+    [SerializeField] private LockController presetsArea;
     [SerializeField] private Transform gameModeCapsuleSpawner;
     [SerializeField] private GameObject capsulePrefab;
 
     private bool isInitialized = false; //Checks to see if the current room settings are initialized on the room settings UI
+    private GameMode currentGameMode = GameMode.TimeAttack;
+    private GameObject currentGameModePanel;
+
+    private void Awake()
+    {
+        currentGameModePanel = gameModePanels[(int)currentGameMode];
+    }
 
     private void OnEnable()
     {
@@ -147,13 +172,28 @@ public class HostSettingsController : MonoBehaviour
 
     public void SpawnGameModeCapsule(int gameMode)
     {
+        //Destroys any other existing game capsule
+        foreach (var capsule in FindObjectsOfType<SettingsCapsule>())
+            Destroy(capsule.gameObject);
+
         GameObject newGameMode = Instantiate(capsulePrefab, gameModeCapsuleSpawner.transform.position, Quaternion.identity);
         newGameMode.GetComponent<SettingsCapsule>().SetGameMode((GameMode)gameMode);
     }
 
     public void SetGameMode(GameObject gameModeCapsule, bool isUnlocked)
     {
-        Debug.Log("Game Mode: " + gameModeCapsule.GetComponent<SettingsCapsule>().GetGameMode());
+        GameMode currentGameMode = gameModeCapsule.GetComponent<SettingsCapsule>().GetGameMode();
+        gameModeLabel.text = "Game Mode: " + GameModeDisplay.DisplayGameMode(currentGameMode);
+        SwitchGameModePanel(currentGameMode);
+    }
+
+    public void SwitchGameModePanel(GameMode newGameMode)
+    {
+        GameObject newGameModePanel = gameModePanels[(int)newGameMode];
+
+        currentGameModePanel.SetActive(false);
+        newGameModePanel.SetActive(true);
+        currentGameModePanel = newGameModePanel;
     }
 
     public void SetPreset(GameObject gameModeCapsule, bool isUnlocked)
