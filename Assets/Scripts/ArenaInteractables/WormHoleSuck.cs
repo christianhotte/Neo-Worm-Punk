@@ -35,6 +35,9 @@ public class WormHoleSuck : MonoBehaviour
             playerRB = other.GetComponent<Rigidbody>();
             player = other.gameObject;
             suckin = true;
+            WHS.wormHoleAud.clip = WHS.suctionSound;
+            WHS.wormHoleAud.loop = true;
+            WHS.wormHoleAud.Play();
         }
     }
 
@@ -42,6 +45,13 @@ public class WormHoleSuck : MonoBehaviour
     {
         if (other.name == "XR Origin")
         {
+            if (!WHS.inZone)
+            {
+                WHS.wormHoleAud.clip = null;
+                WHS.wormHoleAud.loop = false;
+                WHS.wormHoleAud.Stop();
+            }
+            
             suckin = false;
         }
     }
