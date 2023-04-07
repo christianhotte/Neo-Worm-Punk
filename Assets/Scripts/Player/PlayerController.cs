@@ -250,7 +250,8 @@ public class PlayerController : MonoBehaviour
             healthSettings.defaultHealth = (int)PhotonNetwork.CurrentRoom.CustomProperties["PlayerHP"];
         if (!GameManager.Instance.InMenu())
         {
-            MakeInvulnerable(healthSettings.spawnInvincibilityTime);
+            if (UpgradeSpawner.primary != null) UpgradeSpawner.primary.StartCoroutine(UpgradeSpawner.primary.DoPowerUp(PowerUp.PowerUpType.Invulnerability, healthSettings.spawnInvincibilityTime + healthSettings.deathTime));
+            //MakeInvulnerable(healthSettings.spawnInvincibilityTime);
         }
     }
     private void OnDestroy()
@@ -399,7 +400,8 @@ public class PlayerController : MonoBehaviour
         isDead = true; //Indicate that this player is dead
         xrOrigin.transform.position = SpawnManager.current.deathZone.position; //Move player to death zone
         xrOrigin.transform.rotation = Quaternion.identity;                     //Zero out player rotation
-        MakeInvulnerable(healthSettings.spawnInvincibilityTime + healthSettings.deathTime);
+        //MakeInvulnerable(healthSettings.spawnInvincibilityTime + healthSettings.deathTime);
+        if (UpgradeSpawner.primary != null) UpgradeSpawner.primary.StartCoroutine(UpgradeSpawner.primary.DoPowerUp(PowerUp.PowerUpType.Invulnerability, healthSettings.spawnInvincibilityTime + healthSettings.deathTime));
         StartCoroutine(DeathSequence());                                       //Begin death sequence
         currentHealth = healthSettings.defaultHealth;                          //Reset to max health
         healthVolume.weight = 0;                                               //Reset health volume weight
