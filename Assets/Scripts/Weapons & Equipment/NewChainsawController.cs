@@ -152,7 +152,7 @@ public class NewChainsawController : PlayerEquipment
                 grindTime = 0;                                                                            //Reset grind time tracker
             }
         }
-        else if (mode == BladeMode.Extended && triggerValue >= settings.triggerThresholds.y && deflectTime == settings.deflectTime) //Activate deflect mode when player squeezes the trigger
+        else if ((mode == BladeMode.Extended || mode == BladeMode.Extending) && triggerValue >= settings.triggerThresholds.y && deflectTime == settings.deflectTime) //Activate deflect mode when player squeezes the trigger
         {
             //Switch mode:
             prevMode = mode;                           //Record previous blade mode
