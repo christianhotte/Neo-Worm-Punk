@@ -30,7 +30,14 @@ public class UpgradeSpawner : MonoBehaviour
     public IEnumerator DoPowerUp(PowerUp.PowerUpType powerType, float waitTime)
     {
         currentPowerUp = powerType;
-        if (currentPowerUp == PowerUp.PowerUpType.HeatVision)
+        if(currentPowerUp == PowerUp.PowerUpType.Invulnerability)
+        {
+            PlayerController.instance.MakeInvulnerable(settings.InvulnerableTime);
+            PlayerController.photonView.RPC("RPC_ChangeMaterial", RpcTarget.Others, 1);
+            yield return new WaitForSeconds(settings.InvulnerableTime);
+            PlayerController.photonView.RPC("RPC_ChangeMaterial", RpcTarget.Others, -1);
+        }
+        else if (currentPowerUp == PowerUp.PowerUpType.HeatVision)
         {
             print("Network players being made visible = " + NetworkPlayer.instances.Count);
             foreach (NetworkPlayer player in NetworkPlayer.instances)
