@@ -38,8 +38,10 @@ public class LockController : MonoBehaviour
     /// <param name="args"></param>
     public void OnItemEntered(SelectEnterEventArgs args)
     {
+        Debug.Log("Trying To Unlock With: " + args.interactableObject.transform.gameObject.name);
+
         //If the current object inside of the lock is the key, unlock
-        if (args.interactableObject.transform.gameObject.name == keyToUnlock.name)
+        if (args.interactableObject.transform.gameObject.name.Contains(keyToUnlock.name))
         {
             Debug.Log("Unlocked.");
             OnUnlocked.Invoke(args.interactableObject.transform.gameObject, true);

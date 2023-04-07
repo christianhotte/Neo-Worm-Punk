@@ -321,8 +321,13 @@ public class HookProjectile : Projectile
         hitPlayer = hitInfo.collider.GetComponentInParent<NetworkPlayer>();                //Try to get network player from hit collider
         if (hitPlayer == null) hitPlayer = hitInfo.collider.GetComponent<NetworkPlayer>(); //Try again for network player if it was not initially gotten
         if (hitPlayer != null) HookToPlayer(hitPlayer);                                    //Hook is attaching to a player
-        else HookToPoint(hitInfo.point);                                                   //Hook to given point
-        lastHit = hitInfo;                                                                 //Store data from hit
+        else
+        {
+            Vector3 hookPoint = hitInfo.point;
+            if (hitInfo.collider.TryGetComponent(out Targetable target) && target.hookToCenter) { hookPoint = target.transform.position; print("OOg"); }
+            HookToPoint(hookPoint); //Hook to given point
+        }
+        lastHit = hitInfo; //Store data from hit
 
         //Cleanup:
         tetherDistance = Vector3.Distance(hitInfo.point, controller.barrel.position); //Get exact max length of tether
