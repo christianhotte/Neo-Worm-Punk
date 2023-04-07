@@ -33,9 +33,6 @@ public class UpgradeSpawner : MonoBehaviour
         if(currentPowerUp == PowerUp.PowerUpType.Invulnerability)
         {
             PlayerController.instance.MakeInvulnerable(waitTime);
-            PlayerController.photonView.RPC("RPC_ChangeMaterial", RpcTarget.Others, 1);
-            yield return new WaitForSeconds(waitTime);
-            PlayerController.photonView.RPC("RPC_ChangeMaterial", RpcTarget.Others, -1);
         }
         else if (currentPowerUp == PowerUp.PowerUpType.HeatVision)
         {
