@@ -162,8 +162,11 @@ public class NewChainsawController : PlayerEquipment
             audioSource.PlayOneShot(settings.deflectIdleSound);
 
             //Pull player forward:
-            Vector3 pullForce = settings.deflectPullImpulse * transform.forward; //Get force by which player is being pulled forward
-            player.bodyRb.velocity = pullForce;                                  //Add force to player body
+            if (settings.deflectPullForce != 0)
+            {
+                Vector3 pullForce = (Mathf.Max(settings.deflectPullImpulse + player.bodyRb.velocity.magnitude)) * transform.forward; //Get force by which player is being pulled forward
+                player.bodyRb.velocity = pullForce;                                                                                  //Add force to player body
+            }
 
             //Grinding disengagement:
             if (grinding) //Player is currently grinding on a surface
