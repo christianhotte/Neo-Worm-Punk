@@ -420,11 +420,7 @@ public class NetworkPlayer : MonoBehaviour
             {
                 if (equipment.TryGetComponent(out NewChainsawController chainsaw)) //Equipment is a chainsaw
                 {
-                    if (chainsaw.mode == NewChainsawController.BladeMode.Deflecting) //Chainsaw is in deflect mode
-                    {
-                        print("Deflected!");
-                        return;
-                    }
+                    if (chainsaw.TryDeflect(projectileVel, "Projectiles/HotteProjectile1")) return; //Do not deal damage if projectile could be deflected
                 }
             }
 
