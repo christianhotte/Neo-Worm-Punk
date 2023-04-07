@@ -164,7 +164,7 @@ public class NewChainsawController : PlayerEquipment
             //Pull player forward:
             if (settings.deflectPullForce != 0)
             {
-                Vector3 pullForce = (Mathf.Max(settings.deflectPullImpulse + player.bodyRb.velocity.magnitude)) * transform.forward; //Get force by which player is being pulled forward
+                Vector3 pullForce = settings.deflectPullImpulse * transform.forward; //Get force by which player is being pulled forward
                 player.bodyRb.velocity = pullForce;                                                                                  //Add force to player body
             }
 
@@ -415,6 +415,7 @@ public class NewChainsawController : PlayerEquipment
         float alignment = Vector3.Angle(wrist.forward, -incomingDirection);
         if (alignment <= settings.deflectionAngle)
         {
+            barrel.rotation = Quaternion.LookRotation(-incomingDirection, Vector3.up);
             Projectile newProjectile; //Initialize reference container for spawned projectile
             if (!PhotonNetwork.InRoom) //Weapon is in local fire mode
             {
