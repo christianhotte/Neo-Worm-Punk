@@ -124,13 +124,15 @@ MonoBehaviour:
   maxWristAngle: 80
   wristLerpRate: 7.7
   wristRotReturnRate: 400
-  deflectTransTime: 0.1
+  deflectTransTime: 0.07
   deflectRadius: 0.5
-  deflectRotRate: 1400
-  deflectWristExtend: 0.3
-  deflectPullForce: 6000
-  deflectTime: 0
-  deflectCooldownRate: 0
+  deflectRotRate: 1900
+  deflectWristExtend: 0.27
+  deflectPullImpulse: 0
+  deflectPullForce: 0
+  deflectTime: 1.5
+  deflectCooldownRate: 0.7
+  deflectionAngle: 90
   reverseGripAngle: 105
   reverseGripLerpRate: 7
   reverseGripReturnRate: 500
@@ -141,6 +143,8 @@ MonoBehaviour:
   runningSound: {fileID: 0}
   runningWallSound: {fileID: 0}
   sheathSound: {fileID: 8300000, guid: ba699daa1a77ff547b65b08e06538eca, type: 3}
+  deflectIdleSound: {fileID: 8300000, guid: aec4a007ab0c8894aac2c485061c0388, type: 3}
+  deflectSound: {fileID: 8300000, guid: 5343be21a73a12c46807db26cc025b29, type: 3}
   extendHaptics:
     amplitude: 1
     duration: 0.15

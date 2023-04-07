@@ -5,6 +5,9 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "Data", menuName = "ScriptableObjects/PowerUpSettings", order = 1)]
 public class PowerUpSettings : ScriptableObject
 {
+    [Header("invulnerability:")]
+    [Tooltip("Shader applied to players for Invulnerability.")]                            public Material invulnMat;
+    [Tooltip("Time player is invulnerable for.")]                                          public float InvulnerableTime;
     [Header("MultiShot:")]
     [Tooltip("Multiplies the number of projectiles fired by projectile-based equipment.")] public int MS_projectileMultiplier = 2;
     [Tooltip("Increases weapon spread while in multishot mode.")]                          public float MS_spreadAdd = 6;

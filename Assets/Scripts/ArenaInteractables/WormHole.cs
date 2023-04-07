@@ -14,7 +14,7 @@ public class WormHole : NetworkedArenaElement
     public GameObject playerOrigin;
     public static List<WormHole> ActiveWormholes = new List<WormHole>();
     public AudioSource wormHoleAud;
-    public AudioClip enterSound;
+    public AudioClip enterSound,suctionSound;
     private WormHoleTrigger triggerScript,EntryTrigger;
     void Start()
     {
@@ -25,6 +25,7 @@ public class WormHole : NetworkedArenaElement
     }
     public IEnumerator StartWormhole(GameObject startHole,GameObject playerOBJ)
     {
+        inZone = true;
         PlayerController.instance.UnHolsterAll();
         locked = true; // Locks the worm whole circut      
         Transform exitPos;                                                           //define Exit Point
@@ -65,11 +66,14 @@ public class WormHole : NetworkedArenaElement
         {
             pe.Shutdown(waitTime);
         }
-        if (enterSound != null) wormHoleAud.PlayOneShot(enterSound);
+
         PlayerController.photonView.RPC("RPC_MakeInvisible", RpcTarget.Others);
         //playerRB.isKinematic = true;
         playerOBJ.transform.position = wormZoneShifted.position; //Player enters worm zone here
-
+        wormHoleAud.clip = null;
+        wormHoleAud.loop = false;
+        wormHoleAud.Stop();
+        if (enterSound != null) wormHoleAud.PlayOneShot(enterSound);
         float entryDiff = playerCam.transform.eulerAngles.y - wormZoneShifted.eulerAngles.y; //difference for player to face down wormhole
         playerOBJ.transform.rotation = Quaternion.Euler(playerOBJ.transform.eulerAngles.x, playerOBJ.transform.eulerAngles.y - entryDiff, playerOBJ.transform.eulerAngles.z);
         float startRot = playerCam.transform.eulerAngles.y;//reference the starting rotation of the players camera
@@ -94,6 +98,7 @@ public class WormHole : NetworkedArenaElement
         triggerScript.exiting = false;
         triggerScript.reset = true; //tells the exit to open back up
         EntryTrigger.reset = true;//tells the entrance to open back up
+        inZone = false;
         yield return new WaitForSeconds(0.2f);  //Wait for the player to get clear of the wormhole
         ActiveWormholes.Remove(this);
         Destroy(wormZoneInstance);
