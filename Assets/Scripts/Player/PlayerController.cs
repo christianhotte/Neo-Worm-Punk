@@ -119,6 +119,16 @@ public class PlayerController : MonoBehaviour
         isDead = false;                                      //Indicate that player is no longer dead
         CenterCamera();                                      //Center camera (this is worth doing during any major transition)
     }
+    public IEnumerator InvulnerableSequence(float waitTime)
+    {
+        if (photonView == null) yield return null;
+        Material prevMat = bodyRenderer.material;
+        bodyRenderer.material = photonView.GetComponent<NetworkPlayer>().altMaterials[1];
+        photonView.RPC("RPC_ChangeMaterial", RpcTarget.Others, 1);
+        yield return new WaitForSeconds(waitTime);
+        photonView.RPC("RPC_ChangeMaterial", RpcTarget.Others, -1);
+        bodyRenderer.material = prevMat;
+    }
 
     //RUNTIME METHODS:
     private void Awake()
@@ -479,6 +489,6 @@ public class PlayerController : MonoBehaviour
     public void MakeInvulnerable(float time)
     {
         timeUntilVulnerable = time;
-
+        StartCoroutine(InvulnerableSequence(time));
     }
 }
