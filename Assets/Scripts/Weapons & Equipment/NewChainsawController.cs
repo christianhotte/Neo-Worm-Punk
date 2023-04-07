@@ -27,6 +27,7 @@ public class NewChainsawController : PlayerEquipment
     [SerializeField, Tooltip("Jointed component on front of system which moves forward and rotates during blade activation.")]                   private Transform wrist;
     [SerializeField, Tooltip("Rotating assembly which allows the wrist to be turned downward for reverse grip mode.")]                           private Transform wristPivot;
     [SerializeField, Tooltip("Invisible transform which indicates the extent to which blade tracks for grinding and hitting players.")]          private Transform bladeEnd;
+    [SerializeField, Tooltip("Position chainsaw fires deflected projectiles out of.")]                                                           private Transform barrel;
 
     private Transform hand;             //Real position of player hand used by this equipment
     private PlayerEquipment handWeapon; //Player weapon held in the same hand as this chainsaw
@@ -103,7 +104,22 @@ public class NewChainsawController : PlayerEquipment
                 timeUntilPulse = newPulse.duration + Random.Range(-settings.activeHapticFrequencyVariance, settings.activeHapticFrequencyVariance); //Schedule new pulse with slight variation in activation time
             }
         }
-        if (mode != BladeMode.Deflecting && deflectTime < settings.deflectTime) deflectTime = Mathf.Min(deflectTime + (Time.deltaTime * settings.deflectCooldownRate), settings.deflectTime);
+        if (mode != BladeMode.Deflecting)
+        {
+            if (deflectTime < settings.deflectTime) deflectTime = Mathf.Min(deflectTime + (Time.deltaTime * settings.deflectCooldownRate), settings.deflectTime);
+        }
+        else if (deflectTime > 0)
+        {
+            deflectTime = Mathf.Max(deflectTime - Time.deltaTime, 0);
+            if (deflectTime <= 0)
+            {
+                //Switch mode:
+                prevMode = mode;            //Record previous blade mode
+                mode = BladeMode.Extending; //Indicate that blade is no longer in deflect mode
+                timeInMode = 0;             //Reset mode time tracker
+                deflectTime = 0;            //Always fully reset deflect time tracker
+            }
+        }
         if (grinding) grindTime += Time.deltaTime; //Update grind time tracker
 
         //Extend/Retract blade:
@@ -136,13 +152,21 @@ public class NewChainsawController : PlayerEquipment
                 grindTime = 0;                                                                            //Reset grind time tracker
             }
         }
-        else if (mode == BladeMode.Extended && triggerValue >= settings.triggerThresholds.y) //Activate deflect mode when player squeezes the trigger
+        else if (mode == BladeMode.Extended && triggerValue >= settings.triggerThresholds.y && deflectTime == settings.deflectTime) //Activate deflect mode when player squeezes the trigger
         {
             //Switch mode:
             prevMode = mode;                           //Record previous blade mode
             mode = BladeMode.Deflecting;               //Indicate that blade is now deflecting
             wrist.localRotation = Quaternion.identity; //Reset local rotation of the wrist
             timeInMode = 0;                            //Reset mode time tracker
+            audioSource.PlayOneShot(settings.deflectIdleSound);
+
+            //Pull player forward:
+            if (settings.deflectPullForce != 0)
+            {
+                Vector3 pullForce = settings.deflectPullImpulse * transform.forward; //Get force by which player is being pulled forward
+                player.bodyRb.velocity = pullForce;                                                                                  //Add force to player body
+            }
 
             //Grinding disengagement:
             if (grinding) //Player is currently grinding on a surface
@@ -157,6 +181,7 @@ public class NewChainsawController : PlayerEquipment
             prevMode = mode;            //Record previous blade mode
             mode = BladeMode.Extending; //Indicate that blade is no longer in deflect mode
             timeInMode = 0;             //Reset mode time tracker
+            deflectTime = 0;            //Always fully reset deflect time tracker
         }
 
         //Blade movement:
@@ -390,16 +415,17 @@ public class NewChainsawController : PlayerEquipment
         float alignment = Vector3.Angle(wrist.forward, -incomingDirection);
         if (alignment <= settings.deflectionAngle)
         {
+            barrel.rotation = Quaternion.LookRotation(-incomingDirection, Vector3.up);
             Projectile newProjectile; //Initialize reference container for spawned projectile
             if (!PhotonNetwork.InRoom) //Weapon is in local fire mode
             {
                 newProjectile = ((GameObject)Instantiate(Resources.Load(projectileName))).GetComponent<Projectile>(); //Instantiate projectile
-                newProjectile.FireDumb(wrist);                                                                        //Initialize projectile
+                newProjectile.FireDumb(barrel);                                                                       //Initialize projectile
             }
             else //Weapon is firing on the network
             {
-                newProjectile = PhotonNetwork.Instantiate(projectileName, wrist.position, wrist.rotation).GetComponent<Projectile>();        //Instantiate projectile on network
-                newProjectile.photonView.RPC("RPC_Fire", RpcTarget.All, wrist.position, wrist.rotation, PlayerController.photonView.ViewID); //Initialize all projectiles simultaneously
+                newProjectile = PhotonNetwork.Instantiate(projectileName, barrel.position, barrel.rotation).GetComponent<Projectile>();        //Instantiate projectile on network
+                newProjectile.photonView.RPC("RPC_Fire", RpcTarget.All, barrel.position, barrel.rotation, PlayerController.photonView.ViewID); //Initialize all projectiles simultaneously
             }
             audioSource.PlayOneShot(settings.deflectSound); //Play deflect sound
             return true; //Indicate that projectile was deflected

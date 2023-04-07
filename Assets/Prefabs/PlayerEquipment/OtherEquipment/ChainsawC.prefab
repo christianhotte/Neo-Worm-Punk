@@ -497,6 +497,7 @@ Transform:
   m_Children:
   - {fileID: 1042790415488498692}
   - {fileID: 2830854338250873253}
+  - {fileID: 7459764905639344571}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -522,6 +523,7 @@ MonoBehaviour:
   wrist: {fileID: 5251416523246880465}
   wristPivot: {fileID: 1430005168697734574}
   bladeEnd: {fileID: 4368699905273830620}
+  barrel: {fileID: 7459764905639344571}
   settings: {fileID: 11400000, guid: 5bfb7877d76ed7641a233f0c6e3923c0, type: 2}
 --- !u!1 &1451707941621895606
 GameObject:
@@ -6964,6 +6966,37 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &8518483158429959108
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7459764905639344571}
+  m_Layer: 0
+  m_Name: Barrel
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7459764905639344571
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8518483158429959108}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0.117}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4732759101986455782}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8547092212139854867
 GameObject:
   m_ObjectHideFlags: 0
