@@ -101,19 +101,16 @@ public class UpgradeSpawner : MonoBehaviour
         {
             if (LevelTimePercent > 25 && spawnedPowerups < 1)
             {
-                StartCoroutine(SpawnAlert());
                 SpawnRandomUpgrade();
                 spawnedPowerups++;
             }
             else if (LevelTimePercent > 50 && spawnedPowerups < 2)
             {
-                StartCoroutine(SpawnAlert());
                 SpawnRandomUpgrade();
                 spawnedPowerups++;
             }
             else if (LevelTimePercent > 75 && spawnedPowerups < 3)
             {
-                StartCoroutine(SpawnAlert());
                 SpawnRandomUpgrade();
                 spawnedPowerups++;
             }
@@ -123,9 +120,8 @@ public class UpgradeSpawner : MonoBehaviour
     //FUNCTIONALITY METHODS:
     public void SpawnUpgrade()
     {
-        if (!PhotonNetwork.IsMasterClient) return;
-
-
+        StartCoroutine(SpawnAlert());
+        if (!PhotonNetwork.IsMasterClient) return; 
         string resourceName = "PowerUps/" + upgradeResourceNames[Random.Range(0, upgradeResourceNames.Length)];
         PowerUp newUpgrade = PhotonNetwork.Instantiate(resourceName, spawnPoint.position, spawnPoint.rotation).GetComponent<PowerUp>();
         newUpgrade.rb.AddForce(spawnPoint.up * settings.LaunchForce, ForceMode.Impulse);
