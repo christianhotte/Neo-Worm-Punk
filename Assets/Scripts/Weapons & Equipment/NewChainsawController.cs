@@ -162,7 +162,7 @@ public class NewChainsawController : PlayerEquipment
             audioSource.PlayOneShot(settings.deflectIdleSound);
 
             //Pull player forward:
-            if (settings.deflectPullForce != 0)
+            if (settings.deflectPullImpulse != 0)
             {
                 Vector3 pullForce = settings.deflectPullImpulse * transform.forward; //Get force by which player is being pulled forward
                 player.bodyRb.velocity = pullForce;                                                                                  //Add force to player body
