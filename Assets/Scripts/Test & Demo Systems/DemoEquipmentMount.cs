@@ -26,6 +26,7 @@ public class DemoEquipmentMount : MonoBehaviour
     private void Awake()
     {
         //Get objects & components:
+        if (equipment == null) equipment = GetComponentInChildren<PlayerEquipment>();
         shotgun = equipment.GetComponent<NewShotgunController>(); //Get shotgun script if equipment is a shotgun
     }
     private void Update()
