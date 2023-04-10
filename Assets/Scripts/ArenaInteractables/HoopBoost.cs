@@ -49,7 +49,7 @@ public class HoopBoost : NetworkedArenaElement
         {
             yield return null;
         }
-        if(HoopSound!=null)HoopAud.PlayOneShot(HoopSound);
+        if(HoopSound!=null)HoopAud.PlayOneShot(HoopSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
         if(maintainsOtherVelocity)
         {
             //just add the boostAmount to the velocity of the player
