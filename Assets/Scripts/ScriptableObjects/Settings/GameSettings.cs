@@ -18,7 +18,7 @@ public static class GameSettings
 
     public static string titleScreenScene = "JustinMenuScene";
     public static string roomScene = "NetworkLockerRoom";
-    public static string arenaScene = "DM_0.15_Arena";
+    public static string arenaScene = "DM_0.16_Arena";
     public static string tutorialScene = "Tutorial";
 
     public static float defaultMasterSound = 0.5f;
