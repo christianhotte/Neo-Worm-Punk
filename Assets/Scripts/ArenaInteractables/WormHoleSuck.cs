@@ -38,6 +38,7 @@ public class WormHoleSuck : MonoBehaviour
             WHS.wormHoleAud.clip = WHS.suctionSound;
             WHS.wormHoleAud.loop = true;
             WHS.wormHoleAud.Play();
+            WHS.wormHoleAud.volume = PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound);
         }
     }
 

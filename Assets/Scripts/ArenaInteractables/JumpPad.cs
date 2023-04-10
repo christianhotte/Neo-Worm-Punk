@@ -52,7 +52,7 @@ public class JumpPad : MonoBehaviour
 
     public void Bounce()
     {
-        if(jumpPadSound!=null)jumpPadAudio.PlayOneShot(jumpPadSound);
+        if(jumpPadSound!=null)jumpPadAudio.PlayOneShot(jumpPadSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
         Rigidbody playerRb = PlayerController.instance.bodyRb;
         playerRb.transform.position = jumpDirection.position; // moves the player to the center of the jump pad
         playerRb.velocity = jumpDirection.up * jumpForce;// Launches the player off of the pad
