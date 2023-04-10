@@ -14,15 +14,41 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   projectileResourceName: HotteProjectile1
   maxLoadedShots: 2
+  projectilesPerShot: 1
+  shotSpread: 0
   breakAngle: 32
   cooldownTime: 0.05
   doubleFireTime: 0.15
   doubleFireBoost: 2.1
+  emptyEjectWait: 0.6
   fireVelocity: 28
+  reverseFireBoost: 0
+  maxWallBoost: 0
+  maxWallBoostDist: 0
+  alwaysMaxWallBoost: 1
+  wallBoostLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  wallCheckSphereRadius: 1
+  additiveVelocityMaxAngle: 0
+  additiveVelocityMultiplier: 0
+  additiveVelocityCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  noFireDuringRecoil: 1
   triggerThreshold: 0.9
-  recoilTorque: 13
-  recoilAngularSpeed: 30
+  triggerDamper: 20
   closerForce: 100
+  swingCloseWait: 0
+  wallBoostOnly: 0
+  neutralFireBoost: 0
+  modeHoldTime: 0.25
+  reverseSpeed: 0.15
+  reverseButtonCooldown: 0.2
+  directionalReverseSwingSpeed: 0
   recoilDistance: 0.17
   recoilTime: 0.165
   recoilCurve:
@@ -101,6 +127,29 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  recoilRotation: 0
+  recoilRotationCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  barrelReciprocationDistance: 0
+  barrelReciproCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  ejectorTraverseDistance: 0
+  ejectorTraverseTime: 0
+  ejectorTraverseCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  pinTraverseDistance: 0
   fireHaptics:
     amplitude: 1
     duration: 0.14
@@ -141,3 +190,4 @@ MonoBehaviour:
   fireSound: {fileID: 8300000, guid: 0f44c6052aae7c84b90ae2cdc4c1196a, type: 3}
   ejectSound: {fileID: 8300000, guid: 48624e662f82de94b88110c4e8d90ed6, type: 3}
   lockSound: {fileID: 8300000, guid: 3e15122a331d49f4986d8d3ec8a4883d, type: 3}
+  flipSound: {fileID: 0}

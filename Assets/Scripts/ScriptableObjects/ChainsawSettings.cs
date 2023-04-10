@@ -35,6 +35,7 @@ public class ChainsawSettings : ScriptableObject
     [Min(0), Tooltip("Radius of deflection area while deflection is active.")]                          public float deflectRadius;
     [Min(0), Tooltip("Speed at which blade rotates during deflection mode.")]                           public float deflectRotRate;
     [Min(0), Tooltip("Distance wrist extends forward during deflection mode.")]                         public float deflectWristExtend;
+    [Min(0), Tooltip("Impulse force used to pull player when entering deflect mode.")]                  public float deflectPullImpulse;
     [Min(0), Tooltip("Additive force used to pull player while in deflect mode (helicopter-style).")]   public float deflectPullForce;
     [Min(0), Tooltip("Maximum amount of time player can spend in deflection mode.")]                    public float deflectTime;
     [Min(0), Tooltip("How many seconds of deflect time player recovers per second of not deflecting.")] public float deflectCooldownRate;
@@ -52,6 +53,7 @@ public class ChainsawSettings : ScriptableObject
     [Tooltip("Sound chainsaw makes while it is actively running.")]                          public AudioClip runningSound;
     [Tooltip("Sound chainsaw makes while it is actively running (while buried in a wall).")] public AudioClip runningWallSound;
     [Tooltip("Sound chainsaw makes when player releases it.")]                               public AudioClip sheathSound;
+    [Tooltip("Sound played while deflector is idle.")]                                       public AudioClip deflectIdleSound;
     [Tooltip("Sound made when player deflects a projectile with the chainsaw.")]             public AudioClip deflectSound;
     [Header("Haptics:")]
     [Tooltip("Haptic effect which plays when player extends their blade.")]                                            public PlayerController.HapticData extendHaptics;
