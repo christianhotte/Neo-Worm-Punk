@@ -19,17 +19,11 @@ public class MainMenuController : MonoBehaviour
     [SerializeField, Tooltip("Main Menu Background Music")] private AudioClip mainMenuMusic;
     [SerializeField, Tooltip("Wormpunk Sound")] private AudioClip wormPunkSound;
 
-    [SerializeField, Tooltip("The main menu music audio source.")] private AudioSource menuAudioSource;
-
     private void Start()
     {
-        // Play menu music
-        menuAudioSource.clip = mainMenuMusic;
-        menuAudioSource.Play();
-        menuAudioSource.volume = PlayerPrefs.GetFloat("MusicVolume", GameSettings.defaultMusicSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound);
-
         // Move the player forward on the conveyor once the game starts
         playerObject = PlayerController.instance.xrOrigin.transform;
+        PlayerController.instance.inverteboy.PlayMusic(mainMenuMusic);  //Play main menu music
         Invoke("TransportToSettings", 3);
     }
 
@@ -150,7 +144,7 @@ public class MainMenuController : MonoBehaviour
         yield return new WaitForSeconds(playerObject.GetComponentInChildren<FadeScreen>().GetFadeDuration());
         yield return null;
 
-        menuAudioSource.Stop();
+        PlayerController.instance.inverteboy.StopMusic();
         GameManager.Instance.LoadGame(newScene);
     }
 }

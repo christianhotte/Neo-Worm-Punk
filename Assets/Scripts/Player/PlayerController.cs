@@ -41,6 +41,7 @@ public class PlayerController : MonoBehaviour
     [Tooltip("Controller component for player's right hand.")]             internal ActionBasedController rightHand;
     [Tooltip("Equipment which is currently attached to the player")]       internal List<PlayerEquipment> attachedEquipment = new List<PlayerEquipment>();
     [Tooltip("Combat HUD Canvas.")]                                        internal CombatHUDController combatHUD;
+    internal Inverteboy inverteboy;            //The player's inverteboy component
 
     internal Camera cam;                       //Primary camera for VR rendering, located on player head
     internal PlayerInput input;                //Input manager component used by player to send messages to hands and such
@@ -140,6 +141,7 @@ public class PlayerController : MonoBehaviour
         screenShaker = cam.GetComponent<ScreenShakeVR>();                                                                                                                      //Get screenshaker script from camera object
         playerModel = GetComponentInChildren<VRIK>().transform;                                                                                                                //Get player model component
         bodyManager = GetComponentInChildren<PlayerBodyManager>(); if (bodyManager == null) bodyRb.gameObject.AddComponent<PlayerBodyManager>();                               //Make sure player has a body manager component
+        inverteboy = GetComponentInChildren<Inverteboy>(); if(inverteboy == null) { Debug.Log("Inverteboy could not be found."); }
         foreach (Volume volume in GetComponentsInChildren<Volume>()) //Iterate through Volume components in children
         {
             if (volume.name.Contains("Health")) healthVolume = volume; //Get health volume
