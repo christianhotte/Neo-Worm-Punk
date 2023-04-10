@@ -349,14 +349,14 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     public void HitEnemy()
     {
-        if (targetHitSound != null) audioSource.PlayOneShot(targetHitSound); //Play hit sound when player shoots (or damages) a target
+        if (targetHitSound != null) audioSource.PlayOneShot(targetHitSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play hit sound when player shoots (or damages) a target
     }
     /// <summary>
     /// Called when player hits and kills an enemy with a projectile.
     /// </summary>
     public void KilledEnemy()
     {
-        if (targetKillSound != null) audioSource.PlayOneShot(targetKillSound); //Play kill sound when player kills a target
+        if (targetKillSound != null) audioSource.PlayOneShot(targetKillSound,PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play kill sound when player kills a target
     }
     /// <summary>
     /// Method called when this player is hit by a projectile.
@@ -377,7 +377,7 @@ public class PlayerController : MonoBehaviour
         }
         else //Player is being hurt by this projectile hit
         {
-            audioSource.PlayOneShot(healthSettings.hurtSound != null ? healthSettings.hurtSound : (AudioClip)Resources.Load("Sounds/Default_Hurt_Sound")); //Play hurt sound
+            audioSource.PlayOneShot(healthSettings.hurtSound != null ? healthSettings.hurtSound : (AudioClip)Resources.Load("Sounds/Default_Hurt_Sound"), PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play hurt sound
             if (healthSettings.regenSpeed > 0) timeUntilRegen = healthSettings.regenPauseTime;                                                             //Optionally begin regeneration sequence
             return false;
         }
@@ -391,7 +391,7 @@ public class PlayerController : MonoBehaviour
         if (isDead) return; //Do not allow dead players to be killed
 
         //Effects:
-        audioSource.PlayOneShot(healthSettings.deathSound != null ? healthSettings.deathSound : (AudioClip)Resources.Load("Sounds/Temp_Death_Sound")); //Play death sound
+        audioSource.PlayOneShot(healthSettings.deathSound != null ? healthSettings.deathSound : (AudioClip)Resources.Load("Sounds/Temp_Death_Sound"), PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play death sound
         
         //Weapon cleanup:
         foreach (NewGrapplerController hookShot in GetComponentsInChildren<NewGrapplerController>()) //Iterate through any hookshots player may have equipped

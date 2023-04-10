@@ -78,7 +78,7 @@ public class PowerUp : Targetable
         currentHealth -= damage;
         if (photonView.IsMine)
         {
-            powerUpAud.PlayOneShot(powerUpHit);
+           // powerUpAud.PlayOneShot(powerUpHit);   THis is only client side
             if (currentHealth <= 0) Delete();
             else
             {

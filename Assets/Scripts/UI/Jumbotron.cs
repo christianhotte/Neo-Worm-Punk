@@ -26,12 +26,12 @@ public class Jumbotron : MonoBehaviour
         {
             if (currentLevelTimer.GetTotalSecondsLeft() < 1.0f)
             {
-                jumboAud.PlayOneShot(beeees);
+                jumboAud.PlayOneShot(beeees, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
                 finished = true;
             }        
             else
             {
-                jumboAud.PlayOneShot(bwarp);
+                jumboAud.PlayOneShot(bwarp, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
                 cooldown = true;
                 StartCoroutine(CountdownCooldown());
             }
