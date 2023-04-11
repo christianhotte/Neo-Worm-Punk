@@ -26,6 +26,11 @@ public class InverteboyController : MonoBehaviour
 
     [SerializeField, Tooltip("The list of the different menus on the inverteboy.")] private Canvas[] inverteboyCanvases;
 
+    [Header("Music")]
+    [SerializeField, Tooltip("Main menu music.")] private AudioClip mainMenuMusic;
+    [SerializeField, Tooltip("Lobby music.")] private AudioClip lobbyMusic;
+    [SerializeField, Tooltip("Arens music.")] private AudioClip arenaMusic;
+
     private Canvas currentCanvas;
 
     private bool isOpen = false;
@@ -48,6 +53,15 @@ public class InverteboyController : MonoBehaviour
         {
             SwitchCanvas(InverteboyScreens.TUTORIAL);
         }
+
+        if (scene.name == GameSettings.titleScreenScene)
+            PlayMusic(mainMenuMusic);
+
+        if (scene.name == GameSettings.roomScene)
+            PlayMusic(lobbyMusic);
+
+        if (scene.name == GameSettings.arenaScene)
+            PlayMusic(arenaMusic);
     }
 
     /// <summary>
@@ -209,5 +223,6 @@ public class InverteboyController : MonoBehaviour
     private void OnDestroy()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
+        StopMusic();
     }
 }
