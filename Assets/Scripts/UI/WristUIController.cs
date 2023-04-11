@@ -56,6 +56,7 @@ public class WristUIController : MonoBehaviour
         playerHUD.enabled = showMenu;
         playerHUDController.GetComponent<Canvas>().enabled = showMenu;
         playerController.SetCombat(!showMenu);
+        playerController.inverteboy.ForceOpenInverteboy(showMenu);
         foreach (var interactor in rayInteractors)
             interactor.SetActive(showMenu);
     }
