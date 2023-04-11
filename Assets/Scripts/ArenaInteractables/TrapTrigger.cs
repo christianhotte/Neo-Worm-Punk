@@ -9,16 +9,20 @@ public class TrapTrigger : Targetable
 {
     private CrusherTrap crushScript;
     private HoopBoost hoopScript;
+    public PowerUp powerScript;
+    private int lastPlayerID;
+    private TurretTrap turretScript;
     public GameObject indicatorLight,attatchedTrap;
     public GameObject[] MultiTrapsAttacthed;
     internal bool cooldown = false,multiTrigger=false;
     internal NetworkPlayer ActivatingPlayer;
     public UnityEvent onTrapActivated;
+    public TrapController netController;
 
     // Start is called before the first frame update
     void Start()
     {
-
+        netController = GameObject.FindGameObjectWithTag("NetworkManager").GetComponent<TrapController>();
     }
     // Update is called once per frame
     void Update()
@@ -34,7 +38,7 @@ public class TrapTrigger : Targetable
             this.active = false;
         }
     }
-    public override void IsHit(int damage, int playerID)
+    public override void IsHit(int damage, int playerID, Vector3 velocity)
   {
       if (playerID <= 0) return;
       if (PhotonNetwork.GetPhotonView(playerID).TryGetComponent(out NetworkPlayer player))
@@ -42,16 +46,25 @@ public class TrapTrigger : Targetable
             ActivatingPlayer = player;
             if (!cooldown)
             {
+                lastPlayerID = playerID;
                 onTrapActivated.Invoke();
             }
       }
   }
+    public void TurretTrap()
+    {
+        cooldown = true;
+        turretScript = attatchedTrap.GetComponent<TurretTrap>();
+        turretScript.connectedTrigger = this.GetComponent<TrapTrigger>();
+        turretScript.AddShot(lastPlayerID);
+
+    }
     public void CrusherTrap()
     {
         cooldown = true;
         crushScript = attatchedTrap.GetComponent<CrusherTrap>();
-        crushScript.triggerScript = this.GetComponent<TrapTrigger>();
-        crushScript.ActivateCrusher();
+        crushScript.connectedTrigger = this.GetComponent<TrapTrigger>();
+        crushScript.ActivateCrusher(lastPlayerID);
     }
     public void SlimeHoop()
     {
@@ -63,7 +76,7 @@ public class TrapTrigger : Targetable
                 hoopScript = trap.GetComponent<HoopBoost>();
                 hoopScript.triggerScript = this.GetComponent<TrapTrigger>();
                 hoopScript.slimed = true;
-                StartCoroutine(hoopScript.SlimeTime());
+                StartCoroutine(hoopScript.SlimeHoop());
             }
         }
         else
@@ -71,7 +84,7 @@ public class TrapTrigger : Targetable
             hoopScript = attatchedTrap.GetComponent<HoopBoost>();
             hoopScript.triggerScript = this.GetComponent<TrapTrigger>();
             hoopScript.slimed = true;
-            StartCoroutine(hoopScript.SlimeTime());
+            StartCoroutine(hoopScript.SlimeHoop());
         }
     }
 }

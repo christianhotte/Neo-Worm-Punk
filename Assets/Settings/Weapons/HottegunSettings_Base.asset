@@ -14,13 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   projectileResourceName: HotteProjectile1
   maxLoadedShots: 2
+  projectilesPerShot: 1
+  shotSpread: 0
   breakAngle: 32
   cooldownTime: 0.05
   doubleFireTime: 0.15
-  doubleFireBoost: 1.5
+  doubleFireBoost: 1.3
   emptyEjectWait: 0.45
   fireVelocity: 30
-  reverseFireBoost: 1.3
+  reverseFireBoost: 1.2
   maxWallBoost: 2
   maxWallBoostDist: 15
   alwaysMaxWallBoost: 1
@@ -69,11 +71,12 @@ MonoBehaviour:
   swingCloseWait: 0.3
   wallBoostOnly: 1
   neutralFireBoost: 0
+  modeHoldTime: 0.25
   reverseSpeed: 0.145
   reverseButtonCooldown: 0.28
   directionalReverseSwingSpeed: 3.5
   recoilDistance: 0.18
-  recoilTime: 0.35
+  recoilTime: 0.28
   recoilCurve:
     serializedVersion: 2
     m_Curve:

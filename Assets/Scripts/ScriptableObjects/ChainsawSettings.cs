@@ -30,23 +30,35 @@ public class ChainsawSettings : ScriptableObject
     [Range(0, 180), Tooltip("Greatest angle wrist joint is allowed to rotate to.")]                               public float maxWristAngle;
     [Min(0), Tooltip("How quickly wrist lerps to match player hand rotation while chainsaw is deployed.")]        public float wristLerpRate;
     [Min(0), Tooltip("Speed (in degrees per second) at which wrist returns to base rotation during retraction.")] public float wristRotReturnRate;
+    [Header("Deflection:")]
+    [Min(0), Tooltip("How long it takes for blade to move into (and from) deflect position.")]          public float deflectTransTime;
+    [Min(0), Tooltip("Radius of deflection area while deflection is active.")]                          public float deflectRadius;
+    [Min(0), Tooltip("Speed at which blade rotates during deflection mode.")]                           public float deflectRotRate;
+    [Min(0), Tooltip("Distance wrist extends forward during deflection mode.")]                         public float deflectWristExtend;
+    [Min(0), Tooltip("Impulse force used to pull player when entering deflect mode.")]                  public float deflectPullImpulse;
+    [Min(0), Tooltip("Additive force used to pull player while in deflect mode (helicopter-style).")]   public float deflectPullForce;
+    [Min(0), Tooltip("Maximum amount of time player can spend in deflection mode.")]                    public float deflectTime;
+    [Min(0), Tooltip("How many seconds of deflect time player recovers per second of not deflecting.")] public float deflectCooldownRate;
+    [Range(0, 180), Tooltip("Maximum tolerated angle at which projectiles can be deflected.")]          public float deflectionAngle = 90;
     [Space()]
     [Range(0, 180), Tooltip("Angle blade turns to when set to reverse mode.")]                          public float reverseGripAngle;
     [Min(0), Tooltip("How rapidly blade moves to and from reverse grip position.")]                     public float reverseGripLerpRate;
     [Min(0), Tooltip("How rapidly blade returns from reverse grip position when blade is retracting.")] public float reverseGripReturnRate;
     [Header("Feel & Input:")]
-    [Range(0, 1), Tooltip("How much player needs to squeeze the trigger in order to activate the blade.")]           public float triggerThreshold = 1;
-    [Range(0, 1), Tooltip("How much player needs to release the trigger in order to sheath the blade.")]             public float releaseThreshold = 0.5f;
-    [Tooltip("Lower and upper bounds of speed at which player can swing blade to activate/extend plasma extender.")] public Vector2 swingSpeedRange;
+    [MinMaxSlider(0, 1), Tooltip("How much player needs to squeeze the trigger in order to activate/release the blade.")] public Vector2 gripThresholds;
+    [MinMaxSlider(0, 1), Tooltip("How much player needs to squeeze the trigger in order to activate/release the blade.")] public Vector2 triggerThresholds;
+    [Tooltip("Lower and upper bounds of speed at which player can swing blade to activate/extend plasma extender.")]      public Vector2 swingSpeedRange;
     [Header("Sounds:")]
     [Tooltip("Sound chainsaw makes when it first extends.")]                                 public AudioClip extendSound;
     [Tooltip("Sound chainsaw makes while it is actively running.")]                          public AudioClip runningSound;
     [Tooltip("Sound chainsaw makes while it is actively running (while buried in a wall).")] public AudioClip runningWallSound;
     [Tooltip("Sound chainsaw makes when player releases it.")]                               public AudioClip sheathSound;
+    [Tooltip("Sound played while deflector is idle.")]                                       public AudioClip deflectIdleSound;
+    [Tooltip("Sound made when player deflects a projectile with the chainsaw.")]             public AudioClip deflectSound;
     [Header("Haptics:")]
-    [Tooltip("Haptic effect which plays when player extends their blade.")]                                            public PlayerEquipment.HapticData extendHaptics;
-    [Tooltip("Haptic effect which plays when player retracts their blade.")]                                           public PlayerEquipment.HapticData retractHaptics;
-    [Tooltip("Base properties of haptic pulses which are played continuously while blade is active.")]                 public PlayerEquipment.HapticData activeHapticPulse;
+    [Tooltip("Haptic effect which plays when player extends their blade.")]                                            public PlayerController.HapticData extendHaptics;
+    [Tooltip("Haptic effect which plays when player retracts their blade.")]                                           public PlayerController.HapticData retractHaptics;
+    [Tooltip("Base properties of haptic pulses which are played continuously while blade is active.")]                 public PlayerController.HapticData activeHapticPulse;
     [Tooltip("Maximum value of random decrease for pulse magnitude while chainsaw is active.")]                        public float activeHapticMagnitudeVariance;
     [Tooltip("While chainsaw is active, pulses will be separated by random time values between zero and this value.")] public float activeHapticFrequencyVariance;
 }

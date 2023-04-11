@@ -6,6 +6,8 @@ using TMPro;
 
 public class Jumbotron : MonoBehaviour
 {
+    public static Jumbotron primary;
+
     [SerializeField, Tooltip("The container for the information that displays the player stats information.")] private Transform deathInfoContainer;
     [SerializeField, Tooltip("The death information prefab.")] private DeathInfo deathInfoPrefab;
     [SerializeField, Tooltip("The most recent kill text.")] private TextMeshProUGUI mostRecentDeathText;
@@ -13,6 +15,10 @@ public class Jumbotron : MonoBehaviour
     private bool cooldown = false,finished=false;
     public AudioClip oonge, bees,beeees, bwarp,eer,jaigh,krah,oo,rro,yert;
     private LevelTimer currentLevelTimer;
+    private void Awake()
+    {
+        primary = this;
+    }
     private void Start()
     {
         currentLevelTimer = GetComponentInChildren<LevelTimer>();
@@ -26,12 +32,12 @@ public class Jumbotron : MonoBehaviour
         {
             if (currentLevelTimer.GetTotalSecondsLeft() < 1.0f)
             {
-                jumboAud.PlayOneShot(beeees);
+                if (primary == this) jumboAud.PlayOneShot(beeees, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
                 finished = true;
             }        
             else
             {
-                jumboAud.PlayOneShot(bwarp);
+                if (primary == this) jumboAud.PlayOneShot(bwarp, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
                 cooldown = true;
                 StartCoroutine(CountdownCooldown());
             }

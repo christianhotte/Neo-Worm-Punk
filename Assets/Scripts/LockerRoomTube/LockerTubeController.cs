@@ -5,24 +5,15 @@ using TMPro;
 
 public class LockerTubeController : MonoBehaviour
 {
-    private static TubeManager tubeManager;
-
-    public static int OccupiedTubes
-    {
-        get
-        {
-            int x = 0;
-            foreach (LockerTubeController tube in tubeManager.roomTubes) if (tube.occupied) x++;
-            return x;
-        }
-    }
+    private LockerTubeSpawner spawnManager;
 
     [SerializeField, Tooltip("The parent that holds all of the ready lights.")] private Transform readyLights;
     [SerializeField, Tooltip("The spawn point for the player's name.")] private Transform playerNameSpawnPoint;
     [SerializeField, Tooltip("The prefab that displays the player's name.")] private GameObject playerNamePrefab;
+    [SerializeField, Tooltip("The GameObject for the host settings.")] private GameObject hostSettings;
 
     //internal int tubeNumber;
-    public bool occupied = false;
+    //public bool occupied = false;
     /// <summary>
     /// ID of player which is currently in this tube.
     /// </summary>
@@ -31,9 +22,7 @@ public class LockerTubeController : MonoBehaviour
 
     private void Awake()
     {
-        tubeManager = FindObjectOfType<TubeManager>();
-        /*        tubeNumber = int.Parse(name.Replace("TestTube", ""));
-                Debug.Log("Assigning Tube Number: " + tubeNumber);*/
+        spawnManager = FindObjectOfType<LockerTubeSpawner>();
         spawnPoint = transform.Find("Spawnpoint");
     }
 
@@ -63,15 +52,24 @@ public class LockerTubeController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Shows the host settings in the tube.
+    /// </summary>
+    /// <param name="showSettings">If true, the host settings are shown. If false, they are hidden.</param>
+    public void ShowHostSettings(bool showSettings)
+    {
+        hostSettings.SetActive(showSettings);
+    }
+
     public int GetTubeNumber()
     {
-        for(int i = 0; i < tubeManager.roomTubes.Count; i++)
+        for(int i = 0; i < spawnManager.GetTubeList().Length; i++)
         {
-            if (tubeManager.roomTubes[i] == this)
+            if (spawnManager.GetTubeList()[i] == this)
                 return i + 1;
         }
 
-        Debug.LogError("Failed to get tube " + this.name + " | Tube count = " + tubeManager.roomTubes.Count);
+        Debug.LogError("Failed to get " + name + " | Tube count = " + spawnManager.GetTubeList().Length);
         return -1;
     }
 }

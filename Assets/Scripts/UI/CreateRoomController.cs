@@ -12,10 +12,9 @@ public class CreateRoomController : MonoBehaviour
     private RoomOptions currentRoomOptions;
     private Hashtable customRoomSettings;
 
-    private int[] matchLengths = { 30, 60, 120, 300, 420 };
-
     [SerializeField] private TextMeshProUGUI roomTypeLabel;
     [SerializeField] private TextMeshProUGUI matchLengthLabel;
+    [SerializeField] private TextMeshProUGUI playerHPLabel;
 
     private void Start()
     {
@@ -33,7 +32,8 @@ public class CreateRoomController : MonoBehaviour
         customRoomSettings = new Hashtable();
 
         currentRoomOptions.IsVisible = true;
-        customRoomSettings.Add("RoundLength", matchLengths[0]);
+        customRoomSettings.Add("RoundLength", GameSettings.matchLengths[0]);
+        customRoomSettings.Add("PlayerHP", GameSettings.HPDefault);
 
         UpdateRoomTypeLabel();
         UpdateMatchLengthLabel();
@@ -52,13 +52,13 @@ public class CreateRoomController : MonoBehaviour
     /// <summary>
     /// Determines the match length.
     /// </summary>
-    /// <param name="currentMatchLength">The index</param>
+    /// <param name="currentMatchLength">The index of the match length array.</param>
     public void UpdateMatchLength(float currentMatchLength)
     {
         Debug.Log("Match Length: " + currentMatchLength);
         Debug.Log("Match Index: " + Mathf.RoundToInt(currentMatchLength));
-        Debug.Log("Setting Match Length To " + matchLengths[Mathf.RoundToInt(currentMatchLength)]);
-        customRoomSettings["RoundLength"] = matchLengths[Mathf.RoundToInt(currentMatchLength)];
+        Debug.Log("Setting Match Length To " + GameSettings.matchLengths[Mathf.RoundToInt(currentMatchLength)]);
+        customRoomSettings["RoundLength"] = GameSettings.matchLengths[Mathf.RoundToInt(currentMatchLength)];
         UpdateMatchLengthLabel();
     }
 
@@ -89,6 +89,7 @@ public class CreateRoomController : MonoBehaviour
     /// <returns>A random string that serves as a room code.</returns>
     public string GenerateRoomCode()
     {
+        Random.InitState(System.DateTime.Now.Millisecond);
         string roomCode = "";
         for(int i = 0; i < GameSettings.roomCodeLength; i++)
         {

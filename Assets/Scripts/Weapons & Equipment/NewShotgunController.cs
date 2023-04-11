@@ -288,15 +288,15 @@ public class NewShotgunController : PlayerEquipment
     /// <summary>
     /// Shoots the gun (instantiates projectiles in network if possible).
     /// </summary>
-    public Projectile Fire()
+    public Projectile[] Fire()
     {
         //Validation & initialization:
-        Projectile projectile = null;                                                                                     //Initialize reference to projectile
-        if (loadedShots <= 0) { DryFire(); return projectile; }                                                           //Dry-fire if weapon is out of shots
-        if (breachOpen) { DryFire(); return projectile; }                                                                 //Dry-fire if weapon breach is open
-        if (gunSettings.noFireDuringRecoil && timeSinceFiring < gunSettings.recoilTime) { DryFire(); return projectile; } //Dry-fire if weapon has not finished firing cooldown
-        if (locked) return projectile;                                                                                    //Return if locked by another weapon
-        Transform currentBarrel = barrels[currentBarrelIndex]; //Get reference to active barrel
+        if (loadedShots <= 0) { DryFire(); return new Projectile[0]; }                                                           //Dry-fire if weapon is out of shots
+        if (breachOpen) { DryFire(); return new Projectile[0]; }                                                                 //Dry-fire if weapon breach is open
+        if (gunSettings.noFireDuringRecoil && timeSinceFiring < gunSettings.recoilTime) { DryFire(); return new Projectile[0]; } //Dry-fire if weapon has not finished firing cooldown
+        if (locked) return new Projectile[0];                                                                                    //Return if locked by another weapon
+        Transform currentBarrel = barrels[currentBarrelIndex];     //Get reference to active barrel
+        Vector3 origBarrelEulers = currentBarrel.localEulerAngles; //Get original local euler angles for current barrel
 
         //Put weapon at default position:
         if (!reverseFiring) //Only snap weapon while in normal fire mode
@@ -309,17 +309,45 @@ public class NewShotgunController : PlayerEquipment
             transform.rotation = targetTransform.rotation;        //Rotate to exact orientation of target transform
         }
 
-        //Fire projectile:
-        if (debugFireLocal || !PhotonNetwork.InRoom) //Weapon is in local fire mode
+        //Fire projectile(s):
+        List<Projectile> spawnedProjectiles = new List<Projectile>(); //Initialize list of projectiles spawned by shot
+        int shots = gunSettings.projectilesPerShot;
+        float spread = gunSettings.shotSpread;
+        string activeProjName = projResourceName;
+        if (UpgradeSpawner.primary != null) //Upgrade system modifiers
         {
-            projectile = ((GameObject)Instantiate(Resources.Load(projResourceName))).GetComponent<Projectile>(); //Instantiate projectile
-            projectile.FireDumb(currentBarrel);                                                                  //Initialize projectile
+            switch (UpgradeSpawner.primary.currentPowerUp)
+            {
+                case PowerUp.PowerUpType.MultiShot:
+                    shots *= UpgradeSpawner.primary.settings.MS_projectileMultiplier;
+                    spread += UpgradeSpawner.primary.settings.MS_spreadAdd;
+                    break;
+                case PowerUp.PowerUpType.HeatVision:
+                    activeProjName = "Projectiles/" + UpgradeSpawner.primary.settings.heatSeekerPrefabName;
+                    break;
+            }
         }
-        else //Weapon is firing on the network
+        for (int x = 0; x < shots; x++) //Iterate for number of projectiles spawned by shot
         {
-            projectile = PhotonNetwork.Instantiate(projResourceName, currentBarrel.position, currentBarrel.rotation).GetComponent<Projectile>();      //Instantiate projectile on network
-            projectile.photonView.RPC("RPC_Fire", RpcTarget.All, currentBarrel.position, currentBarrel.rotation, PlayerController.photonView.ViewID); //Initialize all projectiles simultaneously
+            //Reposition barrel:
+            Vector2 randomAngles = Random.insideUnitCircle * spread;                                            //Get random angles of shot spread
+            currentBarrel.localEulerAngles = origBarrelEulers + new Vector3(randomAngles.x, randomAngles.y, 0); //Rotate barrel using random angular values
+
+            //Generate new projectiles:
+            Projectile newProjectile; //Initialize reference container for spawned projectile
+            if (debugFireLocal || !PhotonNetwork.InRoom) //Weapon is in local fire mode
+            {
+                newProjectile = ((GameObject)Instantiate(Resources.Load(activeProjName))).GetComponent<Projectile>(); //Instantiate projectile
+                newProjectile.FireDumb(currentBarrel);                                                                //Initialize projectile
+            }
+            else //Weapon is firing on the network
+            {
+                newProjectile = PhotonNetwork.Instantiate(activeProjName, currentBarrel.position, currentBarrel.rotation).GetComponent<Projectile>();        //Instantiate projectile on network
+                newProjectile.photonView.RPC("RPC_Fire", RpcTarget.All, currentBarrel.position, currentBarrel.rotation, PlayerController.photonView.ViewID); //Initialize all projectiles simultaneously
+            }
+            spawnedProjectiles.Add(newProjectile); //Add projectile to spawn list
         }
+        currentBarrel.localEulerAngles = origBarrelEulers; //Move barrel back to base euler angles
 
         //Fire particle effect:
         if (shotParticles != null) //Player has shot particle system (particles need to be shot before recoil scaling occurs)
@@ -356,6 +384,7 @@ public class NewShotgunController : PlayerEquipment
 
             //Wall boost calculations
             bool hitWall = Physics.Raycast(currentBarrel.position, currentBarrel.forward, out RaycastHit hit, gunSettings.maxWallBoostDist, gunSettings.wallBoostLayers); //Determine whether or not play is shooting at a wall
+            if (!hitWall) hitWall = Physics.CheckSphere(transform.position, gunSettings.wallCheckSphereRadius, gunSettings.wallBoostLayers);
             if (hitWall) //Weapon is firing at a nearby wall
             {
                 effectiveFireVel *= gunSettings.maxWallBoost; //Apply multiplier to shot power based on how close player is to the wall
@@ -394,8 +423,8 @@ public class NewShotgunController : PlayerEquipment
             currentBarrelIndex += 1;                                          //Index current barrel number by one
             if (currentBarrelIndex >= barrels.Length) currentBarrelIndex = 0; //Overflow barrel index if relevant
         }
-        loadedShots = Mathf.Max(loadedShots - 1, 0); //Spend one shot (floor at zero)
-        return projectile; //Return reference to the master script of the projectile that was fired
+        if (!(UpgradeSpawner.primary != null && UpgradeSpawner.primary.currentPowerUp == PowerUp.PowerUpType.InfiniShot)) loadedShots = Mathf.Max(loadedShots - 1, 0); //Spend one shot (floor at zero)
+        return spawnedProjectiles.ToArray(); //Return reference to the master script of the projectile(s) spawned
     }
     /// <summary>
     /// Opens weapon breach and ejects shells.

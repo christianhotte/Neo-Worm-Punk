@@ -39,15 +39,14 @@ public class PlayerSettingsController : MonoBehaviour
 
     public static Color[] playerColors = { 
         new Color(247f / 255f, 128f / 255f, 128f / 255f),
-        new Color(197f / 255f, 17f / 255f, 17f / 255f),
+        new Color(255f / 255f, 99f / 255f, 255f / 255f),
         new Color(232f / 255f, 131f / 255f, 23f / 255f),
-        new Color(253f / 255f, 253f / 255f, 150f / 255f),
+        Color.yellow,
         Color.green,
-        Color.blue,
-        new Color(19f / 255f, 168f / 255f, 161f / 255f),
+        Color.cyan,
         new Color(52f / 255f, 31f / 255f, 224f / 255f),
-        Color.magenta,
-        Color.black
+        new Color(215f / 255f, 36f / 255f,  77f / 255f),
+        Color.white,
     };
 
     public static int NumberOfPlayerColors() => playerColors.Length;

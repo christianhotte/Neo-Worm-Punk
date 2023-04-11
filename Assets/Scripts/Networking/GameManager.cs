@@ -9,6 +9,9 @@ using System.Linq;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
+    public List<Transform> spawnPoints = new List<Transform>();
+    //public List<SpawnPointManager> spawnPointsManager = new List<SpawnPointManager>();
+    public List<LockerTubeController> tubes = new List<LockerTubeController>();
 
     internal bool levelTransitionActive = false;
     internal string prevSceneName;
@@ -16,10 +19,13 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+        SceneManager.sceneLoaded += OnSceneLoaded;
         SceneManager.sceneUnloaded += OnSceneUnloaded;
     }
     private void OnDestroy()
     {
+        Instance = null;
+        SceneManager.sceneLoaded -= OnSceneLoaded;
         SceneManager.sceneUnloaded -= OnSceneUnloaded;
     }
 
@@ -40,6 +46,20 @@ public class GameManager : MonoBehaviour
         prevSceneName = scene.name;
     }
 
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == "NetworkLockerRoom")
+        {
+            // find all spawn points in the scene
+            GameObject[] spawnPointObjects = GameObject.FindGameObjectsWithTag("SpawnPoint");
+            foreach (GameObject spawnPointObject in spawnPointObjects)
+            {
+                // add the transform of each spawn point to the list
+                spawnPoints.Add(spawnPointObject.transform);
+            }
+        }
+    }
+
     /// <summary>
     /// Determine whether the player is in a menu depending on the active scene name.
     /// </summary>
@@ -55,6 +75,8 @@ public class GameManager : MonoBehaviour
             case "NetworkLockerRoom":
                 return true;
             case "JustinMenuScene":
+                return true;
+            case "DavidMenuScene":
                 return true;
             default:
                 return false;

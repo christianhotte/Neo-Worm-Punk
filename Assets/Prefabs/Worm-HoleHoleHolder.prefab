@@ -1,5 +1,66 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1262723121591587572
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8928941772608798588}
+  - component: {fileID: 2676434065724780944}
+  - component: {fileID: 5077722994198808935}
+  m_Layer: 9
+  m_Name: SuckZone
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8928941772608798588
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1262723121591587572}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1620262600561972270}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!135 &2676434065724780944
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1262723121591587572}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 1.25
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &5077722994198808935
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1262723121591587572}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9fecc3a00f7bb34a9b33a118ef34eef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  suckin: 0
+  pullForce: 50
+  womrHoleCenter: {fileID: 1620262601156547262}
 --- !u!1 &1620262600103442331
 GameObject:
   m_ObjectHideFlags: 0
@@ -75,6 +136,7 @@ Transform:
   - {fileID: 1620262601156547262}
   - {fileID: 3791764805939174968}
   - {fileID: 8441753312161247399}
+  - {fileID: 8928941772608798588}
   m_Father: {fileID: 1620262601031258321}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
@@ -176,6 +238,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67fc11a315762af43aa4eec7a88a2eac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  activatingPlayer: 0
+  cooldownTime: 10
   holePos1: {fileID: 1620262600561972270}
   holePos2: {fileID: 1620262601479060463}
   wormZone: {fileID: 1620262601096244179}
@@ -191,7 +255,7 @@ MonoBehaviour:
   playerOrigin: {fileID: 0}
   wormHoleAud: {fileID: 0}
   enterSound: {fileID: 8300000, guid: b0a64d7436126ce499301beef26175fa, type: 3}
-  exitSound: {fileID: 0}
+  suctionSound: {fileID: 8300000, guid: 9d4cc2d3b1ccff84b9b1ebb65d46451e, type: 3}
 --- !u!82 &1951368902157187744
 AudioSource:
   m_ObjectHideFlags: 0
@@ -404,6 +468,7 @@ Transform:
   - {fileID: 2985049995785957037}
   - {fileID: 1620262600103442328}
   - {fileID: 7740653793527565370}
+  - {fileID: 6399788246189331470}
   m_Father: {fileID: 1620262601031258321}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -457,6 +522,67 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetPoint: {fileID: 0}
   type: 2
+--- !u!1 &2209894729004177128
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6399788246189331470}
+  - component: {fileID: 6720759907563145425}
+  - component: {fileID: 4764150983559046138}
+  m_Layer: 9
+  m_Name: SuckZone
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6399788246189331470
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2209894729004177128}
+  m_LocalRotation: {x: -0, y: -0.9238797, z: -0, w: -0.38268325}
+  m_LocalPosition: {x: -0.15, y: 0.13, z: 0.93}
+  m_LocalScale: {x: 8, y: 8, z: 0.49999994}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1620262601479060463}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!135 &6720759907563145425
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2209894729004177128}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 1.25
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &4764150983559046138
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2209894729004177128}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9fecc3a00f7bb34a9b33a118ef34eef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  suckin: 0
+  pullForce: 50
+  womrHoleCenter: {fileID: 1620262600103442328}
 --- !u!1 &5374682211338973234
 GameObject:
   m_ObjectHideFlags: 0

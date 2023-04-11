@@ -23,6 +23,7 @@ public class Leaderboards : MonoBehaviourPunCallbacks
     
     //Runtime Vars:
     private bool showingLeaderboard; //True when leaderboard is enabled for the scene (only when players are coming back from combat)
+    private GameObject screenObject;
 
     //RUNTIME METHODS:
     private void Awake()
@@ -37,11 +38,17 @@ public class Leaderboards : MonoBehaviourPunCallbacks
     }
     void Start()
     {
+        //Get objects & components:
+        screenObject = transform.parent.Find("LeaderboardScreen").gameObject;
+
         //Initialization:
         if (PhotonNetwork.LocalPlayer.ActorNumber != GetComponentInParent<LockerTubeController>().GetTubeNumber()) { gameObject.SetActive(false); return; } //Hide board if it does not correspond with player's tube
 
         //Check scene state:
-        foreach (NetworkPlayer player in NetworkPlayer.instances) { if (player.networkPlayerStats.numOfKills > 0) { showingLeaderboard = true; break; } } //Show leaderboard if any players have any kills
+        foreach (NetworkPlayer player in NetworkPlayer.instances)
+        {
+            if (player.networkPlayerStats.numOfKills > 0 || player.networkPlayerStats.numOfDeaths > 0) { showingLeaderboard = true; break; }
+        }
         if (showingLeaderboard) //Leaderboard is being shown this scene
         {
             //Rank players:
@@ -52,14 +59,16 @@ public class Leaderboards : MonoBehaviourPunCallbacks
 
                 //Get stats:
                 PlayerStats stats = player.networkPlayerStats; //Get current player's stats from last round
-                float currentH = stats.numOfKills;             //Get KD of current player
+                float currentK = stats.numOfKills;             //Get KD of current player
+                float currentD = stats.numOfDeaths;
 
                 //Rank against competitors:
                 for (int x = 0; x < rankedPlayers.Count; x++) //Iterate through ranked player list
                 {
                     PlayerStats otherStats = rankedPlayers[x].networkPlayerStats;      //Get stats from other player
-                    float otherH = otherStats.numOfKills;                              //Get KD of other player
-                    if (otherH < currentH) { rankedPlayers.Insert(x, player); break; } //Insert current player above the first player it outranks
+                    float otherK = otherStats.numOfKills;                              //Get KD of other player
+                    float otherD = otherStats.numOfDeaths;
+                    if (otherK < currentK || (otherK == currentK && otherD > currentD)) { rankedPlayers.Insert(x, player); break; } //Insert current player above the first player it outranks
                 }
                 if (!rankedPlayers.Contains(player)) rankedPlayers.Add(player); //Add player in last if it doesn't outrank anyone
             }
@@ -85,17 +94,7 @@ public class Leaderboards : MonoBehaviourPunCallbacks
                 List<char> nameCharacters = new List<char>();
                 foreach (char c in rankedPlayers[x].GetName().ToCharArray())
                 {
-                    if (c == '#') continue;
-                    if (c == '0') continue;
-                    if (c == '1') continue;
-                    if (c == '2') continue;
-                    if (c == '3') continue;
-                    if (c == '4') continue;
-                    if (c == '5') continue;
-                    if (c == '6') continue;
-                    if (c == '7') continue;
-                    if (c == '8') continue;
-                    if (c == '9') continue;
+                    if (c == '#' || c == '0' || c == '1' || c == '2' || c == '3' || c == '4' || c == '5' || c == '6' || c == '7' || c == '8' || c == '9') continue;
                     nameCharacters.Add(c);
                 }
                 newName.text = new string(nameCharacters.ToArray());                              //Display player name
@@ -117,7 +116,9 @@ public class Leaderboards : MonoBehaviourPunCallbacks
                 //Place K/D:
                 TMP_Text newKD = Instantiate(ratios, ratios.transform.parent).GetComponent<TMP_Text>();        //Instantiate new text object
                 newKD.rectTransform.localPosition -= Vector3.down * yHeight;                                   //Move text to target position
-                float KD = ((float)stats.numOfKills / (stats.numOfDeaths > 0 ? (float)stats.numOfDeaths : 1));
+                float divider = stats.numOfDeaths;
+                if (divider == 0) divider = 1;
+                float KD = stats.numOfKills / divider;
                 newKD.text = KD.ToString("F2");                                                                //Display KD ratio
                 newKD.color = playerColor;                                                                     //Set text color to given player color
             }
@@ -129,7 +130,11 @@ public class Leaderboards : MonoBehaviourPunCallbacks
             deaths.enabled = false; //Hide original death display
             ratios.enabled = false; //Hide original ratio display
         }
-        else gameObject.SetActive(false); // If the player did not come back from a game, we don't want to show the leaderboards.
+        else
+        {
+            gameObject.SetActive(false); // If the player did not come back from a game, we don't want to show the leaderboards.
+            screenObject.SetActive(false);
+        }
     }
     /// <summary>
     /// Called whenever current scene is unloaded.

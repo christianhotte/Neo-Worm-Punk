@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using Unity.XR.CoreUtils;
-public class WormHole : MonoBehaviour
+public class WormHole : NetworkedArenaElement
 {
     public Transform holePos1, holePos2,wormZone,playerHead,wormZoneShifted;
     public GameObject wormZoneParticles,wormZoneInstance,playerCam;
@@ -14,7 +14,7 @@ public class WormHole : MonoBehaviour
     public GameObject playerOrigin;
     public static List<WormHole> ActiveWormholes = new List<WormHole>();
     public AudioSource wormHoleAud;
-    public AudioClip enterSound;
+    public AudioClip enterSound,suctionSound;
     private WormHoleTrigger triggerScript,EntryTrigger;
     void Start()
     {
@@ -25,6 +25,8 @@ public class WormHole : MonoBehaviour
     }
     public IEnumerator StartWormhole(GameObject startHole,GameObject playerOBJ)
     {
+        inZone = true;
+        PlayerController.instance.UnHolsterAll();
         locked = true; // Locks the worm whole circut      
         Transform exitPos;                                                           //define Exit Point
         Rigidbody playerRB;
@@ -64,17 +66,25 @@ public class WormHole : MonoBehaviour
         {
             pe.Shutdown(waitTime);
         }
-        if (enterSound != null) wormHoleAud.PlayOneShot(enterSound);
-        PlayerController.photonView.RPC("RPC_MakeInvisible", RpcTarget.Others);
-        playerOBJ.transform.position = wormZoneShifted.position; //Player enters worm zone here
 
+        PlayerController.photonView.RPC("RPC_MakeInvisible", RpcTarget.Others);
+        //playerRB.isKinematic = true;
+        playerOBJ.transform.position = wormZoneShifted.position; //Player enters worm zone here
+        wormHoleAud.clip = null;
+        wormHoleAud.loop = false;
+        wormHoleAud.Stop();
+        if (enterSound != null) wormHoleAud.PlayOneShot(enterSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
         float entryDiff = playerCam.transform.eulerAngles.y - wormZoneShifted.eulerAngles.y; //difference for player to face down wormhole
         playerOBJ.transform.rotation = Quaternion.Euler(playerOBJ.transform.eulerAngles.x, playerOBJ.transform.eulerAngles.y - entryDiff, playerOBJ.transform.eulerAngles.z);
         float startRot = playerCam.transform.eulerAngles.y;//reference the starting rotation of the players camera
+      //  playerRB.isKinematic = true;
         wormZoneInstance =Instantiate(wormZoneParticles);//spawns the wormhole instance
         wormZoneInstance.transform.position = new Vector3(PC.cam.transform.position.x , PC.cam.transform.position.y, PC.cam.transform.position.z);//moves the wormhole into position
         wormZoneInstance.transform.eulerAngles = new Vector3(0, startRot, 0); // sets the wormhole to be aligned with your face
         wormZoneSpeed = 120;// The speed you fly through the wormholes at
+
+      //  playerRB.isKinematic = false;
+       // playerRB.velocity = Vector3.zero;
         playerRB.velocity = wormZoneInstance.transform.forward * wormZoneSpeed;//giving the speed to the player
         yield return new WaitForSeconds(waitTime);//time to wait while traveling down worm hole
         float diff = playerCam.transform.eulerAngles.y - exitPos.transform.eulerAngles.y; // gets the difference in angle between the player and the exit
@@ -88,10 +98,17 @@ public class WormHole : MonoBehaviour
         triggerScript.exiting = false;
         triggerScript.reset = true; //tells the exit to open back up
         EntryTrigger.reset = true;//tells the entrance to open back up
+        inZone = false;
         yield return new WaitForSeconds(0.2f);  //Wait for the player to get clear of the wormhole
         ActiveWormholes.Remove(this);
         Destroy(wormZoneInstance);
-        locked = false;   //Unlock the Womrhole circut
-        
+        // locked = false;   //Unlock the Womrhole circut
+        StartCoroutine(TimedLock());
+    }
+
+    public IEnumerator TimedLock()
+    {
+        yield return new WaitForSeconds(10.0f);
+        locked = false;
     }
 }

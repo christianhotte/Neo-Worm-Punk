@@ -50,7 +50,7 @@ public class ExplosionController : MonoBehaviour
         transform.localScale = Vector3.one * newScale;                    //Apply new scale to transform
 
         //Check for player hits:
-        if (PlayerController.photonView.ViewID == originPlayerID) //Only have master version of explosions check for hits
+        if (PlayerController.photonView != null && PlayerController.photonView.ViewID == originPlayerID) //Only have master version of explosions check for hits
         {
             foreach (NetworkPlayer player in NetworkPlayer.instances) //Iterate through all player instances in scene
             {
@@ -66,8 +66,8 @@ public class ExplosionController : MonoBehaviour
                 launchForce *= (distance / (newScale / 2)) * maxLaunchForce;                //Modify launch force based on how close player is to epicenter of explosion
 
                 //Send signals:
-                player.photonView.RPC("RPC_Launch", RpcTarget.All, launchForce);                                   //Launch player using calculated force
-                if (distance <= damageRadius) player.photonView.RPC("RPC_Hit", RpcTarget.All, new object[] { 1 }); //Damage player if inside radius
+                player.photonView.RPC("RPC_Launch", RpcTarget.All, launchForce);                                                //Launch player using calculated force
+                if (distance <= damageRadius) player.photonView.RPC("RPC_Hit", RpcTarget.All, 1, originPlayerID, Vector3.zero); //Damage player if inside radius
 
                 //Cleanup:
                 hitPlayers.Add(player); //Add player to list to make sure that it does not get hit multiple times by the same explosion

@@ -2,23 +2,29 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum ColorOptions { DEFAULT, RED, ORANGE, YELLOW, GREEN, BLUE, TEAL, VIOLET, MAGENTA, BLACK }
+public enum ColorOptions { DEFAULT, PINK, ORANGE, YELLOW, GREEN, CYAN, VIOLET, RAZZMATAZZ, WHITE }
 
 public class PlayerColorChanger : MonoBehaviour
 {
     private PhysicalButtonController[] colorButtons;
-    private ColorOptions currentColorOptionSelected = ColorOptions.DEFAULT;
+
+    private void Awake()
+    {
+        colorButtons = GetComponentsInChildren<PhysicalButtonController>();
+    }
 
     // Start is called before the first frame update
     void Start()
     {
-        colorButtons = GetComponentsInChildren<PhysicalButtonController>();
+        Debug.Log("Color Buttons Length: " + colorButtons.Length);
         for (int i = 0; i < colorButtons.Length; i++)
             AdjustButtonColor(colorButtons[i], i);
     }
 
     private void AdjustButtonColor(PhysicalButtonController currentButton, int colorOption)
     {
+        Debug.Log("Changing Initial Button Color To: " + (ColorOptions)colorOption);
+
         Color newColor;
 
         newColor = PlayerSettingsController.playerColors[colorOption];
@@ -36,8 +42,8 @@ public class PlayerColorChanger : MonoBehaviour
 
         switch (colorOption)
         {
-            case (int)ColorOptions.RED:
-                newColorText = "RED";
+            case (int)ColorOptions.PINK:
+                newColorText = "PINK";
                 break;
             case (int)ColorOptions.ORANGE:
                 newColorText = "ORANGE";
@@ -48,20 +54,17 @@ public class PlayerColorChanger : MonoBehaviour
             case (int)ColorOptions.GREEN:
                 newColorText = "GREEN";
                 break;
-            case (int)ColorOptions.BLUE:
-                newColorText = "BLUE";
-                break;
-            case (int)ColorOptions.TEAL:
-                newColorText = "TEAL";
+            case (int)ColorOptions.CYAN:
+                newColorText = "CYAN";
                 break;
             case (int)ColorOptions.VIOLET:
                 newColorText = "VIOLET";
                 break;
-            case (int)ColorOptions.MAGENTA:
-                newColorText = "MAGENTA";
+            case (int)ColorOptions.RAZZMATAZZ:
+                newColorText = "RAZZMATAZZ";
                 break;
-            case (int)ColorOptions.BLACK:
-                newColorText = "BLACK";
+            case (int)ColorOptions.WHITE:
+                newColorText = "WHITE";
                 break;
             default:
                 newColorText = "DEFAULT";
@@ -70,10 +73,8 @@ public class PlayerColorChanger : MonoBehaviour
 
         Color newColor = PlayerSettingsController.ColorOptionsToColor((ColorOptions)colorOption);
 
-        NetworkManagerScript.instance.UpdateTakenColorList(currentColorOptionSelected, (ColorOptions)colorOption);
-
         PlayerSettingsController.Instance.charData.playerColor = newColor;   //Set the player color in the character data
-        currentColorOptionSelected = (ColorOptions)colorOption;
+        NetworkManagerScript.localNetworkPlayer.SetNetworkPlayerProperties("Color", colorOption);
 
         PlayerController.instance.ApplyAndSyncSettings(); //Apply settings to player (NOTE TO PETER: Call this whenever you want to change a setting and sync it across the network)
         Debug.Log("Changing Player Color To " + newColorText);
@@ -88,11 +89,12 @@ public class PlayerColorChanger : MonoBehaviour
             button.EnableButton(true);
         }
 
-        foreach (var color in NetworkManagerScript.instance.takenColors)
+        foreach (var player in NetworkManagerScript.instance.GetPlayerList())
         {
-            colorButtons[color].ShowText(true);
-            colorButtons[color].LockButton(true);
-            colorButtons[color].EnableButton(false);
+            Debug.Log(player.NickName + "'s Color: " + (ColorOptions)player.CustomProperties["Color"]);
+            colorButtons[(int)player.CustomProperties["Color"]].ShowText(true);
+            colorButtons[(int)player.CustomProperties["Color"]].LockButton(true);
+            colorButtons[(int)player.CustomProperties["Color"]].EnableButton(false);
         }
     }
 }

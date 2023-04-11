@@ -31,7 +31,7 @@ public class Projectile : MonoBehaviourPunCallbacks
     private float timeAlive;                   //How much time this projectile has been alive for
     private protected float estimatedLifeTime; //Approximate projectile lifetime calculated based on velocity and range
 
-    private protected bool isHook; //Whether or not this projectile is a hook (set by hook script)
+    internal bool isHook;          //Whether or not this projectile is a hook (set by hook script)
     private Vector3 prevTargetPos; //Previous position of target, used for velocity prediction
     private Material origMat;      //Original material projectile had when spawned
 
@@ -418,9 +418,9 @@ public class Projectile : MonoBehaviourPunCallbacks
     private protected virtual void HitObject(RaycastHit hitInfo)
     {
         //Initialization:
-        transform.position = hitInfo.point;                               //Move projectile to its hit position
-        totalDistance += hitInfo.distance;                                //Add the final amount of distance projectile had to travel to get there
-        photonView.RPC("RPC_Move", RpcTarget.Others, transform.position); //Move all networked projectiles to hit position
+        transform.position = hitInfo.point;                                                              //Move projectile to its hit position
+        totalDistance += hitInfo.distance;                                                               //Add the final amount of distance projectile had to travel to get there
+        if (PhotonNetwork.IsConnected) photonView.RPC("RPC_Move", RpcTarget.Others, transform.position); //Move all networked projectiles to hit position
 
         //Look for strikeable scripts:
         NetworkPlayer targetPlayer = hitInfo.collider.GetComponentInParent<NetworkPlayer>();     //Try to get network player from hit collider
@@ -431,13 +431,8 @@ public class Projectile : MonoBehaviourPunCallbacks
 
             //Hit using player:
             print("Projectile with origin ID " + originPlayerID + " hit player with ID " + targetPlayer.photonView.ViewID);
-            targetPlayer.photonView.RPC("RPC_Hit", RpcTarget.All, settings.damage, originPlayerID);                                //Indicate to player that it has been hit
+            targetPlayer.photonView.RPC("RPC_Hit", RpcTarget.All, settings.damage, originPlayerID, velocity);                      //Indicate to player that it has been hit (by projectile with given amount of velocity)
             if (!dumbFired && originPlayerID != 0) PhotonNetwork.GetPhotonView(originPlayerID).RPC("RPC_HitEnemy", RpcTarget.All); //Indicate to origin player that it has shot something
-            if (settings.knockback > 0) //Projectile has player knockback
-            {
-                Vector3 knockback = transform.forward * settings.knockback;          //Get value by which to launch hit player
-                targetPlayer.photonView.RPC("RPC_Launch", RpcTarget.All, knockback); //Add force to player rigidbody based on knockback amount
-            }
 
             //Player hit effect:
             if (settings.playerHitPrefab != null)
@@ -449,15 +444,15 @@ public class Projectile : MonoBehaviourPunCallbacks
         else //Hit object is not a player
         {
             //Hit through targetable:
-            Targetable targetObject = hitInfo.collider.GetComponent<Targetable>();         //Try to get targetable script from target
-            if (targetObject != null) targetObject.IsHit(settings.damage, originPlayerID); //Indicate to targetable that it has been hit
+            Targetable targetObject = hitInfo.collider.GetComponent<Targetable>();                   //Try to get targetable script from target
+            if (targetObject != null) targetObject.IsHit(settings.damage, originPlayerID, velocity); //Indicate to targetable that it has been hit
 
             //Surface explosion:
             if (settings.explosionPrefab != null) //Only explode if projectile has an explosion prefab
             {
                 ExplosionController explosion = Instantiate(settings.explosionPrefab, transform.position, transform.rotation).GetComponent<ExplosionController>(); //Instantiate the explosion prefab and get reference to its script
                 explosion.originPlayerID = originPlayerID;                                                                                                         //Make sure explosion can't hit its own player
-                photonView.RPC("RPC_Explode", RpcTarget.Others);                                                                                                   //Create explosions from networked projectiles
+                if (PhotonNetwork.IsConnected) photonView.RPC("RPC_Explode", RpcTarget.Others);                                                                    //Create explosions from networked projectiles
             }
         }
 
@@ -471,12 +466,12 @@ public class Projectile : MonoBehaviourPunCallbacks
     private protected virtual void BurnOut()
     {
         //Mid-air explosion:
-        if (!photonView.IsMine) return; //Make sure non-main projectiles cannot burn out
+        if (PhotonNetwork.IsConnected && !photonView.IsMine) return; //Make sure non-main projectiles cannot burn out (only valid while projectiles are on the network)
         if (settings.explosionPrefab != null) //Only explode if projectile has an explosion prefab
         {
             ExplosionController explosion = Instantiate(settings.explosionPrefab, transform.position, transform.rotation).GetComponent<ExplosionController>(); //Instantiate an explosion at burnout point
             explosion.originPlayerID = originPlayerID;                                                                                                         //Make sure explosion can't hit its own player
-            photonView.RPC("RPC_Explode", RpcTarget.Others);                                                                                                   //Create explosions from networked projectiles
+            if (PhotonNetwork.IsConnected) photonView.RPC("RPC_Explode", RpcTarget.Others);                                                                    //Create explosions from networked projectiles
         }
 
         //Cleanup:
@@ -579,7 +574,15 @@ public class Projectile : MonoBehaviourPunCallbacks
         //Check demo player:
         PlayerController hitRealPlayer = hit.collider.GetComponentInParent<PlayerController>();         //Try to get real player controller from collision
         if (hitRealPlayer == null) hitRealPlayer = hit.collider.GetComponent<PlayerController>();       //Try again to get real player controller from collision
-        if (hitRealPlayer != null && PlayerController.photonView.ViewID == originPlayerID) return true; //Return true if raycast hits projectile's own demo player
+        if (hitRealPlayer != null)
+        {
+            if (PlayerController.photonView != null)
+            {
+                if (PlayerController.photonView.ViewID == originPlayerID) return true; //Return true if raycast hits projectile's own demo player
+            }
+            else return true;
+        }
+            
 
         return false; //No possible self-hit could be detected, return false
     }

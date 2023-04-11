@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75231b2903c64f74bbd587426850c128, type: 3}
   m_Name: ChainsawSettings_Hotte1
   m_EditorClassIdentifier: 
-  grindSpeedRange: {x: 70, y: 110}
-  grindAccelTime: 5
+  grindSpeedRange: {x: 80, y: 130}
+  grindAccelTime: 1.5
   grindLayers:
     serializedVersion: 2
     m_Bits: 257
@@ -45,7 +45,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  bladeTraverseDistance: 1.6
+  bladeTraverseDistance: 1.8
   bladeExtendTime: 0.155
   bladeExtendCurve:
     serializedVersion: 2
@@ -124,16 +124,27 @@ MonoBehaviour:
   maxWristAngle: 80
   wristLerpRate: 7.7
   wristRotReturnRate: 400
+  deflectTransTime: 0.07
+  deflectRadius: 0.5
+  deflectRotRate: 1900
+  deflectWristExtend: 0.27
+  deflectPullImpulse: 0
+  deflectPullForce: 0
+  deflectTime: 1.5
+  deflectCooldownRate: 0.7
+  deflectionAngle: 90
   reverseGripAngle: 105
   reverseGripLerpRate: 7
   reverseGripReturnRate: 500
-  triggerThreshold: 0.9
-  releaseThreshold: 0.5
+  gripThresholds: {x: 0.62314534, y: 0.76083076}
+  triggerThresholds: {x: 0.39169136, y: 0.64985144}
   swingSpeedRange: {x: 0.5, y: 2}
   extendSound: {fileID: 8300000, guid: f7a515930a8dc6741a608db1e42a190c, type: 3}
   runningSound: {fileID: 0}
   runningWallSound: {fileID: 0}
   sheathSound: {fileID: 8300000, guid: ba699daa1a77ff547b65b08e06538eca, type: 3}
+  deflectIdleSound: {fileID: 8300000, guid: aec4a007ab0c8894aac2c485061c0388, type: 3}
+  deflectSound: {fileID: 8300000, guid: 5343be21a73a12c46807db26cc025b29, type: 3}
   extendHaptics:
     amplitude: 1
     duration: 0.15
