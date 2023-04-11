@@ -967,7 +967,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9159cdd41c7e9dc48b44d250742d9897, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  combatHUDScreen: {fileID: 6428136916501389627}
   leftHolster: {fileID: 3159799231831277637}
   rightHolster: {fileID: 5555264822810242848}
   healthSettings: {fileID: 11400000, guid: 6d24db3effe67fb47a10bfaa9621390b, type: 2}
@@ -975,6 +974,8 @@ MonoBehaviour:
   torsoVerticalOffset: 10
   keepTorsoCentered: 1
   flickStickThreshold: 0
+  slipSpeed: 5
+  slipAngleRange: {x: 0, y: 0}
   targetHitSound: {fileID: 8300000, guid: 531eac65f6344cf478fc990cb0396400, type: 3}
   targetKillSound: {fileID: 0}
   useSpawnPoint: 1
@@ -2781,6 +2782,7 @@ MonoBehaviour:
   jointSettings: {fileID: 11400000, guid: 6b12243a97cccb34983b382025185c85, type: 2}
   canMoveHandRig: 0
   debugUpdateSettings: 0
+  debugUnequip: 0
   rocketTip: {fileID: 7514274169388561736}
   rocketTipReset: {fileID: 2478961638108177106}
   hookedPos: {fileID: 0}
@@ -6423,6 +6425,7 @@ MonoBehaviour:
   jointSettings: {fileID: 11400000, guid: 6b12243a97cccb34983b382025185c85, type: 2}
   canMoveHandRig: 0
   debugUpdateSettings: 1
+  debugUnequip: 0
   blade: {fileID: 7499629525468747182}
   hand: {fileID: 1952950443738959620}
   ProjectilePrefab: {fileID: 5990455804588303578, guid: 0fd9d1413feab904b9d3dbcef74de6a9, type: 3}
@@ -7947,11 +7950,6 @@ PrefabInstance:
 --- !u!4 &5170001516445393295 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6500810002819420461, guid: 80b40ad3b752ff3418b274b0a83344bb, type: 3}
-  m_PrefabInstance: {fileID: 2127964834009903266}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &6428136916501389627 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4953212790757986713, guid: 80b40ad3b752ff3418b274b0a83344bb, type: 3}
   m_PrefabInstance: {fileID: 2127964834009903266}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &3206328300091538794

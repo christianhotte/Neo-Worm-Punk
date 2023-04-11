@@ -10,7 +10,7 @@ public class WristUIController : MonoBehaviour
     [SerializeField, Tooltip("The player controller.")] private PlayerController playerController;
     [SerializeField, Tooltip("The player input actions asset.")] private InputActionAsset inputActions;
     [SerializeField, Tooltip("The menu ray interactors.")] private GameObject[] rayInteractors;
-    [SerializeField, Tooltip("The mesh renderer that shows the player HUD.")] private MeshRenderer playerHUD;
+    [SerializeField, Tooltip("The canvas that shows the player HUD.")] private Canvas playerHUD;
     [SerializeField, Tooltip("The interactable HUD menu.")] private PlayerHUDController playerHUDController;
 
     [SerializeField, Tooltip("The button that allows the player to leave their room.")] private GameObject leaveRoomButton;
