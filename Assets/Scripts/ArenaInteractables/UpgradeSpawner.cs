@@ -30,28 +30,20 @@ public class UpgradeSpawner : MonoBehaviour
     public IEnumerator DoPowerUp(PowerUp.PowerUpType powerType, float waitTime)
     {
         currentPowerUp = powerType;
-        if(currentPowerUp == PowerUp.PowerUpType.Invulnerability)
+        if (currentPowerUp == PowerUp.PowerUpType.Invulnerability)
         {
             PlayerController.instance.MakeInvulnerable(waitTime);
         }
         else if (currentPowerUp == PowerUp.PowerUpType.HeatVision)
         {
-            print("Network players being made visible = " + NetworkPlayer.instances.Count);
-            foreach (NetworkPlayer player in NetworkPlayer.instances)
+            PlayerController.photonView.RPC("StartMaterialEvent", RpcTarget.All, 1, 2, waitTime);
+            foreach (NetworkPlayer otherPlayer in NetworkPlayer.instances)
             {
-                if (player == NetworkManagerScript.localNetworkPlayer) continue;
-                player.ChangeNetworkPlayerMaterial(settings.HeatVisMat);
+                otherPlayer.StartMaterialEvent(1, 2, waitTime);
             }
-            PlayerController.photonView.RPC("RPC_ChangeMaterial", RpcTarget.Others, 0);
-            yield return new WaitForSeconds(settings.HeatVisionTime);
-            foreach (NetworkPlayer player in NetworkPlayer.instances)
-            {
-                if (player == NetworkManagerScript.localNetworkPlayer) continue;
-                player.ResetNetworkPlayerMaterials();
-            }
-            PlayerController.photonView.RPC("RPC_ChangeMaterial", RpcTarget.Others, -1);
         }
-        else yield return new WaitForSeconds(waitTime);
+
+        yield return new WaitForSeconds(waitTime);
         currentPowerUp = PowerUp.PowerUpType.None;
     }
 
@@ -73,12 +65,7 @@ public class UpgradeSpawner : MonoBehaviour
         {
             foreach (var player in NetworkPlayer.instances)
             {
-                if (player == NetworkManagerScript.localNetworkPlayer)
-                    continue;
-                else
-                {
-                    player.ResetNetworkPlayerMaterials();
-                }
+                if (player == NetworkManagerScript.localNetworkPlayer) continue;
             }
         }
     }
