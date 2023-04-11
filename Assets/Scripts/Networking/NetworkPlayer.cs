@@ -383,8 +383,8 @@ public class NetworkPlayer : MonoBehaviour
         //Set materials:
         SkinnedMeshRenderer targetRenderer = photonView.IsMine ? PlayerController.instance.bodyRenderer : bodyRenderer;
         TrailRenderer targetTrail = photonView.IsMine ? null : trail;
-        targetRenderer.material = primaryMat;
-        if (targetTrail != null) trail.material = primaryMat;
+        targetTrail.material = primaryMat;
+        if (targetTrail != null) targetTrail.material = primaryMat;
         
         //Set base color if using default material:
         if (primaryMat == altMaterials[0])
