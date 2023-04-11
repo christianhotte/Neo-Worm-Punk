@@ -71,7 +71,7 @@ public class WristUIController : MonoBehaviour
     private void UpdateLeaveRoomButton()
     {
         //If the player is in a room, not in the main menu, and the leave button is not showing, activate the leave room button.
-        if (PhotonNetwork.InRoom && SceneManager.GetActiveScene().name != GameSettings.titleScreenScene)
+        if (PhotonNetwork.InRoom)
         {
             if (!leaveRoomButton.activeInHierarchy)
                 leaveRoomButton.SetActive(true);
