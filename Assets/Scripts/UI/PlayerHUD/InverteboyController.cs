@@ -107,7 +107,7 @@ public class InverteboyController : MonoBehaviour
     }
 
     public void StopMusic() => audioSource.Stop();
-    private void UpdateVolume() => audioSource.volume = PlayerPrefs.GetFloat("MusicVolume", GameSettings.defaultMusicSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound);
+    public void UpdateVolume() => audioSource.volume = PlayerPrefs.GetFloat("MusicVolume", GameSettings.defaultMusicSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound);
 
     private void OnDestroy()
     {
