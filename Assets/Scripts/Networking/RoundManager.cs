@@ -1,21 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
 using Photon.Pun;
 using Photon.Realtime;
 
 public class RoundManager : MonoBehaviourPunCallbacks, IPunObservable
 {
-    public float roundTime = 300.0f;
+    private float roundTime;
     private float timeRemaining;
     private bool roundActive = false; // Whether a round is currently active
-    //private TMP_Text timerText;
 
     // Start is called before the first frame update
     void Start()
     {
-        //timerText = GetComponent<TMP_Text>();
+        roundTime = (int)PhotonNetwork.CurrentRoom.CustomProperties["RoundLength"];
         timeRemaining = roundTime;
         StartRound();
     }
@@ -30,8 +28,6 @@ public class RoundManager : MonoBehaviourPunCallbacks, IPunObservable
             {
                 EndRound();
             }
-
-            //UpdateTimerDisplay();
         }
     }
 
@@ -47,14 +43,6 @@ public class RoundManager : MonoBehaviourPunCallbacks, IPunObservable
     {
         roundActive = false;
         timeRemaining = roundTime;
-        UpdateTimerDisplay();
-    }
-
-    // If we have a canvas somewhere, we can display the timer.
-    private void UpdateTimerDisplay()
-    {
-        int seconds = Mathf.RoundToInt(timeRemaining);
-        //timerText.text = string.Format("{0:0}:{1:00}", seconds / 60, seconds % 60);
     }
 
     // Updates the timer to display the same time for every client.
@@ -70,7 +58,6 @@ public class RoundManager : MonoBehaviourPunCallbacks, IPunObservable
         {
             // Receive the current time remaining from the network
             timeRemaining = (float)stream.ReceiveNext();
-            UpdateTimerDisplay();
         }
     }
 
@@ -79,9 +66,9 @@ public class RoundManager : MonoBehaviourPunCallbacks, IPunObservable
     public void SyncTimer(float syncedTimeRemaining)
     {
         timeRemaining = syncedTimeRemaining;
-        UpdateTimerDisplay();
     }
 
+    public string GetTimeDisplay() => GetMinutes() + ":" + GetSeconds();
     public string GetMinutes() => Mathf.FloorToInt(timeRemaining / 60f < 0 ? 0 : timeRemaining / 60f).ToString();
     public string GetSeconds() => Mathf.FloorToInt(timeRemaining % 60f < 0 ? 0 : timeRemaining % 60f).ToString("00");
     public float GetTotalSecondsLeft() => timeRemaining;
