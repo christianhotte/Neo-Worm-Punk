@@ -122,12 +122,12 @@ public class PlayerController : MonoBehaviour
     public IEnumerator InvulnerableSequence(float waitTime)
     {
         if (photonView == null) yield return null;
-        Material prevMat = bodyRenderer.material;
         bodyRenderer.material = photonView.GetComponent<NetworkPlayer>().altMaterials[1];
         photonView.RPC("RPC_ChangeMaterial", RpcTarget.Others, 1);
         yield return new WaitForSeconds(waitTime);
         photonView.RPC("RPC_ChangeMaterial", RpcTarget.Others, -1);
-        bodyRenderer.material = prevMat;
+        Debug.Log("Stopping");
+        ApplyAndSyncSettings();
     }
 
     //RUNTIME METHODS:
