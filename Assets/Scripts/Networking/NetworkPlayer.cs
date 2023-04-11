@@ -18,6 +18,39 @@ using RootMotion.FinalIK;
 /// </summary>
 public class NetworkPlayer : MonoBehaviour
 {
+    //Classes, Enums & Structs:
+    public class MatChangeEvent
+    {
+        //Settings:
+        /// <summary>
+        /// The material this event will cause the player to look like.
+        /// </summary>
+        public Material targetMat;
+        /// <summary>
+        /// Higher values mean higher priority.
+        /// </summary>
+        [Min(0)] public int priority;
+
+        //Runtime Variables:
+        public float timeRemaining;
+
+        public MatChangeEvent(Material _targetMat, int _priority, float _duration)
+        {
+            targetMat = _targetMat;
+            priority = _priority;
+            timeRemaining = _duration;
+        }
+    }
+    [System.Serializable]
+    public class MatChangeCombo
+    {
+        //Settings:
+        public Material inputMatA;
+        public Material inputMatB;
+        [Space()]
+        public Material outputMat;
+    }
+
     //Objects & Components:
     /// <summary>
     /// List of all instantiated network players in the room.
@@ -29,10 +62,10 @@ public class NetworkPlayer : MonoBehaviour
     private TrailRenderer trail;                                 //Renderer for trail that makes players more visible to each other
     internal PlayerStats networkPlayerStats = new PlayerStats(); //The stats for the network player
     internal Hashtable photonPlayerSettings;
+    
+    [Header("Material System:")]
     public Material[] altMaterials;
-
-    private Material[] defaultPlayerMaterials;
-    private Material[] defaultTrailMaterials;
+    public MatChangeCombo[] matCombos;
 
     private Transform headTarget;      //True local position of player head
     private Transform leftHandTarget;  //True local position of player left hand
@@ -44,6 +77,11 @@ public class NetworkPlayer : MonoBehaviour
     private Transform modelRig;        //Networked transform which follows position of player model
 
     //Runtime Variables:
+    /// <summary>
+    /// List of all events affecting the material/color of this version of the network player.
+    /// </summary>
+    public List<MatChangeEvent> matChangeEvents = new List<MatChangeEvent>();
+
     private bool visible = true; //Whether or not this network player is currently visible
     internal Color currentColor; //Current player color this networkPlayer instance is set to
     private int lastTubeNumber;  //Number of the tube this player was latest spawned at
@@ -62,9 +100,6 @@ public class NetworkPlayer : MonoBehaviour
         bodyRenderer = GetComponentInChildren<SkinnedMeshRenderer>(); //Get body renderer component from model in children
         trail = GetComponentInChildren<TrailRenderer>();              //Get trail renderer component from children (there should only be one)
         wormName = GetComponentInChildren<TextMeshProUGUI>();
-
-        defaultPlayerMaterials = bodyRenderer.materials;
-        defaultTrailMaterials = trail.materials;
 
         //Set up rig:
         foreach (PhotonTransformView view in GetComponentsInChildren<PhotonTransformView>()) //Iterate through each network-tracked component
@@ -95,8 +130,9 @@ public class NetworkPlayer : MonoBehaviour
         }
 
         //Event subscriptions:
-        SceneManager.sceneLoaded += OnSceneLoaded; //Subscribe to scene load event (every NetworkPlayer should do this)
-        DontDestroyOnLoad(gameObject);             //Make sure network players are not destroyed when a new scene is loaded
+        SceneManager.sceneLoaded += OnSceneLoaded;     //Subscribe to scene load event (every NetworkPlayer should do this)
+        SceneManager.sceneUnloaded += OnSceneUnloaded; //Subscribe to scene unload event (every NetworkPlayer should do this)
+        DontDestroyOnLoad(gameObject);                 //Make sure network players are not destroyed when a new scene is loaded
     }
 
     /// <summary>
@@ -137,10 +173,25 @@ public class NetworkPlayer : MonoBehaviour
         //Synchronize position:
         if (photonView.IsMine) //Client network player has references to actual targets
         {
+            //Sync player puppet:
             MapPosition(headRig, headTarget);           //Update position of head rig
             MapPosition(leftHandRig, leftHandTarget);   //Update position of left hand rig
             MapPosition(rightHandRig, rightHandTarget); //Update position of right hand rig
             MapPosition(modelRig, modelTarget);         //Update position of base model
+        }
+
+        //Sync colors:
+        for (int i = 0; i < matChangeEvents.Count;)
+        {
+            //Update events:
+            MatChangeEvent matEvent = matChangeEvents[i];
+            matEvent.timeRemaining -= Time.deltaTime;
+            if (matEvent.timeRemaining <= 0)
+            {
+                matChangeEvents.Remove(matEvent); //Kill event
+                ReCalculateMaterialEvents();
+            }
+            else i++; //Move to next event
         }
     }
     private void OnDestroy()
@@ -151,6 +202,7 @@ public class NetworkPlayer : MonoBehaviour
         instances.Remove(this);                                                                                 //Remove from instance list
         if (photonView.IsMine && PlayerController.photonView == photonView) PlayerController.photonView = null; //Clear client photonView reference
         SceneManager.sceneLoaded -= OnSceneLoaded;
+        SceneManager.sceneUnloaded -= OnSceneUnloaded;
     }
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
@@ -182,6 +234,11 @@ public class NetworkPlayer : MonoBehaviour
             foreach (Collider c in transform.GetComponentsInChildren<Collider>()) c.enabled = !GameManager.Instance.InMenu(); //Always disable colliders if networkPlayer is in a menu scene
         }
         inTube = false;
+    }
+    public void OnSceneUnloaded(Scene scene)
+    {
+        matChangeEvents.Clear();
+        ReCalculateMaterialEvents();
     }
 
     //FUNCTIONALITY METHODS:
@@ -271,12 +328,83 @@ public class NetworkPlayer : MonoBehaviour
         SyncColors();
     }
 
+    //COLOR MANAGEMENT:
     /// <summary>
     /// Syncs the list of taken colors in the room.
     /// </summary>
     public void SyncColors()
     {
         photonView.RPC("UpdateTakenColors", RpcTarget.AllBuffered); //Send data to every player on the network (including this one)
+    }
+    /// <summary>
+    /// Manages material event priority for this particular network player.
+    /// </summary>
+    public void ReCalculateMaterialEvents()
+    {
+        //Get highest priority material:
+        MatChangeEvent primaryEvent = null;
+        foreach (MatChangeEvent matEvent in matChangeEvents) 
+        {
+            if (primaryEvent == null || matEvent.priority > primaryEvent.priority) primaryEvent = matEvent;
+        }
+
+        //Check for combos:
+        Material primaryMat = altMaterials[0];
+        if (primaryEvent != null)
+        {
+            primaryMat = primaryEvent.targetMat;
+
+            //Look for material combos:
+            while (true)
+            {
+                MatChangeCombo activeCombo = null;
+                bool materialsCombined = false;
+                foreach (MatChangeCombo combo in matCombos)
+                {
+                    if (combo.inputMatA == primaryMat || combo.inputMatB == primaryMat) { activeCombo = combo; break; }
+                }
+                if (activeCombo != null)
+                {
+                    Material otherComboMat = activeCombo.inputMatA == primaryMat ? activeCombo.inputMatB : activeCombo.inputMatA;
+                    foreach (MatChangeEvent matEvent in matChangeEvents)
+                    {
+                        if (matEvent == primaryEvent) continue; //Skip self
+                        if (otherComboMat == matEvent.targetMat) //Material is actually being combined
+                        {
+                            primaryMat = activeCombo.outputMat; //Get combined output material
+                            materialsCombined = true;
+                        }
+                    }
+                }
+                if (!materialsCombined) break;
+            }
+        }
+
+        //Set materials:
+        SkinnedMeshRenderer targetRenderer = photonView.IsMine ? PlayerController.instance.bodyRenderer : bodyRenderer;
+        TrailRenderer targetTrail = photonView.IsMine ? null : trail;
+        targetRenderer.material = primaryMat;
+        if (targetTrail != null) trail.material = primaryMat;
+        
+        //Set base color if using default material:
+        if (primaryMat == altMaterials[0])
+        {
+            targetRenderer.material.SetColor("_Color", PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]]);
+            if (targetTrail != null) targetTrail.material.SetColor("_Color", PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]]);
+        }
+    }
+    /// <summary>
+    /// Creates a material event on this network player which is able to change its material properties for a certain amount of time.
+    /// </summary>
+    /// <param name="targetMatIndex">Index (in altMaterials) of material this event will cause player to have.</param>
+    /// <param name="priority">Controls which events this event is able to override.</param>
+    /// <param name="duration">How long this event will last for.</param>
+    [PunRPC]
+    public void StartMaterialEvent(int targetMatIndex, int priority, float duration)
+    {
+        MatChangeEvent newEvent = new MatChangeEvent(altMaterials[targetMatIndex], priority, duration);
+        matChangeEvents.Add(newEvent);
+        ReCalculateMaterialEvents();
     }
 
     /// <summary>
@@ -392,15 +520,15 @@ public class NetworkPlayer : MonoBehaviour
     {
         bodyRenderer.material = newMaterial;
         trail.material = newMaterial;
+        if (newMaterial == altMaterials[0])
+        {
+            bodyRenderer.material.SetColor("_Color", PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]]);
+            trail.material.SetColor("_Color", PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]]);
+        }
     }
-
-    /// <summary>
-    /// Resets the NetworkPlayer materials to the default ones.
-    /// </summary>
-    public void ResetNetworkPlayerMaterials()
+    public void ChangeNetworkPlayerMaterial(int matIndex)
     {
-        bodyRenderer.materials = defaultPlayerMaterials;
-        trail.materials = defaultTrailMaterials;
+        ChangeNetworkPlayerMaterial(altMaterials[matIndex]);
     }
 
     /// <summary>
@@ -491,7 +619,6 @@ public class NetworkPlayer : MonoBehaviour
     [PunRPC]
     public void RPC_ChangeMaterial(int materialIndex)
     {
-        if (materialIndex == -1) { ResetNetworkPlayerMaterials(); return; }
         ChangeNetworkPlayerMaterial(altMaterials[materialIndex]);
     }
     /// <summary>

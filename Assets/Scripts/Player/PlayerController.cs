@@ -119,16 +119,6 @@ public class PlayerController : MonoBehaviour
         isDead = false;                                      //Indicate that player is no longer dead
         CenterCamera();                                      //Center camera (this is worth doing during any major transition)
     }
-    public IEnumerator InvulnerableSequence(float waitTime)
-    {
-        if (photonView == null) yield return null;
-        Material prevMat = bodyRenderer.material;
-        bodyRenderer.material = photonView.GetComponent<NetworkPlayer>().altMaterials[1];
-        photonView.RPC("RPC_ChangeMaterial", RpcTarget.Others, 1);
-        yield return new WaitForSeconds(waitTime);
-        photonView.RPC("RPC_ChangeMaterial", RpcTarget.Others, -1);
-        bodyRenderer.material = prevMat;
-    }
 
     //RUNTIME METHODS:
     private void Awake()
@@ -179,7 +169,6 @@ public class PlayerController : MonoBehaviour
         //Event subscription:
         inputMap.actionTriggered += OnInputTriggered; //Subscribe to generic input event
         SceneManager.sceneLoaded += OnSceneLoaded;    //Subscribe to scene loaded event
-        SceneManager.sceneUnloaded += OnSceneUnloaded;
     }
     private void Start()
     {
@@ -264,10 +253,6 @@ public class PlayerController : MonoBehaviour
             if (UpgradeSpawner.primary != null) UpgradeSpawner.primary.StartCoroutine(UpgradeSpawner.primary.DoPowerUp(PowerUp.PowerUpType.Invulnerability, healthSettings.spawnInvincibilityTime + healthSettings.deathTime));
             //MakeInvulnerable(healthSettings.spawnInvincibilityTime);
         }
-    }
-    public void OnSceneUnloaded(Scene scene)
-    {
-        ApplyAndSyncSettings();
     }
     private void OnDestroy()
     {
@@ -415,8 +400,7 @@ public class PlayerController : MonoBehaviour
         isDead = true; //Indicate that this player is dead
         xrOrigin.transform.position = SpawnManager.current.deathZone.position; //Move player to death zone
         xrOrigin.transform.rotation = Quaternion.identity;                     //Zero out player rotation
-        //MakeInvulnerable(healthSettings.spawnInvincibilityTime + healthSettings.deathTime);
-        if (UpgradeSpawner.primary != null) UpgradeSpawner.primary.StartCoroutine(UpgradeSpawner.primary.DoPowerUp(PowerUp.PowerUpType.Invulnerability, healthSettings.spawnInvincibilityTime + healthSettings.deathTime));
+        MakeInvulnerable(healthSettings.spawnInvincibilityTime + healthSettings.deathTime);
         StartCoroutine(DeathSequence());                                       //Begin death sequence
         currentHealth = healthSettings.defaultHealth;                          //Reset to max health
         healthVolume.weight = 0;                                               //Reset health volume weight
@@ -494,6 +478,6 @@ public class PlayerController : MonoBehaviour
     public void MakeInvulnerable(float time)
     {
         timeUntilVulnerable = time;
-        StartCoroutine(InvulnerableSequence(time));
+        if (photonView != null) photonView.RPC("StartMaterialEvent", RpcTarget.All, 2, 3, time);
     }
 }
