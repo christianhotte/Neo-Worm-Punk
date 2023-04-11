@@ -169,7 +169,6 @@ public class PlayerController : MonoBehaviour
         //Event subscription:
         inputMap.actionTriggered += OnInputTriggered; //Subscribe to generic input event
         SceneManager.sceneLoaded += OnSceneLoaded;    //Subscribe to scene loaded event
-        SceneManager.sceneUnloaded += OnSceneUnloaded;
     }
     private void Start()
     {
@@ -254,10 +253,6 @@ public class PlayerController : MonoBehaviour
             if (UpgradeSpawner.primary != null) UpgradeSpawner.primary.StartCoroutine(UpgradeSpawner.primary.DoPowerUp(PowerUp.PowerUpType.Invulnerability, healthSettings.spawnInvincibilityTime + healthSettings.deathTime));
             //MakeInvulnerable(healthSettings.spawnInvincibilityTime);
         }
-    }
-    public void OnSceneUnloaded(Scene scene)
-    {
-        ApplyAndSyncSettings();
     }
     private void OnDestroy()
     {
