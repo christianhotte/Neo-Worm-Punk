@@ -144,11 +144,10 @@ public class UpgradeSpawner : MonoBehaviour
     }
     public IEnumerator SpawnAlert()
     {
-        thisAud.PlayOneShot(settings.AlertSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
-        yield return new WaitForSeconds(0.7f);
-        thisAud.PlayOneShot(settings.AlertSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
-        yield return new WaitForSeconds(0.7f);
-        thisAud.PlayOneShot(settings.AlertSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
-        yield return new WaitForSeconds(0.7f);
+        for (int x = 0; x < 3; x++)
+        {
+            yield return new WaitForSeconds(0.7f);
+            if (primary == this) thisAud.PlayOneShot(settings.AlertSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
+        }
     }
 }

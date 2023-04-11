@@ -23,6 +23,7 @@ public class Leaderboards : MonoBehaviourPunCallbacks
     
     //Runtime Vars:
     private bool showingLeaderboard; //True when leaderboard is enabled for the scene (only when players are coming back from combat)
+    private GameObject screenObject;
 
     //RUNTIME METHODS:
     private void Awake()
@@ -37,11 +38,17 @@ public class Leaderboards : MonoBehaviourPunCallbacks
     }
     void Start()
     {
+        //Get objects & components:
+        screenObject = transform.parent.Find("LeaderboardScreen").gameObject;
+
         //Initialization:
         if (PhotonNetwork.LocalPlayer.ActorNumber != GetComponentInParent<LockerTubeController>().GetTubeNumber()) { gameObject.SetActive(false); return; } //Hide board if it does not correspond with player's tube
 
         //Check scene state:
-        foreach (NetworkPlayer player in NetworkPlayer.instances) { if (player.networkPlayerStats.numOfKills > 0) { showingLeaderboard = true; break; } } //Show leaderboard if any players have any kills
+        foreach (NetworkPlayer player in NetworkPlayer.instances)
+        {
+            if (player.networkPlayerStats.numOfKills > 0 || player.networkPlayerStats.numOfDeaths > 0) { showingLeaderboard = true; break; }
+        }
         if (showingLeaderboard) //Leaderboard is being shown this scene
         {
             //Rank players:
@@ -123,7 +130,11 @@ public class Leaderboards : MonoBehaviourPunCallbacks
             deaths.enabled = false; //Hide original death display
             ratios.enabled = false; //Hide original ratio display
         }
-        else gameObject.SetActive(false); // If the player did not come back from a game, we don't want to show the leaderboards.
+        else
+        {
+            gameObject.SetActive(false); // If the player did not come back from a game, we don't want to show the leaderboards.
+            screenObject.SetActive(false);
+        }
     }
     /// <summary>
     /// Called whenever current scene is unloaded.
