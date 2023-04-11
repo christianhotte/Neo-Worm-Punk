@@ -144,7 +144,6 @@ public class MainMenuController : MonoBehaviour
         yield return new WaitForSeconds(playerObject.GetComponentInChildren<FadeScreen>().GetFadeDuration());
         yield return null;
 
-        PlayerController.instance.inverteboy.StopMusic();
         GameManager.Instance.LoadGame(newScene);
     }
 }

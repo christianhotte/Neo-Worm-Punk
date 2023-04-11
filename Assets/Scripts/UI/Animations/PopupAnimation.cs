@@ -44,6 +44,6 @@ public class PopupAnimation : MonoBehaviour
 
     private void PopupEndAnimation()
     {
-        LeanTween.delayedCall(popupDuration, () => LeanTween.scale(gameObject, Vector3.zero, endMovementSpeed).setEase(easeOutCurve));
+        LeanTween.delayedCall(popupDuration, () => LeanTween.scale(gameObject, Vector3.zero, endMovementSpeed).setEase(easeOutCurve)).setDestroyOnComplete(true);
     }
 }
