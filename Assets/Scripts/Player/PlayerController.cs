@@ -41,6 +41,7 @@ public class PlayerController : MonoBehaviour
     [Tooltip("Controller component for player's right hand.")]             internal ActionBasedController rightHand;
     [Tooltip("Equipment which is currently attached to the player")]       internal List<PlayerEquipment> attachedEquipment = new List<PlayerEquipment>();
     [Tooltip("Combat HUD Canvas.")]                                        internal CombatHUDController combatHUD;
+    internal InverteboyController inverteboy;            //The player's inverteboy component
 
     internal Camera cam;                       //Primary camera for VR rendering, located on player head
     internal PlayerInput input;                //Input manager component used by player to send messages to hands and such
@@ -119,16 +120,6 @@ public class PlayerController : MonoBehaviour
         isDead = false;                                      //Indicate that player is no longer dead
         CenterCamera();                                      //Center camera (this is worth doing during any major transition)
     }
-    public IEnumerator InvulnerableSequence(float waitTime)
-    {
-        if (photonView == null) yield return null;
-        Material prevMat = bodyRenderer.material;
-        bodyRenderer.material = photonView.GetComponent<NetworkPlayer>().altMaterials[1];
-        photonView.RPC("RPC_ChangeMaterial", RpcTarget.Others, 1);
-        yield return new WaitForSeconds(waitTime);
-        photonView.RPC("RPC_ChangeMaterial", RpcTarget.Others, -1);
-        bodyRenderer.material = prevMat;
-    }
 
     //RUNTIME METHODS:
     private void Awake()
@@ -150,6 +141,7 @@ public class PlayerController : MonoBehaviour
         screenShaker = cam.GetComponent<ScreenShakeVR>();                                                                                                                      //Get screenshaker script from camera object
         playerModel = GetComponentInChildren<VRIK>().transform;                                                                                                                //Get player model component
         bodyManager = GetComponentInChildren<PlayerBodyManager>(); if (bodyManager == null) bodyRb.gameObject.AddComponent<PlayerBodyManager>();                               //Make sure player has a body manager component
+        inverteboy = GetComponentInChildren<InverteboyController>(); if(inverteboy == null) { Debug.Log("Inverteboy could not be found."); }
         foreach (Volume volume in GetComponentsInChildren<Volume>()) //Iterate through Volume components in children
         {
             if (volume.name.Contains("Health")) healthVolume = volume; //Get health volume
@@ -349,14 +341,14 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     public void HitEnemy()
     {
-        if (targetHitSound != null) audioSource.PlayOneShot(targetHitSound); //Play hit sound when player shoots (or damages) a target
+        if (targetHitSound != null) audioSource.PlayOneShot(targetHitSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play hit sound when player shoots (or damages) a target
     }
     /// <summary>
     /// Called when player hits and kills an enemy with a projectile.
     /// </summary>
     public void KilledEnemy()
     {
-        if (targetKillSound != null) audioSource.PlayOneShot(targetKillSound); //Play kill sound when player kills a target
+        if (targetKillSound != null) audioSource.PlayOneShot(targetKillSound,PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play kill sound when player kills a target
     }
     /// <summary>
     /// Method called when this player is hit by a projectile.
@@ -377,7 +369,7 @@ public class PlayerController : MonoBehaviour
         }
         else //Player is being hurt by this projectile hit
         {
-            audioSource.PlayOneShot(healthSettings.hurtSound != null ? healthSettings.hurtSound : (AudioClip)Resources.Load("Sounds/Default_Hurt_Sound")); //Play hurt sound
+            audioSource.PlayOneShot(healthSettings.hurtSound != null ? healthSettings.hurtSound : (AudioClip)Resources.Load("Sounds/Default_Hurt_Sound"), PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play hurt sound
             if (healthSettings.regenSpeed > 0) timeUntilRegen = healthSettings.regenPauseTime;                                                             //Optionally begin regeneration sequence
             return false;
         }
@@ -391,7 +383,7 @@ public class PlayerController : MonoBehaviour
         if (isDead) return; //Do not allow dead players to be killed
 
         //Effects:
-        audioSource.PlayOneShot(healthSettings.deathSound != null ? healthSettings.deathSound : (AudioClip)Resources.Load("Sounds/Temp_Death_Sound")); //Play death sound
+        audioSource.PlayOneShot(healthSettings.deathSound != null ? healthSettings.deathSound : (AudioClip)Resources.Load("Sounds/Temp_Death_Sound"), PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play death sound
         
         //Weapon cleanup:
         foreach (NewGrapplerController hookShot in GetComponentsInChildren<NewGrapplerController>()) //Iterate through any hookshots player may have equipped
@@ -410,8 +402,7 @@ public class PlayerController : MonoBehaviour
         isDead = true; //Indicate that this player is dead
         xrOrigin.transform.position = SpawnManager.current.deathZone.position; //Move player to death zone
         xrOrigin.transform.rotation = Quaternion.identity;                     //Zero out player rotation
-        //MakeInvulnerable(healthSettings.spawnInvincibilityTime + healthSettings.deathTime);
-        if (UpgradeSpawner.primary != null) UpgradeSpawner.primary.StartCoroutine(UpgradeSpawner.primary.DoPowerUp(PowerUp.PowerUpType.Invulnerability, healthSettings.spawnInvincibilityTime + healthSettings.deathTime));
+        MakeInvulnerable(healthSettings.spawnInvincibilityTime + healthSettings.deathTime);
         StartCoroutine(DeathSequence());                                       //Begin death sequence
         currentHealth = healthSettings.defaultHealth;                          //Reset to max health
         healthVolume.weight = 0;                                               //Reset health volume weight
@@ -489,6 +480,6 @@ public class PlayerController : MonoBehaviour
     public void MakeInvulnerable(float time)
     {
         timeUntilVulnerable = time;
-        StartCoroutine(InvulnerableSequence(time));
+        if (photonView != null) photonView.RPC("StartMaterialEvent", RpcTarget.All, 2, 3, time);
     }
 }

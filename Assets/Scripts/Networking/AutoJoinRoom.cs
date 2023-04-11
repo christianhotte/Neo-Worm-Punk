@@ -14,6 +14,12 @@ public class AutoJoinRoom : MonoBehaviour
         NetworkManagerScript.instance.joinRoomOnLoad = true;
     }
 
+    // Unchecks off joinRoomOnLoad so that when we leave the scene, we won't be stuck in GameDevTest settings.
+    private void OnDestroy()
+    {
+        NetworkManagerScript.instance.joinRoomOnLoad = false;
+    }
+
     /// <summary>
     /// Automatically loads the player into a scene.
     /// </summary>
