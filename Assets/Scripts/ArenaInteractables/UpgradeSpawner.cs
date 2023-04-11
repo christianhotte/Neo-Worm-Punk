@@ -33,9 +33,6 @@ public class UpgradeSpawner : MonoBehaviour
         if(currentPowerUp == PowerUp.PowerUpType.Invulnerability)
         {
             PlayerController.instance.MakeInvulnerable(waitTime);
-            PlayerController.photonView.RPC("RPC_ChangeMaterial", RpcTarget.Others, 1);
-            yield return new WaitForSeconds(waitTime);
-            PlayerController.photonView.RPC("RPC_ChangeMaterial", RpcTarget.Others, -1);
         }
         else if (currentPowerUp == PowerUp.PowerUpType.HeatVision)
         {
@@ -100,35 +97,41 @@ public class UpgradeSpawner : MonoBehaviour
         }
 
         float LevelTimePercent = jumboScript.GetLevelTimer().LevelTimePercentage();
-        if (primary == this && PhotonNetwork.IsMasterClient)
-        {
             if (LevelTimePercent > 25 && spawnedPowerups < 1)
             {
                 StartCoroutine(SpawnAlert());
-                SpawnRandomUpgrade();
                 spawnedPowerups++;
+                if (primary == this && PhotonNetwork.IsMasterClient)
+                {
+                    SpawnRandomUpgrade();
+                }
+
             }
             else if (LevelTimePercent > 50 && spawnedPowerups < 2)
             {
                 StartCoroutine(SpawnAlert());
-                SpawnRandomUpgrade();
                 spawnedPowerups++;
+                if (primary == this && PhotonNetwork.IsMasterClient)
+                {
+                    SpawnRandomUpgrade();
+                }
             }
             else if (LevelTimePercent > 75 && spawnedPowerups < 3)
             {
                 StartCoroutine(SpawnAlert());
-                SpawnRandomUpgrade();
                 spawnedPowerups++;
+                if (primary == this && PhotonNetwork.IsMasterClient)
+                {
+                    SpawnRandomUpgrade();
+                }
             }
-        }
     }
 
     //FUNCTIONALITY METHODS:
     public void SpawnUpgrade()
     {
-        if (!PhotonNetwork.IsMasterClient) return;
-
-
+       
+        if (!PhotonNetwork.IsMasterClient) return; 
         string resourceName = "PowerUps/" + upgradeResourceNames[Random.Range(0, upgradeResourceNames.Length)];
         PowerUp newUpgrade = PhotonNetwork.Instantiate(resourceName, spawnPoint.position, spawnPoint.rotation).GetComponent<PowerUp>();
         newUpgrade.rb.AddForce(spawnPoint.up * settings.LaunchForce, ForceMode.Impulse);
@@ -141,11 +144,10 @@ public class UpgradeSpawner : MonoBehaviour
     }
     public IEnumerator SpawnAlert()
     {
-        thisAud.PlayOneShot(settings.AlertSound);
-        yield return new WaitForSeconds(0.7f);
-        thisAud.PlayOneShot(settings.AlertSound);
-        yield return new WaitForSeconds(0.7f);
-        thisAud.PlayOneShot(settings.AlertSound);
-        yield return new WaitForSeconds(0.7f);
+        for (int x = 0; x < 3; x++)
+        {
+            yield return new WaitForSeconds(0.7f);
+            if (primary == this) thisAud.PlayOneShot(settings.AlertSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
+        }
     }
 }

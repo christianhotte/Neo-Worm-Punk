@@ -73,7 +73,7 @@ public class WormHole : NetworkedArenaElement
         wormHoleAud.clip = null;
         wormHoleAud.loop = false;
         wormHoleAud.Stop();
-        if (enterSound != null) wormHoleAud.PlayOneShot(enterSound);
+        if (enterSound != null) wormHoleAud.PlayOneShot(enterSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
         float entryDiff = playerCam.transform.eulerAngles.y - wormZoneShifted.eulerAngles.y; //difference for player to face down wormhole
         playerOBJ.transform.rotation = Quaternion.Euler(playerOBJ.transform.eulerAngles.x, playerOBJ.transform.eulerAngles.y - entryDiff, playerOBJ.transform.eulerAngles.z);
         float startRot = playerCam.transform.eulerAngles.y;//reference the starting rotation of the players camera
@@ -108,7 +108,7 @@ public class WormHole : NetworkedArenaElement
 
     public IEnumerator TimedLock()
     {
-        yield return new WaitForSeconds(3.0f);
+        yield return new WaitForSeconds(10.0f);
         locked = false;
     }
 }

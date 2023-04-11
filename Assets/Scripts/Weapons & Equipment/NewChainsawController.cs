@@ -152,7 +152,7 @@ public class NewChainsawController : PlayerEquipment
                 grindTime = 0;                                                                            //Reset grind time tracker
             }
         }
-        else if (mode == BladeMode.Extended && triggerValue >= settings.triggerThresholds.y && deflectTime == settings.deflectTime) //Activate deflect mode when player squeezes the trigger
+        else if ((mode == BladeMode.Extended || mode == BladeMode.Extending) && triggerValue >= settings.triggerThresholds.y && deflectTime == settings.deflectTime) //Activate deflect mode when player squeezes the trigger
         {
             //Switch mode:
             prevMode = mode;                           //Record previous blade mode
@@ -162,9 +162,9 @@ public class NewChainsawController : PlayerEquipment
             audioSource.PlayOneShot(settings.deflectIdleSound);
 
             //Pull player forward:
-            if (settings.deflectPullForce != 0)
+            if (settings.deflectPullImpulse != 0)
             {
-                Vector3 pullForce = (Mathf.Max(settings.deflectPullImpulse + player.bodyRb.velocity.magnitude)) * transform.forward; //Get force by which player is being pulled forward
+                Vector3 pullForce = settings.deflectPullImpulse * transform.forward; //Get force by which player is being pulled forward
                 player.bodyRb.velocity = pullForce;                                                                                  //Add force to player body
             }
 
@@ -415,6 +415,7 @@ public class NewChainsawController : PlayerEquipment
         float alignment = Vector3.Angle(wrist.forward, -incomingDirection);
         if (alignment <= settings.deflectionAngle)
         {
+            barrel.rotation = Quaternion.LookRotation(-incomingDirection, Vector3.up);
             Projectile newProjectile; //Initialize reference container for spawned projectile
             if (!PhotonNetwork.InRoom) //Weapon is in local fire mode
             {
