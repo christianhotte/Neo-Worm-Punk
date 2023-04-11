@@ -76,6 +76,8 @@ public class GameManager : MonoBehaviour
                 return true;
             case "JustinMenuScene":
                 return true;
+            case "DavidMenuScene":
+                return true;
             default:
                 return false;
         }
