@@ -15,6 +15,7 @@ public class UpgradeSpawner : MonoBehaviour
     private Jumbotron jumboScript;
     private AudioSource thisAud;
     private int spawnedPowerups=0;
+    private bool Cooldown = false;
     //Settings:
     [Header("Settings:")]
     public PowerUpSettings settings;
@@ -22,6 +23,7 @@ public class UpgradeSpawner : MonoBehaviour
     [Space()]
     [SerializeField] private bool debugSpawn;
     [SerializeField] private bool debugGiveSelectedUpgrade;
+    public float SpawnDelay;
 
     //Runtime Variables:
     public PowerUp.PowerUpType currentPowerUp;
@@ -82,36 +84,47 @@ public class UpgradeSpawner : MonoBehaviour
             debugGiveSelectedUpgrade = false;
             StartCoroutine(DoPowerUp(currentPowerUp, 15));
         }
+        if (!Cooldown)
+        {
+            Cooldown = true;
+            StartCoroutine(SpawnAlert());
 
-        float LevelTimePercent = jumboScript.GetLevelTimer().LevelTimePercentage();
-            if (LevelTimePercent > 25 && spawnedPowerups < 1)
+            StartCoroutine(SpawnPause(SpawnDelay));
+            if (primary == this && PhotonNetwork.IsMasterClient)
             {
-                StartCoroutine(SpawnAlert());
-                spawnedPowerups++;
-                if (primary == this && PhotonNetwork.IsMasterClient)
-                {
-                    SpawnRandomUpgrade();
-                }
+                SpawnRandomUpgrade();
+            }
+        }
 
-            }
-            else if (LevelTimePercent > 50 && spawnedPowerups < 2)
-            {
-                StartCoroutine(SpawnAlert());
-                spawnedPowerups++;
-                if (primary == this && PhotonNetwork.IsMasterClient)
-                {
-                    SpawnRandomUpgrade();
-                }
-            }
-            else if (LevelTimePercent > 75 && spawnedPowerups < 3)
-            {
-                StartCoroutine(SpawnAlert());
-                spawnedPowerups++;
-                if (primary == this && PhotonNetwork.IsMasterClient)
-                {
-                    SpawnRandomUpgrade();
-                }
-            }
+        //    float LevelTimePercent = jumboScript.GetLevelTimer().LevelTimePercentage();
+        //        if (LevelTimePercent > 25 && spawnedPowerups < 1)
+        //        {
+        //            StartCoroutine(SpawnAlert());
+        //            spawnedPowerups++;
+        //            if (primary == this && PhotonNetwork.IsMasterClient)
+        //            {
+        //                SpawnRandomUpgrade();
+        //            }
+
+        //        }
+        //        else if (LevelTimePercent > 50 && spawnedPowerups < 2)
+        //        {
+        //            StartCoroutine(SpawnAlert());
+        //            spawnedPowerups++;
+        //            if (primary == this && PhotonNetwork.IsMasterClient)
+        //            {
+        //                SpawnRandomUpgrade();
+        //            }
+        //        }
+        //        else if (LevelTimePercent > 75 && spawnedPowerups < 3)
+        //        {
+        //            StartCoroutine(SpawnAlert());
+        //            spawnedPowerups++;
+        //            if (primary == this && PhotonNetwork.IsMasterClient)
+        //            {
+        //                SpawnRandomUpgrade();
+        //            }
+        //        }
     }
 
     //FUNCTIONALITY METHODS:
@@ -122,6 +135,11 @@ public class UpgradeSpawner : MonoBehaviour
         string resourceName = "PowerUps/" + upgradeResourceNames[Random.Range(0, upgradeResourceNames.Length)];
         PowerUp newUpgrade = PhotonNetwork.Instantiate(resourceName, spawnPoint.position, spawnPoint.rotation).GetComponent<PowerUp>();
         newUpgrade.rb.AddForce(spawnPoint.up * settings.LaunchForce, ForceMode.Impulse);
+    }
+    public IEnumerator SpawnPause(float time)
+    {
+        yield return new WaitForSeconds(time);
+        Cooldown = false;
     }
     public static void SpawnRandomUpgrade()
     {
