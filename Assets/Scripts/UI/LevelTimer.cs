@@ -121,4 +121,9 @@ public class LevelTimer : MonoBehaviour
     public float LevelTimePercentage() => 100f - ((currentTime / levelTime) * 100f);
 
     public void SetLevelTime(int newLevelTime) => levelTime = newLevelTime;
+
+    public int GetLevelTime()
+    {
+        return levelTime;
+    }
 }
