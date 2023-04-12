@@ -61,7 +61,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: b8820ae00cefc1242976323ea77b1356, type: 2}
+  - {fileID: 2100000, guid: bc810b4fb8f0a8641820d42ca3f1dce6, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -96,9 +96,9 @@ GameObject:
   - component: {fileID: 7994480003421303376}
   - component: {fileID: 2766401067431578661}
   - component: {fileID: 3217773743062146612}
-  - component: {fileID: -2493535638141112661}
+  - component: {fileID: 1254067881300824730}
   m_Layer: 0
-  m_Name: Invulnerability
+  m_Name: WHHeatVision
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -113,7 +113,7 @@ Transform:
   m_GameObject: {fileID: 6217499155098336413}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 134.29, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.12486, y: 0.12486, z: 0.12486}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4066346236961062081}
@@ -135,14 +135,14 @@ MonoBehaviour:
   targetPoint: {fileID: 6217499155098336480}
   type: 1
   hookToCenter: 0
-  powerType: 4
+  powerType: 2
   PowerupTime: 10
   health: 5
   airDrag: 0.1
   restingSpeed: 10
   bounceForce: 100
   powerUpHit: {fileID: 8300000, guid: 531eac65f6344cf478fc990cb0396400, type: 3}
-  dummyPowerup: 0
+  dummyPowerup: 1
 --- !u!114 &7994480003421303376
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -190,12 +190,12 @@ SphereCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6217499155098336413}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 7
   m_Center: {x: 0, y: 0, z: 0}
---- !u!82 &-2493535638141112661
+--- !u!82 &1254067881300824730
 AudioSource:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
