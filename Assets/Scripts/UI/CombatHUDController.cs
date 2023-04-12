@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using UnityEngine;
+using UnityEngine.XR;
 using UnityEngine.UI;
 using TMPro;
 
@@ -11,6 +12,8 @@ public class CombatHUDController : MonoBehaviour
     [SerializeField, Tooltip("The container for the information that displays the player stats information.")] private Transform playerStatsContainer;
     [SerializeField, Tooltip("The container for the information that displays the death information.")] private Transform deathInfoContainer;
     [SerializeField, Tooltip("The death information prefab.")] private DeathInfo deathInfoPrefab;
+    [SerializeField, Tooltip("The game HUD kill feed container.")] private Transform killFeedTransform;
+    [SerializeField, Tooltip("The prefab for the kill message.")] private GameObject killMessagePrefab;
 
     private Color defaultInfoWindowColor;
     [SerializeField, Tooltip("The color the the window flashes when the player gets a kill.")] private Color flashInfoWindowColor;
@@ -55,6 +58,9 @@ public class CombatHUDController : MonoBehaviour
 
         flashAnimation = FlashInfoWindow();
         StartCoroutine(flashAnimation);
+
+        GameObject currentKill = Instantiate(killMessagePrefab, killFeedTransform);
+        currentKill.GetComponentInChildren<TextMeshProUGUI>().text = "Killed " + victim;
     }
 
     private IEnumerator FlashInfoWindow()
@@ -62,6 +68,8 @@ public class CombatHUDController : MonoBehaviour
         for(int i = 0; i < flashNumber * 2; i++)
         {
             infoWindow.color = infoWindow.color == defaultInfoWindowColor ? flashInfoWindowColor : defaultInfoWindowColor;
+            if (infoWindow.color == flashInfoWindowColor)
+                PlayerController.instance.SendHapticImpulse(InputDeviceRole.LeftHanded, new Vector2(0.1f, flashSpeed));
             yield return new WaitForSeconds(flashSpeed);
         }
     }
