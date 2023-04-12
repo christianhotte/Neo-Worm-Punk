@@ -19,6 +19,7 @@ using RootMotion.FinalIK;
 public class NetworkPlayer : MonoBehaviour
 {
     //Classes, Enums & Structs:
+    [System.Serializable]
     public class MatChangeEvent
     {
         //Settings:
@@ -342,6 +343,7 @@ public class NetworkPlayer : MonoBehaviour
     public void ReCalculateMaterialEvents()
     {
         //Validitiy checks:
+        print("Material event recalculation");
         if (photonView.IsMine && PlayerController.instance == null) return;
 
         //Get highest priority material:
@@ -355,6 +357,7 @@ public class NetworkPlayer : MonoBehaviour
         Material primaryMat = altMaterials[0];
         if (primaryEvent != null)
         {
+            print("Primary event identified");
             primaryMat = primaryEvent.targetMat;
 
             //Look for material combos:
@@ -385,6 +388,7 @@ public class NetworkPlayer : MonoBehaviour
 
         //Set materials:
         SkinnedMeshRenderer targetRenderer = photonView.IsMine ? PlayerController.instance.bodyRenderer : bodyRenderer;
+        targetRenderer.material = primaryMat;
         if (!photonView.IsMine) trail.material = primaryMat;
         
         //Set base color if using default material:

@@ -271,23 +271,26 @@ public class NewChainsawController : PlayerEquipment
                 }
 
                 //Sweet spot attraction:
-                float penetration = 1 - (Mathf.Min(hitInfo.distance, settings.bladeTraverseDistance) / settings.bladeTraverseDistance); //Get penetration depth as a percentage of total blade length
-                if (penetration < settings.grindSweetSpot.x || penetration > settings.grindSweetSpot.y) //Blade is not pushed far enough into surface
+                if (settings.grindGlueForce > 0)
                 {
-                    //Get corrective force value:
-                    float correctionValue = penetration < settings.grindSweetSpot.x ? Mathf.InverseLerp(settings.grindSweetSpot.x, 0, penetration) : -Mathf.InverseLerp(settings.grindSweetSpot.y, 1, penetration); //Get linear value representing how far blade is from sweet spot
-                    print("CorrectionValue = " + correctionValue);
-                    correctionValue = Mathf.Sign(correctionValue) * settings.grindGlueCurve.Evaluate(Mathf.Abs(correctionValue)); //Apply curve to value so it's a bit more smoothed-out/consistent (sign-independent)
-                    correctionValue *= settings.grindGlueForce;                          //Get final correction value from glue force
+                    float penetration = 1 - (Mathf.Min(hitInfo.distance, settings.bladeTraverseDistance) / settings.bladeTraverseDistance); //Get penetration depth as a percentage of total blade length
+                    if (penetration < settings.grindSweetSpot.x || penetration > settings.grindSweetSpot.y) //Blade is not pushed far enough into surface
+                    {
+                        //Get corrective force value:
+                        float correctionValue = penetration < settings.grindSweetSpot.x ? Mathf.InverseLerp(settings.grindSweetSpot.x, 0, penetration) : -Mathf.InverseLerp(settings.grindSweetSpot.y, 1, penetration); //Get linear value representing how far blade is from sweet spot
+                        print("CorrectionValue = " + correctionValue);
+                        correctionValue = Mathf.Sign(correctionValue) * settings.grindGlueCurve.Evaluate(Mathf.Abs(correctionValue)); //Apply curve to value so it's a bit more smoothed-out/consistent (sign-independent)
+                        correctionValue *= settings.grindGlueForce;                          //Get final correction value from glue force
 
-                    //Apply force:
-                    Vector3 correctionForce = correctionValue * Time.deltaTime * wrist.transform.forward; //Get force being applied this frame to keep blade locked in surface
-                    playerBody.AddForce(correctionForce, ForceMode.Force);                                //Apply corrective force to player rigidbody
-                }
-                else //Blade is within sweet spot and wants to stay there
-                {
-                    //Apply brakes:
+                        //Apply force:
+                        Vector3 correctionForce = correctionValue * Time.deltaTime * wrist.transform.forward; //Get force being applied this frame to keep blade locked in surface
+                        playerBody.AddForce(correctionForce, ForceMode.Force);                                //Apply corrective force to player rigidbody
+                    }
+                    else //Blade is within sweet spot and wants to stay there
+                    {
+                        //Apply brakes:
 
+                    }
                 }
 
                 //Cleanup:
@@ -367,6 +370,16 @@ public class NewChainsawController : PlayerEquipment
                 Vector3 newPivotRot = wristPivot.localEulerAngles;                                                                         //Get current eulers from pivot
                 newPivotRot.y = Mathf.LerpAngle(newPivotRot.y, -settings.reverseGripAngle, settings.reverseGripLerpRate * Time.deltaTime); //Get new lerped y rotation value for pivot
                 wristPivot.localEulerAngles = newPivotRot;                                                                                 //Apply new eulers to pivot
+            }
+
+            //Player killing:
+            if (Physics.Linecast(wristPivot.position, bladeEnd.position, out RaycastHit hitInfo, LayerMask.GetMask("Player")))
+            {
+                NetworkPlayer hitPlayer = hitInfo.collider.GetComponentInParent<NetworkPlayer>(); //Try to get networkplayer from hit
+                if (hitPlayer != null && !hitPlayer.photonView.IsMine) //Player (other than self) has been hit by blade
+                {
+                    hitPlayer.photonView.RPC("RPC_Hit", RpcTarget.AllBuffered, 3, PlayerController.photonView.ViewID, Vector3.zero); //Hit target
+                }
             }
         }
     }
