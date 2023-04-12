@@ -88,6 +88,7 @@ public class PlayerStats
     public int numOfKills = 0;
     public int numOfDeaths = 0;
     public int killStreak = 0;
+    public int deathStreak = 0;
 
     public static string[] streakMessages =
     {

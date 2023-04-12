@@ -12,6 +12,7 @@ public class CombatHUDController : MonoBehaviour
     [SerializeField, Tooltip("The container for the information that displays the player stats information.")] private Transform playerStatsContainer;
     [SerializeField, Tooltip("The container for the information that displays the death information.")] private Transform deathInfoContainer;
     [SerializeField, Tooltip("The death information prefab.")] private DeathInfo deathInfoPrefab;
+    [SerializeField, Tooltip("The game HUD combat container.")] private GameObject combatInfoTransform;
     [SerializeField, Tooltip("The game HUD kill feed container.")] private Transform killFeedTransform;
     [SerializeField, Tooltip("The prefab for the kill message.")] private GameObject killMessagePrefab;
 
@@ -85,4 +86,6 @@ public class CombatHUDController : MonoBehaviour
         //After a delay, fade out the death info canvas and then destroy it.
         LeanTween.delayedCall(waitDelay, () => LeanTween.alphaCanvas(deathInfoGameObject.GetComponent<CanvasGroup>(), 0f, endAnimationDelay).setDestroyOnComplete(true));
     }
+
+    public void EnableCombatHUD(bool enableCombatHUD) => combatInfoTransform.SetActive(enableCombatHUD);
 }
