@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Photon.Pun;
 
-public class Jumbotron : MonoBehaviour
+public class Jumbotron : MonoBehaviourPunCallbacks
 {
     public static Jumbotron primary;
 
@@ -15,6 +16,8 @@ public class Jumbotron : MonoBehaviour
     private bool cooldown = false,finished=false;
     public AudioClip oonge, bees,beeees, bwarp,eer,jaigh,krah,oo,rro,yert;
     private LevelTimer currentLevelTimer;
+    private RoundManager roundManager;
+
     private void Awake()
     {
         primary = this;
@@ -23,6 +26,8 @@ public class Jumbotron : MonoBehaviour
     {
         currentLevelTimer = GetComponentInChildren<LevelTimer>();
         jumboAud = this.GetComponent<AudioSource>();
+        PhotonView masterPV = PhotonView.Find(17);
+        roundManager = masterPV.GetComponent<RoundManager>();
     }
     private void Update()
     {
@@ -41,7 +46,11 @@ public class Jumbotron : MonoBehaviour
                 cooldown = true;
                 StartCoroutine(CountdownCooldown());
             }
+        }
 
+        if (roundManager != null)
+        {
+            string remainingTime = roundManager.GetTimeDisplay();
         }
     }
     private DeathInfo mostRecentDeath;  //The most recent death recorded

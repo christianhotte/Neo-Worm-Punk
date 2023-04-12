@@ -10,6 +10,15 @@ public class RoundManager : MonoBehaviourPunCallbacks, IPunObservable
     private float timeRemaining;
     private bool roundActive = false; // Whether a round is currently active
 
+    // Makes sure that the Round Manager is only instantiated once (for the master client only).
+    void Awake()
+    {
+        if (!PhotonNetwork.IsMasterClient)
+        {
+            Destroy(gameObject);
+        }
+    }
+
     // Start is called before the first frame update
     void Start()
     {
