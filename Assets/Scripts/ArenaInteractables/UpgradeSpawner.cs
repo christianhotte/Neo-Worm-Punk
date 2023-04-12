@@ -33,6 +33,7 @@ public class UpgradeSpawner : MonoBehaviour
     //EVENTS & COROUTINES:
     public IEnumerator DoPowerUp(PowerUp.PowerUpType powerType, float waitTime)
     {
+        Debug.Log("startingDoPowerUp");
         currentPowerUp = powerType;
         if (currentPowerUp == PowerUp.PowerUpType.Invulnerability)
         {
