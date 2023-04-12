@@ -295,6 +295,13 @@ public class NetworkPlayer : MonoBehaviour
     }
 
     [PunRPC]
+    public void RPC_UpdateLeaderboard(string playerName, int deaths, int kills, int streak)
+    {
+        foreach (var leaderboard in FindObjectsOfType<LeaderboardDisplay>())
+            leaderboard.UpdatePlayerStats(playerName, deaths, kills, streak);
+    }
+
+    [PunRPC]
     public void RPC_DeathLog(string killerName, string victimName)
     {
         NetworkManagerScript.instance.AddDeathToJumbotron(killerName, victimName);
@@ -348,7 +355,7 @@ public class NetworkPlayer : MonoBehaviour
 
         //Get highest priority material:
         MatChangeEvent primaryEvent = null;
-        foreach (MatChangeEvent matEvent in matChangeEvents) 
+        foreach (MatChangeEvent matEvent in matChangeEvents)
         {
             if (primaryEvent == null || matEvent.priority > primaryEvent.priority) primaryEvent = matEvent;
         }
@@ -390,21 +397,29 @@ public class NetworkPlayer : MonoBehaviour
         SkinnedMeshRenderer targetRenderer = photonView.IsMine ? PlayerController.instance.bodyRenderer : bodyRenderer;
         targetRenderer.material = primaryMat;
         if (!photonView.IsMine) trail.material = primaryMat;
-        
+
         //Set base color if using default material:
         if (primaryMat == altMaterials[0])
         {
             targetRenderer.material.SetColor("_Color", PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]]);
-            if (!photonView.IsMine) trail.material.SetColor("_Color", PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]]);
+            if (!photonView.IsMine)
+            {
+                for (int x = 0; x < trail.colorGradient.colorKeys.Length; x++) //Iterate through color keys in trail gradient
+                {
+                    if (currentColor == Color.black) trail.colorGradient.colorKeys[x].color = Color.white;
+                    else trail.colorGradient.colorKeys[x].color = currentColor; //Apply color setting to trail key
+                }
+            }
+            //trail.material.SetColor("_Color", PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]]);
         }
     }
-    /// <summary>
-    /// Creates a material event on this network player which is able to change its material properties for a certain amount of time.
-    /// </summary>
-    /// <param name="targetMatIndex">Index (in altMaterials) of material this event will cause player to have.</param>
-    /// <param name="priority">Controls which events this event is able to override.</param>
-    /// <param name="duration">How long this event will last for.</param>
-    [PunRPC]
+        /// <summary>
+        /// Creates a material event on this network player which is able to change its material properties for a certain amount of time.
+        /// </summary>
+        /// <param name="targetMatIndex">Index (in altMaterials) of material this event will cause player to have.</param>
+        /// <param name="priority">Controls which events this event is able to override.</param>
+        /// <param name="duration">How long this event will last for.</param>
+        [PunRPC]
     public void StartMaterialEvent(int targetMatIndex, int priority, float duration)
     {
         MatChangeEvent newEvent = new MatChangeEvent(altMaterials[targetMatIndex], priority, duration);
@@ -562,11 +577,17 @@ public class NetworkPlayer : MonoBehaviour
             if (killedPlayer)
             {
                 networkPlayerStats.numOfDeaths++;                                               //Increment death counter
+                networkPlayerStats.killStreak = 0;                                               //Reset kill streak counter
+                networkPlayerStats.deathStreak++;                                               //Increment death streak counter
                 PlayerPrefs.SetInt("LifetimeDeaths", PlayerPrefs.GetInt("LifetimeDeaths") + 1); //Add to the lifetime deaths counter 
+                if (PlayerPrefs.GetInt("HighestDeathStreak") < networkPlayerStats.deathStreak)
+                    PlayerPrefs.SetInt("HighestDeathStreak", networkPlayerStats.deathStreak); //Add to the highest death streak counter if applicable
                 PlayerController.instance.combatHUD.UpdatePlayerStats(networkPlayerStats);
                 SyncStats();
                 AddToKillBoard(PhotonNetwork.GetPhotonView(enemyID).Owner.NickName, PhotonNetwork.LocalPlayer.NickName);
+                photonView.RPC("RPC_UpdateLeaderboard", RpcTarget.All, PhotonNetwork.LocalPlayer.NickName, networkPlayerStats.numOfDeaths, networkPlayerStats.numOfKills, networkPlayerStats.killStreak);
                 if (enemyID != photonView.ViewID) PhotonNetwork.GetPhotonView(enemyID).RPC("RPC_KilledEnemy", RpcTarget.AllBuffered, photonView.ViewID);
+
             }
         }
     }
@@ -599,11 +620,16 @@ public class NetworkPlayer : MonoBehaviour
         if (photonView.IsMine)
         {
             networkPlayerStats.numOfKills++;
+            networkPlayerStats.killStreak++;
+            networkPlayerStats.deathStreak = 0;
             PlayerPrefs.SetInt("LifetimeKills", PlayerPrefs.GetInt("LifetimeKills") + 1); //Add to the lifetime kills counter 
+            if (PlayerPrefs.GetInt("BestStreak") < networkPlayerStats.killStreak)
+                PlayerPrefs.SetInt("BestStreak", networkPlayerStats.killStreak); //Add to the best kill streak counter if applicable
             print(PhotonNetwork.LocalPlayer.NickName + " killed enemy with index " + enemyID);
             PlayerController.instance.combatHUD.UpdatePlayerStats(networkPlayerStats);
             SyncStats();
             PlayerController.instance.combatHUD.AddToDeathInfoBoard(PhotonNetwork.LocalPlayer.NickName, PhotonNetwork.GetPhotonView(enemyID).Owner.NickName);
+            photonView.RPC("RPC_UpdateLeaderboard", RpcTarget.All, PhotonNetwork.LocalPlayer.NickName, networkPlayerStats.numOfDeaths, networkPlayerStats.numOfKills, networkPlayerStats.killStreak);
         }
     }
 
