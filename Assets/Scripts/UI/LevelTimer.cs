@@ -122,8 +122,5 @@ public class LevelTimer : MonoBehaviour
 
     public void SetLevelTime(int newLevelTime) => levelTime = newLevelTime;
 
-    public int GetLevelTime()
-    {
-        return levelTime;
-    }
+    public int GetLevelTime() => levelTime;
 }
