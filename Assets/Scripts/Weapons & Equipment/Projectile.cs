@@ -431,7 +431,7 @@ public class Projectile : MonoBehaviourPunCallbacks
 
             //Hit using player:
             print("Projectile with origin ID " + originPlayerID + " hit player with ID " + targetPlayer.photonView.ViewID);
-            targetPlayer.photonView.RPC("RPC_Hit", RpcTarget.All, settings.damage, originPlayerID, velocity);                      //Indicate to player that it has been hit (by projectile with given amount of velocity)
+            targetPlayer.photonView.RPC("RPC_Hit", RpcTarget.All, settings.damage, originPlayerID, velocity, (int)DeathCause.GUN);                      //Indicate to player that it has been hit (by projectile with given amount of velocity)
             if (!dumbFired && originPlayerID != 0) PhotonNetwork.GetPhotonView(originPlayerID).RPC("RPC_HitEnemy", RpcTarget.All); //Indicate to origin player that it has shot something
 
             //Player hit effect:
