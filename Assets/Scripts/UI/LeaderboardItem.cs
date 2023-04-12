@@ -27,6 +27,23 @@ public class LeaderboardItem : MonoBehaviour
         UpdateDeaths(d);
     }
 
+    /// <summary>
+    /// Sets the color of the leaderboard text.
+    /// </summary>
+    /// <param name="newColor">The color of the leaderboard text.</param>
+    public void SetTextColor(Color newColor)
+    {
+        wormName.color = newColor;
+        kills.color = newColor;
+        deaths.color = newColor;
+        streak.color = newColor;
+    }
+
+    public void SetBackgroundOpacity(float alpha)
+    {
+
+    }
+
     public void UpdateKills(int k, int s)
     {
         kills.text = k.ToString();
