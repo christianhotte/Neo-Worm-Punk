@@ -288,10 +288,10 @@ public class NetworkPlayer : MonoBehaviour
         photonView.RPC("LoadPlayerStats", RpcTarget.AllBuffered, statsData);
     }
 
-    public void AddToKillBoard(string killerName, string victimName)
+    public void AddToKillBoard(string killerName, string victimName, DeathCause deathCause)
     {
         Debug.Log("Adding To Kill Board...");
-        photonView.RPC("RPC_DeathLog", RpcTarget.AllBuffered, killerName, victimName);
+        photonView.RPC("RPC_DeathLog", RpcTarget.AllBuffered, killerName, victimName, (int)deathCause);
     }
 
     [PunRPC]
@@ -302,9 +302,9 @@ public class NetworkPlayer : MonoBehaviour
     }
 
     [PunRPC]
-    public void RPC_DeathLog(string killerName, string victimName)
+    public void RPC_DeathLog(string killerName, string victimName, int deathCause)
     {
-        NetworkManagerScript.instance.AddDeathToJumbotron(killerName, victimName);
+        NetworkManagerScript.instance.AddDeathToJumbotron(killerName, victimName, (DeathCause)deathCause);
     }
     public void UpdateRoomSettingsDisplay()
     {
@@ -559,7 +559,7 @@ public class NetworkPlayer : MonoBehaviour
     /// <param name="enemyID">Identify of player who shot this projectile.</param>
     /// <param name="projectileVel">Speed and direction projectile was moving at/in when it struck this player.</param>
     [PunRPC]
-    public void RPC_Hit(int damage, int enemyID, Vector3 projectileVel)
+    public void RPC_Hit(int damage, int enemyID, Vector3 projectileVel, int deathCause = 0)
     {
         if (photonView.IsMine)
         {
@@ -585,7 +585,7 @@ public class NetworkPlayer : MonoBehaviour
                     PlayerPrefs.SetInt("HighestDeathStreak", networkPlayerStats.deathStreak); //Add to the highest death streak counter if applicable
                 PlayerController.instance.combatHUD.UpdatePlayerStats(networkPlayerStats);
                 SyncStats();
-                AddToKillBoard(PhotonNetwork.GetPhotonView(enemyID).Owner.NickName, PhotonNetwork.LocalPlayer.NickName);
+                AddToKillBoard(PhotonNetwork.GetPhotonView(enemyID).Owner.NickName, PhotonNetwork.LocalPlayer.NickName, (DeathCause)deathCause);
                 photonView.RPC("RPC_UpdateLeaderboard", RpcTarget.All, PhotonNetwork.LocalPlayer.NickName, networkPlayerStats.numOfDeaths, networkPlayerStats.numOfKills, networkPlayerStats.killStreak);
                 if (enemyID != photonView.ViewID) PhotonNetwork.GetPhotonView(enemyID).RPC("RPC_KilledEnemy", RpcTarget.AllBuffered, photonView.ViewID);
 
@@ -616,7 +616,7 @@ public class NetworkPlayer : MonoBehaviour
     /// </summary>
     /// <param name="enemyID"></param>
     [PunRPC]
-    public void RPC_KilledEnemy(int enemyID)
+    public void RPC_KilledEnemy(int enemyID, int deathCause = 0)
     {
         if (photonView.IsMine)
         {
@@ -629,7 +629,7 @@ public class NetworkPlayer : MonoBehaviour
             print(PhotonNetwork.LocalPlayer.NickName + " killed enemy with index " + enemyID);
             PlayerController.instance.combatHUD.UpdatePlayerStats(networkPlayerStats);
             SyncStats();
-            PlayerController.instance.combatHUD.AddToDeathInfoBoard(PhotonNetwork.LocalPlayer.NickName, PhotonNetwork.GetPhotonView(enemyID).Owner.NickName);
+            PlayerController.instance.combatHUD.AddToDeathInfoBoard(PhotonNetwork.LocalPlayer.NickName, PhotonNetwork.GetPhotonView(enemyID).Owner.NickName, (DeathCause)deathCause);
             photonView.RPC("RPC_UpdateLeaderboard", RpcTarget.All, PhotonNetwork.LocalPlayer.NickName, networkPlayerStats.numOfDeaths, networkPlayerStats.numOfKills, networkPlayerStats.killStreak);
         }
     }

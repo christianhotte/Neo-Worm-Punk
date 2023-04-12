@@ -980,6 +980,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  infoWindow: {fileID: 2500491247791032961}
   labelText: {fileID: 3751345711733789909}
   tutorialText: {fileID: 5551287065146020528}
   inverteboyCanvases:
@@ -988,6 +989,9 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  flashInfoWindowColor: {r: 0.28235295, g: 0.50980395, b: 0.29411766, a: 1}
+  flashSpeed: 0.25
+  flashNumber: 2
   mainMenuMusic: {fileID: 8300000, guid: cb01f04009ff8254f883b6c20383879c, type: 3}
   lobbyMusic: {fileID: 8300000, guid: 2c82a204298ae1242bfcc8deb15a51c9, type: 3}
   arenaMusic: {fileID: 8300000, guid: eb1d91725082e4348910f458d47b3dd7, type: 3}
@@ -1587,6 +1591,17 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d73f3010d975c434ab95c2b23e9e9d88, type: 3}
+--- !u!114 &2500491247791032961 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2860747582445035995, guid: d73f3010d975c434ab95c2b23e9e9d88, type: 3}
+  m_PrefabInstance: {fileID: 360548891050863450}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &3526935139237020279 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3887413093800585517, guid: d73f3010d975c434ab95c2b23e9e9d88, type: 3}
