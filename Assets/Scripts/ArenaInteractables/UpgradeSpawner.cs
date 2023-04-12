@@ -104,25 +104,31 @@ public class UpgradeSpawner : MonoBehaviour
         //    }
         //}
 
-        if (primary == this && PhotonNetwork.IsMasterClient && timeUntilNextUpgrade > 0)
+        if (primary == this && timeUntilNextUpgrade > 0)
         {
-           // Debug.Log(Timer.GetTotalSecondsLeft());
+            // Debug.Log(Timer.GetTotalSecondsLeft());
             timeUntilNextUpgrade -= Time.deltaTime;
-            if (timeUntilNextUpgrade <= 0)
+            if (timeUntilNextUpgrade <= 2)
             {
-                Debug.Log("Check2");
                 StartCoroutine(SpawnAlert());
-                SpawnRandomUpgrade();
-                if ((30*powerupsPerMin) < Timer.GetTotalSecondsLeft())
+                if (PhotonNetwork.IsMasterClient&& timeUntilNextUpgrade <= 0)
                 {
-                    Debug.Log("Check3");
-                    timeUntilNextUpgrade = 30*powerupsPerMin;
+                    Debug.Log("Check2");
+                    
+                    SpawnRandomUpgrade();
+                    if ((30 * powerupsPerMin) < Timer.GetTotalSecondsLeft())
+                    {
+                        Debug.Log("Check3");
+                        timeUntilNextUpgrade = 30 * powerupsPerMin;
+                    }
+                    else
+                    {
+                        timeUntilNextUpgrade = -1;
+                    }
                 }
-                else
-                {
-                    timeUntilNextUpgrade = -1;
-                }
+                
             }
+           
         }
     }
 
