@@ -10,7 +10,7 @@ public class WristUIController : MonoBehaviour
     [SerializeField, Tooltip("The player controller.")] private PlayerController playerController;
     [SerializeField, Tooltip("The player input actions asset.")] private InputActionAsset inputActions;
     [SerializeField, Tooltip("The menu ray interactors.")] private GameObject[] rayInteractors;
-    [SerializeField, Tooltip("The mesh renderer that shows the player HUD.")] private MeshRenderer playerHUD;
+    [SerializeField, Tooltip("The canvas that shows the player HUD.")] private Canvas playerHUD;
     [SerializeField, Tooltip("The interactable HUD menu.")] private PlayerHUDController playerHUDController;
 
     [SerializeField, Tooltip("The button that allows the player to leave their room.")] private GameObject leaveRoomButton;
@@ -56,6 +56,7 @@ public class WristUIController : MonoBehaviour
         playerHUD.enabled = showMenu;
         playerHUDController.GetComponent<Canvas>().enabled = showMenu;
         playerController.SetCombat(!showMenu);
+        playerController.inverteboy.ForceOpenInverteboy(showMenu);
         foreach (var interactor in rayInteractors)
             interactor.SetActive(showMenu);
     }
@@ -71,7 +72,7 @@ public class WristUIController : MonoBehaviour
     private void UpdateLeaveRoomButton()
     {
         //If the player is in a room, not in the main menu, and the leave button is not showing, activate the leave room button.
-        if (PhotonNetwork.InRoom && SceneManager.GetActiveScene().name != GameSettings.titleScreenScene)
+        if (PhotonNetwork.InRoom)
         {
             if (!leaveRoomButton.activeInHierarchy)
                 leaveRoomButton.SetActive(true);

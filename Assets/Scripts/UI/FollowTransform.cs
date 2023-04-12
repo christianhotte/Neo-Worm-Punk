@@ -21,6 +21,7 @@ public class FollowTransform : MonoBehaviour
     void Update()
     {
         objectTransform.LookAt(lookAt, Vector3.up);
+        objectTransform.Rotate(0f, 180f, 0f);
 
         Vector3 newPos = objectTransform.position;
         Vector3 followPos = transformToFollow.position;

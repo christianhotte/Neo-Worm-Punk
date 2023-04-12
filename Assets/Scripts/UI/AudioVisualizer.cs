@@ -10,12 +10,18 @@ public class AudioVisualizer : MonoBehaviour
     [SerializeField, Tooltip("The type of spectrum to show.")] private FFTWindow spectrumType;
     [SerializeField, Tooltip("The audio channel to get the spectrum data from.")] private int audioChannel = 0;
     [SerializeField, Tooltip("The number of samples to take from the spectrum (Note: they must be in multiples of 64 to work properly.)")] private int numberOfSamples = 256;
+    [SerializeField, Tooltip("Decides whether or not to display the frequency bands of the spectrum.")] private bool displayFrequencyBands;
     [Space(10)]
 
     [Header("Visual Settings")]
     [SerializeField, Tooltip("The spectrum line prefab.")] private GameObject spectrumLinePrefab;
+    [SerializeField, Tooltip("The starting / minimum scale for the spectrum.")] private float startingScale = 1f;
     [SerializeField, Tooltip("The maximum scaling for the spectrum.")] private float maxScale;
+    [SerializeField, Tooltip("The width of the spectrum lines.")] private float spectrumWidth;
     [SerializeField, Tooltip("The color of the spectrum.")] private Color spectrumColor = Color.white;
+    [SerializeField, Tooltip("Determines whether the audio visualizer uses the buffer for smoother spectrum transition.")] private bool useBuffer;
+    [SerializeField, Tooltip("The space between each spectrum line.")] private float spacing;
+    [SerializeField, Tooltip("Determines whether the spectrum is centered in the RectTransform or not.")] private bool isCentered;
     [Space(10)]
 
     [Header("Rainbow Settings")]
@@ -23,9 +29,11 @@ public class AudioVisualizer : MonoBehaviour
     [SerializeField, Tooltip("If true, the colors in the rainbow are cycled in a random order.")] private bool randomizeRainbowColors;
     [SerializeField, Tooltip("The speed of the rainbow color change.")] private float rainbowSpeed = 1f;
 
-    private float spacing;  //The spacing between each spectrum line
     private float[] samples;    //The array where the spectrum data is stored for each sample
     private GameObject[] sampleLines;   //The physical sample lines that visualize the spectrum data
+    private float[] frequencyBands;     //The frequency bands of the visualizer
+    private float[] spectrumBuffer;     //The buffer for the visualizer for smoother visualization
+    private float[] spectrumDecrease;   //The speed at which each spectrum line should decrease
 
     //A list of colors in the rainbow
     private Color32[] rainbowColors = new Color32[7]
@@ -42,7 +50,21 @@ public class AudioVisualizer : MonoBehaviour
     void Start()
     {
         samples = new float[numberOfSamples];
-        sampleLines = new GameObject[numberOfSamples];
+        frequencyBands = new float[8];
+
+        if (displayFrequencyBands)
+        {
+            samples = new float[512];
+            sampleLines = new GameObject[frequencyBands.Length];
+        }
+        else
+        {
+            sampleLines = new GameObject[numberOfSamples];
+        }
+
+        spectrumBuffer = new float[sampleLines.Length];
+        spectrumDecrease = new float[sampleLines.Length];
+
         CreateSpectrum();
     }
 
@@ -51,24 +73,30 @@ public class AudioVisualizer : MonoBehaviour
     /// </summary>
     private void CreateSpectrum()
     {
-        spacing = GetComponent<RectTransform>().rect.width / sampleLines.Length;    //Creates spacing based on the container's width.
+        float startingX = 0f;
+
+        if (isCentered)
+        {
+            startingX = GetComponent<RectTransform>().rect.width / 2f;
+
+            for(int i = (sampleLines.Length / 2) - 1; i >= 0; i--)
+                startingX -= spectrumWidth + spacing;
+        }
 
         for(int i = 0; i < sampleLines.Length; i++)
         {
-            GameObject currentLine = Instantiate(spectrumLinePrefab);
+            GameObject currentLine = Instantiate(spectrumLinePrefab, transform);
             RectTransform lineTransform = currentLine.GetComponent<RectTransform>();
-            currentLine.transform.parent = transform;
 
-            //Zeroes out position and rotation of the sample line RectTransform
-            lineTransform.localPosition = Vector3.zero;
-            lineTransform.anchoredPosition = Vector3.zero;
-            lineTransform.localRotation = Quaternion.identity;
+            //Adjusts the width of the sample line
+            lineTransform.sizeDelta = new Vector2(spectrumWidth, lineTransform.sizeDelta.y);
 
             //Adjusts the position based on the sample index
-            Vector3 pos = lineTransform.anchoredPosition;
-            pos.x = pos.x + (spacing * i);
-            lineTransform.anchoredPosition = pos;
+            float xPos = startingX + (i * spectrumWidth) + (spacing * i);
 
+            lineTransform.anchoredPosition = new Vector2(xPos, 0f);
+
+            //If the rainbow spectrum is not in use, set the color of the spectrum
             if(!enableRainbowSpectrum)
                 currentLine.GetComponent<Image>().color = spectrumColor;
 
@@ -76,6 +104,7 @@ public class AudioVisualizer : MonoBehaviour
             sampleLines[i] = currentLine;   //Adds to list of sample lines
         }
 
+        //Start the rainbow color animation if active
         if (enableRainbowSpectrum)
             StartCoroutine(CycleRainbow());
     }
@@ -83,6 +112,12 @@ public class AudioVisualizer : MonoBehaviour
     void Update()
     {
         GetSpectrumAudioSource();
+
+        if (displayFrequencyBands)
+            MakeFrequencyBands();
+        if (useBuffer)
+            UpdateBuffer();
+
         UpdateSpectrum();
     }
 
@@ -143,8 +178,75 @@ public class AudioVisualizer : MonoBehaviour
     /// </summary>
     private void UpdateSpectrum()
     {
-        for(int i = 0; i < sampleLines.Length; i++)
-            sampleLines[i].transform.localScale = new Vector3(1, 1 + (samples[i] * maxScale), 1);
+        float[] currentData = displayFrequencyBands ? frequencyBands : samples;
+
+        for (int i = 0; i < sampleLines.Length; i++)
+        {
+            if(useBuffer)
+                sampleLines[i].transform.localScale = new Vector3(transform.localScale.x, startingScale + (spectrumBuffer[i] * maxScale), transform.localScale.z);
+            else
+                sampleLines[i].transform.localScale = new Vector3(transform.localScale.x, startingScale + (currentData[i] * maxScale), transform.localScale.z);
+        }
+    }
+
+    /// <summary>
+    /// Makes data for the frequency bands.
+    /// </summary>
+    private void MakeFrequencyBands()
+    {
+
+        int count = 0;
+
+        for(int i = 0; i < frequencyBands.Length; i++)
+        {
+            float average = 0f;
+
+            /*
+             * Gets the average of the current frequency band (represents a group of hertz).
+             * This is done in a geometric sequence (2, 4, 8, 16, etc.) to get the full range of hertz in our spectrum data.
+             */
+
+            int sampleCount = (int)Mathf.Pow(2, i) * 2;
+
+            if (i == 7)
+                sampleCount += 2;
+
+            //For each frequency band section, get the sample data and sum it up
+            for (int j = 0; j < sampleCount; j++)
+            {
+                average += samples[count] * (count + 1);
+                count++;
+            }
+
+            //Get the average of the spectrum data and save it
+            average /= count;
+
+            frequencyBands[i] = average * 10f;
+        }
+    }
+
+    /// <summary>
+    /// Updates the spectrum data with a buffer so that the data decreases with some smoothness to it.
+    /// </summary>
+    private void UpdateBuffer()
+    {
+        float[] currentData = displayFrequencyBands? frequencyBands : samples;
+
+        for (int i = 0; i < currentData.Length; i++)
+        {
+            //If the current data is greater than the spectrum buffer, set it as the new buffer and reset its decrease speed
+            if (currentData[i] > spectrumBuffer[i])
+            {
+                spectrumBuffer[i] = currentData[i];
+                spectrumDecrease[i] = 0.005f;
+            }
+            //If the current data is less than the spectrum buffer, decrease the spectrum with a small amount of acceleration as it continues to be smaller
+            if (currentData[i] < spectrumBuffer[i])
+            {
+                spectrumBuffer[i] -= spectrumDecrease[i];
+                spectrumDecrease[i] *= 1.2f;
+            }
+        }
     }
 
     public void SetAudioSource(AudioSource newSource) => audioSource = newSource;
