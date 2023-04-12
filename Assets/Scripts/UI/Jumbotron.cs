@@ -22,6 +22,7 @@ public class Jumbotron : MonoBehaviourPunCallbacks
     {
         primary = this;
     }
+
     private void Start()
     {
         currentLevelTimer = GetComponentInChildren<LevelTimer>();
@@ -33,7 +34,7 @@ public class Jumbotron : MonoBehaviourPunCallbacks
     {
         //Debug.Log(currentLevelTimer.GetTotalSecondsLeft());
         //Debug.Log(currentLevelTimer.LevelTimePercentage());
-        if (currentLevelTimer.GetTotalSecondsLeft() <= 11.0f&& currentLevelTimer.GetTotalSecondsLeft() >0&& !cooldown&&!finished)
+        /*if (currentLevelTimer.GetTotalSecondsLeft() <= 11.0f&& currentLevelTimer.GetTotalSecondsLeft() >0&& !cooldown&&!finished)
         {
             if (currentLevelTimer.GetTotalSecondsLeft() < 1.0f)
             {
@@ -46,11 +47,25 @@ public class Jumbotron : MonoBehaviourPunCallbacks
                 cooldown = true;
                 StartCoroutine(CountdownCooldown());
             }
-        }
+        }*/
 
+        // Gets the timer from the Round Manager which is synced throughout the network.
         if (roundManager != null)
         {
             string remainingTime = roundManager.GetTimeDisplay();
+
+            if (roundManager.GetTotalSecondsLeft() < 11.0f && roundManager.GetTotalSecondsLeft() > 0 && !cooldown && !finished)
+            {
+                if (primary == this) jumboAud.PlayOneShot(beeees, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
+                finished = true;
+            }
+
+            else
+            {
+                if (primary == this) jumboAud.PlayOneShot(bwarp, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
+                cooldown = true;
+                StartCoroutine(CountdownCooldown());
+            }
         }
     }
     private DeathInfo mostRecentDeath;  //The most recent death recorded
@@ -66,6 +81,7 @@ public class Jumbotron : MonoBehaviourPunCallbacks
         //Destroy the second most recent death
         if(mostRecentDeath != null)
             Destroy(mostRecentDeath.gameObject);
+
         else
         {
             mostRecentDeathText.gameObject.SetActive(true);
