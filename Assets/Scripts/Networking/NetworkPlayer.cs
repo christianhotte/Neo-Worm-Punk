@@ -295,6 +295,13 @@ public class NetworkPlayer : MonoBehaviour
     }
 
     [PunRPC]
+    public void RPC_UpdateLeaderboard(string playerName, int deaths, int kills, int streak)
+    {
+        foreach (var leaderboard in FindObjectsOfType<LeaderboardDisplay>())
+            leaderboard.UpdatePlayerStats(playerName, deaths, kills, streak);
+    }
+
+    [PunRPC]
     public void RPC_DeathLog(string killerName, string victimName)
     {
         NetworkManagerScript.instance.AddDeathToJumbotron(killerName, victimName);
@@ -562,11 +569,14 @@ public class NetworkPlayer : MonoBehaviour
             if (killedPlayer)
             {
                 networkPlayerStats.numOfDeaths++;                                               //Increment death counter
+                networkPlayerStats.killStreak = 0;                                               //Reset streak counter
                 PlayerPrefs.SetInt("LifetimeDeaths", PlayerPrefs.GetInt("LifetimeDeaths") + 1); //Add to the lifetime deaths counter 
                 PlayerController.instance.combatHUD.UpdatePlayerStats(networkPlayerStats);
                 SyncStats();
                 AddToKillBoard(PhotonNetwork.GetPhotonView(enemyID).Owner.NickName, PhotonNetwork.LocalPlayer.NickName);
+                photonView.RPC("RPC_UpdateLeaderboard", RpcTarget.All, PhotonNetwork.LocalPlayer.NickName, networkPlayerStats.numOfDeaths, networkPlayerStats.numOfKills, networkPlayerStats.killStreak);
                 if (enemyID != photonView.ViewID) PhotonNetwork.GetPhotonView(enemyID).RPC("RPC_KilledEnemy", RpcTarget.AllBuffered, photonView.ViewID);
+
             }
         }
     }
@@ -599,11 +609,15 @@ public class NetworkPlayer : MonoBehaviour
         if (photonView.IsMine)
         {
             networkPlayerStats.numOfKills++;
+            networkPlayerStats.killStreak++;
             PlayerPrefs.SetInt("LifetimeKills", PlayerPrefs.GetInt("LifetimeKills") + 1); //Add to the lifetime kills counter 
+            if (PlayerPrefs.GetInt("BestStreak") < networkPlayerStats.killStreak)
+                PlayerPrefs.SetInt("BestStreak", networkPlayerStats.killStreak); //Add to the best kill streak counter if applicable
             print(PhotonNetwork.LocalPlayer.NickName + " killed enemy with index " + enemyID);
             PlayerController.instance.combatHUD.UpdatePlayerStats(networkPlayerStats);
             SyncStats();
             PlayerController.instance.combatHUD.AddToDeathInfoBoard(PhotonNetwork.LocalPlayer.NickName, PhotonNetwork.GetPhotonView(enemyID).Owner.NickName);
+            photonView.RPC("RPC_UpdateLeaderboard", RpcTarget.All, PhotonNetwork.LocalPlayer.NickName, networkPlayerStats.numOfDeaths, networkPlayerStats.numOfKills, networkPlayerStats.killStreak);
         }
     }
 

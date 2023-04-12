@@ -56,16 +56,20 @@ public class Jumbotron : MonoBehaviourPunCallbacks
 
             if (roundManager.GetTotalSecondsLeft() < 11.0f && roundManager.GetTotalSecondsLeft() > 0 && !cooldown && !finished)
             {
-                if (primary == this) jumboAud.PlayOneShot(beeees, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
-                finished = true;
+                if (currentLevelTimer.GetTotalSecondsLeft() < 1.0f)
+                {
+                    if (primary == this) jumboAud.PlayOneShot(beeees, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
+                    finished = true;
+                }
+                else
+                {
+                    if (primary == this) jumboAud.PlayOneShot(bwarp, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
+                    cooldown = true;
+                    StartCoroutine(CountdownCooldown());
+                }
             }
 
-            else
-            {
-                if (primary == this) jumboAud.PlayOneShot(bwarp, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
-                cooldown = true;
-                StartCoroutine(CountdownCooldown());
-            }
+           
         }
     }
     private DeathInfo mostRecentDeath;  //The most recent death recorded
