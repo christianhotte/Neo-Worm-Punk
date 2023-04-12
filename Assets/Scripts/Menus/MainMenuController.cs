@@ -24,7 +24,7 @@ public class MainMenuController : MonoBehaviour
         // Move the player forward on the conveyor once the game starts
         playerObject = PlayerController.instance.xrOrigin.transform;
         PlayerController.instance.inverteboy.PlayMusic(mainMenuMusic);  //Play main menu music
-        Invoke("TransportToSettings", 3);
+        //Invoke("TransportToSettings", 3);
     }
 
     public void GoToArena()
@@ -144,7 +144,6 @@ public class MainMenuController : MonoBehaviour
         yield return new WaitForSeconds(playerObject.GetComponentInChildren<FadeScreen>().GetFadeDuration());
         yield return null;
 
-        PlayerController.instance.inverteboy.StopMusic();
         GameManager.Instance.LoadGame(newScene);
     }
 }

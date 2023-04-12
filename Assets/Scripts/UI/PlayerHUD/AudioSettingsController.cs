@@ -37,6 +37,7 @@ public class AudioSettingsController : MonoBehaviour
     public void AdjustMasterVolume(float newVolume)
     {
         PlayerPrefs.SetFloat("MasterVolume", newVolume / 10f);
+        PlayerController.instance.inverteboy.UpdateVolume();
     }
 
     /// <summary>
@@ -46,6 +47,7 @@ public class AudioSettingsController : MonoBehaviour
     public void AdjustMusicVolume(float newVolume)
     {
         PlayerPrefs.SetFloat("MusicVolume", newVolume / 10f);
+        PlayerController.instance.inverteboy.UpdateVolume();
     }
 
     /// <summary>
