@@ -7,7 +7,7 @@ using Photon.Realtime;
 public class RoundManager : MonoBehaviourPunCallbacks, IPunObservable
 {
     private float roundTime;
-    private float timeRemaining;
+    internal float timeRemaining;
     private bool roundActive = false; // Whether a round is currently active
 
     // Makes sure that the Round Manager is only instantiated once (for the master client only).
