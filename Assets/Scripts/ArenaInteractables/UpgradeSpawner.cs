@@ -108,7 +108,7 @@ public class UpgradeSpawner : MonoBehaviour
         {
             // Debug.Log(Timer.GetTotalSecondsLeft());
             timeUntilNextUpgrade -= Time.deltaTime;
-            if (timeUntilNextUpgrade <= 2)
+            if (timeUntilNextUpgrade <= 0)
             {
                 StartCoroutine(SpawnAlert());
                 if (PhotonNetwork.IsMasterClient&& timeUntilNextUpgrade <= 0)
