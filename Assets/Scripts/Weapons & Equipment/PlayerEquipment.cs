@@ -263,8 +263,11 @@ public class PlayerEquipment : MonoBehaviour
     private protected virtual void Start()
     {
         //Set up holster:
-        preferredHolster = new GameObject(name + "_HolsterMover").transform; //Instantiate an empty transform to serve as preferred holster
-        preferredHolster.parent = playerBody.transform;                      //Child holster to player body
+        if (player != null)
+        {
+            preferredHolster = new GameObject(name + "_HolsterMover").transform; //Instantiate an empty transform to serve as preferred holster
+            preferredHolster.parent = playerBody.transform;                      //Child holster to player body
+        }
     }
     private protected virtual void Update()
     {

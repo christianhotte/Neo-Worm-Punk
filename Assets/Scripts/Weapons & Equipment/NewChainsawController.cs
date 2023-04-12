@@ -267,7 +267,7 @@ public class NewChainsawController : PlayerEquipment
                 //Grind beginning:
                 if (!grinding) //Player was not previously grinding
                 {
-                    if (otherHandGrapple != null && otherHandGrapple.hook.state != HookProjectile.HookState.Stowed) otherHandGrapple.hook.Release();
+                    if (otherHandGrapple != null && otherHandGrapple.hook != null && otherHandGrapple.hook.state != HookProjectile.HookState.Stowed) otherHandGrapple.hook.Release();
                 }
 
                 //Cleanup:
