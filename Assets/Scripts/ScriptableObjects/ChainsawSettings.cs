@@ -8,11 +8,13 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "Data", menuName = "ScriptableObjects/ChainsawSettings", order = 1)]
 public class ChainsawSettings : ScriptableObject
 {
-    [Header("Mechanical Settings:")]
+    [Header("Wallgrinding:")]
     [Tooltip("Base speed and max speed at which chainsaw can grind along walls and floors.")]                              public Vector2 grindSpeedRange;
     [Min(0), Tooltip("Time player must continuously grind to reach maximum grind speed.")]                                 public float grindAccelTime;
     [Tooltip("Layers which player can grind on.")]                                                                         public LayerMask grindLayers;
     [MinMaxSlider(0, 1), Tooltip("Range of positions along the blade which player will magnetize to while wallgrinding.")] public Vector2 grindSweetSpot;
+    [Min(0), Tooltip("Force by which player is glued to sweet spot while grinding (keeps them on walls).")]                public float grindGlueForce;
+    [Tooltip("Curve modifying force of grind sweet spot effect (in order to make correction smoother)")]                   public AnimationCurve grindGlueCurve;
     [Tooltip("Effective width of blade hitbox (should be more or less the actual size of the real blade.")]                public float bladeWidth;
     [Min(0), Tooltip("Force applied to player away from surface when disengaging from grind.")]                            public float disengageForce;
     [Header("Animation:")]
@@ -51,8 +53,12 @@ public class ChainsawSettings : ScriptableObject
     [Header("Sounds:")]
     [Tooltip("Sound chainsaw makes when it first extends.")]                                 public AudioClip extendSound;
     [Tooltip("Sound chainsaw makes while it is actively running.")]                          public AudioClip runningSound;
-    [Tooltip("Sound chainsaw makes while it is actively running (while buried in a wall).")] public AudioClip runningWallSound;
     [Tooltip("Sound chainsaw makes when player releases it.")]                               public AudioClip sheathSound;
+    [Space()]
+    [Tooltip("Sound chainsaw makes when it is initially jammed into a wall (blends into grindingSound).")] public AudioClip grindBeginSound;
+    [Tooltip("Sound chainsaw makes while it is actively running (while buried in a wall).")]               public AudioClip grindingSound;
+    [Tooltip("Sound chainsaw makes when it is dislodged from a wall (blends into runningSound).")]         public AudioClip grindEndSound;
+    [Space()]
     [Tooltip("Sound played while deflector is idle.")]                                       public AudioClip deflectIdleSound;
     [Tooltip("Sound made when player deflects a projectile with the chainsaw.")]             public AudioClip deflectSound;
     [Header("Haptics:")]
