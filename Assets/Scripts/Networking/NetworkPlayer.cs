@@ -569,8 +569,11 @@ public class NetworkPlayer : MonoBehaviour
             if (killedPlayer)
             {
                 networkPlayerStats.numOfDeaths++;                                               //Increment death counter
-                networkPlayerStats.killStreak = 0;                                               //Reset streak counter
+                networkPlayerStats.killStreak = 0;                                               //Reset kill streak counter
+                networkPlayerStats.deathStreak++;                                               //Increment death streak counter
                 PlayerPrefs.SetInt("LifetimeDeaths", PlayerPrefs.GetInt("LifetimeDeaths") + 1); //Add to the lifetime deaths counter 
+                if (PlayerPrefs.GetInt("HighestDeathStreak") < networkPlayerStats.deathStreak)
+                    PlayerPrefs.SetInt("HighestDeathStreak", networkPlayerStats.deathStreak); //Add to the highest death streak counter if applicable
                 PlayerController.instance.combatHUD.UpdatePlayerStats(networkPlayerStats);
                 SyncStats();
                 AddToKillBoard(PhotonNetwork.GetPhotonView(enemyID).Owner.NickName, PhotonNetwork.LocalPlayer.NickName);
@@ -610,6 +613,7 @@ public class NetworkPlayer : MonoBehaviour
         {
             networkPlayerStats.numOfKills++;
             networkPlayerStats.killStreak++;
+            networkPlayerStats.deathStreak = 0;
             PlayerPrefs.SetInt("LifetimeKills", PlayerPrefs.GetInt("LifetimeKills") + 1); //Add to the lifetime kills counter 
             if (PlayerPrefs.GetInt("BestStreak") < networkPlayerStats.killStreak)
                 PlayerPrefs.SetInt("BestStreak", networkPlayerStats.killStreak); //Add to the best kill streak counter if applicable

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 
 public class LeaderboardItem : MonoBehaviour
@@ -39,9 +40,15 @@ public class LeaderboardItem : MonoBehaviour
         streak.color = newColor;
     }
 
+    /// <summary>
+    /// Sets the opacity of the background.
+    /// </summary>
+    /// <param name="alpha">The new alpha of the background.</param>
     public void SetBackgroundOpacity(float alpha)
     {
-
+        Color imageColor = GetComponent<Image>().color;
+        imageColor.a = alpha;
+        GetComponent<Image>().color = imageColor;
     }
 
     public void UpdateKills(int k, int s)
