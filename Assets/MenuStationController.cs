@@ -44,7 +44,18 @@ public class MenuStationController : MonoBehaviour
     {
         yield return new WaitForSeconds(0.1f);  //random wait time
 
+        //TEMP
         menuStations[menuStationIndex].stationTransform.position = menuStations[menuStationIndex].activePosition;
+
+
+
+
+        //Add animations here
+
+
+
+
+
         menuStations[menuStationIndex].activeStatus = true;
 
     }
@@ -67,7 +78,17 @@ public class MenuStationController : MonoBehaviour
     {
         yield return new WaitForSeconds(0.1f);  //random wait time
 
+
+        //TEMP
         menuStations[menuStationIndex].stationTransform.position = menuStations[menuStationIndex].inactivePosition;
+
+
+
+
+        //Add animations here
+
+
+
         menuStations[menuStationIndex].activeStatus = false;
     }
 

@@ -8,6 +8,7 @@ public class ConveyerController : MonoBehaviour
     [SerializeField, Tooltip("")] private Transform[] conveyerBeltObjects;
     [SerializeField, Tooltip("How much time it takes for objects to get from conveyerbelt stop positions")] private float transportTime;
     [SerializeField, Tooltip("Refference to MenuStationController")] private MenuStationController menuStationControllerRef;
+    [SerializeField, Tooltip("Indicates whether or not this is the player's conveyerbelt")] private bool isPlayerBelt;
 
     private int currentConveyerBeltIndex = -1;
     private bool conveyerBeltIsMoving = false;
@@ -36,8 +37,12 @@ public class ConveyerController : MonoBehaviour
         //safety first folks
         conveyerBeltIsMoving = true;
 
-        //retract all ui that is down except for the next one
-        menuStationControllerRef.DeactivateAllOtherStations(nextConveyerBeltIndex);
+        //only do if this is the player's belt
+        if(isPlayerBelt)
+        {
+            //retract all ui that is down except for the next one
+            menuStationControllerRef.DeactivateAllOtherStations(nextConveyerBeltIndex);
+        }
 
 
         //wait a tiny bit
@@ -82,8 +87,12 @@ public class ConveyerController : MonoBehaviour
             yield return null;
         }
 
-        //TEMPORARY. IT HAPPENS TOO SLOW I THINK
-        menuStationControllerRef.ActivateStation(nextConveyerBeltIndex);
+        //only do if this is the player's belt
+        if(isPlayerBelt)
+        {
+            menuStationControllerRef.ActivateStation(nextConveyerBeltIndex);
+        }
+        
 
         currentConveyerBeltIndex = nextConveyerBeltIndex;
         conveyerBeltIsMoving = false;
