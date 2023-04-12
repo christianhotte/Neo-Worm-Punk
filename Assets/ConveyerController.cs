@@ -84,14 +84,17 @@ public class ConveyerController : MonoBehaviour
             //just in case
             if(GameManager.Instance.levelTransitionActive) { break; }
 
+
+            //do animation if under 0.25 seconds from ending, and the station isn't already moving, and it is the player's conveyer
+            if(timeElapsed > (transportTime - 0.25f) && !menuStationControllerRef.GetMenuStationIsMoving(nextConveyerBeltIndex) && isPlayerBelt)
+            {
+                menuStationControllerRef.ActivateStation(nextConveyerBeltIndex);
+            }
+
             yield return null;
         }
 
-        //only do if this is the player's belt
-        if(isPlayerBelt)
-        {
-            menuStationControllerRef.ActivateStation(nextConveyerBeltIndex);
-        }
+        
         
 
         currentConveyerBeltIndex = nextConveyerBeltIndex;
