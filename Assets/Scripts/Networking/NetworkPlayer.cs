@@ -355,7 +355,7 @@ public class NetworkPlayer : MonoBehaviour
 
         //Get highest priority material:
         MatChangeEvent primaryEvent = null;
-        foreach (MatChangeEvent matEvent in matChangeEvents) 
+        foreach (MatChangeEvent matEvent in matChangeEvents)
         {
             if (primaryEvent == null || matEvent.priority > primaryEvent.priority) primaryEvent = matEvent;
         }
@@ -412,6 +412,7 @@ public class NetworkPlayer : MonoBehaviour
             }
             //trail.material.SetColor("_Color", PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]]);
         }
+    }
         /// <summary>
         /// Creates a material event on this network player which is able to change its material properties for a certain amount of time.
         /// </summary>
