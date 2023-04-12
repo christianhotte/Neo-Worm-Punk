@@ -52,6 +52,7 @@ public class NewChainsawController : PlayerEquipment
     private bool reverseGrip;        //Indicates that player is pressing the input for reverse grip mode (only valid while chainsaw is active)
     private float gripValue;         //Latest value from grip input
     private float triggerValue;      //Latest value from trigger input
+    private bool deflectDeactivated; //Becomes true when player exhausts their deflect meter and needs to wait for it to recharge
 
     private Vector3 bladeOriginPos;    //Initial local (sheathed) position of blade
     private Vector3 wristOriginPos;    //Initial local (sheathed) position of wrist assembly
@@ -106,7 +107,14 @@ public class NewChainsawController : PlayerEquipment
         }
         if (mode != BladeMode.Deflecting)
         {
-            if (deflectTime < settings.deflectTime) deflectTime = Mathf.Min(deflectTime + (Time.deltaTime * settings.deflectCooldownRate), settings.deflectTime);
+            if (deflectTime < settings.deflectTime)
+            {
+                deflectTime = Mathf.Min(deflectTime + (Time.deltaTime * settings.deflectCooldownRate), settings.deflectTime);
+                if (deflectTime == settings.deflectTime)
+                {
+                    deflectDeactivated = false;
+                }
+            }
         }
         else if (deflectTime > 0)
         {
@@ -118,6 +126,7 @@ public class NewChainsawController : PlayerEquipment
                 mode = BladeMode.Extending; //Indicate that blade is no longer in deflect mode
                 timeInMode = 0;             //Reset mode time tracker
                 deflectTime = 0;            //Always fully reset deflect time tracker
+                deflectDeactivated = true;
             }
         }
         if (grinding) grindTime += Time.deltaTime; //Update grind time tracker
@@ -152,7 +161,7 @@ public class NewChainsawController : PlayerEquipment
                 grindTime = 0;                                                                            //Reset grind time tracker
             }
         }
-        else if ((mode == BladeMode.Extended || mode == BladeMode.Extending) && triggerValue >= settings.triggerThresholds.y && deflectTime == settings.deflectTime) //Activate deflect mode when player squeezes the trigger
+        else if ((mode == BladeMode.Extended || mode == BladeMode.Extending) && triggerValue >= settings.triggerThresholds.y && deflectTime == settings.deflectTime && !deflectDeactivated) //Activate deflect mode when player squeezes the trigger
         {
             //Switch mode:
             prevMode = mode;                           //Record previous blade mode
@@ -181,7 +190,7 @@ public class NewChainsawController : PlayerEquipment
             prevMode = mode;            //Record previous blade mode
             mode = BladeMode.Extending; //Indicate that blade is no longer in deflect mode
             timeInMode = 0;             //Reset mode time tracker
-            deflectTime = 0;            //Always fully reset deflect time tracker
+            //deflectTime = 0;            //Always fully reset deflect time tracker
         }
 
         //Blade movement:

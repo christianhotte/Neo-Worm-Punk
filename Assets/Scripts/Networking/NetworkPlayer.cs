@@ -401,7 +401,8 @@ public class NetworkPlayer : MonoBehaviour
         //Set base color if using default material:
         if (primaryMat == altMaterials[0])
         {
-            targetRenderer.material.SetColor("_Color", PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]]);
+            currentColor = PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]];
+            targetRenderer.material.SetColor("_Color", currentColor);
             if (!photonView.IsMine)
             {
                 for (int x = 0; x < trail.colorGradient.colorKeys.Length; x++) //Iterate through color keys in trail gradient
