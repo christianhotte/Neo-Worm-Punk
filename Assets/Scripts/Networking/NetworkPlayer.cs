@@ -397,21 +397,28 @@ public class NetworkPlayer : MonoBehaviour
         SkinnedMeshRenderer targetRenderer = photonView.IsMine ? PlayerController.instance.bodyRenderer : bodyRenderer;
         targetRenderer.material = primaryMat;
         if (!photonView.IsMine) trail.material = primaryMat;
-        
+
         //Set base color if using default material:
         if (primaryMat == altMaterials[0])
         {
             targetRenderer.material.SetColor("_Color", PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]]);
-            if (!photonView.IsMine) trail.material.SetColor("_Color", PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]]);
+            if (!photonView.IsMine)
+            {
+                for (int x = 0; x < trail.colorGradient.colorKeys.Length; x++) //Iterate through color keys in trail gradient
+                {
+                    if (currentColor == Color.black) trail.colorGradient.colorKeys[x].color = Color.white;
+                    else trail.colorGradient.colorKeys[x].color = currentColor; //Apply color setting to trail key
+                }
+            }
+            //trail.material.SetColor("_Color", PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]]);
         }
-    }
-    /// <summary>
-    /// Creates a material event on this network player which is able to change its material properties for a certain amount of time.
-    /// </summary>
-    /// <param name="targetMatIndex">Index (in altMaterials) of material this event will cause player to have.</param>
-    /// <param name="priority">Controls which events this event is able to override.</param>
-    /// <param name="duration">How long this event will last for.</param>
-    [PunRPC]
+        /// <summary>
+        /// Creates a material event on this network player which is able to change its material properties for a certain amount of time.
+        /// </summary>
+        /// <param name="targetMatIndex">Index (in altMaterials) of material this event will cause player to have.</param>
+        /// <param name="priority">Controls which events this event is able to override.</param>
+        /// <param name="duration">How long this event will last for.</param>
+        [PunRPC]
     public void StartMaterialEvent(int targetMatIndex, int priority, float duration)
     {
         MatChangeEvent newEvent = new MatChangeEvent(altMaterials[targetMatIndex], priority, duration);
