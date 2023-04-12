@@ -97,8 +97,8 @@ public class LeaderboardDisplay : MonoBehaviour
                     if(currentPlayer.GetRanking() > previousPlayer.GetRanking())
                         currentPlayer.UpdateRank(currentPlayer.GetRanking() - 1);
 
-                    //If the current player is equal rank to the previous one, lower the previous player's rank
-                    if (currentPlayer.GetRanking() == previousPlayer.GetRanking())
+                    //If the current player is less than or equal rank to the previous one, lower the previous player's rank
+                    if (currentPlayer.GetRanking() <= previousPlayer.GetRanking())
                         previousPlayer.UpdateRank(previousPlayer.GetRanking() + 1);
                 }
 
