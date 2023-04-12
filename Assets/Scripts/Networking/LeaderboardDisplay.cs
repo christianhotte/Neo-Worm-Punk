@@ -42,6 +42,8 @@ public class LeaderboardDisplay : MonoBehaviour
 
             newLeaderboardItem.SetLeaderboardInformation(1, NetworkPlayer.instances[i].photonView.Owner.NickName, 0, 0, 0);
 
+            newLeaderboardItem.SetTextColor(PlayerSettingsController.ColorOptionsToColor((ColorOptions)NetworkPlayer.instances[i].photonView.Owner.CustomProperties["Color"]));
+
             //Show a background on the local player's leaderboard stats
             if (NetworkPlayer.instances[i] == NetworkManagerScript.localNetworkPlayer)
                 newLeaderboardItem.SetBackgroundOpacity(1f);
