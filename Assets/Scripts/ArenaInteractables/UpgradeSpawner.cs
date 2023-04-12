@@ -33,7 +33,6 @@ public class UpgradeSpawner : MonoBehaviour
     //EVENTS & COROUTINES:
     public IEnumerator DoPowerUp(PowerUp.PowerUpType powerType, float waitTime)
     {
-        Debug.Log("startingDoPowerUp");
         currentPowerUp = powerType;
         if (currentPowerUp == PowerUp.PowerUpType.Invulnerability)
         {
@@ -106,19 +105,16 @@ public class UpgradeSpawner : MonoBehaviour
 
         if (primary == this && timeUntilNextUpgrade > 0)
         {
-            // Debug.Log(Timer.GetTotalSecondsLeft());
             timeUntilNextUpgrade -= Time.deltaTime;
             if (timeUntilNextUpgrade <= 0)
             {
                 StartCoroutine(SpawnAlert());
                 if (PhotonNetwork.IsMasterClient&& timeUntilNextUpgrade <= 0)
                 {
-                    Debug.Log("Check2");
                     
                     SpawnRandomUpgrade();
                     if ((30 * powerupsPerMin) < Timer.GetTotalSecondsLeft())
                     {
-                        Debug.Log("Check3");
                         timeUntilNextUpgrade = 30 * powerupsPerMin;
                     }
                     else
