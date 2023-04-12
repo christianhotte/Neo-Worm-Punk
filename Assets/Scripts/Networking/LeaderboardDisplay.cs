@@ -49,33 +49,21 @@ public class LeaderboardDisplay : MonoBehaviour
     /// Updates the player's kills on the leaderboard.
     /// </summary>
     /// <param name="playerName">The player's name to search for in the list.</param>
+    /// <param name="deaths">The new number of deaths for the player.</param>
     /// <param name="kills">The new number of deaths for the player.</param>
     /// <param name="streak">The new streak number for the player.</param>
-    public void UpdatePlayerKills(string playerName, int kills, int streak)
+    public void UpdatePlayerStats(string playerName, int deaths, int kills, int streak)
     {
         foreach(var player in leaderBoardList)
         {
             if(player.GetWormName() == playerName)
             {
-                player.UpdateKills(kills, streak);
-                SortLeaderboard();  //Sort the leaderboard
-                break;
-            }
-        }
-    }
+                if(kills != player.GetKills())
+                    player.UpdateKills(kills, streak);
 
-    /// <summary>
-    /// Updates the player's deaths on the leaderboard.
-    /// </summary>
-    /// <param name="playerName">The player's name to search for in the list.</param>
-    /// <param name="deaths">The new number of deaths for the player.</param>
-    public void UpdatePlayerDeaths(string playerName, int deaths)
-    {
-        foreach (var player in leaderBoardList)
-        {
-            if (player.GetWormName() == playerName)
-            {
-                player.UpdateDeaths(deaths);
+                else if(deaths != player.GetDeaths())
+                    player.UpdateDeaths(deaths);
+
                 SortLeaderboard();  //Sort the leaderboard
                 break;
             }
