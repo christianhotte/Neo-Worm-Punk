@@ -72,10 +72,8 @@ public class PowerUp : Targetable
     {
         if (dummyPowerup)
         {
-            Debug.Log("hit");
             if (other.name == "XR Origin")
             {
-                Debug.Log("AboutToCallPowerUp");
                 UpgradeSpawner.primary.StartCoroutine(UpgradeSpawner.primary.DoPowerUp(powerType, PowerupTime));
                 this.gameObject.SetActive(false);
             }
