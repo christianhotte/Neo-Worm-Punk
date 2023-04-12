@@ -341,6 +341,9 @@ public class NetworkPlayer : MonoBehaviour
     /// </summary>
     public void ReCalculateMaterialEvents()
     {
+        //Validitiy checks:
+        if (photonView.IsMine && PlayerController.instance == null) return;
+
         //Get highest priority material:
         MatChangeEvent primaryEvent = null;
         foreach (MatChangeEvent matEvent in matChangeEvents) 
