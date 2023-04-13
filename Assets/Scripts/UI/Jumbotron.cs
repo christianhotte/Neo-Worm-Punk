@@ -80,7 +80,7 @@ public class Jumbotron : MonoBehaviourPunCallbacks
     /// <param name="killer">The name of the person who performed a kill.</param>
     /// <param name="victim">The name of the person killed.</param>
     /// <param name="causeOfDeath">An icon that indicates the cause of death.</param>
-    public void AddToDeathInfoBoard(string killer, string victim, Image causeOfDeath = null)
+    public void AddToDeathInfoBoard(string killer, string victim, DeathCause causeOfDeath = DeathCause.UNKNOWN)
     {
         //Destroy the second most recent death
         if(mostRecentDeath != null)
