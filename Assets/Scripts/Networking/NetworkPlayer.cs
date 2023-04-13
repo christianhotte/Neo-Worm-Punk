@@ -396,21 +396,21 @@ public class NetworkPlayer : MonoBehaviour
         //Set materials:
         SkinnedMeshRenderer targetRenderer = photonView.IsMine ? PlayerController.instance.bodyRenderer : bodyRenderer;
         targetRenderer.material = primaryMat;
-        if (!photonView.IsMine) trail.material = primaryMat;
+        //if (!photonView.IsMine) trail.material = primaryMat;
 
         //Set base color if using default material:
         if (primaryMat == altMaterials[0])
         {
             currentColor = PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]];
             targetRenderer.material.SetColor("_Color", currentColor);
-            if (!photonView.IsMine)
+            /*if (!photonView.IsMine)
             {
                 for (int x = 0; x < trail.colorGradient.colorKeys.Length; x++) //Iterate through color keys in trail gradient
                 {
                     if (currentColor == Color.black) trail.colorGradient.colorKeys[x].color = Color.white;
                     else trail.colorGradient.colorKeys[x].color = currentColor; //Apply color setting to trail key
                 }
-            }
+            }*/
             //trail.material.SetColor("_Color", PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]]);
         }
     }
@@ -559,7 +559,7 @@ public class NetworkPlayer : MonoBehaviour
     /// <param name="enemyID">Identify of player who shot this projectile.</param>
     /// <param name="projectileVel">Speed and direction projectile was moving at/in when it struck this player.</param>
     [PunRPC]
-    public void RPC_Hit(int damage, int enemyID, Vector3 projectileVel, int deathCause = 0)
+    public void RPC_Hit(int damage, int enemyID, Vector3 projectileVel, int deathCause)
     {
         if (photonView.IsMine)
         {
@@ -587,7 +587,7 @@ public class NetworkPlayer : MonoBehaviour
                 SyncStats();
                 AddToKillBoard(PhotonNetwork.GetPhotonView(enemyID).Owner.NickName, PhotonNetwork.LocalPlayer.NickName, (DeathCause)deathCause);
                 photonView.RPC("RPC_UpdateLeaderboard", RpcTarget.All, PhotonNetwork.LocalPlayer.NickName, networkPlayerStats.numOfDeaths, networkPlayerStats.numOfKills, networkPlayerStats.killStreak);
-                if (enemyID != photonView.ViewID) PhotonNetwork.GetPhotonView(enemyID).RPC("RPC_KilledEnemy", RpcTarget.AllBuffered, photonView.ViewID);
+                if (enemyID != photonView.ViewID) PhotonNetwork.GetPhotonView(enemyID).RPC("RPC_KilledEnemy", RpcTarget.AllBuffered, photonView.ViewID, deathCause);
 
             }
         }
@@ -616,7 +616,7 @@ public class NetworkPlayer : MonoBehaviour
     /// </summary>
     /// <param name="enemyID"></param>
     [PunRPC]
-    public void RPC_KilledEnemy(int enemyID, int deathCause = 0)
+    public void RPC_KilledEnemy(int enemyID, int deathCause)
     {
         if (photonView.IsMine)
         {
