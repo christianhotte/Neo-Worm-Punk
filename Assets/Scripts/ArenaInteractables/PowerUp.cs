@@ -19,7 +19,7 @@ public class PowerUp : Targetable
     public AudioClip powerUpHit;
     private PhotonView photonView;
     internal Rigidbody rb;
-
+    public bool dummyPowerup = false;
     private protected override void Awake()
     {
         base.Awake();
@@ -35,6 +35,7 @@ public class PowerUp : Targetable
             rb.constraints = RigidbodyConstraints.FreezeRotation;
             rb.drag = 5;
         }
+
     }
     private void FixedUpdate()
     {
@@ -54,6 +55,7 @@ public class PowerUp : Targetable
     }
     private void OnCollisionEnter(Collision collision)
     {
+  
         if (PhotonNetwork.IsMasterClient)
         {
             rb.drag = airDrag;
@@ -63,6 +65,17 @@ public class PowerUp : Targetable
                 newVel = newVel.normalized * bounceForce;
                 rb.velocity = newVel;
                
+            }
+        }
+    }
+    private void OnTriggerEnter(Collider other)
+    {
+        if (dummyPowerup)
+        {
+            if (other.name == "XR Origin")
+            {
+                UpgradeSpawner.primary.StartCoroutine(UpgradeSpawner.primary.DoPowerUp(powerType, PowerupTime));
+                this.gameObject.SetActive(false);
             }
         }
     }

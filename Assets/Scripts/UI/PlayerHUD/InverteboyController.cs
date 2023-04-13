@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.XR;
+using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
 
@@ -21,10 +23,15 @@ public class InverteboyController : MonoBehaviour
     [SerializeField, Tooltip("The animation curve for the Inverteboy opening animation.")] private AnimationCurve animationCurve;
     [Space(10)]
 
+    [SerializeField, Tooltip("The information window image.")] private Image infoWindow;
     [SerializeField, Tooltip("The label text.")] private TextMeshProUGUI labelText;
     [SerializeField, Tooltip("The tutorial text.")] private TextMeshProUGUI tutorialText;
 
     [SerializeField, Tooltip("The list of the different menus on the inverteboy.")] private Canvas[] inverteboyCanvases;
+
+    [SerializeField, Tooltip("The color the the window flashes when the player gets a kill.")] private Color flashInfoWindowColor;
+    [SerializeField, Tooltip("The speed of the kill flash.")] private float flashSpeed;
+    [SerializeField, Tooltip("The number of flashes.")] private int flashNumber;
 
     [Header("Music")]
     [SerializeField, Tooltip("Main menu music.")] private AudioClip mainMenuMusic;
@@ -36,12 +43,17 @@ public class InverteboyController : MonoBehaviour
     private bool isOpen = false;
     private bool forceOpen = false;
     private float timeLookingAtInverteboy;
+
+    private Color defaultInfoWindowColor;
+
     private IEnumerator inverteboyAnimation;
+    private IEnumerator flashAnimation;
 
     private void Awake()
     {
         audioSource = GetComponent<AudioSource>();
         currentCanvas = inverteboyCanvases[(int)InverteboyScreens.MAIN];
+        defaultInfoWindowColor = infoWindow.color;
         UpdateVolume();
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
@@ -215,6 +227,30 @@ public class InverteboyController : MonoBehaviour
     public void ShowCanvas(InverteboyScreens canvasIndex, bool showCanvas)
     {
         inverteboyCanvases[(int)canvasIndex].enabled = showCanvas;
+    }
+
+    /// <summary>
+    /// Flashes the information window and has it vibrate.
+    /// </summary>
+    public void Flash()
+    {
+        //Flashes the information window
+        if (flashAnimation != null)
+            StopCoroutine(flashAnimation);
+
+        flashAnimation = FlashInfoWindow();
+        StartCoroutine(flashAnimation);
+    }
+
+    private IEnumerator FlashInfoWindow()
+    {
+        for (int i = 0; i < flashNumber * 2; i++)
+        {
+            infoWindow.color = infoWindow.color == defaultInfoWindowColor ? flashInfoWindowColor : defaultInfoWindowColor;
+            if (infoWindow.color == flashInfoWindowColor)
+                PlayerController.instance.SendHapticImpulse(InputDeviceRole.LeftHanded, new Vector2(0.1f, flashSpeed));
+            yield return new WaitForSeconds(flashSpeed);
+        }
     }
 
     public void StopMusic() => audioSource.Stop();
