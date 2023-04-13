@@ -89,6 +89,7 @@ public class NetworkPlayer : MonoBehaviour
     internal bool inTube = false;
 
     private TextMeshProUGUI wormName;
+    private Material origTrailMat;
 
     //RUNTIME METHODS:
     private void Awake()
@@ -129,6 +130,9 @@ public class NetworkPlayer : MonoBehaviour
 
             NetworkManagerScript.instance.AdjustVoiceVolume();  //Adjusts the volume of all players
         }
+
+        //Runtime variable setup:
+        origTrailMat = trail.sharedMaterial; //Get base material for worm trail
 
         //Event subscriptions:
         SceneManager.sceneLoaded += OnSceneLoaded;     //Subscribe to scene load event (every NetworkPlayer should do this)
@@ -193,6 +197,13 @@ public class NetworkPlayer : MonoBehaviour
                 ReCalculateMaterialEvents();
             }
             else i++; //Move to next event
+        }
+
+        //Crungy trail solution:
+        if (!photonView.IsMine)
+        {
+            if (GameManager.Instance.InMenu()) trail.enabled = false;
+            else trail.enabled = true;
         }
     }
     private void OnDestroy()
@@ -288,10 +299,10 @@ public class NetworkPlayer : MonoBehaviour
         photonView.RPC("LoadPlayerStats", RpcTarget.AllBuffered, statsData);
     }
 
-    public void AddToKillBoard(string killerName, string victimName)
+    public void AddToKillBoard(string killerName, string victimName, DeathCause deathCause)
     {
         Debug.Log("Adding To Kill Board...");
-        photonView.RPC("RPC_DeathLog", RpcTarget.AllBuffered, killerName, victimName);
+        photonView.RPC("RPC_DeathLog", RpcTarget.AllBuffered, killerName, victimName, (int)deathCause);
     }
 
     [PunRPC]
@@ -302,9 +313,9 @@ public class NetworkPlayer : MonoBehaviour
     }
 
     [PunRPC]
-    public void RPC_DeathLog(string killerName, string victimName)
+    public void RPC_DeathLog(string killerName, string victimName, int deathCause)
     {
-        NetworkManagerScript.instance.AddDeathToJumbotron(killerName, victimName);
+        NetworkManagerScript.instance.AddDeathToJumbotron(killerName, victimName, (DeathCause)deathCause);
     }
     public void UpdateRoomSettingsDisplay()
     {
@@ -396,22 +407,25 @@ public class NetworkPlayer : MonoBehaviour
         //Set materials:
         SkinnedMeshRenderer targetRenderer = photonView.IsMine ? PlayerController.instance.bodyRenderer : bodyRenderer;
         targetRenderer.material = primaryMat;
-        if (!photonView.IsMine) trail.material = primaryMat;
-
-        //Set base color if using default material:
         if (primaryMat == altMaterials[0])
         {
             currentColor = PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]];
             targetRenderer.material.SetColor("_Color", currentColor);
             if (!photonView.IsMine)
             {
-                for (int x = 0; x < trail.colorGradient.colorKeys.Length; x++) //Iterate through color keys in trail gradient
-                {
-                    if (currentColor == Color.black) trail.colorGradient.colorKeys[x].color = Color.white;
-                    else trail.colorGradient.colorKeys[x].color = currentColor; //Apply color setting to trail key
-                }
+                trail.material = origTrailMat;
+                trail.colorGradient.colorKeys[0].color = currentColor;
+                trail.colorGradient.colorKeys[1].color = currentColor;
             }
-            //trail.material.SetColor("_Color", PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]]);
+        }
+        else //System is using unique material
+        {
+            if (!photonView.IsMine)
+            {
+                trail.colorGradient.colorKeys[0].color = Color.white;
+                trail.colorGradient.colorKeys[1].color = Color.white;
+                trail.material = primaryMat;
+            }
         }
     }
         /// <summary>
@@ -524,13 +538,15 @@ public class NetworkPlayer : MonoBehaviour
         //Apply settings:
         SetWormNicknameText(photonView.Owner.NickName);
         foreach (Material mat in bodyRenderer.materials) mat.color = currentColor; //Apply color to entire player body
-        for (int x = 0; x < trail.colorGradient.colorKeys.Length; x++) //Iterate through color keys in trail gradient
+        trail.colorGradient.colorKeys[0].color = currentColor;
+        trail.colorGradient.colorKeys[1].color = currentColor;
+        /*for (int x = 0; x < trail.colorGradient.colorKeys.Length; x++) //Iterate through color keys in trail gradient
         {
             if (currentColor == Color.black) trail.colorGradient.colorKeys[x].color = Color.white;
             else trail.colorGradient.colorKeys[x].color = currentColor; //Apply color setting to trail key
         }
         if (currentColor == Color.black) { trail.startColor = Color.white; trail.endColor = Color.white; }
-        else { trail.startColor = currentColor; trail.endColor = currentColor; } //Set actual trail colors (just in case)
+        else { trail.startColor = currentColor; trail.endColor = currentColor; } //Set actual trail colors (just in case)*/
     }
 
     /// <summary>
@@ -559,7 +575,7 @@ public class NetworkPlayer : MonoBehaviour
     /// <param name="enemyID">Identify of player who shot this projectile.</param>
     /// <param name="projectileVel">Speed and direction projectile was moving at/in when it struck this player.</param>
     [PunRPC]
-    public void RPC_Hit(int damage, int enemyID, Vector3 projectileVel)
+    public void RPC_Hit(int damage, int enemyID, Vector3 projectileVel, int deathCause)
     {
         if (photonView.IsMine)
         {
@@ -585,9 +601,9 @@ public class NetworkPlayer : MonoBehaviour
                     PlayerPrefs.SetInt("HighestDeathStreak", networkPlayerStats.deathStreak); //Add to the highest death streak counter if applicable
                 PlayerController.instance.combatHUD.UpdatePlayerStats(networkPlayerStats);
                 SyncStats();
-                AddToKillBoard(PhotonNetwork.GetPhotonView(enemyID).Owner.NickName, PhotonNetwork.LocalPlayer.NickName);
+                AddToKillBoard(PhotonNetwork.GetPhotonView(enemyID).Owner.NickName, PhotonNetwork.LocalPlayer.NickName, (DeathCause)deathCause);
                 photonView.RPC("RPC_UpdateLeaderboard", RpcTarget.All, PhotonNetwork.LocalPlayer.NickName, networkPlayerStats.numOfDeaths, networkPlayerStats.numOfKills, networkPlayerStats.killStreak);
-                if (enemyID != photonView.ViewID) PhotonNetwork.GetPhotonView(enemyID).RPC("RPC_KilledEnemy", RpcTarget.AllBuffered, photonView.ViewID);
+                if (enemyID != photonView.ViewID) PhotonNetwork.GetPhotonView(enemyID).RPC("RPC_KilledEnemy", RpcTarget.AllBuffered, photonView.ViewID, deathCause);
 
             }
         }
@@ -616,7 +632,7 @@ public class NetworkPlayer : MonoBehaviour
     /// </summary>
     /// <param name="enemyID"></param>
     [PunRPC]
-    public void RPC_KilledEnemy(int enemyID)
+    public void RPC_KilledEnemy(int enemyID, int deathCause)
     {
         if (photonView.IsMine)
         {
@@ -629,7 +645,7 @@ public class NetworkPlayer : MonoBehaviour
             print(PhotonNetwork.LocalPlayer.NickName + " killed enemy with index " + enemyID);
             PlayerController.instance.combatHUD.UpdatePlayerStats(networkPlayerStats);
             SyncStats();
-            PlayerController.instance.combatHUD.AddToDeathInfoBoard(PhotonNetwork.LocalPlayer.NickName, PhotonNetwork.GetPhotonView(enemyID).Owner.NickName);
+            PlayerController.instance.combatHUD.AddToDeathInfoBoard(PhotonNetwork.LocalPlayer.NickName, PhotonNetwork.GetPhotonView(enemyID).Owner.NickName, (DeathCause)deathCause);
             photonView.RPC("RPC_UpdateLeaderboard", RpcTarget.All, PhotonNetwork.LocalPlayer.NickName, networkPlayerStats.numOfDeaths, networkPlayerStats.numOfKills, networkPlayerStats.killStreak);
         }
     }
