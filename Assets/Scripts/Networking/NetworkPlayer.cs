@@ -587,7 +587,7 @@ public class NetworkPlayer : MonoBehaviour
                 SyncStats();
                 AddToKillBoard(PhotonNetwork.GetPhotonView(enemyID).Owner.NickName, PhotonNetwork.LocalPlayer.NickName, (DeathCause)deathCause);
                 photonView.RPC("RPC_UpdateLeaderboard", RpcTarget.All, PhotonNetwork.LocalPlayer.NickName, networkPlayerStats.numOfDeaths, networkPlayerStats.numOfKills, networkPlayerStats.killStreak);
-                if (enemyID != photonView.ViewID) PhotonNetwork.GetPhotonView(enemyID).RPC("RPC_KilledEnemy", RpcTarget.AllBuffered, photonView.ViewID);
+                if (enemyID != photonView.ViewID) PhotonNetwork.GetPhotonView(enemyID).RPC("RPC_KilledEnemy", RpcTarget.AllBuffered, photonView.ViewID, deathCause);
 
             }
         }
@@ -616,7 +616,7 @@ public class NetworkPlayer : MonoBehaviour
     /// </summary>
     /// <param name="enemyID"></param>
     [PunRPC]
-    public void RPC_KilledEnemy(int enemyID, int deathCause = 0)
+    public void RPC_KilledEnemy(int enemyID, int deathCause)
     {
         if (photonView.IsMine)
         {
