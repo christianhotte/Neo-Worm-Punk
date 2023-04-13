@@ -559,7 +559,7 @@ public class NetworkPlayer : MonoBehaviour
     /// <param name="enemyID">Identify of player who shot this projectile.</param>
     /// <param name="projectileVel">Speed and direction projectile was moving at/in when it struck this player.</param>
     [PunRPC]
-    public void RPC_Hit(int damage, int enemyID, Vector3 projectileVel, int deathCause = 0)
+    public void RPC_Hit(int damage, int enemyID, Vector3 projectileVel, int deathCause)
     {
         if (photonView.IsMine)
         {
