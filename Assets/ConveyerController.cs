@@ -12,10 +12,13 @@ public class ConveyerController : MonoBehaviour
 
     private int currentConveyerBeltIndex = -1;
     private bool conveyerBeltIsMoving = false;
+    private float[] beginningZBiases;
 
     private void Start()
     {
-
+        //if this is not the conveyerbelt start repeatedely calling the conveyerbelt to move
+        if(!isPlayerBelt) { InvokeRepeating("DisplayBeltMove", Random.Range(0.5f, 3f), 3f); }
+        
 
 
     }
@@ -55,10 +58,22 @@ public class ConveyerController : MonoBehaviour
         //assign the arrays wit the correct starting and ending positions
         for(int i = 0; i < conveyerBeltObjects.Length; i++)
         {
+            Debug.Log("i = " + i);
+            Debug.Log("next Conv = " + nextConveyerBeltIndex);
             startPositions[i] = conveyerBeltObjects[i].position;
-            endPositions[i] = new Vector3(conveyerBeltObjects[i].position.x, conveyerBeltObjects[i].position.y, conveyerBeltStopPositions[nextConveyerBeltIndex].position.z);
+            if(isPlayerBelt)
+            {
+                endPositions[i] = new Vector3(conveyerBeltObjects[i].position.x, conveyerBeltObjects[i].position.y, conveyerBeltStopPositions[nextConveyerBeltIndex].position.z);
+            }
+            else
+            {
+                endPositions[i] = new Vector3(conveyerBeltObjects[i].position.x, conveyerBeltObjects[i].position.y, conveyerBeltStopPositions[nextConveyerBeltIndex].position.z);
+            }
+            
+            
         }
         
+
 
         //set initial time to 0
         float timeElapsed = 0;
@@ -86,10 +101,14 @@ public class ConveyerController : MonoBehaviour
 
 
             //do animation if under 0.25 seconds from ending, and the station isn't already moving, and it is the player's conveyer
-            if(timeElapsed > (transportTime - 0.25f) && !menuStationControllerRef.GetMenuStationIsMoving(nextConveyerBeltIndex) && isPlayerBelt)
+            if(isPlayerBelt)
             {
-                menuStationControllerRef.ActivateStation(nextConveyerBeltIndex);
+                if (timeElapsed > (transportTime - 0.25f) && !menuStationControllerRef.GetMenuStationIsMoving(nextConveyerBeltIndex))
+                {
+                    menuStationControllerRef.ActivateStation(nextConveyerBeltIndex);
+                }
             }
+            
 
             yield return null;
         }
@@ -101,6 +120,22 @@ public class ConveyerController : MonoBehaviour
         conveyerBeltIsMoving = false;
     }
     
+    private void DisplayBeltMove()
+    {
+        //first teleport objects that need to go from one end to the other to actually do that
+        for(int i = 0; i < conveyerBeltObjects.Length; i++)
+        {
+            if(conveyerBeltObjects[i].position.z >= conveyerBeltStopPositions[conveyerBeltStopPositions.Length - 1].position.z)
+            {
+                conveyerBeltObjects[i].position = conveyerBeltStopPositions[0].position;
+            }
+        }
 
+        //then call conveyerbelt
+        currentConveyerBeltIndex = MyUtils.MyMod(currentConveyerBeltIndex + 1, conveyerBeltStopPositions.Length);
+        Debug.Log("YEE_________________________________________________________________________________________________________ " + currentConveyerBeltIndex);
+        MoveConveyer(currentConveyerBeltIndex);
+        
+    }
 
 }
