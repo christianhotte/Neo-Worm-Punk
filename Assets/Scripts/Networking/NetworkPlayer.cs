@@ -396,21 +396,21 @@ public class NetworkPlayer : MonoBehaviour
         //Set materials:
         SkinnedMeshRenderer targetRenderer = photonView.IsMine ? PlayerController.instance.bodyRenderer : bodyRenderer;
         targetRenderer.material = primaryMat;
-        if (!photonView.IsMine) trail.material = primaryMat;
+        //if (!photonView.IsMine) trail.material = primaryMat;
 
         //Set base color if using default material:
         if (primaryMat == altMaterials[0])
         {
             currentColor = PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]];
             targetRenderer.material.SetColor("_Color", currentColor);
-            if (!photonView.IsMine)
+            /*if (!photonView.IsMine)
             {
                 for (int x = 0; x < trail.colorGradient.colorKeys.Length; x++) //Iterate through color keys in trail gradient
                 {
                     if (currentColor == Color.black) trail.colorGradient.colorKeys[x].color = Color.white;
                     else trail.colorGradient.colorKeys[x].color = currentColor; //Apply color setting to trail key
                 }
-            }
+            }*/
             //trail.material.SetColor("_Color", PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]]);
         }
     }
