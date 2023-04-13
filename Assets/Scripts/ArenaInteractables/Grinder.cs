@@ -14,13 +14,16 @@ public class Grinder : MonoBehaviour
     public float LevelTimePercent;
     internal AudioSource GrinderAud;
     public AudioClip GrindnerSound;
-    private Jumbotron jumbotronObject;
+    //private Jumbotron jumbotronObject;
+    private RoundManager roundManager;
 
     // Start is called before the first frame update
     void Start()
     {
-        jumbotronObject = FindObjectOfType<Jumbotron>();
+        //jumbotronObject = FindObjectOfType<Jumbotron>();
         GrinderAud = this.GetComponent<AudioSource>();
+        PhotonView masterPV = PhotonView.Find(17);
+        roundManager = masterPV.GetComponent<RoundManager>();
     }
 
     // Update is called once per frame
@@ -37,7 +40,8 @@ public class Grinder : MonoBehaviour
         }
         if (!Activated && Closed)
         {
-            LevelTimePercent = jumbotronObject.GetLevelTimer().LevelTimePercentage();
+            //LevelTimePercent = jumbotronObject.GetLevelTimer().LevelTimePercentage();
+            LevelTimePercent = roundManager.LevelTimePercentage();
             if (LevelTimePercent >= 60)
             {
                 Activated = true;
@@ -53,7 +57,7 @@ public class Grinder : MonoBehaviour
             // hitPlayer = other.GetComponent<PlayerController>();
             netPlayer = PlayerController.photonView.GetComponent<NetworkPlayer>();
             // Debug.Log(netPlayer.name);
-            netPlayer.photonView.RPC("RPC_Hit", RpcTarget.All, 100, netPlayer.photonView.ViewID, Vector3.zero);
+            netPlayer.photonView.RPC("RPC_Hit", RpcTarget.All, 100, netPlayer.photonView.ViewID, Vector3.zero, (int)DeathCause.TRAP);
         }
     }
 

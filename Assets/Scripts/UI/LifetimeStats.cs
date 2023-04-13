@@ -19,8 +19,10 @@ public class LifetimeStats : MonoBehaviour
     private void ShowLifeTimeStats()
     {
         string stats = "" +
-            "Kills:\t\t\t" + PlayerPrefs.GetInt("LifetimeKills") + "\n" +
-            "Deaths:\t\t" + PlayerPrefs.GetInt("LifetimeDeaths");
+            "Kills:\t\t\t\t" + PlayerPrefs.GetInt("LifetimeKills") + "\n" +
+            "Deaths:\t\t\t" + PlayerPrefs.GetInt("LifetimeDeaths") + "\n" +
+            "Best Kill Streak:\t\t" + PlayerPrefs.GetInt("BestStreak") + "\n" +
+            "Highest Death Streak:\t" + PlayerPrefs.GetInt("HighestDeathStreak");
         lifetimeStats.text = stats;
     }
 }

@@ -17,7 +17,32 @@ MonoBehaviour:
   grindLayers:
     serializedVersion: 2
     m_Bits: 257
-  grindSweetSpot: {x: 0.11164844, y: 0.2250574}
+  grindSweetSpot: {x: 0.1464797, y: 0.2646137}
+  grindGlueForce: 0
+  grindGlueCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.2000122
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   bladeWidth: 0.17
   disengageForce: 27
   bladePreRetractDistance: 0.08
@@ -129,10 +154,10 @@ MonoBehaviour:
   deflectRotRate: 1900
   deflectWristExtend: 0.27
   deflectPullImpulse: 0
-  deflectPullForce: 0
-  deflectTime: 1.5
-  deflectCooldownRate: 0.7
-  deflectionAngle: 90
+  deflectPullForce: 500
+  deflectTime: 1.6
+  deflectCooldownRate: 0.6
+  deflectionAngle: 60
   reverseGripAngle: 105
   reverseGripLerpRate: 7
   reverseGripReturnRate: 500
@@ -141,8 +166,10 @@ MonoBehaviour:
   swingSpeedRange: {x: 0.5, y: 2}
   extendSound: {fileID: 8300000, guid: f7a515930a8dc6741a608db1e42a190c, type: 3}
   runningSound: {fileID: 0}
-  runningWallSound: {fileID: 0}
   sheathSound: {fileID: 8300000, guid: ba699daa1a77ff547b65b08e06538eca, type: 3}
+  grindBeginSound: {fileID: 0}
+  grindingSound: {fileID: 0}
+  grindEndSound: {fileID: 0}
   deflectIdleSound: {fileID: 8300000, guid: aec4a007ab0c8894aac2c485061c0388, type: 3}
   deflectSound: {fileID: 8300000, guid: 5343be21a73a12c46807db26cc025b29, type: 3}
   extendHaptics:
