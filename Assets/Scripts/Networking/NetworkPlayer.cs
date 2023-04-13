@@ -200,8 +200,11 @@ public class NetworkPlayer : MonoBehaviour
         }
 
         //Crungy trail solution:
-        if (GameManager.Instance.InMenu()) trail.enabled = false;
-        else trail.enabled = true;
+        if (!photonView.IsMine)
+        {
+            if (GameManager.Instance.InMenu()) trail.enabled = false;
+            else trail.enabled = true;
+        }
     }
     private void OnDestroy()
     {
@@ -411,13 +414,16 @@ public class NetworkPlayer : MonoBehaviour
             if (!photonView.IsMine)
             {
                 trail.material = origTrailMat;
-                trail.material.SetColor("_Color", currentColor);
+                trail.colorGradient.colorKeys[0].color = currentColor;
+                trail.colorGradient.colorKeys[1].color = currentColor;
             }
         }
         else //System is using unique material
         {
             if (!photonView.IsMine)
             {
+                trail.colorGradient.colorKeys[0].color = Color.white;
+                trail.colorGradient.colorKeys[1].color = Color.white;
                 trail.material = primaryMat;
             }
         }
@@ -532,7 +538,8 @@ public class NetworkPlayer : MonoBehaviour
         //Apply settings:
         SetWormNicknameText(photonView.Owner.NickName);
         foreach (Material mat in bodyRenderer.materials) mat.color = currentColor; //Apply color to entire player body
-        trail.material.SetColor("_Color", currentColor);
+        trail.colorGradient.colorKeys[0].color = currentColor;
+        trail.colorGradient.colorKeys[1].color = currentColor;
         /*for (int x = 0; x < trail.colorGradient.colorKeys.Length; x++) //Iterate through color keys in trail gradient
         {
             if (currentColor == Color.black) trail.colorGradient.colorKeys[x].color = Color.white;
