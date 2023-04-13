@@ -120,6 +120,12 @@ public class PlayerController : MonoBehaviour
         isDead = false;                                      //Indicate that player is no longer dead
         CenterCamera();                                      //Center camera (this is worth doing during any major transition)
     }
+    public IEnumerator InitialSpawnSequence()
+    {
+        timeUntilVulnerable = healthSettings.spawnInvincibilityTime;
+        yield return new WaitUntil(() => photonView != null);
+        MakeInvulnerable(timeUntilVulnerable);
+    }
 
     //RUNTIME METHODS:
     private void Awake()
@@ -241,7 +247,7 @@ public class PlayerController : MonoBehaviour
                 healthVolume.weight = 1 - HealthPercent;                                                                               //Update health visualization
             }
         }
-        if (timeUntilVulnerable > 0) { timeUntilVulnerable = Mathf.Max(timeUntilVulnerable - Time.deltaTime, 0); print(timeUntilVulnerable); }
+        if (timeUntilVulnerable > 0) { timeUntilVulnerable = Mathf.Max(timeUntilVulnerable - Time.deltaTime, 0); }
     }
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
@@ -249,11 +255,14 @@ public class PlayerController : MonoBehaviour
 
         //If the player is in a room, set their default health to whatever the room setting for health is
         if (PhotonNetwork.InRoom)
+        {
             healthSettings.defaultHealth = (int)PhotonNetwork.CurrentRoom.CustomProperties["PlayerHP"];
+            currentHealth = healthSettings.defaultHealth;
+            healthVolume.weight = 0;
+        }
         if (!GameManager.Instance.InMenu())
         {
-            if (UpgradeSpawner.primary != null) UpgradeSpawner.primary.StartCoroutine(UpgradeSpawner.primary.DoPowerUp(PowerUp.PowerUpType.Invulnerability, healthSettings.spawnInvincibilityTime + healthSettings.deathTime));
-            //MakeInvulnerable(healthSettings.spawnInvincibilityTime);
+            StartCoroutine(InitialSpawnSequence());
         }
     }
     private void OnDestroy()
@@ -293,9 +302,9 @@ public class PlayerController : MonoBehaviour
     public void UpdateWeaponry()
     {
         if (inMenu)
-        {
             inCombat = false;
-        }
+
+        combatHUD.EnableCombatHUD(inCombat);
 
         bodyRb.isKinematic = !inCombat;
 

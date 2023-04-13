@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Photon.Pun;
 
-public class Jumbotron : MonoBehaviour
+public class Jumbotron : MonoBehaviourPunCallbacks
 {
     public static Jumbotron primary;
 
@@ -15,20 +16,25 @@ public class Jumbotron : MonoBehaviour
     private bool cooldown = false,finished=false;
     public AudioClip oonge, bees,beeees, bwarp,eer,jaigh,krah,oo,rro,yert;
     private LevelTimer currentLevelTimer;
+    private RoundManager roundManager;
+
     private void Awake()
     {
         primary = this;
     }
+
     private void Start()
     {
         currentLevelTimer = GetComponentInChildren<LevelTimer>();
         jumboAud = this.GetComponent<AudioSource>();
+        PhotonView masterPV = PhotonView.Find(17);
+        roundManager = masterPV.GetComponent<RoundManager>();
     }
     private void Update()
     {
         //Debug.Log(currentLevelTimer.GetTotalSecondsLeft());
         //Debug.Log(currentLevelTimer.LevelTimePercentage());
-        if (currentLevelTimer.GetTotalSecondsLeft() <= 11.0f&& currentLevelTimer.GetTotalSecondsLeft() >0&& !cooldown&&!finished)
+        /*if (currentLevelTimer.GetTotalSecondsLeft() <= 11.0f&& currentLevelTimer.GetTotalSecondsLeft() >0&& !cooldown&&!finished)
         {
             if (currentLevelTimer.GetTotalSecondsLeft() < 1.0f)
             {
@@ -41,7 +47,29 @@ public class Jumbotron : MonoBehaviour
                 cooldown = true;
                 StartCoroutine(CountdownCooldown());
             }
+        }*/
 
+        // Gets the timer from the Round Manager which is synced throughout the network.
+        if (roundManager != null)
+        {
+            string remainingTime = roundManager.GetTimeDisplay();
+
+            if (roundManager.GetTotalSecondsLeft() < 11.0f && roundManager.GetTotalSecondsLeft() > 0 && !cooldown && !finished)
+            {
+                if (currentLevelTimer.GetTotalSecondsLeft() < 1.0f)
+                {
+                    if (primary == this) jumboAud.PlayOneShot(beeees, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
+                    finished = true;
+                }
+                else
+                {
+                    if (primary == this) jumboAud.PlayOneShot(bwarp, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
+                    cooldown = true;
+                    StartCoroutine(CountdownCooldown());
+                }
+            }
+
+           
         }
     }
     private DeathInfo mostRecentDeath;  //The most recent death recorded
@@ -52,11 +80,12 @@ public class Jumbotron : MonoBehaviour
     /// <param name="killer">The name of the person who performed a kill.</param>
     /// <param name="victim">The name of the person killed.</param>
     /// <param name="causeOfDeath">An icon that indicates the cause of death.</param>
-    public void AddToDeathInfoBoard(string killer, string victim, Image causeOfDeath = null)
+    public void AddToDeathInfoBoard(string killer, string victim, DeathCause causeOfDeath = DeathCause.UNKNOWN)
     {
         //Destroy the second most recent death
         if(mostRecentDeath != null)
             Destroy(mostRecentDeath.gameObject);
+
         else
         {
             mostRecentDeathText.gameObject.SetActive(true);

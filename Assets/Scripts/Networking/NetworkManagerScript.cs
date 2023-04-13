@@ -313,10 +313,10 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     /// </summary>
     /// <param name="killerName">The killer's user name.</param>
     /// <param name="victimName">The victim's user name.</param>
-    public void AddDeathToJumbotron(string killerName, string victimName)
+    public void AddDeathToJumbotron(string killerName, string victimName, DeathCause deathCause)
     {
         foreach(var jumbotron in FindObjectsOfType<Jumbotron>())
-            jumbotron.AddToDeathInfoBoard(killerName, victimName);
+            jumbotron.AddToDeathInfoBoard(killerName, victimName, deathCause);
     }
 
     public override void OnCreatedRoom()

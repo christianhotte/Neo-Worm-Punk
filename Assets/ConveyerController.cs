@@ -7,6 +7,8 @@ public class ConveyerController : MonoBehaviour
     [SerializeField, Tooltip("teehee this is a fake tooltip")] private Transform[] conveyerBeltStopPositions;
     [SerializeField, Tooltip("")] private Transform[] conveyerBeltObjects;
     [SerializeField, Tooltip("How much time it takes for objects to get from conveyerbelt stop positions")] private float transportTime;
+    [SerializeField, Tooltip("Refference to MenuStationController")] private MenuStationController menuStationControllerRef;
+    [SerializeField, Tooltip("Indicates whether or not this is the player's conveyerbelt")] private bool isPlayerBelt;
 
     private int currentConveyerBeltIndex = -1;
     private bool conveyerBeltIsMoving = false;
@@ -20,7 +22,6 @@ public class ConveyerController : MonoBehaviour
 
     public void MoveConveyer(int nextConveyerBeltIndex)
     {
-        Debug.Log("1");
         //if -1 is passed in, it just moves to the next belt index
         if(nextConveyerBeltIndex == -1) { nextConveyerBeltIndex = currentConveyerBeltIndex + 1; }
 
@@ -28,16 +29,24 @@ public class ConveyerController : MonoBehaviour
         if(!conveyerBeltIsMoving) { StartCoroutine(MovingConveyerBelt(nextConveyerBeltIndex)); }
         //safety
         conveyerBeltIsMoving = true;
-
     }
 
     
     private IEnumerator MovingConveyerBelt(int nextConveyerBeltIndex)
     {
+        //safety first folks
         conveyerBeltIsMoving = true;
 
+        //only do if this is the player's belt
+        if(isPlayerBelt)
+        {
+            //retract all ui that is down except for the next one
+            menuStationControllerRef.DeactivateAllOtherStations(nextConveyerBeltIndex);
+        }
+
+
         //wait a tiny bit
-        yield return new WaitForSeconds(0.5f);                          //do other things in this time like retract stuffs
+        yield return new WaitForSeconds(0.4f);                          //do other things in this time like retract stuffs
 
         //make arrays to store starting + ending positions
         Vector3[] startPositions = new Vector3[conveyerBeltObjects.Length];
@@ -57,7 +66,6 @@ public class ConveyerController : MonoBehaviour
         //lerp the objects from start to end positions
         while (timeElapsed < transportTime)
         {
-            Debug.Log("START MOVING, timeElapsed = " + timeElapsed);
             //smooth lerp duration alg
             float t = timeElapsed / transportTime;
             t = t * t * (3f - 2f * t);
@@ -78,6 +86,13 @@ public class ConveyerController : MonoBehaviour
 
             yield return null;
         }
+
+        //only do if this is the player's belt
+        if(isPlayerBelt)
+        {
+            menuStationControllerRef.ActivateStation(nextConveyerBeltIndex);
+        }
+        
 
         currentConveyerBeltIndex = nextConveyerBeltIndex;
         conveyerBeltIsMoving = false;
