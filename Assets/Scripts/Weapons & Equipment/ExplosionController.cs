@@ -67,7 +67,7 @@ public class ExplosionController : MonoBehaviour
 
                 //Send signals:
                 player.photonView.RPC("RPC_Launch", RpcTarget.All, launchForce);                                                //Launch player using calculated force
-                if (distance <= damageRadius) player.photonView.RPC("RPC_Hit", RpcTarget.All, 1, originPlayerID, Vector3.zero); //Damage player if inside radius
+                if (distance <= damageRadius) player.photonView.RPC("RPC_Hit", RpcTarget.All, 1, originPlayerID, Vector3.zero, (int)DeathCause.UNKNOWN); //Damage player if inside radius
 
                 //Cleanup:
                 hitPlayers.Add(player); //Add player to list to make sure that it does not get hit multiple times by the same explosion

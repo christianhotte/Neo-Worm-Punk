@@ -16,6 +16,7 @@ public class WormHole : NetworkedArenaElement
     public AudioSource wormHoleAud;
     public AudioClip enterSound,suctionSound;
     private WormHoleTrigger triggerScript,EntryTrigger;
+    public int luckyChance = 10;
     void Start()
     {
         wormHoleAud = this.GetComponent<AudioSource>();
