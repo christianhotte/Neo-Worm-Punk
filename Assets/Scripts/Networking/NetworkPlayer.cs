@@ -89,6 +89,7 @@ public class NetworkPlayer : MonoBehaviour
     internal bool inTube = false;
 
     private TextMeshProUGUI wormName;
+    private Material origTrailMat;
 
     //RUNTIME METHODS:
     private void Awake()
@@ -129,6 +130,9 @@ public class NetworkPlayer : MonoBehaviour
 
             NetworkManagerScript.instance.AdjustVoiceVolume();  //Adjusts the volume of all players
         }
+
+        //Runtime variable setup:
+        origTrailMat = trail.sharedMaterial; //Get base material for worm trail
 
         //Event subscriptions:
         SceneManager.sceneLoaded += OnSceneLoaded;     //Subscribe to scene load event (every NetworkPlayer should do this)
@@ -194,6 +198,10 @@ public class NetworkPlayer : MonoBehaviour
             }
             else i++; //Move to next event
         }
+
+        //Crungy trail solution:
+        if (GameManager.Instance.InMenu()) trail.enabled = false;
+        else trail.enabled = true;
     }
     private void OnDestroy()
     {
@@ -396,22 +404,22 @@ public class NetworkPlayer : MonoBehaviour
         //Set materials:
         SkinnedMeshRenderer targetRenderer = photonView.IsMine ? PlayerController.instance.bodyRenderer : bodyRenderer;
         targetRenderer.material = primaryMat;
-        //if (!photonView.IsMine) trail.material = primaryMat;
-
-        //Set base color if using default material:
         if (primaryMat == altMaterials[0])
         {
             currentColor = PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]];
             targetRenderer.material.SetColor("_Color", currentColor);
-            /*if (!photonView.IsMine)
+            if (!photonView.IsMine)
             {
-                for (int x = 0; x < trail.colorGradient.colorKeys.Length; x++) //Iterate through color keys in trail gradient
-                {
-                    if (currentColor == Color.black) trail.colorGradient.colorKeys[x].color = Color.white;
-                    else trail.colorGradient.colorKeys[x].color = currentColor; //Apply color setting to trail key
-                }
-            }*/
-            //trail.material.SetColor("_Color", PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]]);
+                trail.material = origTrailMat;
+                trail.material.SetColor("_Color", currentColor);
+            }
+        }
+        else //System is using unique material
+        {
+            if (!photonView.IsMine)
+            {
+                trail.material = primaryMat;
+            }
         }
     }
         /// <summary>
@@ -524,13 +532,14 @@ public class NetworkPlayer : MonoBehaviour
         //Apply settings:
         SetWormNicknameText(photonView.Owner.NickName);
         foreach (Material mat in bodyRenderer.materials) mat.color = currentColor; //Apply color to entire player body
-        for (int x = 0; x < trail.colorGradient.colorKeys.Length; x++) //Iterate through color keys in trail gradient
+        trail.material.SetColor("_Color", currentColor);
+        /*for (int x = 0; x < trail.colorGradient.colorKeys.Length; x++) //Iterate through color keys in trail gradient
         {
             if (currentColor == Color.black) trail.colorGradient.colorKeys[x].color = Color.white;
             else trail.colorGradient.colorKeys[x].color = currentColor; //Apply color setting to trail key
         }
         if (currentColor == Color.black) { trail.startColor = Color.white; trail.endColor = Color.white; }
-        else { trail.startColor = currentColor; trail.endColor = currentColor; } //Set actual trail colors (just in case)
+        else { trail.startColor = currentColor; trail.endColor = currentColor; } //Set actual trail colors (just in case)*/
     }
 
     /// <summary>
