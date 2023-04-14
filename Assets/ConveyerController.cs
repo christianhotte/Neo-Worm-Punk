@@ -13,11 +13,20 @@ public class ConveyerController : MonoBehaviour
     private int currentConveyerBeltIndex = -1;
     private bool conveyerBeltIsMoving = false;
     private float[] beginningZBiases;
+    private int[] currentObjectPositions;
 
     private void Start()
     {
         //if this is not the conveyerbelt start repeatedely calling the conveyerbelt to move
-        if(!isPlayerBelt) { InvokeRepeating("DisplayBeltMove", Random.Range(0.5f, 3f), 3f); }
+        if(!isPlayerBelt)
+        {
+            InvokeRepeating("DisplayBeltMove", Random.Range(0.5f, 3f), 3f);
+            currentObjectPositions = new int[conveyerBeltObjects.Length];
+            for(int i = 0; i < conveyerBeltObjects.Length; i++)
+            {
+                currentObjectPositions[i] = i;
+            }
+        }
         
 
 
@@ -117,6 +126,10 @@ public class ConveyerController : MonoBehaviour
         
 
         currentConveyerBeltIndex = nextConveyerBeltIndex;
+        if(!isPlayerBelt)
+        {
+            
+        }
         conveyerBeltIsMoving = false;
     }
     
@@ -125,15 +138,25 @@ public class ConveyerController : MonoBehaviour
         //first teleport objects that need to go from one end to the other to actually do that
         for(int i = 0; i < conveyerBeltObjects.Length; i++)
         {
+            if (currentObjectPositions[i] >= conveyerBeltObjects.Length - 1)
+            {
+                conveyerBeltObjects[i].position = conveyerBeltStopPositions[0].position;
+            }
+
+            /*
             if(conveyerBeltObjects[i].position.z >= conveyerBeltStopPositions[conveyerBeltStopPositions.Length - 1].position.z)
             {
                 conveyerBeltObjects[i].position = conveyerBeltStopPositions[0].position;
             }
+            */
         }
 
         //then call conveyerbelt
-        currentConveyerBeltIndex = MyUtils.MyMod(currentConveyerBeltIndex + 1, conveyerBeltStopPositions.Length);
-        Debug.Log("YEE_________________________________________________________________________________________________________ " + currentConveyerBeltIndex);
+        for (int i = 0; i < currentObjectPositions.Length; i++)
+        {
+            currentObjectPositions[i] = MyUtils.MyMod(currentObjectPositions[i] + 1, conveyerBeltStopPositions.Length);
+        }
+        //Debug.Log("YEE_________________________________________________________________________________________________________ " + currentConveyerBeltIndex);
         MoveConveyer(currentConveyerBeltIndex);
         
     }
