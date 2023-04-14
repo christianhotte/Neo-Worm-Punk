@@ -9,24 +9,24 @@ public class Jumbotron : MonoBehaviourPunCallbacks
 {
     public static Jumbotron primary;
 
+    [SerializeField] private TextMeshProUGUI levelTimer;
     [SerializeField, Tooltip("The container for the information that displays the player stats information.")] private Transform deathInfoContainer;
     [SerializeField, Tooltip("The death information prefab.")] private DeathInfo deathInfoPrefab;
     [SerializeField, Tooltip("The most recent kill text.")] private TextMeshProUGUI mostRecentDeathText;
     private AudioSource jumboAud;
     private bool cooldown = false,finished=false;
     public AudioClip oonge, bees,beeees, bwarp,eer,jaigh,krah,oo,rro,yert;
-    private LevelTimer currentLevelTimer;
     private RoundManager roundManager;
 
     private void Awake()
     {
         primary = this;
+        jumboAud = primary.GetComponent<AudioSource>();
     }
 
     private void Start()
     {
-        currentLevelTimer = GetComponentInChildren<LevelTimer>();
-        jumboAud = this.GetComponent<AudioSource>();
+        //jumboAud = this.GetComponent<AudioSource>();
         PhotonView masterPV = PhotonView.Find(17);
         roundManager = masterPV.GetComponent<RoundManager>();
     }
@@ -53,10 +53,11 @@ public class Jumbotron : MonoBehaviourPunCallbacks
         if (roundManager != null)
         {
             string remainingTime = roundManager.GetTimeDisplay();
+            levelTimer.text = remainingTime;
 
             if (roundManager.GetTotalSecondsLeft() < 11.0f && roundManager.GetTotalSecondsLeft() > 0 && !cooldown && !finished)
             {
-                if (currentLevelTimer.GetTotalSecondsLeft() < 1.0f)
+                if (roundManager.GetTotalSecondsLeft() < 1.0f)
                 {
                     if (primary == this) jumboAud.PlayOneShot(beeees, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
                     finished = true;
@@ -68,8 +69,6 @@ public class Jumbotron : MonoBehaviourPunCallbacks
                     StartCoroutine(CountdownCooldown());
                 }
             }
-
-           
         }
     }
     private DeathInfo mostRecentDeath;  //The most recent death recorded
@@ -105,6 +104,4 @@ public class Jumbotron : MonoBehaviourPunCallbacks
         yield return new WaitForSeconds(1.0f);
         cooldown = false;
     }
-
-    public LevelTimer GetLevelTimer() => currentLevelTimer;
 }
