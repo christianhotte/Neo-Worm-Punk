@@ -302,11 +302,12 @@ public class PlayerController : MonoBehaviour
     public void UpdateWeaponry()
     {
         if (inMenu)
+        {
             inCombat = false;
+            bodyRb.isKinematic = true;
+        }
 
         combatHUD.EnableCombatHUD(inCombat);
-
-        bodyRb.isKinematic = !inCombat;
 
         foreach (var weapon in attachedEquipment)
             foreach (var renderer in weapon.GetComponentsInChildren<Renderer>())
