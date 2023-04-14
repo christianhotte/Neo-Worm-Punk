@@ -25,6 +25,7 @@ public class UpgradeSpawner : MonoBehaviour
     [SerializeField] private bool debugGiveSelectedUpgrade;
     public float SpawnDelay;
     private LevelTimer Timer;
+    private RoundManager roundTimer;
     //Runtime Variables:
     public PowerUp.PowerUpType currentPowerUp;
     public float powerupsPerMin;
@@ -61,6 +62,8 @@ public class UpgradeSpawner : MonoBehaviour
         thisAud = this.GetComponent<AudioSource>();
         jumboScript = FindObjectOfType<Jumbotron>();
         Timer = FindObjectOfType<Jumbotron>().GetComponentInChildren<LevelTimer>();
+        PhotonView masterPV = PhotonView.Find(17);
+        roundTimer = masterPV.GetComponent<RoundManager>(); 
        // totalLevelTime = (int)PhotonNetwork.CurrentRoom.CustomProperties["RoundLength"];
         //powerDelay = totalLevelTime / (powerupsPerMin * 4);
         timeUntilNextUpgrade = 30*powerupsPerMin;
@@ -113,7 +116,7 @@ public class UpgradeSpawner : MonoBehaviour
                 {
                     
                     SpawnRandomUpgrade();
-                    if ((30 * powerupsPerMin) < Timer.GetTotalSecondsLeft())
+                    if ((30 * powerupsPerMin) < roundTimer.GetTotalSecondsLeft())
                     {
                         timeUntilNextUpgrade = 30 * powerupsPerMin;
                     }
