@@ -5,160 +5,165 @@ using UnityEngine;
 public class ConveyerController : MonoBehaviour
 {
     [SerializeField, Tooltip("teehee this is a fake tooltip")] private Transform[] conveyerBeltStopPositions;
-    [SerializeField, Tooltip("")] private Transform[] conveyerBeltObjects;
+    [SerializeField, Tooltip("All of the objects on the conveyer belt")] private Transform[] conveyerBeltObjects;
     [SerializeField, Tooltip("How much time it takes for objects to get from conveyerbelt stop positions")] private float transportTime;
     [SerializeField, Tooltip("Refference to MenuStationController")] private MenuStationController menuStationControllerRef;
     [SerializeField, Tooltip("Indicates whether or not this is the player's conveyerbelt")] private bool isPlayerBelt;
 
-    private int currentConveyerBeltIndex = -1;
     private bool conveyerBeltIsMoving = false;
-    private float[] beginningZBiases;
-    private int[] currentObjectPositions;
+    private int[] newConveyerObjectPositions;
+    private int[] objectZBiases;
 
+    /// <summary>
+    /// Initialize and fill the storage of object index positioning
+    /// </summary>
     private void Start()
     {
         //if this is not the conveyerbelt start repeatedely calling the conveyerbelt to move
-        if(!isPlayerBelt)
+        newConveyerObjectPositions = new int[conveyerBeltObjects.Length];
+
+        if (!isPlayerBelt)
         {
-            InvokeRepeating("DisplayBeltMove", Random.Range(0.5f, 3f), 3f);
-            currentObjectPositions = new int[conveyerBeltObjects.Length];
+            //set position in order
             for(int i = 0; i < conveyerBeltObjects.Length; i++)
             {
-                currentObjectPositions[i] = i;
+                newConveyerObjectPositions[i] = i;
+            }
+            //make the belt move automatically and start somewhat randomly
+            InvokeRepeating("DisplayBeltMove", Random.Range(0.5f, 3f), transportTime * 1.5f);
+        }
+        else
+        {
+            //set position to same
+            for (int i = 0; i < conveyerBeltObjects.Length; i++)
+            {
+                newConveyerObjectPositions[i] = 0;
             }
         }
-        
-
-
     }
 
-    public void MoveConveyer(int nextConveyerBeltIndex)
+    /// <summary>
+    /// move conveyer objects all to different belt positions
+    /// </summary>
+    /// <param name="nextBeltPositions"></param>
+    public void MoveConveyer(int[] nextBeltPositions)
     {
-        //if -1 is passed in, it just moves to the next belt index
-        if(nextConveyerBeltIndex == -1) { nextConveyerBeltIndex = currentConveyerBeltIndex + 1; }
+        //generate new positions for the 
 
-        //only calls the coroutine if it is not currently running
-        if(!conveyerBeltIsMoving) { StartCoroutine(MovingConveyerBelt(nextConveyerBeltIndex)); }
+        //only calls the coroutine if it is not currently runningmove the conveyer one slot for
+        if (!conveyerBeltIsMoving) { StartCoroutine(MovingConveyerBelt(nextBeltPositions)); }
         //safety
         conveyerBeltIsMoving = true;
     }
 
-    
-    private IEnumerator MovingConveyerBelt(int nextConveyerBeltIndex)
+    ///move conveyer objects all to the same positions
+    public void MoveConveyer(int nextBeltPosition)
+    {
+        //generates an int array to feed coroutine
+        int[] nextBeltPositions = new int[conveyerBeltObjects.Length];
+        for(int i = 0; i < conveyerBeltObjects.Length; i++)
+        {
+            nextBeltPositions[i] = nextBeltPosition;
+        }
+        //only calls the coroutine if it is not currently runningmove the conveyer one slot for
+        if (!conveyerBeltIsMoving) { StartCoroutine(MovingConveyerBelt(nextBeltPositions)); }
+        //safety
+        conveyerBeltIsMoving = true;
+    }
+
+    /// <summary>
+    /// This Coroutine moves all of the objects along the conveyer belt to their target slot
+    /// </summary>
+    /// <param name="nextBeltPositions"></param>
+    /// <returns></returns>
+    private IEnumerator MovingConveyerBelt(int[] nextBeltPositions)
     {
         //safety first folks
         conveyerBeltIsMoving = true;
 
         //only do if this is the player's belt
-        if(isPlayerBelt)
+        if (isPlayerBelt)
         {
-            //retract all ui that is down except for the next one
-            menuStationControllerRef.DeactivateAllOtherStations(nextConveyerBeltIndex);
+            //retract all menu ui that is down except for the next one
+            menuStationControllerRef.DeactivateAllOtherStations(nextBeltPositions[0]);
         }
 
-
-        //wait a tiny bit
-        yield return new WaitForSeconds(0.4f);                          //do other things in this time like retract stuffs
+        //time for menuUI to start retracting
+        yield return new WaitForSeconds(0.4f);
 
         //make arrays to store starting + ending positions
         Vector3[] startPositions = new Vector3[conveyerBeltObjects.Length];
         Vector3[] endPositions = new Vector3[conveyerBeltObjects.Length];
 
         //assign the arrays wit the correct starting and ending positions
-        for(int i = 0; i < conveyerBeltObjects.Length; i++)
+        for (int i = 0; i < conveyerBeltObjects.Length; i++)
         {
-            Debug.Log("i = " + i);
-            Debug.Log("next Conv = " + nextConveyerBeltIndex);
             startPositions[i] = conveyerBeltObjects[i].position;
-            if(isPlayerBelt)
-            {
-                endPositions[i] = new Vector3(conveyerBeltObjects[i].position.x, conveyerBeltObjects[i].position.y, conveyerBeltStopPositions[nextConveyerBeltIndex].position.z);
-            }
-            else
-            {
-                endPositions[i] = new Vector3(conveyerBeltObjects[i].position.x, conveyerBeltObjects[i].position.y, conveyerBeltStopPositions[nextConveyerBeltIndex].position.z);
-            }
-            
-            
+            endPositions[i] = new Vector3(conveyerBeltObjects[i].position.x, conveyerBeltObjects[i].position.y, conveyerBeltStopPositions[nextBeltPositions[i]].position.z);
         }
-        
-
 
         //set initial time to 0
         float timeElapsed = 0;
 
         //lerp the objects from start to end positions
-        while (timeElapsed < transportTime)
+        while(timeElapsed < transportTime)
         {
+            //just in case, stay safe :)
+            if (GameManager.Instance.levelTransitionActive) { break; }
+
             //smooth lerp duration alg
             float t = timeElapsed / transportTime;
             t = t * t * (3f - 2f * t);
 
             //loops through all of the conveyer belt objects and lerps them from start to end
-            for(int i = 0; i < conveyerBeltObjects.Length; i++)
+            for (int i = 0; i < conveyerBeltObjects.Length; i++)
             {
                 conveyerBeltObjects[i].position = Vector3.Lerp(startPositions[i], endPositions[i], t);
-                //conveyerBeltObjects[i].position = endPositions[i];
             }
 
             //advance time
             timeElapsed += Time.deltaTime;
-            //timeElapsed = 100;
 
-            //just in case
-            if(GameManager.Instance.levelTransitionActive) { break; }
-
-
-            //do animation if under 0.25 seconds from ending, and the station isn't already moving, and it is the player's conveyer
-            if(isPlayerBelt)
+            
+            //only do if this is the player's belt
+            if (isPlayerBelt)
             {
-                if (timeElapsed > (transportTime - 0.25f) && !menuStationControllerRef.GetMenuStationIsMoving(nextConveyerBeltIndex))
+                //activate menu II anim if under 0.25 seconds from ending, and the station isn't already moving, and it is the player's conveyer
+                if (timeElapsed > (transportTime - 0.25f) && !menuStationControllerRef.GetMenuStationIsMoving(nextBeltPositions[0]))
                 {
-                    menuStationControllerRef.ActivateStation(nextConveyerBeltIndex);
+                    menuStationControllerRef.ActivateStation(nextBeltPositions[0]);
                 }
             }
-            
-
             yield return null;
         }
 
-        
-        
-
-        currentConveyerBeltIndex = nextConveyerBeltIndex;
-        if(!isPlayerBelt)
-        {
-            
-        }
+        //sall gud to call this coroutine again :)
         conveyerBeltIsMoving = false;
     }
+
     
+
+    /// <summary>
+    /// Persona5 sucks. Yes this is a direct attack on Peter
+    /// </summary>
     private void DisplayBeltMove()
     {
-        //first teleport objects that need to go from one end to the other to actually do that
-        for(int i = 0; i < conveyerBeltObjects.Length; i++)
+        //advances conveyer positions by 1 and loops them
+        for (int i = 0; i < newConveyerObjectPositions.Length; i++)
         {
-            if (currentObjectPositions[i] >= conveyerBeltObjects.Length - 1)
+            //add one to the position and loop if past the limit of conveyerbelt positions
+            newConveyerObjectPositions[i] = MyUtils.MyMod(newConveyerObjectPositions[i] + 1, conveyerBeltStopPositions.Length);
+
+            //teleport objects who have looped from one end of the belt to the other in index to that new index
+            if (newConveyerObjectPositions[i] == 0)
             {
                 conveyerBeltObjects[i].position = conveyerBeltStopPositions[0].position;
+                newConveyerObjectPositions[i] = 1;
+                Debug.Log("_________________________________________________________________________ " + newConveyerObjectPositions[i]);
             }
-
-            /*
-            if(conveyerBeltObjects[i].position.z >= conveyerBeltStopPositions[conveyerBeltStopPositions.Length - 1].position.z)
-            {
-                conveyerBeltObjects[i].position = conveyerBeltStopPositions[0].position;
-            }
-            */
         }
 
-        //then call conveyerbelt
-        for (int i = 0; i < currentObjectPositions.Length; i++)
-        {
-            currentObjectPositions[i] = MyUtils.MyMod(currentObjectPositions[i] + 1, conveyerBeltStopPositions.Length);
-        }
-        //Debug.Log("YEE_________________________________________________________________________________________________________ " + currentConveyerBeltIndex);
-        MoveConveyer(currentConveyerBeltIndex);
-        
+        //move the conveyer belt
+        MoveConveyer(newConveyerObjectPositions);
     }
-
 }
