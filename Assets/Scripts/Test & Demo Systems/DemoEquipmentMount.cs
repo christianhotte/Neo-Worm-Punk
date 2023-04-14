@@ -16,6 +16,8 @@ public class DemoEquipmentMount : MonoBehaviour
     [SerializeField, Tooltip("Fires weapon.")]                                      private bool fire;
     [SerializeField, Tooltip("Fires weapon automatically at set rate.")]            private bool fireContinuous;
     [Min(0), SerializeField, Tooltip("Shots per second when continuously firing.")] private float continuousFireRate;
+    [Range(0, 1), SerializeField] private float playerFollowRate = 1;
+    [Min(0), SerializeField] private float playerFollowDist = 100;
     [Header("Debug Options:")]
     [SerializeField, Tooltip("Firing weapon does not spend ammunition.")] private bool infiniteAmmo;
 
@@ -53,7 +55,18 @@ public class DemoEquipmentMount : MonoBehaviour
             }
             else if (timeSinceFiring > 0) timeSinceFiring = -1;
         }
-        
-        
+    }
+    private void FixedUpdate()
+    {
+        if (playerFollowRate > 0 && PlayerController.instance != null && Vector3.Distance(transform.position, PlayerController.instance.cam.transform.position) <= playerFollowDist)
+        {
+            Vector3 playerDir = (PlayerController.instance.cam.transform.position - transform.position).normalized;
+            Quaternion targetRotation = Quaternion.LookRotation(playerDir, Vector3.up);
+            if (playerFollowRate < 1)
+            {
+                targetRotation = Quaternion.Slerp(transform.rotation, targetRotation, playerFollowRate);
+            }
+            transform.rotation = targetRotation;
+        }
     }
 }
