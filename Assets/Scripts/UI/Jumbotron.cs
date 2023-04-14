@@ -21,12 +21,13 @@ public class Jumbotron : MonoBehaviourPunCallbacks
     private void Awake()
     {
         primary = this;
+        jumboAud = primary.GetComponent<AudioSource>();
     }
 
     private void Start()
     {
         currentLevelTimer = GetComponentInChildren<LevelTimer>();
-        jumboAud = this.GetComponent<AudioSource>();
+        //jumboAud = this.GetComponent<AudioSource>();
         PhotonView masterPV = PhotonView.Find(17);
         roundManager = masterPV.GetComponent<RoundManager>();
     }

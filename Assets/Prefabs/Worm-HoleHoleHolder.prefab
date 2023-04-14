@@ -190,6 +190,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetPoint: {fileID: 0}
   type: 2
+  hookToCenter: 0
 --- !u!1 &1620262601031258323
 GameObject:
   m_ObjectHideFlags: 0
@@ -248,6 +249,8 @@ MonoBehaviour:
   wormZoneParticles: {fileID: 5120769077581133618, guid: 4f62d637fc7968845b5980a817dd33ac, type: 3}
   wormZoneInstance: {fileID: 0}
   playerCam: {fileID: 0}
+  particle1: {fileID: 730297741547238853}
+  particle2: {fileID: 584470618371506264}
   waitTime: 2
   exitSpeed: 30
   wormZoneSpeed: 5
@@ -256,6 +259,8 @@ MonoBehaviour:
   wormHoleAud: {fileID: 0}
   enterSound: {fileID: 8300000, guid: b0a64d7436126ce499301beef26175fa, type: 3}
   suctionSound: {fileID: 8300000, guid: 9d4cc2d3b1ccff84b9b1ebb65d46451e, type: 3}
+  wormZoneScript: {fileID: 0}
+  luckyChance: 10
 --- !u!82 &1951368902157187744
 AudioSource:
   m_ObjectHideFlags: 0
@@ -522,6 +527,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetPoint: {fileID: 0}
   type: 2
+  hookToCenter: 0
 --- !u!1 &2209894729004177128
 GameObject:
   m_ObjectHideFlags: 0
@@ -806,6 +812,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0bede374e101b084eb3d0c08ae4d6fd9, type: 3}
+--- !u!1 &730297741547238853 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 485414483475103461, guid: 0bede374e101b084eb3d0c08ae4d6fd9, type: 3}
+  m_PrefabInstance: {fileID: 909164224594152224}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1054120527464185533
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -875,6 +886,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0bede374e101b084eb3d0c08ae4d6fd9, type: 3}
+--- !u!1 &584470618371506264 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 485414483475103461, guid: 0bede374e101b084eb3d0c08ae4d6fd9, type: 3}
+  m_PrefabInstance: {fileID: 1054120527464185533}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &3379879341891979590
 PrefabInstance:
   m_ObjectHideFlags: 0
