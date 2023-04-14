@@ -256,12 +256,10 @@ public class NewChainsawController : PlayerEquipment
             //Wall grinding:
             Vector3 bladeOffset = wristPivot.right * settings.bladeWidth; //Get distance of offset for secondary blade cast
             Vector3 bladeDir = wristPivot.position - bladeEnd.position;
-            if (Physics.Linecast(wristPivot.position, bladeEnd.position, out RaycastHit hitInfo, settings.grindLayers) ||                  //Check for obstacles intersecting back of the blade
-                Physics.Linecast(wristPivot.position + bladeOffset, bladeEnd.position + bladeOffset, out hitInfo, settings.grindLayers) && //Check for obstacles intersecting front of the blade
-                Vector3.Angle(bladeDir, hitInfo.normal) <= settings.maxGrindAngle) 
+            if ((Physics.Linecast(wristPivot.position, bladeEnd.position, out RaycastHit hitInfo, settings.grindLayers) ||                  //Check for obstacles intersecting back of the blade
+                Physics.Linecast(wristPivot.position + bladeOffset, bladeEnd.position + bladeOffset, out hitInfo, settings.grindLayers)) && //Check for obstacles intersecting front of the blade
+                Vector3.Angle(bladeDir, hitInfo.normal) <= settings.maxGrindAngle)
             {
-                //print(Vector3.Angle(bladeDir, hitInfo.normal));
-                
                 //Adjust player velocity:
                 Vector3 grindDirection = Vector3.Cross(hitInfo.normal, wrist.up).normalized;                                 //Get target direction of grind
                 if (handedness == CustomEnums.Handedness.Left) grindDirection *= -1;                                         //Grind in opposite direction if blade is flipped
