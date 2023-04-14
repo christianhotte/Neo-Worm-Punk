@@ -149,15 +149,39 @@ MonoBehaviour:
   maxWristAngle: 80
   wristLerpRate: 7.7
   wristRotReturnRate: 400
+  deflectTime: 3
   deflectTransTime: 0.07
   deflectRadius: 0.5
   deflectRotRate: 1900
   deflectWristExtend: 0.27
-  deflectPullImpulse: 0
-  deflectPullForce: 500
-  deflectTime: 1.6
-  deflectCooldownRate: 0.6
+  deflectPullForce: 5000
+  deflectPullForceCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0.6831221
+      outSlope: 0.6831221
+      tangentMode: 0
+      weightedMode: 2
+      inWeight: 0
+      outWeight: 0.45818672
+    - serializedVersion: 3
+      time: 1
+      value: 2
+      inSlope: 0.0026271003
+      outSlope: 0.0026271003
+      tangentMode: 0
+      weightedMode: 1
+      inWeight: 0.3523959
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  deflectCooldownRate: 0.8
   deflectionAngle: 60
+  minimumDeflectTime: 0.3
   reverseGripAngle: 105
   reverseGripLerpRate: 7
   reverseGripReturnRate: 500

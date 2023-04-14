@@ -170,13 +170,6 @@ public class NewChainsawController : PlayerEquipment
             timeInMode = 0;                            //Reset mode time tracker
             audioSource.PlayOneShot(settings.deflectIdleSound);
 
-            //Pull player forward:
-            if (settings.deflectPullImpulse != 0)
-            {
-                Vector3 pullForce = settings.deflectPullImpulse * transform.forward; //Get force by which player is being pulled forward
-                player.bodyRb.velocity = pullForce;                                                                                  //Add force to player body
-            }
-
             //Grinding disengagement:
             if (grinding) //Player is currently grinding on a surface
             {
@@ -184,13 +177,12 @@ public class NewChainsawController : PlayerEquipment
                 grindTime = 0;    //Reset grind time tracker
             }
         }
-        else if (mode == BladeMode.Deflecting && triggerValue < settings.triggerThresholds.x) //End deflect mode when player releases the trigger
+        else if (mode == BladeMode.Deflecting && triggerValue < settings.triggerThresholds.x && timeInMode >= settings.minimumDeflectTime) //End deflect mode when player releases the trigger
         {
             //Switch mode:
             prevMode = mode;            //Record previous blade mode
             mode = BladeMode.Extending; //Indicate that blade is no longer in deflect mode
             timeInMode = 0;             //Reset mode time tracker
-            //deflectTime = 0;            //Always fully reset deflect time tracker
         }
 
         //Blade movement:
@@ -263,9 +255,13 @@ public class NewChainsawController : PlayerEquipment
 
             //Wall grinding:
             Vector3 bladeOffset = wristPivot.right * settings.bladeWidth; //Get distance of offset for secondary blade cast
-            if (Physics.Linecast(wristPivot.position, bladeEnd.position, out RaycastHit hitInfo, settings.grindLayers) ||                //Check for obstacles intersecting back of the blade
-                Physics.Linecast(wristPivot.position + bladeOffset, bladeEnd.position + bladeOffset, out hitInfo, settings.grindLayers)) //Check for obstacles intersecting front of the blade
+            Vector3 bladeDir = wristPivot.position - bladeEnd.position;
+            if (Physics.Linecast(wristPivot.position, bladeEnd.position, out RaycastHit hitInfo, settings.grindLayers) ||                  //Check for obstacles intersecting back of the blade
+                Physics.Linecast(wristPivot.position + bladeOffset, bladeEnd.position + bladeOffset, out hitInfo, settings.grindLayers) && //Check for obstacles intersecting front of the blade
+                Vector3.Angle(bladeDir, hitInfo.normal) <= settings.maxGrindAngle) 
             {
+                //print(Vector3.Angle(bladeDir, hitInfo.normal));
+                
                 //Adjust player velocity:
                 Vector3 grindDirection = Vector3.Cross(hitInfo.normal, wrist.up).normalized;                                 //Get target direction of grind
                 if (handedness == CustomEnums.Handedness.Left) grindDirection *= -1;                                         //Grind in opposite direction if blade is flipped
@@ -367,8 +363,9 @@ public class NewChainsawController : PlayerEquipment
             wrist.localRotation = targetWristRot;
 
             //Pull player forward:
-            Vector3 pullForce = settings.deflectPullForce * Time.deltaTime * transform.forward; //Get force by which player is being pulled forward
-            player.bodyRb.AddForce(pullForce, ForceMode.Acceleration);                          //Add force to player body
+            float interpolant = Mathf.Min(settings.deflectTime, timeInMode) / settings.deflectTime;
+            float pullForceMultiplier = settings.deflectPullForce * Time.deltaTime * settings.deflectPullForceCurve.Evaluate(interpolant);
+            player.bodyRb.AddForce(transform.forward * pullForceMultiplier, ForceMode.Acceleration); //Add force to player body
 
             //targetWristRot = Quaternion.RotateTowards(wrist.parent.rotation, targetWristRot, settings.maxWristAngle);  //Clamp rotation to set angular limit
             //wrist.rotation = Quaternion.Lerp(wrist.rotation, targetWristRot, settings.wristLerpRate * Time.deltaTime); //Lerp wrist toward target rotation
