@@ -24,10 +24,14 @@ public class ConveyerController : MonoBehaviour
 
         if (!isPlayerBelt)
         {
-            //set position in order
+            //set position to where they are
             for(int i = 0; i < conveyerBeltObjects.Length; i++)
             {
-                newConveyerObjectPositions[i] = i;
+                //if the conveyer position is equal to the current position of the belt, then set it to that position index
+                for(int j = 0; j < conveyerBeltStopPositions.Length; j++)
+                {
+                    if(conveyerBeltStopPositions[j].position.z == conveyerBeltObjects[i].position.z) { newConveyerObjectPositions[i] = j; }
+                }
             }
             //make the belt move automatically and start somewhat randomly
             InvokeRepeating("DisplayBeltMove", Random.Range(0.5f, 3f), transportTime * 1.5f);
@@ -157,7 +161,7 @@ public class ConveyerController : MonoBehaviour
             //teleport objects who have looped from one end of the belt to the other in index to that new index
             if (newConveyerObjectPositions[i] == 0)
             {
-                conveyerBeltObjects[i].position = conveyerBeltStopPositions[0].position;
+                conveyerBeltObjects[i].position = new Vector3(conveyerBeltObjects[i].position.x, conveyerBeltObjects[i].position.y, conveyerBeltStopPositions[0].position.z);
                 newConveyerObjectPositions[i] = 1;
                 Debug.Log("_________________________________________________________________________ " + newConveyerObjectPositions[i]);
             }
