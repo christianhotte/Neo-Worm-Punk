@@ -16,6 +16,7 @@ public class WormHole : NetworkedArenaElement
     public AudioSource wormHoleAud;
     public AudioClip enterSound,suctionSound;
     private WormHoleTrigger triggerScript,EntryTrigger;
+    internal NetworkPlayer netPlayer;
     public int luckyChance = 10;
     void Start()
     {
@@ -27,7 +28,9 @@ public class WormHole : NetworkedArenaElement
     public IEnumerator StartWormhole(GameObject startHole,GameObject playerOBJ)
     {
         inZone = true;
+        PC = PlayerController.instance;
         PlayerController.instance.UnHolsterAll();
+        netPlayer = PlayerController.photonView.GetComponent<NetworkPlayer>();
         locked = true; // Locks the worm whole circut      
         Transform exitPos;                                                           //define Exit Point
         Rigidbody playerRB;
