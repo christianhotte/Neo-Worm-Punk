@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using Photon.Pun;
 
@@ -8,6 +9,13 @@ public class RearView : MonoBehaviour
 {
     private PlayerController playerRef;
     private List<NetworkPlayer> otherPlayers = new List<NetworkPlayer>();
+    private Transform[] playerDots;
+    public GameObject playerMarker;
+    public Transform markerStartPos;
+    [Header("Settings:")]
+    [SerializeField, Range(0, 360)] private float detectionAngle;
+    [SerializeField, Min(0)] private float mirrorWidth = 300;
+
     // Start is called before the first frame update
     private void Awake()
     {
@@ -29,15 +37,33 @@ public class RearView : MonoBehaviour
         if (!GameManager.Instance.InMenu())
         {
             Transform playerCam = PlayerController.instance.cam.transform;
-            foreach (NetworkPlayer otherPlayer in otherPlayers)
+            for (int x = 0; x < otherPlayers.Count; x++)
             {
+                NetworkPlayer otherPlayer = otherPlayers[x];
                 Vector3 PlayerToNet = (playerCam.position - otherPlayer.GetComponentInChildren<Targetable>().targetPoint.position);
                 PlayerToNet = Vector3.ProjectOnPlane(PlayerToNet, playerCam.up);
                 Vector3 facingDir = playerCam.forward;
                 float playerAngle = Vector3.SignedAngle(facingDir, PlayerToNet, playerCam.up);
-                Debug.Log(playerAngle);
+                //Debug.Log(playerAngle);
 
-               // Color playerColor = PlayerSettingsController.playerColors[(int)otherPlayer.GetComponent<PhotonView>().Owner.CustomProperties["Color"]];
+                Vector3 newPos = Vector3.zero;
+                if (playerAngle >= -(detectionAngle / 2) || playerAngle <= detectionAngle / 2)
+                {
+                    //Dot should be visible
+                    //playerDots[x];
+
+                    float angleInterp = Mathf.InverseLerp(-(detectionAngle / 2), detectionAngle / 2, playerAngle);
+                    float dotPosX = Mathf.Lerp(-(mirrorWidth / 2), mirrorWidth / 2, angleInterp);
+                    newPos.x = dotPosX;
+                    
+                }
+                else
+                {
+                    //Dot should not be visible
+
+                    newPos.x = 1000;
+                }
+                playerDots[x].localPosition = newPos;
             }
         }
     }
@@ -46,6 +72,21 @@ public class RearView : MonoBehaviour
         playerRef = PlayerController.instance;
         otherPlayers.AddRange(FindObjectsOfType<NetworkPlayer>());
         otherPlayers.Remove(PlayerController.photonView.GetComponent<NetworkPlayer>());
+
+        List<Transform> playerDotList = new List<Transform>();
+        foreach (NetworkPlayer otherPlayer in otherPlayers)
+        {
+            Transform dot =Instantiate(playerMarker, transform.GetChild(0),markerStartPos).GetComponent<Transform>();
+            //Transform dot = //Instantiate dot prefab and get its transform
+            //Move dot to a convenient position
+            dot.localPosition = new Vector3(1000, 0, 0);
+            //Set dot to player color
+            Color playerColor = PlayerSettingsController.playerColors[(int)otherPlayer.GetComponent<PhotonView>().Owner.CustomProperties["Color"]];
+            dot.GetComponent<Image>().color = playerColor; 
+            // Color playerColor = PlayerSettingsController.playerColors[(int)otherPlayer.GetComponent<PhotonView>().Owner.CustomProperties["Color"]];
+            playerDotList.Add(dot);
+        }
+        playerDots = playerDotList.ToArray();
     }
     public void PlaceIndicator(float Pos,float Size,Color PlayerCol)
     {
