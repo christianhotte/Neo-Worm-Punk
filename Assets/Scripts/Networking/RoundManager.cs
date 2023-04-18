@@ -45,6 +45,7 @@ public class RoundManager : MonoBehaviourPunCallbacks, IPunObservable
     {
         roundActive = false;
         timeRemaining = roundTime;
+        NetworkManagerScript.instance.LoadSceneWithFade(GameSettings.roomScene);
     }
 
     // Updates the timer to display the same time for every client.
