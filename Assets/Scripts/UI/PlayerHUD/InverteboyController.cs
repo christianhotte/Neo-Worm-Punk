@@ -53,6 +53,7 @@ public class InverteboyController : MonoBehaviour
     private Canvas currentHologramCanvas;
 
     private bool hologramOpen = false;
+    private bool hideHologram = false;
     
     private bool isOpen = false;
     private bool forceOpen = false;
@@ -88,6 +89,7 @@ public class InverteboyController : MonoBehaviour
         {
             PlayMusic(arenaMusic);
             SwitchMainCanvas((int)InverteboyMainScreens.ARENA);
+            hideHologram = true;
         }
 
         if(scene.name == GameSettings.tutorialScene)
@@ -205,6 +207,9 @@ public class InverteboyController : MonoBehaviour
 
     public void OpenHologramMenu(bool openHologram)
     {
+        if (hideHologram)
+            return;
+
         if (hologramAnimation != null)
             StopCoroutine(hologramAnimation);
 
@@ -264,7 +269,7 @@ public class InverteboyController : MonoBehaviour
         }
         else
         {
-            hologramObject.transform.localPosition = Vector3.zero;
+            hologramObject.transform.localPosition = new Vector3(hologramObject.transform.localPosition.x, 0f, hologramObject.transform.localPosition.z);
             hologramObject.transform.localScale = Vector3.zero;
         }
     }
@@ -287,6 +292,9 @@ public class InverteboyController : MonoBehaviour
     public void SwitchMainCanvas(int canvasIndex)
     {
         Canvas newCanvas = inverteboyMainCanvases[canvasIndex];
+
+        Debug.Log("Switching To " + newCanvas.name);
+        Debug.Log("Current Canvas: " + currentMainCanvas.name);
 
         currentMainCanvas.enabled = false;
         currentMainCanvas = newCanvas;
