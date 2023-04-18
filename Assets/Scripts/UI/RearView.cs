@@ -12,6 +12,7 @@ public class RearView : MonoBehaviour
     private Transform[] playerDots;
     public GameObject playerMarker;
     public Transform markerStartPos;
+    internal bool scannerOff = false;
     [Header("Settings:")]
     [SerializeField, Range(0, 360)] private float detectionAngle;
     [SerializeField, Min(0)] private float mirrorWidth = 300;
@@ -43,16 +44,17 @@ public class RearView : MonoBehaviour
             for (int x = 0; x < otherPlayers.Count; x++)
             {
                 NetworkPlayer otherPlayer = otherPlayers[x];
-                Vector3 PlayerToNet = (playerCam.position - otherPlayer.GetComponentInChildren<Targetable>().targetPoint.position);
+                Vector3 PlayerToNet = (otherPlayer.GetComponentInChildren<Targetable>().targetPoint.position - playerCam.position);
                 float sqrPlayerDist = PlayerToNet.sqrMagnitude;
                 PlayerToNet = Vector3.ProjectOnPlane(PlayerToNet, playerCam.up);
                 Vector3 facingDir = playerCam.forward;
                 float playerAngle = Vector3.SignedAngle(facingDir, PlayerToNet, playerCam.up);
                 //Debug.Log(playerAngle);
                 Debug.Log(sqrPlayerDist);
-                Vector3 newPos = Vector3.zero;
                 
-                if ((playerAngle >= -(detectionAngle / 2) || playerAngle <= detectionAngle / 2) && sqrPlayerDist < sqrMaxDist)
+                Vector3 newPos = Vector3.zero;
+
+                if (!scannerOff&&(playerAngle >= -(detectionAngle / 2) || playerAngle <= detectionAngle / 2) && sqrPlayerDist < sqrMaxDist)
                 {
                     //Dot should be visible
                     //playerDots[x];
@@ -64,6 +66,7 @@ public class RearView : MonoBehaviour
 
                     //Dot scale:
                     float distInterp = Mathf.InverseLerp(sqrMaxDist, 0, sqrPlayerDist);
+                    print(distInterp);
                     float sclValue = Mathf.Lerp(0.075f, maxDotScale, distInterp);
                     playerDots[x].localScale = Vector3.one * sclValue;
                     //float playerDist = Vector3.Distance(playerCam.position, otherPlayer.GetComponentInChildren<Targetable>().targetPoint.position);
@@ -73,6 +76,7 @@ public class RearView : MonoBehaviour
                     //Dot should not be visible
 
                     newPos.x = 1000;
+                    playerDots[x].localScale = Vector3.zero;
                 }
                 playerDots[x].localPosition = newPos;
             }
@@ -100,8 +104,20 @@ public class RearView : MonoBehaviour
         }
         playerDots = playerDotList.ToArray();
     }
-    public void PlaceIndicator(float Pos,float Size,Color PlayerCol)
+    public IEnumerator DisableScanner(float waitTime)
     {
-
+        Debug.Log("DisableStart");
+        scannerOff = true;
+        yield return new WaitForSeconds(waitTime);
+        scannerOff = false;
+        Debug.Log("DisableStop");
+    }
+    public void ScannerStop()
+    {
+        scannerOff = true;
+    }
+    public void ScannerStart()
+    {
+        scannerOff = false;
     }
 }

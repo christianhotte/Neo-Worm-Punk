@@ -17,6 +17,7 @@ public class ChainsawSettings : ScriptableObject
     [Tooltip("Curve modifying force of grind sweet spot effect (in order to make correction smoother)")]                   public AnimationCurve grindGlueCurve;
     [Tooltip("Effective width of blade hitbox (should be more or less the actual size of the real blade.")]                public float bladeWidth;
     [Min(0), Tooltip("Force applied to player away from surface when disengaging from grind.")]                            public float disengageForce;
+    [Range(0, 90), Tooltip("Force applied to player away from surface when disengaging from grind.")]                      public float maxGrindAngle;
     [Header("Animation:")]
     [Min(0), Tooltip("Amount by which blade is pulled back as player squeezes the trigger.")]      public float bladePreRetractDistance;
     [Tooltip("Curve describing motion of pre-retraction, evaluated based on trigger pull value.")] public AnimationCurve bladePreRetractCurve;
@@ -33,15 +34,16 @@ public class ChainsawSettings : ScriptableObject
     [Min(0), Tooltip("How quickly wrist lerps to match player hand rotation while chainsaw is deployed.")]        public float wristLerpRate;
     [Min(0), Tooltip("Speed (in degrees per second) at which wrist returns to base rotation during retraction.")] public float wristRotReturnRate;
     [Header("Deflection:")]
+    [Min(0), Tooltip("Maximum amount of time player can spend in deflection mode.")]                    public float deflectTime;
     [Min(0), Tooltip("How long it takes for blade to move into (and from) deflect position.")]          public float deflectTransTime;
     [Min(0), Tooltip("Radius of deflection area while deflection is active.")]                          public float deflectRadius;
     [Min(0), Tooltip("Speed at which blade rotates during deflection mode.")]                           public float deflectRotRate;
     [Min(0), Tooltip("Distance wrist extends forward during deflection mode.")]                         public float deflectWristExtend;
-    [Min(0), Tooltip("Impulse force used to pull player when entering deflect mode.")]                  public float deflectPullImpulse;
     [Min(0), Tooltip("Additive force used to pull player while in deflect mode (helicopter-style).")]   public float deflectPullForce;
-    [Min(0), Tooltip("Maximum amount of time player can spend in deflection mode.")]                    public float deflectTime;
+    [Tooltip("Curve describing falloff of deflect pull force over course of deflectTime.")]             public AnimationCurve deflectPullForceCurve;
     [Min(0), Tooltip("How many seconds of deflect time player recovers per second of not deflecting.")] public float deflectCooldownRate;
     [Range(0, 180), Tooltip("Maximum tolerated angle at which projectiles can be deflected.")]          public float deflectionAngle = 90;
+    [Min(0), Tooltip("Maximum tolerated angle at which projectiles can be deflected.")]                 public float minimumDeflectTime = 0.3f;
     [Space()]
     [Range(0, 180), Tooltip("Angle blade turns to when set to reverse mode.")]                          public float reverseGripAngle;
     [Min(0), Tooltip("How rapidly blade moves to and from reverse grip position.")]                     public float reverseGripLerpRate;
