@@ -73,7 +73,7 @@ public class LobbyUIScript : MonoBehaviour
     /// <param name="showState">If true, the menu state is showing. If false, the menu state is not showing.</param>
     public void ShowMenuState(LobbyMenuState menu, bool showState)
     {
-        menus[(int)menu].SetActive(showState);
+        //menus[(int)menu].SetActive(showState);
     }
 
     /// <summary>
@@ -87,8 +87,8 @@ public class LobbyUIScript : MonoBehaviour
         GameObject prevMenu = currentMenu;
 
         currentMenu = newMenu;
-        prevMenu.SetActive(false);
-        currentMenu.SetActive(true);
+        //prevMenu.SetActive(false);
+        //currentMenu.SetActive(true);
     }
     #endregion
 

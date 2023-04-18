@@ -16,7 +16,7 @@ public static class GameSettings
     public static int testMatchLength = 300;
     public static int HPDefault = 3;
 
-    public static string titleScreenScene = "JustinMenuScene";
+    public static string titleScreenScene = "DavidMenuScene";
     public static string roomScene = "NetworkLockerRoom";
     public static string arenaScene = "DM_0.16_Arena";
     public static string tutorialScene = "Tutorial";
