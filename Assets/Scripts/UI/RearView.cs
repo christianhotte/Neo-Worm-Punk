@@ -43,7 +43,7 @@ public class RearView : MonoBehaviour
             for (int x = 0; x < otherPlayers.Count; x++)
             {
                 NetworkPlayer otherPlayer = otherPlayers[x];
-                Vector3 PlayerToNet = (playerCam.position - otherPlayer.GetComponentInChildren<Targetable>().targetPoint.position);
+                Vector3 PlayerToNet = (otherPlayer.GetComponentInChildren<Targetable>().targetPoint.position - playerCam.position);
                 float sqrPlayerDist = PlayerToNet.sqrMagnitude;
                 PlayerToNet = Vector3.ProjectOnPlane(PlayerToNet, playerCam.up);
                 Vector3 facingDir = playerCam.forward;
@@ -64,6 +64,7 @@ public class RearView : MonoBehaviour
 
                     //Dot scale:
                     float distInterp = Mathf.InverseLerp(sqrMaxDist, 0, sqrPlayerDist);
+                    print(distInterp);
                     float sclValue = Mathf.Lerp(0.075f, maxDotScale, distInterp);
                     playerDots[x].localScale = Vector3.one * sclValue;
                     //float playerDist = Vector3.Distance(playerCam.position, otherPlayer.GetComponentInChildren<Targetable>().targetPoint.position);
