@@ -222,41 +222,66 @@ public class LobbyUIScript : MonoBehaviour
 
     public void UpdateLobbyList(List<RoomInfo> roomListInfo)
     {
-        // We clear the list every time we update.
-        foreach (Transform trans in roomListContent)
-        {
-            Destroy(trans.gameObject);
-        }
+        //Refresh the find room menu's list of rooms
+        FindRoomController findRoomController = FindObjectOfType<FindRoomController>();
 
-        /*if (GameSettings.debugMode)
+        if(findRoomController != null)
         {
-            // Loops through the list of dummy rooms.
-            for (int i = 0; i < 10; i++)
+            // We clear the list every time we update.
+            foreach (Transform trans in roomListContent)
+                Destroy(trans.gameObject);
+
+            int roomCount = 0;
+
+            /*if (GameSettings.debugMode)
             {
-                Instantiate(roomListItemPrefab, roomListContent).GetComponent<RoomListItem>().UpdateText("Dummy Room " + (i + 1));
-            }
-        }*/
+                // Loops through the list of dummy rooms.
+                for (int i = 0; i < 10; i++)
+                {
+                    Instantiate(roomListItemPrefab, roomListContent).GetComponent<RoomListItem>().UpdateText("Dummy Room " + (i + 1));
+                }
+            }*/
 
-        // Loops through the list of rooms.
-        for (int i = 0; i < roomListInfo.Count; i++)
-        {
-            if (IsValidRoom(roomListInfo[i]))
+            // Loops through the list of rooms.
+            for (int i = 0; i < roomListInfo.Count; i++)
             {
-                // Adds the rooms to the list of rooms.
-                Instantiate(roomListItemPrefab, roomListContent).GetComponent<RoomListItem>().SetUp(roomListInfo[i]);
-            }
-        }
+                Debug.Log("Room Found: " + roomListInfo[i].Name);
+                Debug.Log("Room Details: \nPlayers: " + roomListInfo[i].PlayerCount + " / " + roomListInfo[i].MaxPlayers + "\nIs Open: " + roomListInfo[i].IsOpen + "\nIs Visible: " + roomListInfo[i].IsVisible);
 
+                if (IsValidRoom(roomListInfo[i]))
+                {
+                    // Adds the rooms to the list of rooms.
+                    GameObject newRoom = Instantiate(roomListItemPrefab, roomListContent);
+                    newRoom.GetComponent<RoomListItem>().SetUp(roomListInfo[i]);
+                    newRoom.name = newRoom.GetComponent<RoomListItem>().GetRoomListInfo().Name;
+                    newRoom.GetComponent<RectTransform>().anchoredPosition = new Vector3(newRoom.GetComponent<RectTransform>().anchoredPosition.x, findRoomController.GetArrowYPos() + (findRoomController.GetArrowYPos() * roomCount));
+                    roomCount++;
+                }
+            }
+
+            findRoomController.RefreshRoomListItems();
+        }
+    }
+
+    public void AddDummyRoom()
+    {
         //Refresh the find room menu's list of rooms
         FindRoomController findRoomController = FindObjectOfType<FindRoomController>();
 
         if (findRoomController != null)
+        {
+            // Adds the rooms to the list of rooms.
+            GameObject newRoom = Instantiate(roomListItemPrefab, roomListContent);
+            newRoom.name = "Dummy Room";
+            newRoom.GetComponent<RectTransform>().anchoredPosition = new Vector3(newRoom.GetComponent<RectTransform>().anchoredPosition.x, findRoomController.GetArrowYPos() + (findRoomController.GetArrowYPos() * (roomListContent.childCount - 1)));
+
             findRoomController.RefreshRoomListItems();
+        }
     }
 
     private bool IsValidRoom(RoomInfo room)
     {
-        return (room.PlayerCount > 0 && room.PlayerCount < room.MaxPlayers);
+        return (room.PlayerCount > 0 && room.PlayerCount < room.MaxPlayers && room.IsOpen);
     }
 
     public void OpenRoomList()

@@ -11,7 +11,8 @@ public class FindRoomController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI noRoomsText;
     [SerializeField] private GameObject connectButton;
 
-    private float menuItemDistance = 22.59f;
+    [SerializeField] private bool debugAddDummyRoom;
+
     private float menuItemGlobalHeight;
     private RoomListItem selectedRoom;
     private RoomListItem[] listedRooms;
@@ -35,61 +36,41 @@ public class FindRoomController : MonoBehaviour
     /// Changes the scroll area's position.
     /// </summary>
     /// <param name="sliderPos">The position of the slider.</param>
-    public void ChangeScrollAreaPosition(float sliderPos)
+    public void IncrementRoomList(int increment)
     {
-        float maximumYPos = menuItemDistance * (listedRooms.Length - 1);
+        float maximumYPos = Mathf.Abs(GetArrowYPos()) * (listedRooms.Length - 1);
 
-        Debug.Log("Menu Item Distance: " + menuItemDistance);
-
-        Vector3 scrollLocalPos = scrollArea.localPosition;
-        scrollLocalPos.y = maximumYPos * sliderPos;
+        Vector3 scrollLocalPos = scrollArea.anchoredPosition;
+        scrollLocalPos.y += (GetArrowYPos() * increment);
         scrollLocalPos.y = Mathf.Clamp(scrollLocalPos.y, 0, maximumYPos);
-
         scrollArea.anchoredPosition = scrollLocalPos;
 
         UpdateMenu();
     }
 
     /// <summary>
-    /// Updates the menu and selects an active room
+    /// Updates the menu and selects an active room.
     /// </summary>
     private void UpdateMenu()
     {
-        if (listedRooms.Length > 0)
-        {
+        if (scrollArea.childCount > 0)
             ShowRoomList(true);
-            SelectFirstRoomByDefault();
-        }
         else
         {
             ShowRoomList(false);
             return;
         }
 
-        float arrowYPos = arrowObject.GetComponent<RectTransform>().position.y;
+        if(scrollArea.childCount < 2)
+            SelectFirstRoomByDefault();
 
-        //Only display the slider if there is more than one option
-        if (listedRooms.Length > 1)
-        {
-            menuItemGlobalHeight = Mathf.Abs(listedRooms[1].GetComponent<RectTransform>().position.y - listedRooms[0].GetComponent<RectTransform>().position.y);
-        }
+        int roomIndex = (int)(scrollArea.anchoredPosition.y / Mathf.Abs(GetArrowYPos()));
 
-        int counter = 1;
-        foreach (var rooms in listedRooms)
-        {
-            if (rooms == null)
-                return;
+        if (selectedRoom != null)
+            selectedRoom.OnDeselect();
 
-            if (Mathf.Abs(arrowYPos - rooms.GetComponent<RectTransform>().position.y) < menuItemGlobalHeight / 2f)
-            {
-                if (selectedRoom != null)
-                    selectedRoom.OnDeselect();
-
-                selectedRoom = rooms;
-                selectedRoom.OnSelect();
-            }
-            counter++;
-        }
+        selectedRoom = listedRooms[roomIndex];
+        selectedRoom.OnSelect();
     }
 
     private void ShowRoomList(bool showRoomList)
@@ -99,7 +80,16 @@ public class FindRoomController : MonoBehaviour
         connectButton.SetActive(showRoomList);
         noRoomsText.gameObject.SetActive(!showRoomList);
     }
-    
+
+    private void Update()
+    {
+        if (debugAddDummyRoom)
+        {
+            debugAddDummyRoom = false;
+            FindObjectOfType<LobbyUIScript>().AddDummyRoom();
+        }
+    }
+
     /// <summary>
     /// Connects to the selected room.
     /// </summary>
@@ -115,7 +105,9 @@ public class FindRoomController : MonoBehaviour
     public void RefreshRoomListItems()
     {
         listedRooms = scrollArea.GetComponentsInChildren<RoomListItem>();
-
+        scrollArea.anchoredPosition = Vector3.zero;
         UpdateMenu();
     }
+
+    public float GetArrowYPos() => arrowObject.anchoredPosition.y;
 }
