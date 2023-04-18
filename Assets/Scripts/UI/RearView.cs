@@ -15,6 +15,8 @@ public class RearView : MonoBehaviour
     [Header("Settings:")]
     [SerializeField, Range(0, 360)] private float detectionAngle;
     [SerializeField, Min(0)] private float mirrorWidth = 300;
+    [SerializeField, Min(0)] private float maxDotScale = 0.6f;
+    [SerializeField, Min(0)] private float detectRange = 100;
 
     // Start is called before the first frame update
     private void Awake()
@@ -37,25 +39,34 @@ public class RearView : MonoBehaviour
         if (!GameManager.Instance.InMenu())
         {
             Transform playerCam = PlayerController.instance.cam.transform;
+            float sqrMaxDist = Mathf.Pow(detectRange, 2);
             for (int x = 0; x < otherPlayers.Count; x++)
             {
                 NetworkPlayer otherPlayer = otherPlayers[x];
                 Vector3 PlayerToNet = (playerCam.position - otherPlayer.GetComponentInChildren<Targetable>().targetPoint.position);
+                float sqrPlayerDist = PlayerToNet.sqrMagnitude;
                 PlayerToNet = Vector3.ProjectOnPlane(PlayerToNet, playerCam.up);
                 Vector3 facingDir = playerCam.forward;
                 float playerAngle = Vector3.SignedAngle(facingDir, PlayerToNet, playerCam.up);
                 //Debug.Log(playerAngle);
 
                 Vector3 newPos = Vector3.zero;
-                if (playerAngle >= -(detectionAngle / 2) || playerAngle <= detectionAngle / 2)
+                
+                if ((playerAngle >= -(detectionAngle / 2) || playerAngle <= detectionAngle / 2) && sqrPlayerDist < sqrMaxDist)
                 {
                     //Dot should be visible
                     //playerDots[x];
-
+                    
+                    //Dot position:
                     float angleInterp = Mathf.InverseLerp(-(detectionAngle / 2), detectionAngle / 2, playerAngle);
                     float dotPosX = Mathf.Lerp(-(mirrorWidth / 2), mirrorWidth / 2, angleInterp);
                     newPos.x = dotPosX;
-                    
+
+                    //Dot scale:
+                    float distInterp = Mathf.InverseLerp(sqrMaxDist, 0, sqrPlayerDist);
+                    float sclValue = Mathf.Lerp(0.075f, maxDotScale, distInterp);
+                    playerDots[x].localScale = Vector3.one * sclValue;
+                    //float playerDist = Vector3.Distance(playerCam.position, otherPlayer.GetComponentInChildren<Targetable>().targetPoint.position);
                 }
                 else
                 {
