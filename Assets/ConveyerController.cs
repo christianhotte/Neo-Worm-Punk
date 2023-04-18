@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class ConveyerController : MonoBehaviour
 {
+    [Header("ALL Conveyers")]
     [SerializeField, Tooltip("teehee this is a fake tooltip")] private Transform[] conveyerBeltStopPositions;
     [SerializeField, Tooltip("All of the objects on the conveyer belt")] private Transform[] conveyerBeltObjects;
     [SerializeField, Tooltip("How much time it takes for objects to get from conveyerbelt stop positions")] private float transportTime;
@@ -12,7 +13,19 @@ public class ConveyerController : MonoBehaviour
 
     private bool conveyerBeltIsMoving = false;
     private int[] newConveyerObjectPositions;
-    private int[] objectZBiases;
+    private bool changingHereBoi = false;
+
+
+    [Header("PLAYER Conveyer")]
+    [SerializeField, Tooltip("Ref to the launch tube")] private Transform tube;
+    [SerializeField, Tooltip("Ref to the launch tube Window")] private Transform tubeWindow;
+    [SerializeField, Tooltip("Ref to the lobbyUI controller")] private LobbyUIScript lubbyUIScriptRef;
+    [SerializeField, Tooltip("Ref to the FindRoomUI controller")] private FindRoomController findRoomControllerRef;
+
+    private bool createRoomOption;
+    
+
+
 
     /// <summary>
     /// Initialize and fill the storage of object index positioning
@@ -132,10 +145,18 @@ public class ConveyerController : MonoBehaviour
             //only do if this is the player's belt
             if (isPlayerBelt)
             {
-                //activate menu II anim if under 0.25 seconds from ending, and the station isn't already moving, and it is the player's conveyer
-                if (timeElapsed > (transportTime - 0.25f) && !menuStationControllerRef.GetMenuStationIsMoving(nextBeltPositions[0]))
+                //activate menu II anim if under 0.25 seconds from ending
+                if (timeElapsed > (transportTime - 0.25f))
                 {
-                    menuStationControllerRef.ActivateStation(nextBeltPositions[0]);
+                    if(nextBeltPositions[0] == 7 && !changingHereBoi)
+                    {
+                        changingHereBoi = true;
+                        StartCoroutine(TransitionToNewSceneSequence());
+                    }
+                    else if(nextBeltPositions[0] != 7)
+                    {
+                        menuStationControllerRef.ActivateStation(nextBeltPositions[0]);
+                    }
                 }
             }
             yield return null;
@@ -145,10 +166,119 @@ public class ConveyerController : MonoBehaviour
         conveyerBeltIsMoving = false;
     }
 
-    
+    private IEnumerator TransitionToNewSceneSequence()
+    {
+        changingHereBoi = true;
+
+        float timeElapsed = 0;
+        float endTransportTime = 1.0f;
+
+        Vector3 startYPos = tubeWindow.localPosition;
+        Vector3 endYPos = new Vector3(startYPos.x, 0.12f, startYPos.z);
+
+
+        //lerp door up
+        while (timeElapsed < endTransportTime)
+        {
+            //just in case, stay safe :)
+            if (GameManager.Instance.levelTransitionActive) { break; }
+
+            //smooth lerp duration alg
+            float t = timeElapsed / endTransportTime;
+            t = t * t * (3f - 2f * t);
+
+            tubeWindow.localPosition = Vector3.Lerp(startYPos, endYPos, t);
+
+            //advance time
+            timeElapsed += Time.deltaTime;
+
+            yield return null;
+        }
+
+        yield return new WaitForSeconds(0.5f);
+
+        //reset timer
+        timeElapsed = 0f;
+
+        Vector3 startYRot = tube.localRotation.eulerAngles;
+        Vector3 endYRot = Vector3.zero;
+
+
+        //lerp door around
+        while(timeElapsed < endTransportTime)
+        {
+            //just in case, stay safe :)
+            if (GameManager.Instance.levelTransitionActive) { break; }
+
+            //smooth lerp duration alg
+            float t = timeElapsed / endTransportTime;
+            t = t * t * (3f - 2f * t);
+
+            tube.localRotation = Quaternion.Euler(Vector3.Lerp(startYRot, endYRot, t));
+
+            //advance time
+            timeElapsed += Time.deltaTime;
+
+            yield return null;
+        }
+
+        tube.localRotation = Quaternion.Euler(endYRot);
+
+        timeElapsed = 0f;
+        endTransportTime = 10.0f;
+
+        startYPos = tube.localPosition;
+        endYPos = startYPos;
+        endYPos += new Vector3(0, 10, 0);
+
+        StartCoroutine(FadeToBlackAndGoToLockerRoom());
+
+        //lerp whole tube up
+        while (timeElapsed < endTransportTime)
+        {
+            //will  cut this off once you start loading the new scene
+            if (GameManager.Instance.levelTransitionActive) { break; }
+
+            //smooth lerp duration alg
+            float t = timeElapsed / endTransportTime;
+            t = t * t * (3f - 2f * t);
+
+            tube.localPosition = Vector3.Lerp(startYPos, endYPos, t);
+
+            yield return null;
+        }
+    }
+
+    private IEnumerator FadeToBlackAndGoToLockerRoom()
+    {
+        conveyerBeltObjects[0].GetComponentInChildren<FadeScreen>().FadeOut();
+
+        yield return new WaitForSeconds(conveyerBeltObjects[0].GetComponentInChildren<FadeScreen>().GetFadeDuration());
+        yield return null;
+
+        //join or create room based on which one works
+        if (createRoomOption)
+        {
+            lubbyUIScriptRef.CreateRoom();
+        }
+        else
+        {
+            findRoomControllerRef.ConnectToRoom();
+        }
+    }
+
+    public void CreateRoomOptionChosen()
+    {
+        createRoomOption = true;
+    }
+
+    public void JoinRoomOptionChosen()
+    {
+        createRoomOption = false;
+    }
 
     /// <summary>
-    /// Persona5 sucks. Yes this is a direct attack on Peter
+    /// Persona5 sucks. Yes this is a direct attack on Peter. Yes I'm joking
     /// </summary>
     private void DisplayBeltMove()
     {
@@ -163,7 +293,6 @@ public class ConveyerController : MonoBehaviour
             {
                 conveyerBeltObjects[i].position = new Vector3(conveyerBeltObjects[i].position.x, conveyerBeltObjects[i].position.y, conveyerBeltStopPositions[0].position.z);
                 newConveyerObjectPositions[i] = 1;
-                Debug.Log("_________________________________________________________________________ " + newConveyerObjectPositions[i]);
             }
         }
 

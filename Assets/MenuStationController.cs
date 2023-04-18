@@ -34,9 +34,9 @@ public class MenuStationController : MonoBehaviour
             menuStations[i].isActive = false;
             menuStations[i].isMoving = false;
         }
-
         menuStations[0].isActive = true;
-        ActivateStation(0);
+        menuStations[0].stationTransform.position += new Vector3(0, -5, 0);
+        //teleport station to correct positon
         //by default the first one should actually be set to true, bc that's the menu color select etc.
     }
 

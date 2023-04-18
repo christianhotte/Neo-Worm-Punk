@@ -352,6 +352,10 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         if (autoJoin != null && autoJoin.GoToLockerRoom())
             autoJoin.AutoLoadScene(GameSettings.roomScene);
 
+        //Loads the locker room scene when the player joins a room from the title screen. This is so epic can we hit 10 likes
+        if (SceneManager.GetActiveScene().name == GameSettings.titleScreenScene)
+            GameManager.Instance.LoadGame(GameSettings.roomScene);
+
         //Update lobby UI:
         LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
         if (lobbyUI != null) //If there is a lobby in the scene, display room information
@@ -366,6 +370,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         SpawnNetworkPlayer();                                             //Always spawn a network player instance when joining a room
         localNetworkPlayer.SetNetworkPlayerProperties("IsReady", false);;
         AdjustVoiceVolume();
+        
     }
 
     public override void OnJoinRoomFailed(short returnCode, string message)
