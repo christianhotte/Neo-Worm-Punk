@@ -5,7 +5,7 @@ using TMPro;
 
 public class FindRoomController : MonoBehaviour
 {
-    [SerializeField] private SliderController slider;
+    [SerializeField] private GameObject roomSelector;
     [SerializeField] private RectTransform arrowObject;
     [SerializeField] private RectTransform scrollArea;
     [SerializeField] private TextMeshProUGUI noRoomsText;
@@ -16,6 +16,8 @@ public class FindRoomController : MonoBehaviour
     private float menuItemGlobalHeight;
     private RoomListItem selectedRoom;
     private RoomListItem[] listedRooms;
+
+    private int roomCount;
 
     private void OnEnable()
     {
@@ -53,7 +55,7 @@ public class FindRoomController : MonoBehaviour
     /// </summary>
     private void UpdateMenu()
     {
-        if (scrollArea.childCount > 0)
+        if (roomCount > 0)
             ShowRoomList(true);
         else
         {
@@ -61,7 +63,7 @@ public class FindRoomController : MonoBehaviour
             return;
         }
 
-        if(scrollArea.childCount < 2)
+        if(roomCount < 2)
             SelectFirstRoomByDefault();
 
         int roomIndex = (int)(scrollArea.anchoredPosition.y / Mathf.Abs(GetArrowYPos()));
@@ -79,6 +81,7 @@ public class FindRoomController : MonoBehaviour
         arrowObject.gameObject.SetActive(showRoomList);
         connectButton.SetActive(showRoomList);
         noRoomsText.gameObject.SetActive(!showRoomList);
+        roomSelector.SetActive(showRoomList);
     }
 
     private void Update()
@@ -102,8 +105,11 @@ public class FindRoomController : MonoBehaviour
     /// <summary>
     /// Refreshes the list of rooms.
     /// </summary>
-    public void RefreshRoomListItems()
+    public void RefreshRoomListItems(int newRoomCount = -1)
     {
+        if (newRoomCount != -1)
+            roomCount = newRoomCount;
+
         listedRooms = scrollArea.GetComponentsInChildren<RoomListItem>();
         scrollArea.anchoredPosition = Vector3.zero;
         UpdateMenu();

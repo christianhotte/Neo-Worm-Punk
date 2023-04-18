@@ -259,7 +259,7 @@ public class LobbyUIScript : MonoBehaviour
                 }
             }
 
-            findRoomController.RefreshRoomListItems();
+            findRoomController.RefreshRoomListItems(roomCount);
         }
     }
 
