@@ -49,7 +49,7 @@ public class RearView : MonoBehaviour
                 Vector3 facingDir = playerCam.forward;
                 float playerAngle = Vector3.SignedAngle(facingDir, PlayerToNet, playerCam.up);
                 //Debug.Log(playerAngle);
-
+                Debug.Log(sqrPlayerDist);
                 Vector3 newPos = Vector3.zero;
                 
                 if ((playerAngle >= -(detectionAngle / 2) || playerAngle <= detectionAngle / 2) && sqrPlayerDist < sqrMaxDist)
