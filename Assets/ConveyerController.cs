@@ -11,17 +11,15 @@ public class ConveyerController : MonoBehaviour
     [SerializeField, Tooltip("Refference to MenuStationController")] private MenuStationController menuStationControllerRef;
     [SerializeField, Tooltip("Indicates whether or not this is the player's conveyerbelt")] private bool isPlayerBelt;
 
-    private bool conveyerBeltIsMoving = false;
-    private int[] newConveyerObjectPositions;
-    private bool changingHereBoi = false;
-
-
     [Header("PLAYER Conveyer")]
     [SerializeField, Tooltip("Ref to the launch tube")] private Transform tube;
     [SerializeField, Tooltip("Ref to the launch tube Window")] private Transform tubeWindow;
     [SerializeField, Tooltip("Ref to the lobbyUI controller")] private LobbyUIScript lubbyUIScriptRef;
     [SerializeField, Tooltip("Ref to the FindRoomUI controller")] private FindRoomController findRoomControllerRef;
 
+    private bool conveyerBeltIsMoving = false;
+    private int[] newConveyerObjectPositions;
+    private bool changingHereBoi = false;
     private bool createRoomOption;
     private bool yeetNotYetNoob = false;
     
@@ -172,7 +170,7 @@ public class ConveyerController : MonoBehaviour
         changingHereBoi = true;
 
         float timeElapsed = 0;
-        float endTransportTime = 1.0f;
+        float endTransportTime = 0.25f;
 
         Vector3 startYPos = tubeWindow.localPosition;
         Vector3 endYPos = new Vector3(startYPos.x, 0.12f, startYPos.z);
@@ -200,6 +198,7 @@ public class ConveyerController : MonoBehaviour
 
         //reset timer
         timeElapsed = 0f;
+        endTransportTime = 0.9f;
 
         Vector3 startYRot = tube.localRotation.eulerAngles;
         Vector3 endYRot = Vector3.zero;
@@ -230,9 +229,8 @@ public class ConveyerController : MonoBehaviour
 
         startYPos = tube.localPosition;
         endYPos = startYPos;
-        endYPos += new Vector3(0, 10, 0);
-
-        
+        endYPos += new Vector3(0, 5, 0);
+        yeetNotYetNoob = false;
 
         //lerp whole tube up
         while (timeElapsed < endTransportTime)
@@ -245,12 +243,17 @@ public class ConveyerController : MonoBehaviour
             t = t * t * (3f - 2f * t);
 
             tube.localPosition = Vector3.Lerp(startYPos, endYPos, t);
+            conveyerBeltObjects[0].localPosition += Vector3.Lerp(startYPos, endYPos, t);
 
-            if(!yeetNotYetNoob && timeElapsed > 0.5f)
+            if (!yeetNotYetNoob && timeElapsed > 2.0f)
             {
                 yeetNotYetNoob = true;
+                Debug.Log("_________________________________________________________________________________________ fade to part");
                 StartCoroutine(FadeToBlackAndGoToLockerRoom());
             }
+
+            //advance time
+            timeElapsed += Time.deltaTime;
 
             yield return null;
         }
