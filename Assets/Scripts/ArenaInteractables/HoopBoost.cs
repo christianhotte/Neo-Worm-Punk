@@ -73,7 +73,7 @@ public class HoopBoost : NetworkedArenaElement
         yield return new WaitForSeconds(10.0f);
         slimed = false;
     }
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerStay(Collider other)
     {
         if(other.name == "XR Origin" && !launchin)
         {
