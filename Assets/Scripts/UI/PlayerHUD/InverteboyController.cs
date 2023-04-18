@@ -34,6 +34,7 @@ public class InverteboyController : MonoBehaviour
     [SerializeField, Tooltip("The information window images.")] private Image[] infoWindow;
     [SerializeField, Tooltip("The label text.")] private TextMeshProUGUI labelText;
     [SerializeField, Tooltip("The tutorial text.")] private TextMeshProUGUI tutorialText;
+    [SerializeField, Tooltip("The tutorial progress text.")] private TextMeshProUGUI tutorialProgressText;
 
     [SerializeField, Tooltip("The list of the different menus on the main inverteboy.")] private Canvas[] inverteboyMainCanvases;
     [SerializeField, Tooltip("The list of the different menus on the inverteboy hologram.")] private Canvas[] inverteboyHologramCanvases;
@@ -279,10 +280,16 @@ public class InverteboyController : MonoBehaviour
     /// </summary>
     /// <param name="message">The message for the tutorial.</param>
     /// <param name="label">The label of the tutorial.</param>
-    public void UpdateTutorialText(string message, string label = "")
+    public void UpdateTutorialText(string message, string label = "", string progress = "")
     {
         labelText.text = label;
         tutorialText.text = message;
+        UpdateTutorialProgress(progress);
+    }
+
+    public void UpdateTutorialProgress(string progressText)
+    {
+        tutorialProgressText.text = progressText;
     }
 
     /// <summary>
