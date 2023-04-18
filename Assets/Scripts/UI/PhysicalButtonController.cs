@@ -140,7 +140,7 @@ public class PhysicalButtonController : MonoBehaviour
                 GetComponent<AudioSource>().PlayOneShot(onPressedSoundEffect, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
 
             onPressed.Invoke();
-            Debug.Log(gameObject.name + " Pressed.");
+            //Debug.Log(gameObject.name + " Pressed.");
 
             if (lockOnPress)
                 LockButton(true);
