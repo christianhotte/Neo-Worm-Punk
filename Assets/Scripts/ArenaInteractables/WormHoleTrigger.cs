@@ -37,7 +37,7 @@ public class WormHoleTrigger : MonoBehaviour
     }
 
 
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerStay(Collider other)
     {
      
         if (other.TryGetComponent(out XROrigin playerOrigin) && !WHS.locked) // make sure it hit the player, and the wormhole isnt locked
