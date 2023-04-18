@@ -23,6 +23,7 @@ public class ConveyerController : MonoBehaviour
     [SerializeField, Tooltip("Ref to the FindRoomUI controller")] private FindRoomController findRoomControllerRef;
 
     private bool createRoomOption;
+    private bool yeetNotYetNoob = false;
     
 
 
@@ -231,7 +232,7 @@ public class ConveyerController : MonoBehaviour
         endYPos = startYPos;
         endYPos += new Vector3(0, 10, 0);
 
-        StartCoroutine(FadeToBlackAndGoToLockerRoom());
+        
 
         //lerp whole tube up
         while (timeElapsed < endTransportTime)
@@ -245,12 +246,20 @@ public class ConveyerController : MonoBehaviour
 
             tube.localPosition = Vector3.Lerp(startYPos, endYPos, t);
 
+            if(!yeetNotYetNoob && timeElapsed > 0.5f)
+            {
+                yeetNotYetNoob = true;
+                StartCoroutine(FadeToBlackAndGoToLockerRoom());
+            }
+
             yield return null;
         }
     }
 
     private IEnumerator FadeToBlackAndGoToLockerRoom()
     {
+        yeetNotYetNoob = true;
+
         conveyerBeltObjects[0].GetComponentInChildren<FadeScreen>().FadeOut();
 
         yield return new WaitForSeconds(conveyerBeltObjects[0].GetComponentInChildren<FadeScreen>().GetFadeDuration());
