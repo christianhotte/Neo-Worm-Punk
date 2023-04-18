@@ -93,8 +93,9 @@ public class RearView : MonoBehaviour
             dot.localPosition = new Vector3(1000, 0, 0);
             //Set dot to player color
             Color playerColor = PlayerSettingsController.playerColors[(int)otherPlayer.GetComponent<PhotonView>().Owner.CustomProperties["Color"]];
-            dot.GetComponent<Image>().color = playerColor; 
+            dot.GetComponent<Image>().color = playerColor;
             // Color playerColor = PlayerSettingsController.playerColors[(int)otherPlayer.GetComponent<PhotonView>().Owner.CustomProperties["Color"]];
+            dot.localScale = Vector3.one * 0.2f;
             playerDotList.Add(dot);
         }
         playerDots = playerDotList.ToArray();
