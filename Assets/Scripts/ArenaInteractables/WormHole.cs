@@ -85,7 +85,11 @@ public class WormHole : NetworkedArenaElement
                 }
             }
         }
-
+        RearView heatScanner = PlayerController.instance.GetComponentInChildren<RearView>();
+        if (heatScanner != null)
+        {
+            heatScanner.StartCoroutine(heatScanner.DisableScanner(waitTime));
+        }
         locked = true; // Locks the worm whole circut      
         Transform exitPos;                                                           //define Exit Point
         Rigidbody playerRB;

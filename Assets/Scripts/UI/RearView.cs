@@ -12,6 +12,7 @@ public class RearView : MonoBehaviour
     private Transform[] playerDots;
     public GameObject playerMarker;
     public Transform markerStartPos;
+    internal bool scannerOff = false;
     [Header("Settings:")]
     [SerializeField, Range(0, 360)] private float detectionAngle;
     [SerializeField, Min(0)] private float mirrorWidth = 300;
@@ -50,9 +51,10 @@ public class RearView : MonoBehaviour
                 float playerAngle = Vector3.SignedAngle(facingDir, PlayerToNet, playerCam.up);
                 //Debug.Log(playerAngle);
                 Debug.Log(sqrPlayerDist);
-                Vector3 newPos = Vector3.zero;
                 
-                if ((playerAngle >= -(detectionAngle / 2) || playerAngle <= detectionAngle / 2) && sqrPlayerDist < sqrMaxDist)
+                Vector3 newPos = Vector3.zero;
+
+                if (!scannerOff&&(playerAngle >= -(detectionAngle / 2) || playerAngle <= detectionAngle / 2) && sqrPlayerDist < sqrMaxDist)
                 {
                     //Dot should be visible
                     //playerDots[x];
@@ -74,6 +76,7 @@ public class RearView : MonoBehaviour
                     //Dot should not be visible
 
                     newPos.x = 1000;
+                    playerDots[x].localScale = Vector3.zero;
                 }
                 playerDots[x].localPosition = newPos;
             }
@@ -81,28 +84,43 @@ public class RearView : MonoBehaviour
     }
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        playerRef = PlayerController.instance;
-        otherPlayers.AddRange(FindObjectsOfType<NetworkPlayer>());
-        otherPlayers.Remove(PlayerController.photonView.GetComponent<NetworkPlayer>());
-
-        List<Transform> playerDotList = new List<Transform>();
-        foreach (NetworkPlayer otherPlayer in otherPlayers)
+        if (scene.name == GameSettings.arenaScene)
         {
-            Transform dot =Instantiate(playerMarker, transform.GetChild(0),markerStartPos).GetComponent<Transform>();
-            //Transform dot = //Instantiate dot prefab and get its transform
-            //Move dot to a convenient position
-            dot.localPosition = new Vector3(1000, 0, 0);
-            //Set dot to player color
-            Color playerColor = PlayerSettingsController.playerColors[(int)otherPlayer.GetComponent<PhotonView>().Owner.CustomProperties["Color"]];
-            dot.GetComponent<Image>().color = playerColor;
-            // Color playerColor = PlayerSettingsController.playerColors[(int)otherPlayer.GetComponent<PhotonView>().Owner.CustomProperties["Color"]];
-            dot.localScale = Vector3.one * 0.2f;
-            playerDotList.Add(dot);
-        }
-        playerDots = playerDotList.ToArray();
-    }
-    public void PlaceIndicator(float Pos,float Size,Color PlayerCol)
-    {
+            playerRef = PlayerController.instance;
+            otherPlayers.AddRange(FindObjectsOfType<NetworkPlayer>());
+            otherPlayers.Remove(PlayerController.photonView.GetComponent<NetworkPlayer>());
 
+            List<Transform> playerDotList = new List<Transform>();
+            foreach (NetworkPlayer otherPlayer in otherPlayers)
+            {
+                Transform dot = Instantiate(playerMarker, transform.GetChild(0), markerStartPos).GetComponent<Transform>();
+                //Transform dot = //Instantiate dot prefab and get its transform
+                //Move dot to a convenient position
+                dot.localPosition = new Vector3(1000, 0, 0);
+                //Set dot to player color
+                Color playerColor = PlayerSettingsController.playerColors[(int)otherPlayer.GetComponent<PhotonView>().Owner.CustomProperties["Color"]];
+                dot.GetComponent<Image>().color = playerColor;
+                // Color playerColor = PlayerSettingsController.playerColors[(int)otherPlayer.GetComponent<PhotonView>().Owner.CustomProperties["Color"]];
+                dot.localScale = Vector3.one * 0.2f;
+                playerDotList.Add(dot);
+            }
+            playerDots = playerDotList.ToArray();
+        }
+    }
+    public IEnumerator DisableScanner(float waitTime)
+    {
+        Debug.Log("DisableStart");
+        scannerOff = true;
+        yield return new WaitForSeconds(waitTime);
+        scannerOff = false;
+        Debug.Log("DisableStop");
+    }
+    public void ScannerStop()
+    {
+        scannerOff = true;
+    }
+    public void ScannerStart()
+    {
+        scannerOff = false;
     }
 }
