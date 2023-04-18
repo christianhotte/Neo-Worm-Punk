@@ -42,14 +42,14 @@ public class Grinder : MonoBehaviour
         {
             //LevelTimePercent = jumbotronObject.GetLevelTimer().LevelTimePercentage();
             LevelTimePercent = roundManager.LevelTimePercentage();
-            if (LevelTimePercent >= 60)
+            if (LevelTimePercent >= 1)//60
             {
                 Activated = true;
                 if(GrindnerSound!=null)GrinderAud.PlayOneShot(GrindnerSound);
             }
         }
     }
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerStay(Collider other)
     {
         //PlayerController.photonView.ViewID;
         if (other.name == "XR Origin"&& Activated)

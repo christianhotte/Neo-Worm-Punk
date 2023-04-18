@@ -6,9 +6,9 @@ using Unity.XR.CoreUtils;
 public class WormHole : NetworkedArenaElement
 {
     public Transform holePos1, holePos2,wormZone,playerHead,wormZoneShifted;
-    public GameObject wormZoneParticles,wormZoneInstance,playerCam;
+    public GameObject wormZoneParticles, wormZoneInstance, playerCam,particle1,particle2;
     public float waitTime,exitSpeed=30,wormZoneSpeed=5;
-    internal bool locked = false,inZone=false;
+    internal bool locked = false,inZone=false,luckyProc=false;
     private NewShotgunController NSC;
     public PlayerController PC;
     public GameObject playerOrigin;
@@ -16,10 +16,13 @@ public class WormHole : NetworkedArenaElement
     public AudioSource wormHoleAud;
     public AudioClip enterSound,suctionSound;
     private WormHoleTrigger triggerScript,EntryTrigger;
+    public WormZone wormZoneScript;
+    internal NetworkPlayer netPlayer;
     public int luckyChance = 10;
     void Start()
     {
         wormHoleAud = this.GetComponent<AudioSource>();
+        wormZoneScript = wormZoneParticles.GetComponent<WormZone>();
     }
     void Update()
     {
@@ -27,7 +30,62 @@ public class WormHole : NetworkedArenaElement
     public IEnumerator StartWormhole(GameObject startHole,GameObject playerOBJ)
     {
         inZone = true;
+        PC = PlayerController.instance;
         PlayerController.instance.UnHolsterAll();
+        netPlayer = PlayerController.photonView.GetComponent<NetworkPlayer>();
+        if (netPlayer.networkPlayerStats.deathStreak >= 1)
+        {
+            int adjustedLuckChance = luckyChance * netPlayer.networkPlayerStats.deathStreak;
+            if (adjustedLuckChance > 100)
+            {
+                adjustedLuckChance = 100;
+            }
+            int randTarget = 100 - adjustedLuckChance; //the number need random range to be greater than.
+            Random.seed = (int)Time.realtimeSinceStartup;
+            int randRoll = Random.Range(0, 101);
+            Debug.Log("Roll is "+ randRoll +" Target is "+randTarget);
+            if (randRoll > randTarget)
+            {
+                luckyProc = true;
+                int randPower = Random.Range(1, 4);
+
+                switch (randPower)
+                {
+                    case 1:
+                       wormZoneScript.heatVision.SetActive(true);
+                        break;
+                    case 2:
+                       wormZoneScript.multiShot.SetActive(true);
+                        break;
+                    default:
+                       wormZoneScript.invincibility.SetActive(true);
+                        break;
+                }
+            }
+        }
+        else
+        {
+            int randRoll = Random.Range(0, 101);
+            Debug.Log("Roll is " + randRoll + " Target is " + luckyChance);
+            if (randRoll < luckyChance)
+            {
+                luckyProc = true;
+                int randPower = Random.Range(1, 4);
+                switch (randPower)
+                {
+                    case 1:
+                        wormZoneScript.heatVision.SetActive(true);
+                        break;
+                    case 2:
+                        wormZoneScript.multiShot.SetActive(true);
+                        break;
+                    default:
+                        wormZoneScript.invincibility.SetActive(true);
+                        break;
+                }
+            }
+        }
+
         locked = true; // Locks the worm whole circut      
         Transform exitPos;                                                           //define Exit Point
         Rigidbody playerRB;
@@ -44,6 +102,8 @@ public class WormHole : NetworkedArenaElement
             EntryTrigger = holePos2.gameObject.GetComponent<WormHoleTrigger>();//Gets the script on the entrance
         }
         triggerScript.exiting = true;//Tells the trigger script it will be the exit
+        particle1.SetActive(false);
+        particle2.SetActive(false);
         PC = PlayerController.instance; // Gets the controller of the player instance
         playerRB = PC.bodyRb;      //sets rigidbody reference
         playerCam = PC.cam.gameObject;      //sets camera reference
@@ -97,8 +157,13 @@ public class WormHole : NetworkedArenaElement
         playerRB.useGravity = true; //Bring back Gravity
         playerRB.velocity = exitPos.forward * exitSpeed;    //launch out of wormhole
         triggerScript.exiting = false;
-        triggerScript.reset = true; //tells the exit to open back up
-        EntryTrigger.reset = true;//tells the entrance to open back up
+
+        if (luckyProc)
+        {
+            wormZoneScript.heatVision.SetActive(false);
+            wormZoneScript.multiShot.SetActive(false);
+            wormZoneScript.invincibility.SetActive(false);
+        }
         inZone = false;
         yield return new WaitForSeconds(0.2f);  //Wait for the player to get clear of the wormhole
         ActiveWormholes.Remove(this);
@@ -110,6 +175,10 @@ public class WormHole : NetworkedArenaElement
     public IEnumerator TimedLock()
     {
         yield return new WaitForSeconds(10.0f);
+        particle1.SetActive(true);
+        particle2.SetActive(true);
+        triggerScript.reset = true; //tells the exit to open back up
+        EntryTrigger.reset = true;//tells the entrance to open back up
         locked = false;
     }
 }

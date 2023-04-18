@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 2736213684082993538}
   - component: {fileID: 715954230275427784}
   - component: {fileID: 2433439419123049857}
-  - component: {fileID: 5403578247996450387}
   m_Layer: 30
   m_Name: GameTimer
   m_TagString: Untagged
@@ -136,21 +135,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!114 &5403578247996450387
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1866105745301341325}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2b9f155cf69ec6b4689b13afc83b76cb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  OnTimerEnd:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &4170964893796603747
 GameObject:
   m_ObjectHideFlags: 0
@@ -299,6 +283,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8f85332aeefe054995fb05fb9f96536, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  levelTimer: {fileID: 2433439419123049857}
   deathInfoContainer: {fileID: 7528970993658099163}
   deathInfoPrefab: {fileID: 2780169293417573499, guid: aefd2156ae091d44eb75f298da019a4e, type: 3}
   mostRecentDeathText: {fileID: 3959947330390162914}
