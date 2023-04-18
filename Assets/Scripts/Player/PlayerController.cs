@@ -74,7 +74,7 @@ public class PlayerController : MonoBehaviour
     [Header("Debug Options:")]
     [SerializeField, Tooltip("Enables usage of SpawnManager system to automatically position player upon instantiation.")] private bool useSpawnPoint = true;
     [SerializeField, Tooltip("Click to snap camera back to center of player rigidbody (ignoring height).")]                private bool debugCenterCamera;
-    [SerializeField, Tooltip("Manually isntantiate a network player.")]                                                    private bool debugSpawnNetworkPlayer;
+    [SerializeField, Tooltip("Manually instantiate a network player.")]                                                    private bool debugSpawnNetworkPlayer;
     [SerializeField, Tooltip("Manually destroy client network player.")]                                                   private bool debugDeSpawnNetworkPlayer;
     [SerializeField, Tooltip("Deals one damage to this player.")]                                                          private bool debugHarm;
 
@@ -97,6 +97,7 @@ public class PlayerController : MonoBehaviour
     /// What percentage of maximum player health they currently have.
     /// </summary>
     public float HealthPercent { get { return currentHealth / (float)healthSettings.defaultHealth; } }
+    public int MaxHealth { get { return healthSettings.defaultHealth; } }
 
     //Events & Coroutines:
     /// <summary>
@@ -245,6 +246,7 @@ public class PlayerController : MonoBehaviour
             {
                 currentHealth = Mathf.Min(currentHealth + (healthSettings.regenSpeed * Time.deltaTime), healthSettings.defaultHealth); //Regenerate until player is back to default health
                 healthVolume.weight = 1 - HealthPercent;                                                                               //Update health visualization
+                UpdateHealthIndicators();
             }
         }
         if (timeUntilVulnerable > 0) { timeUntilVulnerable = Mathf.Max(timeUntilVulnerable - Time.deltaTime, 0); }
@@ -258,6 +260,10 @@ public class PlayerController : MonoBehaviour
         {
             healthSettings.defaultHealth = (int)PhotonNetwork.CurrentRoom.CustomProperties["PlayerHP"];
             currentHealth = healthSettings.defaultHealth;
+            
+            foreach (var indicator in FindObjectsOfType<HealthIndicator>())
+                indicator.GenerateHealthIcons();
+
             healthVolume.weight = 0;
         }
         if (!GameManager.Instance.InMenu())
@@ -296,17 +302,28 @@ public class PlayerController : MonoBehaviour
 
         print("Centering player camera."); //Indicate that camera is being centered
     }
+
+    /// <summary>
+    /// Updates all of the available health indicators on the player.
+    /// </summary>
+    private void UpdateHealthIndicators()
+    {
+        foreach (var indicator in FindObjectsOfType<HealthIndicator>())
+            indicator.UpdateHealth(currentHealth);
+    }
+
     /// <summary>
     /// Updates the weaponry so that the player can / can't fight under certain conditions.
     /// </summary>
     public void UpdateWeaponry()
     {
         if (inMenu)
+        {
             inCombat = false;
+            bodyRb.isKinematic = true;
+        }
 
         combatHUD.EnableCombatHUD(inCombat);
-
-        bodyRb.isKinematic = !inCombat;
 
         foreach (var weapon in attachedEquipment)
             foreach (var renderer in weapon.GetComponentsInChildren<Renderer>())
@@ -369,6 +386,7 @@ public class PlayerController : MonoBehaviour
         currentHealth -= Mathf.Max((float)damage, 0);                           //Deal projectile damage, floor at 0
         healthVolume.weight = 1 - HealthPercent;                                //Update health visualization
         print(damage + " damage dealt to player with ID " + photonView.ViewID); //Indicate that damage has been dealt
+        UpdateHealthIndicators();
 
         //Death check:
         if (currentHealth <= 0) //Player is being killed by this projectile hit
@@ -414,6 +432,7 @@ public class PlayerController : MonoBehaviour
         MakeInvulnerable(healthSettings.spawnInvincibilityTime + healthSettings.deathTime);
         StartCoroutine(DeathSequence());                                       //Begin death sequence
         currentHealth = healthSettings.defaultHealth;                          //Reset to max health
+        UpdateHealthIndicators();
         healthVolume.weight = 0;                                               //Reset health volume weight
         timeUntilRegen = 0;                                                    //Reset regen timer
         UnHolsterAll();

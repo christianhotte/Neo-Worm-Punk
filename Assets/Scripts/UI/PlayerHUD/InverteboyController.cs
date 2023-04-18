@@ -8,7 +8,8 @@ using UnityEngine.SceneManagement;
 
 public class InverteboyController : MonoBehaviour
 {
-    public enum InverteboyScreens { MAIN, ARENA, TUTORIAL, VISUALIZER, MENU }
+    public enum InverteboyMainScreens { MAIN, ARENA }
+    public enum InverteboyHologramScreens { MAIN, TUTORIAL }
 
     private AudioSource audioSource;
     private Transform wristTransform;
@@ -20,15 +21,24 @@ public class InverteboyController : MonoBehaviour
     [SerializeField, Tooltip("The amount of distance between the player's head and the Inverteboy needed to register that the player is looking at the Inverteboy.")] private float lookDistance;
     [SerializeField, Tooltip("The speed of the Inverteboy opening / closing.")] private float movementSpeed;
     [SerializeField, Tooltip("The maximum angle for the Inverteboy to open to.")] private float maxAngle;
-    [SerializeField, Tooltip("The animation curve for the Inverteboy opening animation.")] private AnimationCurve animationCurve;
+    [SerializeField, Tooltip("The animation curve for the Inverteboy opening animation.")] private AnimationCurve openAnimationCurve;
     [Space(10)]
 
-    [SerializeField, Tooltip("The information window image.")] private Image infoWindow;
+    [SerializeField] private GameObject hologramObject;
+    [SerializeField] private float hologramHeight;
+    [SerializeField, Tooltip("The animation curve for the hologram animation.")] private AnimationCurve hologramAnimationCurve;
+    [SerializeField] private float hologramSpeed;
+
+    [SerializeField, Tooltip("The Inverteboy popup GameObject.")] private GameObject popupPrefab;
+    [SerializeField, Tooltip("The Inverteboy popup container.")] private Transform popupContainer;
+    [SerializeField, Tooltip("The information window images.")] private Image[] infoWindow;
     [SerializeField, Tooltip("The label text.")] private TextMeshProUGUI labelText;
     [SerializeField, Tooltip("The tutorial text.")] private TextMeshProUGUI tutorialText;
 
-    [SerializeField, Tooltip("The list of the different menus on the inverteboy.")] private Canvas[] inverteboyCanvases;
+    [SerializeField, Tooltip("The list of the different menus on the main inverteboy.")] private Canvas[] inverteboyMainCanvases;
+    [SerializeField, Tooltip("The list of the different menus on the inverteboy hologram.")] private Canvas[] inverteboyHologramCanvases;
 
+    [SerializeField, Tooltip("The strength of the Inverteboy haptics when flashing the screen.")] private float hapticsStrength = 0.25f;
     [SerializeField, Tooltip("The color the the window flashes when the player gets a kill.")] private Color flashInfoWindowColor;
     [SerializeField, Tooltip("The speed of the kill flash.")] private float flashSpeed;
     [SerializeField, Tooltip("The number of flashes.")] private int flashNumber;
@@ -37,9 +47,13 @@ public class InverteboyController : MonoBehaviour
     [SerializeField, Tooltip("Main menu music.")] private AudioClip mainMenuMusic;
     [SerializeField, Tooltip("Lobby music.")] private AudioClip lobbyMusic;
     [SerializeField, Tooltip("Arens music.")] private AudioClip arenaMusic;
+    [Space(10)]
 
-    private Canvas currentCanvas;
+    private Canvas currentMainCanvas;
+    private Canvas currentHologramCanvas;
 
+    private bool hologramOpen = false;
+    
     private bool isOpen = false;
     private bool forceOpen = false;
     private float timeLookingAtInverteboy;
@@ -47,25 +61,23 @@ public class InverteboyController : MonoBehaviour
     private Color defaultInfoWindowColor;
 
     private IEnumerator inverteboyAnimation;
+    private IEnumerator hologramAnimation;
     private IEnumerator flashAnimation;
 
     private void Awake()
     {
         audioSource = GetComponent<AudioSource>();
-        currentCanvas = inverteboyCanvases[(int)InverteboyScreens.MAIN];
-        defaultInfoWindowColor = infoWindow.color;
+        currentMainCanvas = inverteboyMainCanvases[(int)InverteboyMainScreens.MAIN];
+        currentHologramCanvas = inverteboyHologramCanvases[(int)InverteboyHologramScreens.MAIN];
+        defaultInfoWindowColor = infoWindow[0].color;
+        ShowHologram(false);
+
         UpdateVolume();
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // If we are loaded into the tutorial scene, show the tutorial canvas
-        if (scene.name == GameSettings.tutorialScene)
-        {
-            SwitchCanvas(InverteboyScreens.TUTORIAL);
-        }
-
         if (scene.name == GameSettings.titleScreenScene)
             PlayMusic(mainMenuMusic);
 
@@ -73,7 +85,17 @@ public class InverteboyController : MonoBehaviour
             PlayMusic(lobbyMusic);
 
         if (scene.name == GameSettings.arenaScene)
+        {
             PlayMusic(arenaMusic);
+            SwitchMainCanvas((int)InverteboyMainScreens.ARENA);
+        }
+
+        if(scene.name == GameSettings.tutorialScene)
+        {
+            SwitchMainCanvas((int)InverteboyMainScreens.MAIN);
+            SwitchHologramCanvas((int)InverteboyHologramScreens.TUTORIAL);
+            ForceOpenInverteboy(true);
+        }
     }
 
     /// <summary>
@@ -105,7 +127,10 @@ public class InverteboyController : MonoBehaviour
         {
             //If the player has been looking at the inverteboy for enough time and is open, open the inverteboy
             if(timeLookingAtInverteboy > lookBufferTime && !isOpen)
+            {
                 OpenInverteboy(true);
+                OpenHologramMenu(true);
+            }
 
             timeLookingAtInverteboy += Time.deltaTime;  //Increment timer
         }
@@ -115,7 +140,10 @@ public class InverteboyController : MonoBehaviour
 
             //Close the inverteboy if open
             if (isOpen)
+            {
                 OpenInverteboy(false);
+                OpenHologramMenu(false);
+            }
         }
     }
 
@@ -128,7 +156,10 @@ public class InverteboyController : MonoBehaviour
         forceOpen = open;
 
         if (forceOpen && !isOpen)
+        {
             OpenInverteboy(true);
+            OpenHologramMenu(true);
+        }
     }
 
     private void OpenInverteboy(bool openInverteboy)
@@ -162,7 +193,7 @@ public class InverteboyController : MonoBehaviour
 
         while (timeElapsed < movementSpeed)
         {
-            float inverteboyAngle = Mathf.Lerp(startingAngle, endingAngle, animationCurve.Evaluate(timeElapsed / movementSpeed));
+            float inverteboyAngle = Mathf.Lerp(startingAngle, endingAngle, openAnimationCurve.Evaluate(timeElapsed / movementSpeed));
             flipScreenTransform.localEulerAngles = new Vector3(inverteboyAngle, 0f, 0f);
 
             timeElapsed += Time.deltaTime;
@@ -170,6 +201,72 @@ public class InverteboyController : MonoBehaviour
         }
 
         flipScreenTransform.localEulerAngles = new Vector3(endingAngle, 0f, 0f);
+    }
+
+    public void OpenHologramMenu(bool openHologram)
+    {
+        if (hologramAnimation != null)
+            StopCoroutine(hologramAnimation);
+
+        hologramAnimation = HologramMovementAnimation(openHologram);
+        StartCoroutine(hologramAnimation);
+    }
+
+    private IEnumerator HologramMovementAnimation(bool open)
+    {
+        hologramOpen = open;
+
+        float timeElapsed = 0;
+
+        float startingY, endingY;
+        Vector3 startingScale, endingScale;
+
+        if (hologramOpen)
+        {
+            startingY = 0f;
+            endingY = hologramHeight;
+
+            startingScale = Vector3.zero;
+            endingScale = Vector3.one;
+        }
+        else
+        {
+            startingY = hologramHeight;
+            endingY = 0f;
+
+            startingScale = Vector3.one;
+            endingScale = Vector3.zero;
+        }
+
+
+        while (timeElapsed < movementSpeed)
+        {
+            float hologramY = Mathf.Lerp(startingY, endingY, hologramAnimationCurve.Evaluate(timeElapsed / hologramSpeed));
+            Vector3 hologramScale = Vector3.Lerp(startingScale, endingScale, hologramAnimationCurve.Evaluate(timeElapsed / hologramSpeed));
+
+            hologramObject.transform.localPosition = new Vector3(hologramObject.transform.localPosition.x, hologramY, hologramObject.transform.localPosition.z);
+            hologramObject.transform.localScale = hologramScale;
+
+            timeElapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        hologramObject.transform.localPosition = new Vector3(hologramObject.transform.localPosition.x, endingY, hologramObject.transform.localPosition.z);
+        hologramObject.transform.localScale = endingScale;
+    }
+
+    private void ShowHologram(bool showHologram)
+    {
+        if (showHologram)
+        {
+            hologramObject.transform.localPosition = new Vector3(hologramObject.transform.localPosition.x, hologramHeight, hologramObject.transform.localPosition.z);
+            hologramObject.transform.localScale = Vector3.one;
+        }
+        else
+        {
+            hologramObject.transform.localPosition = Vector3.zero;
+            hologramObject.transform.localScale = Vector3.zero;
+        }
     }
 
     /// <summary>
@@ -184,29 +281,55 @@ public class InverteboyController : MonoBehaviour
     }
 
     /// <summary>
-    /// Switches the canvas of the Inverteboy.
+    /// Switches the canvas of the main Inverteboy screen.
     /// </summary>
     /// <param name="canvasIndex">the index of the new canvas.</param>
-    public void SwitchCanvas(int canvasIndex)
+    public void SwitchMainCanvas(int canvasIndex)
     {
-        Canvas newCanvas = inverteboyCanvases[canvasIndex];
+        Canvas newCanvas = inverteboyMainCanvases[canvasIndex];
 
-        currentCanvas.enabled = false;
-        currentCanvas = newCanvas;
-        currentCanvas.enabled = true;
+        currentMainCanvas.enabled = false;
+        currentMainCanvas = newCanvas;
+        currentMainCanvas.enabled = true;
     }
 
     /// <summary>
-    /// Switches the canvas of the Inverteboy.
+    /// Switches the canvas of the Inverteboy hologram.
     /// </summary>
     /// <param name="canvasIndex">the index of the new canvas.</param>
-    public void SwitchCanvas(InverteboyScreens canvasIndex)
+    public void SwitchHologramCanvas(int canvasIndex)
     {
-        Canvas newCanvas = inverteboyCanvases[(int)canvasIndex];
+        Canvas newCanvas = inverteboyHologramCanvases[canvasIndex];
 
-        currentCanvas.enabled = false;
-        currentCanvas = newCanvas;
-        currentCanvas.enabled = true;
+        currentHologramCanvas.enabled = false;
+        currentHologramCanvas = newCanvas;
+        currentHologramCanvas.enabled = true;
+    }
+
+    /// <summary>
+    /// Switches the canvas of the main Inverteboy screen.
+    /// </summary>
+    /// <param name="canvasIndex">the index of the new canvas.</param>
+    public void SwitchMainCanvas(InverteboyMainScreens canvasIndex)
+    {
+        Canvas newCanvas = inverteboyMainCanvases[(int)canvasIndex];
+
+        currentMainCanvas.enabled = false;
+        currentMainCanvas = newCanvas;
+        currentMainCanvas.enabled = true;
+    }
+
+    /// <summary>
+    /// Switches the canvas of the Inverteboy hologram.
+    /// </summary>
+    /// <param name="canvasIndex">the index of the new canvas.</param>
+    public void SwitchHologramCanvas(InverteboyHologramScreens canvasIndex)
+    {
+        Canvas newCanvas = inverteboyHologramCanvases[(int)canvasIndex];
+
+        currentHologramCanvas.enabled = false;
+        currentHologramCanvas = newCanvas;
+        currentHologramCanvas.enabled = true;
     }
 
     /// <summary>
@@ -214,9 +337,9 @@ public class InverteboyController : MonoBehaviour
     /// </summary>
     /// <param name="canvasIndex">The index of the canvas.</param>
     /// <param name="showCanvas">If true, the canvas is enabled. If false, the canvas is hidden.</param>
-    public void ShowCanvas(int canvasIndex, bool showCanvas)
+    public void ShowMainCanvas(int canvasIndex, bool showCanvas)
     {
-        inverteboyCanvases[canvasIndex].enabled = showCanvas;
+        inverteboyMainCanvases[canvasIndex].enabled = showCanvas;
     }
 
     /// <summary>
@@ -224,9 +347,23 @@ public class InverteboyController : MonoBehaviour
     /// </summary>
     /// <param name="canvasIndex">The index of the canvas.</param>
     /// <param name="showCanvas">If true, the canvas is enabled. If false, the canvas is hidden.</param>
-    public void ShowCanvas(InverteboyScreens canvasIndex, bool showCanvas)
+    public void ShowMainCanvas(InverteboyMainScreens canvasIndex, bool showCanvas)
     {
-        inverteboyCanvases[(int)canvasIndex].enabled = showCanvas;
+        inverteboyMainCanvases[(int)canvasIndex].enabled = showCanvas;
+    }
+
+    /// <summary>
+    /// Shows a popup on the player's HUD.
+    /// </summary>
+    /// <param name="sender">The sender to show on the popup.</param>
+    public void ShowInverteboyPopup(string sender = "")
+    {
+        GameObject newPopup = Instantiate(popupPrefab, popupContainer);
+
+        if (sender == "")
+            newPopup.GetComponentInChildren<TextMeshProUGUI>().text = "Incoming Message On Inverteboy";
+        else
+            newPopup.GetComponentInChildren<TextMeshProUGUI>().text = "Incoming Message From:\n" + sender;
     }
 
     /// <summary>
@@ -246,9 +383,11 @@ public class InverteboyController : MonoBehaviour
     {
         for (int i = 0; i < flashNumber * 2; i++)
         {
-            infoWindow.color = infoWindow.color == defaultInfoWindowColor ? flashInfoWindowColor : defaultInfoWindowColor;
-            if (infoWindow.color == flashInfoWindowColor)
-                PlayerController.instance.SendHapticImpulse(InputDeviceRole.LeftHanded, new Vector2(0.1f, flashSpeed));
+            foreach(var window in infoWindow)
+                window.color = window.color == defaultInfoWindowColor ? flashInfoWindowColor : defaultInfoWindowColor;
+
+            if (infoWindow[0].color == flashInfoWindowColor)
+                PlayerController.instance.SendHapticImpulse(InputDeviceRole.LeftHanded, new Vector2(hapticsStrength, flashSpeed));
             yield return new WaitForSeconds(flashSpeed);
         }
     }

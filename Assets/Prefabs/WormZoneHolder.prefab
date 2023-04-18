@@ -10683,6 +10683,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5140416440903843769}
+  - component: {fileID: 7513089004291307240}
   m_Layer: 0
   m_Name: WormZoneHolder
   m_TagString: Untagged
@@ -10721,6 +10722,21 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+--- !u!114 &7513089004291307240
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5120769077581133618}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04b977a60bd3a884ebe190b9ade595b2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  multiShot: {fileID: 3040414784228672906}
+  heatVision: {fileID: 3663305926561663067}
+  invincibility: {fileID: 8757552473148935704}
 --- !u!1 &5311333786893583544
 GameObject:
   m_ObjectHideFlags: 0
@@ -16138,6 +16154,7 @@ GameObject:
   m_Component:
   - component: {fileID: 760038708360116361}
   - component: {fileID: 8973659162628435023}
+  - component: {fileID: 666308899138716184}
   m_Layer: 0
   m_Name: Area Light
   m_TagString: Untagged
@@ -16222,6 +16239,26 @@ Light:
   m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0
   m_ShadowAngle: 0
+--- !u!114 &666308899138716184
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7523258951432324766}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Version: 1
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_LightLayerMask: 1
+  m_CustomShadowLayers: 0
+  m_ShadowLayerMask: 1
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
 --- !u!1 &7695963837752351079
 GameObject:
   m_ObjectHideFlags: 0
@@ -21742,6 +21779,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8c064a0de35411c4fa7a1bdd80596783, type: 3}
+--- !u!1 &8757552473148935704 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6217499155098336413, guid: 8c064a0de35411c4fa7a1bdd80596783, type: 3}
+  m_PrefabInstance: {fileID: 3441292282271085189}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &8757552473148935781 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6217499155098336480, guid: 8c064a0de35411c4fa7a1bdd80596783, type: 3}
@@ -21813,6 +21855,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6217499155098336480, guid: 17867a4557a970545a83d3ec6a2d39f0, type: 3}
   m_PrefabInstance: {fileID: 7250324667266233542}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &3663305926561663067 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6217499155098336413, guid: 17867a4557a970545a83d3ec6a2d39f0, type: 3}
+  m_PrefabInstance: {fileID: 7250324667266233542}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &8969278924549175575
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -21874,6 +21921,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 027e2c952aa06954e9e06aa0408d47f7, type: 3}
+--- !u!1 &3040414784228672906 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6217499155098336413, guid: 027e2c952aa06954e9e06aa0408d47f7, type: 3}
+  m_PrefabInstance: {fileID: 8969278924549175575}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &3040414784228673015 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6217499155098336480, guid: 027e2c952aa06954e9e06aa0408d47f7, type: 3}
