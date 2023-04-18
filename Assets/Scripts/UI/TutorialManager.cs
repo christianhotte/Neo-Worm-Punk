@@ -29,4 +29,11 @@ public class TutorialManager : MonoBehaviour
         PlayerController.instance.inverteboy.Flash();
         PlayerController.instance.inverteboy.UpdateTutorialText(tutorialMessages[(int)tutorialSegment], tutorialLabels[(int)tutorialSegment]);
     }
+
+    public void DisplayTutorial(int tutorialSegment)
+    {
+        PlayerController.instance.inverteboy.ShowInverteboyPopup("Spineless Benefactor");
+        PlayerController.instance.inverteboy.Flash();
+        PlayerController.instance.inverteboy.UpdateTutorialText(tutorialMessages[tutorialSegment], tutorialLabels[tutorialSegment]);
+    }
 }
