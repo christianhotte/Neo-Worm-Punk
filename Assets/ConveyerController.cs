@@ -228,7 +228,7 @@ public class ConveyerController : MonoBehaviour
         endTransportTime = 5.0f;
 
         startYPos = tube.localPosition;
-        Vector3 secondStartYPos = conveyerBeltObjects[0].localPosition;
+        Vector3 secondStartYPos = conveyerBeltObjects[0].position;
         endYPos = startYPos;
         endYPos += new Vector3(0, 10, 0);
         yeetNotYetNoob = false;
@@ -240,7 +240,7 @@ public class ConveyerController : MonoBehaviour
             if (GameManager.Instance.levelTransitionActive) { break; }
 
             tube.localPosition = Vector3.Lerp(startYPos, endYPos, timeElapsed / endTransportTime);
-            conveyerBeltObjects[0].localPosition += Vector3.Lerp(startYPos, endYPos, timeElapsed / endTransportTime);
+            conveyerBeltObjects[0].position += Vector3.Lerp(startYPos, endYPos, timeElapsed / endTransportTime);
 
             if (!yeetNotYetNoob && timeElapsed > 2.0f)
             {
