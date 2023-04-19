@@ -25,6 +25,8 @@ public class NewShotgunController : PlayerEquipment
     [SerializeField, Tooltip("Part on the side of the weapon which indicates barrel load status.")]     private Transform rightEjectorAssembly;
     [SerializeField, Tooltip("Pin on the back of the weapon which indicates when it is fired.")]        private Transform leftFiringPin;
     [SerializeField, Tooltip("Pin on the back of the weapon which indicates when it is fired.")]        private Transform rightFiringPin;
+    [SerializeField, Tooltip("Position where left shell is spawned in and ejected from.")]              private Transform leftChamber;
+    [SerializeField, Tooltip("Position where right shell is spawned in and ejected from.")]             private Transform rightChamber;
     [Header("Debug Settings:")]
     [SerializeField, Tooltip("Makes it so that weapon fires from the gun itself and not on the netwrok.")] private bool debugFireLocal = false;
 
@@ -50,6 +52,9 @@ public class NewShotgunController : PlayerEquipment
     private Vector3 baseEjectorLPos; //Base position of left ejector
     private Vector3 baseEjectorRPos; //Base position of right ejector
     private Vector3 basePinPos;      //Base position of both firing pins
+
+    private Material litPinMat;   //Color of firing pin indicator light when chamber is full (default color of LEFT FIRING PIN)
+    private Material spentPinMat; //Color of firing pin indicator light when chamber is empty (default color of RIGHT FIRING PIN)
 
     //Events & Coroutines:
     /// <summary>
@@ -98,7 +103,7 @@ public class NewShotgunController : PlayerEquipment
     /// <param name="forward">True moves ejector(s) forward, false moves it/them backward.</param>
     public IEnumerator MoveEjector(Handedness side, bool forward)
     {
-        //validity checks:
+        //Validity checks:
         bool leftInPlace = (leftEjectorAssembly.localPosition == baseEjectorLPos) != forward;   //Check whether or not left ejector is in target position
         bool rightInPlace = (rightEjectorAssembly.localPosition == baseEjectorRPos) != forward; //Check whether or not right ejector is in target position
         if (side == Handedness.None && leftInPlace && rightInPlace) yield return null; //End if both ejectors are already in target positions
@@ -107,6 +112,7 @@ public class NewShotgunController : PlayerEquipment
         Vector3 originAdd = forward ? Vector3.zero : (gunSettings.ejectorTraverseDistance * Vector3.forward); //Get amount to add to origin for each ejector
         Vector3 targetAdd = forward ? (gunSettings.ejectorTraverseDistance * Vector3.forward) : Vector3.zero; //Get amount to add to target for each ejector
 
+        //Transition:
         for (float totalTime = 0; totalTime < gunSettings.ejectorTraverseTime; totalTime += Time.fixedDeltaTime) //Iterate once each fixed update for duration of ejector phase
         {
             //Initialization:
@@ -148,6 +154,11 @@ public class NewShotgunController : PlayerEquipment
         baseEjectorLPos = leftEjectorAssembly.localPosition;  //Get base local position of left ejector assembly
         baseEjectorRPos = rightEjectorAssembly.localPosition; //Get base local position of right ejector assembly
         basePinPos = leftFiringPin.localPosition;             //Get base local position of both firing pins
+
+        //Get pin colors:
+        litPinMat = leftFiringPin.Find("Light").GetComponent<Renderer>().material;    //Get lit color from left firing pin light
+        spentPinMat = rightFiringPin.Find("Light").GetComponent<Renderer>().material; //Get unlit color from right firing pin light
+        rightFiringPin.Find("Light").GetComponent<Renderer>().material = litPinMat;   //Set up right firing pin with lit color
     }
     private protected override void Start()
     {
@@ -541,8 +552,27 @@ public class NewShotgunController : PlayerEquipment
     /// <param name="inward">Pass true to move pin inward, false to move it back out.</param>
     private void MovePin(Handedness side, bool inward)
     {
+        //Initialization:
         Vector3 targetPinPos = basePinPos + (inward ? (Vector3.forward * gunSettings.pinTraverseDistance) : Vector3.zero); //Get position pin(s) are being moved to
-        if (side == Handedness.Left || side == Handedness.None) leftFiringPin.localPosition = targetPinPos;                //Left pin is being moved
-        if (side == Handedness.Right || side == Handedness.None) rightFiringPin.localPosition = targetPinPos;              //Right pin is being moved
+        Material targetPinMat = inward ? spentPinMat : litPinMat;                                                          //Determine material pin color is going to be changing to
+
+        //Modify pins:
+        if (side == Handedness.Left || side == Handedness.None) //Left pin is being moved
+        {
+            leftFiringPin.localPosition = targetPinPos;                                   //Move left pin to target position
+            leftFiringPin.Find("Light").GetComponent<Renderer>().material = targetPinMat; //Change color of indicator light
+        }
+        if (side == Handedness.Right || side == Handedness.None) //Right pin is being moved
+        {
+            rightFiringPin.localPosition = targetPinPos;                                   //Move right pin to target position
+            rightFiringPin.Find("Light").GetComponent<Renderer>().material = targetPinMat; //Change color of indicator light
+        }
+    }
+    /// <summary>
+    /// Instantiates shells in both weapon chambers.
+    /// </summary>
+    private void LoadChambers()
+    {
+
     }
 }

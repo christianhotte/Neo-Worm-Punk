@@ -8,8 +8,10 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "Data", menuName = "ScriptableObjects/ShotgunSettings", order = 1)]
 public class ShotgunSettings : ScriptableObject
 {
-    [Header("Mechanical Properties:")]
+    [Header("Resources:")]
     [Tooltip("Name of projectile prefab fired by this weapon (make sure this refers to a projectile in the Resources/Projectiles folder).")] public string projectileResourceName;
+    [Tooltip("Prefab for shells ejected by weapon when reloading.")]                                                                         public GameObject shellPrefab;
+    [Header("Mechanical Properties:")]
     [Min(1), Tooltip("Maximum number of shots which can be loaded into weapon (not necessarily equal to number of barrels).")]               public int maxLoadedShots = 2;
     [Min(1), Tooltip("Number of projectiles spawned whenever weapon is fired.")]                                                             public int projectilesPerShot = 1;
     [Range(0, 90), Tooltip("Maximum random spread angle added to every projectile fired.")]                                                  public float shotSpread = 0;
@@ -58,10 +60,10 @@ public class ShotgunSettings : ScriptableObject
     [Tooltip("Describes motion of ejector during traversal.")]                                public AnimationCurve ejectorTraverseCurve;
     [Min(0), Tooltip("Amount forward firing pins move when weapon is fired.")]                public float pinTraverseDistance;
     [Header("Effects:")]
-    [Tooltip("Settings for configuring the vibration player feels when firing.")]             public PlayerController.HapticData fireHaptics;
-    [Tooltip("Settings for configuring the vibration player feels when ejecting shells.")]    public PlayerController.HapticData ejectHaptics;
-    [Tooltip("Settings for configuring the vibration player feels when closing the breach.")] public PlayerController.HapticData closeHaptics;
-    [Tooltip("Magnitude (x) and duration (y) of screenshake event when weapon is fired.")]    public Vector2 fireScreenShake;
+    [Tooltip("Settings for configuring the vibration player feels when firing.")]                             public PlayerController.HapticData fireHaptics;
+    [Tooltip("Settings for configuring the vibration player feels when ejecting shells.")]                    public PlayerController.HapticData ejectHaptics;
+    [Tooltip("Settings for configuring the vibration player feels when closing the breach.")]                 public PlayerController.HapticData closeHaptics;
+    [Tooltip("Magnitude (x) and duration (y) of screenshake event when weapon is fired.")]                    public Vector2 fireScreenShake;
     [Header("Sounds:")]
     [Tooltip("SFX for when weapon is fired")]          public AudioClip fireSound;
     [Tooltip("SFX for when breach is opened")]         public AudioClip ejectSound;
