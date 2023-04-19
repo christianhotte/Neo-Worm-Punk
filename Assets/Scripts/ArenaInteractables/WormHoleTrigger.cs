@@ -45,7 +45,7 @@ public class WormHoleTrigger : MonoBehaviour
             GameObject playerRb = PlayerController.instance.bodyRb.gameObject;//gets player reference to send to the wormhole script
             playerRb.transform.position = wormholeEntrance.position;
             holeAnim.SetBool("Locked", true);
-            StartCoroutine(WHS.StartWormhole(this.gameObject, playerRb)); //Tells the wormhole to start the loop 
+            StartCoroutine(WHS.StartWormhole(this, playerRb)); //Tells the wormhole to start the loop 
             return;
         }
     }
