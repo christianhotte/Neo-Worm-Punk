@@ -22,7 +22,7 @@ public class ConveyerController : MonoBehaviour
     private bool changingHereBoi = false;
     private bool createRoomOption;
     private bool yeetNotYetNoob = false;
-    
+    private bool tutorialOption = false;
 
 
 
@@ -225,11 +225,12 @@ public class ConveyerController : MonoBehaviour
         tube.localRotation = Quaternion.Euler(endYRot);
 
         timeElapsed = 0f;
-        endTransportTime = 10.0f;
+        endTransportTime = 5.0f;
 
         startYPos = tube.localPosition;
+        Vector3 secondStartYPos = conveyerBeltObjects[0].localPosition;
         endYPos = startYPos;
-        endYPos += new Vector3(0, 5, 0);
+        endYPos += new Vector3(0, 10, 0);
         yeetNotYetNoob = false;
 
         //lerp whole tube up
@@ -238,18 +239,14 @@ public class ConveyerController : MonoBehaviour
             //will  cut this off once you start loading the new scene
             if (GameManager.Instance.levelTransitionActive) { break; }
 
-            //smooth lerp duration alg
-            float t = timeElapsed / endTransportTime;
-            t = t * t * (3f - 2f * t);
-
-            tube.localPosition = Vector3.Lerp(startYPos, endYPos, t);
-            conveyerBeltObjects[0].localPosition += Vector3.Lerp(startYPos, endYPos, t);
+            tube.localPosition = Vector3.Lerp(startYPos, endYPos, timeElapsed / endTransportTime);
+            conveyerBeltObjects[0].localPosition += Vector3.Lerp(startYPos, endYPos, timeElapsed / endTransportTime);
 
             if (!yeetNotYetNoob && timeElapsed > 2.0f)
             {
                 yeetNotYetNoob = true;
                 Debug.Log("_________________________________________________________________________________________ fade to part");
-                StartCoroutine(FadeToBlackAndGoToLockerRoom());
+                StartCoroutine(FadeToBlackAndGoToNextScene());
             }
 
             //advance time
@@ -259,7 +256,7 @@ public class ConveyerController : MonoBehaviour
         }
     }
 
-    private IEnumerator FadeToBlackAndGoToLockerRoom()
+    private IEnumerator FadeToBlackAndGoToNextScene()
     {
         yeetNotYetNoob = true;
 
@@ -269,7 +266,11 @@ public class ConveyerController : MonoBehaviour
         yield return null;
 
         //join or create room based on which one works
-        if (createRoomOption)
+        if(tutorialOption)
+        {
+            GameManager.Instance.LoadGame(GameSettings.tutorialScene);
+        }
+        else if (createRoomOption)
         {
             lubbyUIScriptRef.CreateRoom();
         }
@@ -282,11 +283,18 @@ public class ConveyerController : MonoBehaviour
     public void CreateRoomOptionChosen()
     {
         createRoomOption = true;
+        tutorialOption = false;
     }
 
     public void JoinRoomOptionChosen()
     {
         createRoomOption = false;
+        tutorialOption = false;
+    }
+
+    public void TutorialOptionChosen()
+    {
+        tutorialOption = true;
     }
 
     /// <summary>
