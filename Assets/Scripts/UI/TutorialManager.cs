@@ -6,7 +6,8 @@ public class TutorialManager : MonoBehaviour
 {
     public enum Tutorial { GUNS, TURN, MOVE, CHAINSAW, HOOKSHOT, PARRY }
 
-    [SerializeField, Tooltip("The different tutorial segments.")] private TutorialSegment[] tutorialSegments;
+    [SerializeField] private string[] tutorialLabels;
+    [SerializeField] private string[] tutorialMessages;
 
     private Tutorial currentTutorialSegment;
 
@@ -33,27 +34,19 @@ public class TutorialManager : MonoBehaviour
     public void DisplayTutorial(Tutorial tutorialSegment)
     {
         PlayerController.instance.inverteboy.Flash();
-        PlayerController.instance.inverteboy.UpdateTutorialText(tutorialSegments[(int)tutorialSegment].message, tutorialSegments[(int)tutorialSegment].label, tutorialSegments[(int)tutorialSegment].diagram);
+        PlayerController.instance.inverteboy.UpdateTutorialText(tutorialMessages[(int)tutorialSegment], tutorialLabels[(int)tutorialSegment]);
         currentTutorialSegment = tutorialSegment;
-        ResetTutorialTask();
     }
 
-    /// <summary>
-    /// Displays a tutorial message based on the tutorial segment active.
-    /// </summary>
-    /// <param name="tutorialSegment">The tutorial segment to show the information for.</param>
     public void DisplayTutorial(int tutorialSegment)
     {
         PlayerController.instance.inverteboy.ShowInverteboyPopup("Spineless Benefactor");
         PlayerController.instance.inverteboy.Flash();
-        PlayerController.instance.inverteboy.UpdateTutorialText(tutorialSegments[tutorialSegment].message, tutorialSegments[tutorialSegment].label, tutorialSegments[tutorialSegment].diagram);
+        PlayerController.instance.inverteboy.UpdateTutorialText(tutorialMessages[tutorialSegment], tutorialLabels[tutorialSegment]);
         currentTutorialSegment = (Tutorial)tutorialSegment;
         ResetTutorialTask();
     }
 
-    /// <summary>
-    /// Resets the tutorial task based on the tutorial segment active.
-    /// </summary>
     public void ResetTutorialTask()
     {
         switch (currentTutorialSegment)
@@ -66,9 +59,6 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Increments the tutorial task in progress.
-    /// </summary>
     public void IncrementTutorialProgress()
     {
         switch (currentTutorialSegment)
@@ -78,41 +68,15 @@ public class TutorialManager : MonoBehaviour
                 if (targetsShot < targetGoal)
                     PlayerController.instance.inverteboy.UpdateTutorialProgress("Shoot Five Targets.\n" + targetsShot + " / " + targetGoal);
                 else
-                    OnTaskComplete();
+                    PlayerController.instance.inverteboy.UpdateTutorialProgress("Task Complete.");
                 break;
         }
     }
 
-    /// <summary>
-    /// Calls whenever a task is completed.
-    /// </summary>
-    private void OnTaskComplete()
-    {
-        PlayerController.instance.inverteboy.UpdateTutorialProgress("Task Complete.");
-        switch (currentTutorialSegment)
-        {
-            default:
-                //Task completed
-                break;
-        }
-    }
-
-    /// <summary>
-    /// Displays empty text for when there are no active tutorials.
-    /// </summary>
     public void DisplayEmptyText()
     {
         PlayerController.instance.inverteboy.UpdateTutorialText("No Incoming Messages.");
-        PlayerController.instance.inverteboy.UpdateTutorialProgress("");
     }
 
     public Tutorial GetCurrentTutorialSegment() => currentTutorialSegment;
-}
-
-[System.Serializable]
-public class TutorialSegment
-{
-    public string label;
-    public string message;
-    public Sprite diagram;
 }
