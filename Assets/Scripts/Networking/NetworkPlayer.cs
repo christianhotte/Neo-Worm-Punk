@@ -129,6 +129,13 @@ public class NetworkPlayer : MonoBehaviour
             foreach (Renderer r in transform.GetComponentsInChildren<Renderer>()) r.enabled = false; //Local player should never be able to see their own NetworkPlayer
 
             NetworkManagerScript.instance.AdjustVoiceVolume();  //Adjusts the volume of all players
+
+            //Bone evaporator:
+            foreach (Rigidbody tailRb in GetComponentsInChildren<Rigidbody>())
+            {
+                tailRb.isKinematic = true;
+                if (tailRb.TryGetComponent(out Collider coll)) Destroy(coll);
+            }
         }
 
         //Runtime variable setup:
@@ -225,6 +232,7 @@ public class NetworkPlayer : MonoBehaviour
                 //Local scene setup:
                 RigToActivePlayer(); //Re-apply rig to new scene's PlayerController
 
+                //Local visibility:
                 if (scene.name == NetworkManagerScript.instance.mainMenuScene)
                 {
                     photonView.RPC("RPC_MakeInvisible", RpcTarget.OthersBuffered);  //Hide all remote players when entering main menu

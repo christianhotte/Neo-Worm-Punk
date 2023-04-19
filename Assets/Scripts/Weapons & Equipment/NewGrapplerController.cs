@@ -185,7 +185,7 @@ public class NewGrapplerController : PlayerEquipment
         if (hook.punchWhipped && hook.timeInState < settings.punchWhipCooldown) return; //Do not allow hook to be launched before punch-whip cooldown has ended
 
         //Fire hook:
-        hook.Fire(barrel.position, hand.rotation, PlayerController.photonView.ViewID); //Fire using the position of barrel and rotation of hand (to allow for more directional flexibility)
+        hook.Fire(barrel.position, hand.rotation, PlayerController.photonView != null ? PlayerController.photonView.ViewID : -1); //Fire using the position of barrel and rotation of hand (to allow for more directional flexibility)
 
         //Effects:
         Vector3 forwardHandVel = Vector3.Project(RelativeVelocity, hand.forward); //Get forward hand velocity (relative to barrel)
