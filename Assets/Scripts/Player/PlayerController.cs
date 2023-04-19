@@ -338,7 +338,13 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        combatHUD.GetComponent<Canvas>().enabled = inCombat;
+        if (SceneManager.GetActiveScene().name != GameSettings.tutorialScene)
+        {
+            if (inCombat)
+                inverteboy.SwitchMainCanvas(InverteboyController.InverteboyMainScreens.ARENA);
+            else
+                inverteboy.SwitchMainCanvas(InverteboyController.InverteboyMainScreens.MAIN);
+        }
     }
 
     //INPUT METHODS:

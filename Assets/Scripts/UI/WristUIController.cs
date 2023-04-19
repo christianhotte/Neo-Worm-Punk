@@ -10,9 +10,9 @@ public class WristUIController : MonoBehaviour
     [SerializeField, Tooltip("The player controller.")] private PlayerController playerController;
     [SerializeField, Tooltip("The player input actions asset.")] private InputActionAsset inputActions;
     [SerializeField, Tooltip("The menu ray interactors.")] private GameObject[] rayInteractors;
-    [SerializeField, Tooltip("The canvas that shows the player HUD.")] private Canvas playerHUD;
     [SerializeField, Tooltip("The interactable HUD menu.")] private PlayerHUDController playerHUDController;
 
+    [SerializeField, Tooltip("The button that allows the player to go back to the main menu.")] private GameObject quitToMainButton;
     [SerializeField, Tooltip("The button that allows the player to leave their room.")] private GameObject leaveRoomButton;
 
     private Canvas wristCanvas; //The canvas that shows the wrist menu
@@ -53,10 +53,12 @@ public class WristUIController : MonoBehaviour
     public void ShowMenu(bool showMenu)
     {
         wristCanvas.enabled = showMenu;
-        playerHUD.enabled = showMenu;
         playerHUDController.GetComponent<Canvas>().enabled = showMenu;
         playerController.SetCombat(!showMenu);
-        playerController.inverteboy.ForceOpenInverteboy(showMenu);
+        
+        if(SceneManager.GetActiveScene().name != GameSettings.tutorialScene)
+            playerController.inverteboy.ForceOpenInverteboy(showMenu);
+
         foreach (var interactor in rayInteractors)
             interactor.SetActive(showMenu);
     }
@@ -79,7 +81,10 @@ public class WristUIController : MonoBehaviour
         }
         //If they are not in a room, set the button to false.
         else
+        {
             leaveRoomButton.SetActive(false);
+            quitToMainButton.SetActive(SceneManager.GetActiveScene().name != GameSettings.titleScreenScene);
+        }
     }
 
     /// <summary>
@@ -90,6 +95,11 @@ public class WristUIController : MonoBehaviour
         PhotonNetwork.LeaveRoom();  //Leave the room
         PhotonNetwork.LeaveLobby(); //Leave the lobby
         PhotonNetwork.Disconnect(); //Disconnects from the server
+    }
+
+    public void QuitToMain()
+    {
+        NetworkManagerScript.instance.LoadSceneWithFade(GameSettings.titleScreenScene);
     }
 
     /// <summary>
