@@ -137,6 +137,7 @@ public class WormHole : NetworkedArenaElement
         {
             EntryTrigger = startHole;
             OpenExits.Remove(startHole);
+            randRange = OpenExits.Count;
             int randomIndex = Random.Range(0, randRange);
             triggerScript = OpenExits[randomIndex];
             exitPos = triggerScript.transform;
