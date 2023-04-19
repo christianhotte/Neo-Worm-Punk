@@ -193,6 +193,7 @@ public class WormHole : NetworkedArenaElement
         float diff = playerCam.transform.eulerAngles.y - exitPos.transform.eulerAngles.y; // gets the difference in angle between the player and the exit
         float exitDiff = playerCam.transform.eulerAngles.y - startRot;//adjusts the players rotation by the difference in the wormhole and as they turn in the wormhole
         diff = diff - exitDiff;
+        triggerScript.locked = true;
         playerOBJ.transform.rotation = Quaternion.Euler(playerOBJ.transform.eulerAngles.x, playerOBJ.transform.eulerAngles.y - diff, playerOBJ.transform.eulerAngles.z);//turns the player to face out of the worhole
         playerOBJ.transform.position = exitPos.position; //takes the player out of the wormhole
         if (PhotonNetwork.IsConnected)
