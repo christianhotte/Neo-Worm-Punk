@@ -466,7 +466,7 @@ public class Projectile : MonoBehaviourPunCallbacks
     private protected virtual void BurnOut()
     {
         //Mid-air explosion:
-        if (PhotonNetwork.IsConnected && !photonView.IsMine) return; //Make sure non-main projectiles cannot burn out (only valid while projectiles are on the network)
+        if (PhotonNetwork.IsConnected && !photonView.IsMine && !dumbFired) return; //Make sure non-main projectiles cannot burn out (only valid while projectiles are on the network)
         if (settings.explosionPrefab != null) //Only explode if projectile has an explosion prefab
         {
             ExplosionController explosion = Instantiate(settings.explosionPrefab, transform.position, transform.rotation).GetComponent<ExplosionController>(); //Instantiate an explosion at burnout point
