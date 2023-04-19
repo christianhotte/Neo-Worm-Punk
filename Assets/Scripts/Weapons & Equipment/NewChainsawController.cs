@@ -31,7 +31,7 @@ public class NewChainsawController : PlayerEquipment
 
     private Transform hand;             //Real position of player hand used by this equipment
     private PlayerEquipment handWeapon; //Player weapon held in the same hand as this chainsaw
-    private NewGrapplerController otherHandGrapple; 
+    private NewGrapplerController otherHandGrapple;
 
     //Settings:
     [Header("Settings:")]
@@ -363,7 +363,7 @@ public class NewChainsawController : PlayerEquipment
             //Pull player forward:
             float interpolant = Mathf.Min(settings.deflectTime, timeInMode) / settings.deflectTime;
             float pullForceMultiplier = settings.deflectPullForce * Time.deltaTime * settings.deflectPullForceCurve.Evaluate(interpolant);
-            player.bodyRb.AddForce(transform.forward * pullForceMultiplier, ForceMode.Acceleration); //Add force to player body
+            player.bodyRb.AddForce(transform.forward * pullForceMultiplier, ForceMode.Force); //Add force to player body
 
             //targetWristRot = Quaternion.RotateTowards(wrist.parent.rotation, targetWristRot, settings.maxWristAngle);  //Clamp rotation to set angular limit
             //wrist.rotation = Quaternion.Lerp(wrist.rotation, targetWristRot, settings.wristLerpRate * Time.deltaTime); //Lerp wrist toward target rotation
