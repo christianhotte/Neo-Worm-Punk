@@ -175,6 +175,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   light: {fileID: 5374682211338973234}
   WormHole: {fileID: 9109921427710634525}
+  particle: {fileID: 730297741547238853}
   wormholeEntrance: {fileID: 1620262601156547262}
 --- !u!114 &3605367630141126351
 MonoBehaviour:
@@ -249,18 +250,19 @@ MonoBehaviour:
   wormZoneParticles: {fileID: 5120769077581133618, guid: 4f62d637fc7968845b5980a817dd33ac, type: 3}
   wormZoneInstance: {fileID: 0}
   playerCam: {fileID: 0}
-  particle1: {fileID: 730297741547238853}
-  particle2: {fileID: 584470618371506264}
   waitTime: 2
   exitSpeed: 30
   wormZoneSpeed: 5
+  randomExit: 0
   PC: {fileID: 0}
   playerOrigin: {fileID: 0}
+  OpenExits: []
   wormHoleAud: {fileID: 0}
   enterSound: {fileID: 8300000, guid: b0a64d7436126ce499301beef26175fa, type: 3}
   suctionSound: {fileID: 8300000, guid: 9d4cc2d3b1ccff84b9b1ebb65d46451e, type: 3}
   wormZoneScript: {fileID: 0}
   luckyChance: 10
+  randRange: 0
 --- !u!82 &1951368902157187744
 AudioSource:
   m_ObjectHideFlags: 0
@@ -382,7 +384,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1620262601096244178}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -129.32185, y: -500, z: -0.000015258789}
+  m_LocalPosition: {x: -129.32185, y: -5000, z: -0.000015258789}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -512,6 +514,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   light: {fileID: 9133768623429087693}
   WormHole: {fileID: 2460891239498265623}
+  particle: {fileID: 584470618371506264}
   wormholeEntrance: {fileID: 1620262600103442328}
 --- !u!114 &2735634459400725784
 MonoBehaviour:
