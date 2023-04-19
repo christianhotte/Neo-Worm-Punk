@@ -2,19 +2,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
+using UnityEngine.SceneManagement;
 
 public class UpgradeSpawner : MonoBehaviour
 {
     //Objects & Components:
     public static UpgradeSpawner primary;
     private static List<UpgradeSpawner> spawners = new List<UpgradeSpawner>();
+    private List<WormHoleTrigger> WormholeTriggers = new List<WormHoleTrigger>();
     /// <summary>
     /// Position and orientation where upgrades spawn (forward is the direction they are pushed in).
     /// </summary>
     public Transform spawnPoint;
     private Jumbotron jumboScript;
     private AudioSource thisAud;
-    private int spawnedPowerups=0,totalLevelTime,powerDelay;
+    private int spawnedPowerups=0,totalLevelTime,powerDelay,randRange,randomIndex;
     private bool Cooldown = false;
     //Settings:
     [Header("Settings:")]
@@ -57,7 +59,7 @@ public class UpgradeSpawner : MonoBehaviour
     {
         primary = this;
         spawners.Add(this);
-
+        SceneManager.sceneLoaded += OnSceneLoaded;
         if (spawnPoint == null) spawnPoint = transform;
         thisAud = this.GetComponent<AudioSource>();
         jumboScript = FindObjectOfType<Jumbotron>();
@@ -72,7 +74,7 @@ public class UpgradeSpawner : MonoBehaviour
     private void OnDestroy()
     {
         if (spawners.Contains(this)) spawners.Remove(this);
-
+        SceneManager.sceneLoaded += OnSceneLoaded;
         if (currentPowerUp == PowerUp.PowerUpType.HeatVision)
         {
             foreach (var player in NetworkPlayer.instances)
@@ -81,19 +83,27 @@ public class UpgradeSpawner : MonoBehaviour
             }
         }
     }
-    private void Update()
+    public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        //if (debugSpawn)
-        //{
-        //    StartCoroutine(SpawnAlert());
-        //    debugSpawn = false;
-        //    SpawnUpgrade();
-        //}
-        //if (debugGiveSelectedUpgrade)
-        //{
-        //    debugGiveSelectedUpgrade = false;
-        //    StartCoroutine(DoPowerUp(currentPowerUp, 15));
-        //}
+        WormholeTriggers.AddRange(FindObjectsOfType<WormHoleTrigger>());
+        randRange = WormholeTriggers.Count;
+        int randomIndex = Random.Range(0, randRange);
+
+    }
+       
+        private void Update()
+    {
+        if (debugSpawn)
+        {
+            StartCoroutine(SpawnAlert());
+            debugSpawn = false;
+            SpawnUpgrade();
+        }
+        if (debugGiveSelectedUpgrade)
+        {
+            debugGiveSelectedUpgrade = false;
+            StartCoroutine(DoPowerUp(currentPowerUp, 15));
+        }
         //if (!Cooldown)
         //{
         //    Cooldown = true;
@@ -134,7 +144,7 @@ public class UpgradeSpawner : MonoBehaviour
     //FUNCTIONALITY METHODS:
     public void SpawnUpgrade()
     {
-       
+        spawnPoint = WormholeTriggers[randomIndex].transform;
         if (!PhotonNetwork.IsMasterClient) return; 
         string resourceName = "PowerUps/" + upgradeResourceNames[Random.Range(0, upgradeResourceNames.Length)];
         PowerUp newUpgrade = PhotonNetwork.Instantiate(resourceName, spawnPoint.position, spawnPoint.rotation).GetComponent<PowerUp>();
