@@ -6,10 +6,10 @@ using Unity.XR.CoreUtils;
 public class WormHoleTrigger : MonoBehaviour
 {
     private WormHole WHS;
-    internal bool exiting = false,flashin=false,reset=false;
-    public GameObject light,WormHole;
+    internal bool exiting = false,flashin=false,reset=false,locked=false;
+    public GameObject light,WormHole,particle;
     public Transform wormholeEntrance;
-    private Animator holeAnim;
+    internal Animator holeAnim;
     // Start is called before the first frame update
     void Start()
     {
@@ -25,13 +25,15 @@ public class WormHoleTrigger : MonoBehaviour
         {
             StartCoroutine(FlashLight());
         }
-        if (exiting) //set by the parent when designated as the exit and player is in wormhole
-        {
-            holeAnim.SetBool("Locked",true);//Tells the wormhole to close
-        }
+        //if (exiting) //set by the parent when designated as the exit and player is in wormhole
+        //{
+        //    holeAnim.SetBool("Locked",true);//Tells the wormhole to close
+        //}
         if (reset)//Set by the parent script when player exits the wormholes
         {
             holeAnim.SetBool("Locked", false);//Tells the wormhole to open
+            particle.SetActive(true);
+            locked = false;
             reset = false;
         }
     }
@@ -40,11 +42,12 @@ public class WormHoleTrigger : MonoBehaviour
     private void OnTriggerStay(Collider other)
     {
      
-        if (other.TryGetComponent(out XROrigin playerOrigin) && !WHS.locked) // make sure it hit the player, and the wormhole isnt locked
+        if (other.TryGetComponent(out XROrigin playerOrigin)&&!locked) // make sure it hit the player, and the wormhole isnt locked
         {
             GameObject playerRb = PlayerController.instance.bodyRb.gameObject;//gets player reference to send to the wormhole script
             playerRb.transform.position = wormholeEntrance.position;
             holeAnim.SetBool("Locked", true);
+            particle.SetActive(false);
             StartCoroutine(WHS.StartWormhole(this, playerRb)); //Tells the wormhole to start the loop 
             return;
         }
