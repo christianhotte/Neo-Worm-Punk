@@ -31,5 +31,8 @@ public class PlayerSetup : MonoBehaviour
         {
             if (controller.GetComponentInChildren<MeshRenderer>() != null) controller.GetComponentInChildren<MeshRenderer>().material.SetColor("_Color", newColor); //Change hand color (if possible, may be deprecated)
         }
+
+        //Change color of player helmet
+        PlayerController.instance.combatHUD.ChangeHelmetColor(newColor);
     }
 }
