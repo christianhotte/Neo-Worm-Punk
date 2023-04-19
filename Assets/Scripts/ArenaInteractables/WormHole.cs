@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using Unity.XR.CoreUtils;
+using UnityEngine.SceneManagement;
 public class WormHole : NetworkedArenaElement
 {
     public Transform holePos1, holePos2,wormZone,playerHead,wormZoneShifted;
@@ -13,21 +14,39 @@ public class WormHole : NetworkedArenaElement
     public PlayerController PC;
     public GameObject playerOrigin;
     public static List<WormHole> ActiveWormholes = new List<WormHole>();
+    public List<WormHoleTrigger> OpenExits = new List<WormHoleTrigger>();
     public AudioSource wormHoleAud;
     public AudioClip enterSound,suctionSound;
     private WormHoleTrigger triggerScript,EntryTrigger;
     public WormZone wormZoneScript;
     internal NetworkPlayer netPlayer;
-    public int luckyChance = 10;
+    public int luckyChance = 10,randRange;
     void Start()
     {
         wormHoleAud = this.GetComponent<AudioSource>();
         wormZoneScript = wormZoneParticles.GetComponent<WormZone>();
     }
+    private void Awake()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+    public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == GameSettings.arenaScene)
+        {
+            OpenExits.AddRange(FindObjectsOfType<WormHoleTrigger>());
+            randRange = OpenExits.Count;
+            int randomIndex = Random.Range(0, randRange);
+        }
+    }
     void Update()
     {
     }
-    public IEnumerator StartWormhole(GameObject startHole,GameObject playerOBJ)
+    public IEnumerator StartWormhole(WormHoleTrigger startHole,GameObject playerOBJ)
     {
         inZone = true;
         PC = PlayerController.instance;
@@ -97,18 +116,22 @@ public class WormHole : NetworkedArenaElement
         locked = true; // Locks the worm whole circut      
         Transform exitPos;                                                           //define Exit Point
         Rigidbody playerRB;
-        if (holePos1.transform == startHole.transform)//Determine which wormhole is going to be the exit
-        {
-            exitPos = holePos2.transform; //Set the exit point
-            triggerScript = holePos2.gameObject.GetComponent<WormHoleTrigger>();//Gets the script of the exit
-            EntryTrigger = holePos1.gameObject.GetComponent<WormHoleTrigger>();//Gets the script on the entrance
-        }
-        else
-        {
-            exitPos = holePos1.transform;//Set the exit point
-            triggerScript = holePos1.gameObject.GetComponent<WormHoleTrigger>();//Gets the script of the exit
-            EntryTrigger = holePos2.gameObject.GetComponent<WormHoleTrigger>();//Gets the script on the entrance
-        }
+        EntryTrigger = startHole;
+        int randomIndex = Random.Range(0, randRange);
+        triggerScript = OpenExits[randomIndex];
+        exitPos = triggerScript.transform;
+        //if (holePos1.transform == startHole.transform)//Determine which wormhole is going to be the exit
+        //{
+        //    exitPos = holePos2.transform; //Set the exit point
+        //    triggerScript = holePos2.gameObject.GetComponent<WormHoleTrigger>();//Gets the script of the exit
+        //    EntryTrigger = holePos1.gameObject.GetComponent<WormHoleTrigger>();//Gets the script on the entrance
+        //}
+        //else
+        //{
+        //    exitPos = holePos1.transform;//Set the exit point
+        //    triggerScript = holePos1.gameObject.GetComponent<WormHoleTrigger>();//Gets the script of the exit
+        //    EntryTrigger = holePos2.gameObject.GetComponent<WormHoleTrigger>();//Gets the script on the entrance
+        //}
         triggerScript.exiting = true;//Tells the trigger script it will be the exit
         particle1.SetActive(false);
         particle2.SetActive(false);

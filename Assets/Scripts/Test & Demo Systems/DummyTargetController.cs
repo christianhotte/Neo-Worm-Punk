@@ -60,5 +60,14 @@ public class DummyTargetController : Targetable
     {
         audioSource.PlayOneShot((AudioClip)Resources.Load("Sounds/Default_Hurt_Sound"), PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play hurt sound
         print("Target hit!");                                                            //Indicate that target was hit
+
+        TutorialManager tutorialManager = FindObjectOfType<TutorialManager>();
+
+        if (tutorialManager != null && tutorialManager.GetCurrentTutorialSegment() == TutorialManager.Tutorial.GUNS)
+            tutorialManager.IncrementTutorialProgress();
+    }
+    public override void IsHit(int damage, int playerID, Vector3 velocity)
+    {
+        IsHit(damage);
     }
 }
