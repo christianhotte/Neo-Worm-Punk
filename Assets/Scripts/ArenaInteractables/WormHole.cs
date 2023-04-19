@@ -32,59 +32,63 @@ public class WormHole : NetworkedArenaElement
         inZone = true;
         PC = PlayerController.instance;
         PlayerController.instance.UnHolsterAll();
-        netPlayer = PlayerController.photonView.GetComponent<NetworkPlayer>();
-        if (netPlayer.networkPlayerStats.deathStreak >= 1)
+        if (PhotonNetwork.IsConnected)
         {
-            int adjustedLuckChance = luckyChance * netPlayer.networkPlayerStats.deathStreak;
-            if (adjustedLuckChance > 100)
+            netPlayer = PlayerController.photonView.GetComponent<NetworkPlayer>();
+            if (netPlayer.networkPlayerStats.deathStreak >= 1)
             {
-                adjustedLuckChance = 100;
-            }
-            int randTarget = 100 - adjustedLuckChance; //the number need random range to be greater than.
-            Random.seed = (int)Time.realtimeSinceStartup;
-            int randRoll = Random.Range(0, 101);
-            Debug.Log("Roll is "+ randRoll +" Target is "+randTarget);
-            if (randRoll > randTarget)
-            {
-                luckyProc = true;
-                int randPower = Random.Range(1, 4);
+                int adjustedLuckChance = luckyChance * netPlayer.networkPlayerStats.deathStreak;
+                if (adjustedLuckChance > 100)
+                {
+                    adjustedLuckChance = 100;
+                }
+                int randTarget = 100 - adjustedLuckChance; //the number need random range to be greater than.
+                Random.seed = (int)Time.realtimeSinceStartup;
+                int randRoll = Random.Range(0, 101);
+                Debug.Log("Roll is " + randRoll + " Target is " + randTarget);
+                if (randRoll > randTarget)
+                {
+                    luckyProc = true;
+                    int randPower = Random.Range(1, 4);
 
-                switch (randPower)
-                {
-                    case 1:
-                       wormZoneScript.heatVision.SetActive(true);
-                        break;
-                    case 2:
-                       wormZoneScript.multiShot.SetActive(true);
-                        break;
-                    default:
-                       wormZoneScript.invincibility.SetActive(true);
-                        break;
+                    switch (randPower)
+                    {
+                        case 1:
+                            wormZoneScript.heatVision.SetActive(true);
+                            break;
+                        case 2:
+                            wormZoneScript.multiShot.SetActive(true);
+                            break;
+                        default:
+                            wormZoneScript.invincibility.SetActive(true);
+                            break;
+                    }
                 }
             }
-        }
-        else
-        {
-            int randRoll = Random.Range(0, 101);
-            Debug.Log("Roll is " + randRoll + " Target is " + luckyChance);
-            if (randRoll < luckyChance)
+            else
             {
-                luckyProc = true;
-                int randPower = Random.Range(1, 4);
-                switch (randPower)
+                int randRoll = Random.Range(0, 101);
+                Debug.Log("Roll is " + randRoll + " Target is " + luckyChance);
+                if (randRoll < luckyChance)
                 {
-                    case 1:
-                        wormZoneScript.heatVision.SetActive(true);
-                        break;
-                    case 2:
-                        wormZoneScript.multiShot.SetActive(true);
-                        break;
-                    default:
-                        wormZoneScript.invincibility.SetActive(true);
-                        break;
+                    luckyProc = true;
+                    int randPower = Random.Range(1, 4);
+                    switch (randPower)
+                    {
+                        case 1:
+                            wormZoneScript.heatVision.SetActive(true);
+                            break;
+                        case 2:
+                            wormZoneScript.multiShot.SetActive(true);
+                            break;
+                        default:
+                            wormZoneScript.invincibility.SetActive(true);
+                            break;
+                    }
                 }
             }
         }
+       
         RearView heatScanner = PlayerController.instance.GetComponentInChildren<RearView>();
         if (heatScanner != null)
         {
@@ -132,7 +136,8 @@ public class WormHole : NetworkedArenaElement
             pe.Shutdown(waitTime);
         }
 
-        PlayerController.photonView.RPC("RPC_MakeInvisible", RpcTarget.Others);
+       if(PhotonNetwork.IsConnected)
+            PlayerController.photonView.RPC("RPC_MakeInvisible", RpcTarget.Others);
         //playerRB.isKinematic = true;
         playerOBJ.transform.position = wormZoneShifted.position; //Player enters worm zone here
         wormHoleAud.clip = null;
@@ -157,7 +162,8 @@ public class WormHole : NetworkedArenaElement
         diff = diff - exitDiff;
         playerOBJ.transform.rotation = Quaternion.Euler(playerOBJ.transform.eulerAngles.x, playerOBJ.transform.eulerAngles.y - diff, playerOBJ.transform.eulerAngles.z);//turns the player to face out of the worhole
         playerOBJ.transform.position = exitPos.position; //takes the player out of the wormhole
-        PlayerController.photonView.RPC("RPC_MakeVisible", RpcTarget.Others);
+        if (PhotonNetwork.IsConnected)
+            PlayerController.photonView.RPC("RPC_MakeVisible", RpcTarget.Others);
         playerRB.useGravity = true; //Bring back Gravity
         playerRB.velocity = exitPos.forward * exitSpeed;    //launch out of wormhole
         triggerScript.exiting = false;

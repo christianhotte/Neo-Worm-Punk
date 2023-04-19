@@ -385,7 +385,7 @@ public class PlayerController : MonoBehaviour
         if (timeUntilVulnerable > 0) return false;                              //Do not allow players to be hurt while invulnerable
         currentHealth -= Mathf.Max((float)damage, 0);                           //Deal projectile damage, floor at 0
         healthVolume.weight = 1 - HealthPercent;                                //Update health visualization
-        print(damage + " damage dealt to player with ID " + photonView.ViewID); //Indicate that damage has been dealt
+        //print(damage + " damage dealt to player with ID " + photonView.ViewID); //Indicate that damage has been dealt
         UpdateHealthIndicators();
 
         //Death check:
