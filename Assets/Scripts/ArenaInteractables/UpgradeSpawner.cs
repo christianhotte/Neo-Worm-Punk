@@ -9,14 +9,15 @@ public class UpgradeSpawner : MonoBehaviour
     //Objects & Components:
     public static UpgradeSpawner primary;
     private static List<UpgradeSpawner> spawners = new List<UpgradeSpawner>();
-    private List<WormHoleTrigger> WormholeTriggers = new List<WormHoleTrigger>();
+    public List<WormHoleTrigger> WormholeTriggers = new List<WormHoleTrigger>();
     /// <summary>
     /// Position and orientation where upgrades spawn (forward is the direction they are pushed in).
     /// </summary>
     public Transform spawnPoint;
     private Jumbotron jumboScript;
     private AudioSource thisAud;
-    private int spawnedPowerups=0,totalLevelTime,powerDelay,randRange,randomIndex;
+    private int spawnedPowerups=0,totalLevelTime,powerDelay;
+    public int randomIndex, randRange;
     private bool Cooldown = false;
     //Settings:
     [Header("Settings:")]
@@ -144,6 +145,7 @@ public class UpgradeSpawner : MonoBehaviour
     //FUNCTIONALITY METHODS:
     public void SpawnUpgrade()
     {
+        int randomIndex = Random.Range(0, randRange);
         spawnPoint = WormholeTriggers[randomIndex].transform;
         if (!PhotonNetwork.IsMasterClient) return; 
         string resourceName = "PowerUps/" + upgradeResourceNames[Random.Range(0, upgradeResourceNames.Length)];
