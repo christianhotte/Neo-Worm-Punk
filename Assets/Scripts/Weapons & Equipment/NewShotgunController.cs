@@ -156,9 +156,12 @@ public class NewShotgunController : PlayerEquipment
         basePinPos = leftFiringPin.localPosition;             //Get base local position of both firing pins
 
         //Get pin colors:
-        litPinMat = leftFiringPin.Find("Light").GetComponent<Renderer>().material;    //Get lit color from left firing pin light
-        spentPinMat = rightFiringPin.Find("Light").GetComponent<Renderer>().material; //Get unlit color from right firing pin light
-        rightFiringPin.Find("Light").GetComponent<Renderer>().material = litPinMat;   //Set up right firing pin with lit color
+        if (leftFiringPin.Find("Light") != null)
+        {
+            litPinMat = leftFiringPin.Find("Light").GetComponent<Renderer>().material;    //Get lit color from left firing pin light
+            spentPinMat = rightFiringPin.Find("Light").GetComponent<Renderer>().material; //Get unlit color from right firing pin light
+            rightFiringPin.Find("Light").GetComponent<Renderer>().material = litPinMat;   //Set up right firing pin with lit color
+        }
     }
     private protected override void Start()
     {
