@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using ExitGames.Client.Photon;
 using Photon.Voice.Unity;
+using System.Linq;
 
 /* Code was referenced from https://www.youtube.com/watch?v=KHWuTBmT1oI
  * https://www.youtube.com/watch?v=zPZK7C5_BQo&list=PLhsVv9Uw1WzjI8fEBjBQpTyXNZ6Yp1ZLw */
@@ -352,6 +353,10 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         if (autoJoin != null && autoJoin.GoToLockerRoom())
             autoJoin.AutoLoadScene(GameSettings.roomScene);
 
+        //Loads the locker room scene when the player joins a room from the title screen. This is so epic can we hit 10 likes
+        if (SceneManager.GetActiveScene().name == GameSettings.titleScreenScene)
+            GameManager.Instance.LoadGame(GameSettings.roomScene);
+
         //Update lobby UI:
         LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
         if (lobbyUI != null) //If there is a lobby in the scene, display room information
@@ -366,6 +371,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         SpawnNetworkPlayer();                                             //Always spawn a network player instance when joining a room
         localNetworkPlayer.SetNetworkPlayerProperties("IsReady", false);;
         AdjustVoiceVolume();
+        
     }
 
     public override void OnJoinRoomFailed(short returnCode, string message)
@@ -440,6 +446,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             PhotonNetwork.LoadLevel(GameSettings.titleScreenScene);
     }
 
+    private Dictionary<string, RoomInfo> roomDictionary = new Dictionary<string, RoomInfo>();
+
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
         //base.OnRoomListUpdate(roomList);
@@ -451,7 +459,32 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         //If there is a lobby in the scene, update the room list
         if (lobbyUI != null)
         {
-            lobbyUI.UpdateLobbyList(roomList);
+            foreach(var room in roomList)
+            {
+                if (room.RemovedFromList)
+                {
+                    if (roomDictionary.ContainsKey(room.Name))
+                    {
+                        Debug.Log("Removing " + room.Name + " From Lobby List...");
+                        roomDictionary.Remove(room.Name);
+                    }
+                }
+                else
+                {
+                    if (roomDictionary.ContainsKey(room.Name))
+                    {
+                        Debug.Log("Updating " + room.Name + "In Lobby List...");
+                        roomDictionary[room.Name] = room;
+                    }
+                    else
+                    {
+                        Debug.Log("Adding " + room.Name + " To Lobby List...");
+                        roomDictionary.Add(room.Name, room);
+                    }
+                }
+            }
+
+            lobbyUI.UpdateLobbyList(roomDictionary.Values.ToList());
         }
     }
 
@@ -569,12 +602,12 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         return playerNameList;
     }
 
-    public void LoadSceneWithFade(string sceneName, bool asyncLoad = true)
+    public void LoadSceneWithFade(string sceneName)
     {
-        StartCoroutine(FadeLevelRoutine(sceneName, asyncLoad));
+        StartCoroutine(FadeLevelRoutine(sceneName));
     }
 
-    private IEnumerator FadeLevelRoutine(string sceneName, bool asyncLoad)
+    private IEnumerator FadeLevelRoutine(string sceneName)
     {
         GameManager.Instance.levelTransitionActive = true;
 
@@ -587,7 +620,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         PhotonNetwork.LoadLevel(sceneName);
 
         // Unready
-        localNetworkPlayer.SetNetworkPlayerProperties("IsReady", false);
+        if(localNetworkPlayer != null)
+            localNetworkPlayer.SetNetworkPlayerProperties("IsReady", false);
 
         GameManager.Instance.levelTransitionActive = false;
     }

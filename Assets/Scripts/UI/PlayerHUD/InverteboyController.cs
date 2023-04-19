@@ -34,6 +34,7 @@ public class InverteboyController : MonoBehaviour
     [SerializeField, Tooltip("The information window images.")] private Image[] infoWindow;
     [SerializeField, Tooltip("The label text.")] private TextMeshProUGUI labelText;
     [SerializeField, Tooltip("The tutorial text.")] private TextMeshProUGUI tutorialText;
+    [SerializeField, Tooltip("The tutorial progress text.")] private TextMeshProUGUI tutorialProgressText;
 
     [SerializeField, Tooltip("The list of the different menus on the main inverteboy.")] private Canvas[] inverteboyMainCanvases;
     [SerializeField, Tooltip("The list of the different menus on the inverteboy hologram.")] private Canvas[] inverteboyHologramCanvases;
@@ -53,6 +54,7 @@ public class InverteboyController : MonoBehaviour
     private Canvas currentHologramCanvas;
 
     private bool hologramOpen = false;
+    private bool hideHologram = false;
     
     private bool isOpen = false;
     private bool forceOpen = false;
@@ -88,6 +90,7 @@ public class InverteboyController : MonoBehaviour
         {
             PlayMusic(arenaMusic);
             SwitchMainCanvas((int)InverteboyMainScreens.ARENA);
+            hideHologram = true;
         }
 
         if(scene.name == GameSettings.tutorialScene)
@@ -205,6 +208,9 @@ public class InverteboyController : MonoBehaviour
 
     public void OpenHologramMenu(bool openHologram)
     {
+        if (hideHologram)
+            return;
+
         if (hologramAnimation != null)
             StopCoroutine(hologramAnimation);
 
@@ -264,7 +270,7 @@ public class InverteboyController : MonoBehaviour
         }
         else
         {
-            hologramObject.transform.localPosition = Vector3.zero;
+            hologramObject.transform.localPosition = new Vector3(hologramObject.transform.localPosition.x, 0f, hologramObject.transform.localPosition.z);
             hologramObject.transform.localScale = Vector3.zero;
         }
     }
@@ -274,10 +280,16 @@ public class InverteboyController : MonoBehaviour
     /// </summary>
     /// <param name="message">The message for the tutorial.</param>
     /// <param name="label">The label of the tutorial.</param>
-    public void UpdateTutorialText(string message, string label = "")
+    public void UpdateTutorialText(string message, string label = "", string progress = "")
     {
         labelText.text = label;
         tutorialText.text = message;
+        UpdateTutorialProgress(progress);
+    }
+
+    public void UpdateTutorialProgress(string progressText)
+    {
+        tutorialProgressText.text = progressText;
     }
 
     /// <summary>
@@ -287,6 +299,9 @@ public class InverteboyController : MonoBehaviour
     public void SwitchMainCanvas(int canvasIndex)
     {
         Canvas newCanvas = inverteboyMainCanvases[canvasIndex];
+
+        Debug.Log("Switching To " + newCanvas.name);
+        Debug.Log("Current Canvas: " + currentMainCanvas.name);
 
         currentMainCanvas.enabled = false;
         currentMainCanvas = newCanvas;

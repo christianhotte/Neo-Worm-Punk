@@ -84,25 +84,28 @@ public class RearView : MonoBehaviour
     }
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        playerRef = PlayerController.instance;
-        otherPlayers.AddRange(FindObjectsOfType<NetworkPlayer>());
-        otherPlayers.Remove(PlayerController.photonView.GetComponent<NetworkPlayer>());
-
-        List<Transform> playerDotList = new List<Transform>();
-        foreach (NetworkPlayer otherPlayer in otherPlayers)
+        if (scene.name == GameSettings.arenaScene)
         {
-            Transform dot =Instantiate(playerMarker, transform.GetChild(0),markerStartPos).GetComponent<Transform>();
-            //Transform dot = //Instantiate dot prefab and get its transform
-            //Move dot to a convenient position
-            dot.localPosition = new Vector3(1000, 0, 0);
-            //Set dot to player color
-            Color playerColor = PlayerSettingsController.playerColors[(int)otherPlayer.GetComponent<PhotonView>().Owner.CustomProperties["Color"]];
-            dot.GetComponent<Image>().color = playerColor;
-            // Color playerColor = PlayerSettingsController.playerColors[(int)otherPlayer.GetComponent<PhotonView>().Owner.CustomProperties["Color"]];
-            dot.localScale = Vector3.one * 0.2f;
-            playerDotList.Add(dot);
+            playerRef = PlayerController.instance;
+            otherPlayers.AddRange(FindObjectsOfType<NetworkPlayer>());
+            otherPlayers.Remove(PlayerController.photonView.GetComponent<NetworkPlayer>());
+
+            List<Transform> playerDotList = new List<Transform>();
+            foreach (NetworkPlayer otherPlayer in otherPlayers)
+            {
+                Transform dot = Instantiate(playerMarker, transform.GetChild(0), markerStartPos).GetComponent<Transform>();
+                //Transform dot = //Instantiate dot prefab and get its transform
+                //Move dot to a convenient position
+                dot.localPosition = new Vector3(1000, 0, 0);
+                //Set dot to player color
+                Color playerColor = PlayerSettingsController.playerColors[(int)otherPlayer.GetComponent<PhotonView>().Owner.CustomProperties["Color"]];
+                dot.GetComponent<Image>().color = playerColor;
+                // Color playerColor = PlayerSettingsController.playerColors[(int)otherPlayer.GetComponent<PhotonView>().Owner.CustomProperties["Color"]];
+                dot.localScale = Vector3.one * 0.2f;
+                playerDotList.Add(dot);
+            }
+            playerDots = playerDotList.ToArray();
         }
-        playerDots = playerDotList.ToArray();
     }
     public IEnumerator DisableScanner(float waitTime)
     {
