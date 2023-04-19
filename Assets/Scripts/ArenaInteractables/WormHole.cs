@@ -107,8 +107,7 @@ public class WormHole : NetworkedArenaElement
                     }
                 }
             }
-        }
-       
+        }      
         RearView heatScanner = PlayerController.instance.GetComponentInChildren<RearView>();
         if (heatScanner != null)
         {
@@ -152,8 +151,7 @@ public class WormHole : NetworkedArenaElement
         playerCam = PC.cam.gameObject;      //sets camera reference
         ActiveWormholes.Add(this);//Adds this to the static wormhole list
         wormZoneShifted = wormZone; //gives the shifted zone its starting point
-        wormZoneShifted.transform.position = new Vector3(wormZone.position.x + 100 * ActiveWormholes.Count,wormZone.position.y,wormZone.position.z);//moves the wormhole instance so each player has their own
-      
+        wormZoneShifted.transform.position = new Vector3(wormZone.position.x + 100 * ActiveWormholes.Count,wormZone.position.y,wormZone.position.z);//moves the wormhole instance so each player has their own      
         playerRB.useGravity = false;  //Turn off Gravity
         foreach (PlayerEquipment equipment in PlayerController.instance.attachedEquipment)
         {
@@ -165,19 +163,19 @@ public class WormHole : NetworkedArenaElement
                 grapple.hook.Stow();
             }
         }
-       // PC.attachedEquipment.shu
        foreach(PlayerEquipment pe in PC.attachedEquipment)
         {
             pe.Shutdown(waitTime);
         }
 
-       if(PhotonNetwork.IsConnected)
+        if (PhotonNetwork.IsConnected)
+        {
             PlayerController.photonView.RPC("RPC_MakeInvisible", RpcTarget.Others);
-        //playerRB.isKinematic = true;
+        }
         playerOBJ.transform.position = wormZoneShifted.position; //Player enters worm zone here
         wormHoleAud.clip = null;
         wormHoleAud.loop = false;
-        wormHoleAud.Stop();
+        //wormHoleAud.Stop();
         if (enterSound != null) wormHoleAud.PlayOneShot(enterSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
         float entryDiff = playerCam.transform.eulerAngles.y - wormZoneShifted.eulerAngles.y; //difference for player to face down wormhole
         playerOBJ.transform.rotation = Quaternion.Euler(playerOBJ.transform.eulerAngles.x, playerOBJ.transform.eulerAngles.y - entryDiff, playerOBJ.transform.eulerAngles.z);
@@ -213,6 +211,7 @@ public class WormHole : NetworkedArenaElement
         yield return new WaitForSeconds(0.2f);  //Wait for the player to get clear of the wormhole
         lastEntry = startHole;
         triggerScript.holeAnim.SetBool("Locked", true);
+        triggerScript.particle.SetActive(false);
         ActiveWormholes.Remove(this);
         Destroy(wormZoneInstance);
         // locked = false;   //Unlock the Womrhole circut

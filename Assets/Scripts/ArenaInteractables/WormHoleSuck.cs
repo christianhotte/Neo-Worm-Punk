@@ -32,7 +32,7 @@ public class WormHoleSuck : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
-        if (other.name == "XR Origin")
+        if (other.name == "XR Origin"&&!WHT.locked)
         {
             playerRB = other.GetComponent<Rigidbody>();
             player = other.gameObject;
@@ -48,7 +48,7 @@ public class WormHoleSuck : MonoBehaviour
     {
         if (other.name == "XR Origin")
         {
-            if (!WHS.inZone||WHT.locked)
+            if (!WHS.inZone)
             {
                 WHS.wormHoleAud.clip = null;
                 WHS.wormHoleAud.loop = false;
