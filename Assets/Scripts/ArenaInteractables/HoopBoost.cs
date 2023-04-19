@@ -69,7 +69,7 @@ public class HoopBoost : NetworkedArenaElement
         }
 
         
-        yield return new WaitForSeconds(0.2f);//cooldown so only one boost given
+        yield return new WaitForSeconds(0.4f);//cooldown so only one boost given
         launchin = false;
     }
     public IEnumerator SlimeHoop()
