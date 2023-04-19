@@ -66,4 +66,8 @@ public class DummyTargetController : Targetable
         if (tutorialManager != null && tutorialManager.GetCurrentTutorialSegment() == TutorialManager.Tutorial.GUNS)
             tutorialManager.IncrementTutorialProgress();
     }
+    public override void IsHit(int damage, int playerID, Vector3 velocity)
+    {
+        IsHit(damage);
+    }
 }
