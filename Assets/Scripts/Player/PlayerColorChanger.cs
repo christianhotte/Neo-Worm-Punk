@@ -21,7 +21,8 @@ public class PlayerColorChanger : MonoBehaviour
         for (int i = 0; i < colorButtons.Length; i++)
             AdjustButtonColor(colorButtons[i], i);
 
-        StartCoroutine(RefreshButtonsOnStart());
+        if(PhotonNetwork.IsConnected)
+            StartCoroutine(RefreshButtonsOnStart());
     }
 
     /// <summary>
@@ -87,7 +88,10 @@ public class PlayerColorChanger : MonoBehaviour
         Color newColor = PlayerSettingsController.ColorOptionsToColor((ColorOptions)colorOption);
 
         PlayerSettingsController.Instance.charData.playerColor = newColor;   //Set the player color in the character data
-        NetworkManagerScript.localNetworkPlayer.SetNetworkPlayerProperties("Color", colorOption);
+        if(PhotonNetwork.IsConnected)
+            NetworkManagerScript.localNetworkPlayer.SetNetworkPlayerProperties("Color", colorOption);
+        else
+            PlayerPrefs.SetInt("PreferredColorOption", colorOption);
 
         PlayerController.instance.ApplyAndSyncSettings(); //Apply settings to player (NOTE TO PETER: Call this whenever you want to change a setting and sync it across the network)
         Debug.Log("Changing Player Color To " + newColorText);

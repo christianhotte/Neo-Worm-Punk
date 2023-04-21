@@ -152,7 +152,7 @@ public class NetworkPlayer : MonoBehaviour
     /// </summary>
     private void InitializePhotonPlayerSettings()
     {
-        photonPlayerSettings.Add("Color", 0);
+        photonPlayerSettings.Add("Color", PlayerPrefs.GetInt("PreferredColorOption"));
         photonPlayerSettings.Add("IsReady", false);
         photonPlayerSettings.Add("TubeID", -1);
         PlayerController.photonView.Owner.SetCustomProperties(photonPlayerSettings);
