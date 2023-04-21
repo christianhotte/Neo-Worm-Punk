@@ -506,6 +506,9 @@ public class NewShotgunController : PlayerEquipment
         //Cleanup:
         currentBarrelIndex = 0;                   //Reset barrel index
         loadedShots = gunSettings.maxLoadedShots; //Reset shot counter to maximum
+
+        if(!breachOpen)
+            PlayerController.instance.combatHUD.UpdateAmmoText(handedness, loadedShots, gunSettings.maxLoadedShots);
     }
     /// <summary>
     /// Called whenever player tries to fire weapon but weapon cannot be fired for some reason.

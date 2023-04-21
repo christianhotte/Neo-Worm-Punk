@@ -519,7 +519,10 @@ public class NetworkPlayer : MonoBehaviour
             //Refreshes the tubes
             if (FindObjectOfType<LockerTubeSpawner>() != null)
                 foreach (var tube in FindObjectOfType<LockerTubeSpawner>().GetTubeList())
-                    tube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
+                {
+                    if(NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["Color"] != null)
+                        tube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
+                }
         }
     }
 
