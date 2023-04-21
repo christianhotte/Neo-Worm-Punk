@@ -78,6 +78,10 @@ public class WristUIController : MonoBehaviour
         {
             if (!leaveRoomButton.activeInHierarchy)
                 leaveRoomButton.SetActive(true);
+
+            //Hide the quit to main button when in a room
+            if(quitToMainButton.activeInHierarchy)
+                quitToMainButton.SetActive(false);
         }
         //If they are not in a room, set the button to false.
         else
