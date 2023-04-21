@@ -152,7 +152,7 @@ public class NetworkPlayer : MonoBehaviour
     /// </summary>
     private void InitializePhotonPlayerSettings()
     {
-        photonPlayerSettings.Add("Color", 0);
+        photonPlayerSettings.Add("Color", PlayerPrefs.GetInt("PreferredColorOption"));
         photonPlayerSettings.Add("IsReady", false);
         photonPlayerSettings.Add("TubeID", -1);
         PlayerController.photonView.Owner.SetCustomProperties(photonPlayerSettings);
@@ -453,8 +453,10 @@ public class NetworkPlayer : MonoBehaviour
     /// <summary>
     /// When a user joins, try to take either their color or the next available color.
     /// </summary>
-    public void UpdateTakenColorsOnJoin()
+    public IEnumerator UpdateTakenColorsOnJoin()
     {
+        yield return new WaitUntil(() => photonView.Owner.CustomProperties["Color"] != null);
+
         if (ReadyUpManager.instance != null)
         {
             List<int> takenColors = new List<int>();
@@ -472,7 +474,7 @@ public class NetworkPlayer : MonoBehaviour
                 Debug.Log("Checking " + currentPlayer.NickName + "'s Color: " + (ColorOptions)currentPlayer.CustomProperties["Color"]);
                 takenColors.Add((int)currentPlayer.CustomProperties["Color"]);
 
-                if ((int)currentPlayer.CustomProperties["Color"] == PlayerPrefs.GetInt("PreferredColorOption"))
+                if ((int)currentPlayer.CustomProperties["Color"] == (int)photonView.Owner.CustomProperties["Color"])
                 {
                     Debug.Log((ColorOptions)currentPlayer.CustomProperties["Color"] + " is taken.");
                     mustReplaceColor = true;
@@ -493,8 +495,6 @@ public class NetworkPlayer : MonoBehaviour
                     }
                 }
             }
-            else
-                SetNetworkPlayerProperties("Color", PlayerPrefs.GetInt("PreferredColorOption"));
         }
     }
 
