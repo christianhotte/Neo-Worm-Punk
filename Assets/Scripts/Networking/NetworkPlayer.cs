@@ -152,7 +152,7 @@ public class NetworkPlayer : MonoBehaviour
     /// </summary>
     private void InitializePhotonPlayerSettings()
     {
-        photonPlayerSettings.Add("Color", PlayerPrefs.GetInt("PreferredColorOption"));
+        photonPlayerSettings.Add("Color", 0);
         photonPlayerSettings.Add("IsReady", false);
         photonPlayerSettings.Add("TubeID", -1);
         PlayerController.photonView.Owner.SetCustomProperties(photonPlayerSettings);
@@ -361,7 +361,7 @@ public class NetworkPlayer : MonoBehaviour
     /// </summary>
     public void SyncColors()
     {
-        photonView.RPC("UpdateTakenColors", RpcTarget.AllBuffered); //Send data to every player on the network (including this one)
+        photonView.RPC("UpdateTakenColors", RpcTarget.All); //Send data to every player on the network (including this one)
     }
     /// <summary>
     /// Manages material event priority for this particular network player.
@@ -472,7 +472,7 @@ public class NetworkPlayer : MonoBehaviour
                 Debug.Log("Checking " + currentPlayer.NickName + "'s Color: " + (ColorOptions)currentPlayer.CustomProperties["Color"]);
                 takenColors.Add((int)currentPlayer.CustomProperties["Color"]);
 
-                if ((int)currentPlayer.CustomProperties["Color"] == (int)photonView.Owner.CustomProperties["Color"])
+                if ((int)currentPlayer.CustomProperties["Color"] == PlayerPrefs.GetInt("PreferredColorOption"))
                 {
                     Debug.Log((ColorOptions)currentPlayer.CustomProperties["Color"] + " is taken.");
                     mustReplaceColor = true;
@@ -493,6 +493,8 @@ public class NetworkPlayer : MonoBehaviour
                     }
                 }
             }
+            else
+                SetNetworkPlayerProperties("Color", PlayerPrefs.GetInt("PreferredColorOption"));
         }
     }
 
@@ -519,10 +521,7 @@ public class NetworkPlayer : MonoBehaviour
             //Refreshes the tubes
             if (FindObjectOfType<LockerTubeSpawner>() != null)
                 foreach (var tube in FindObjectOfType<LockerTubeSpawner>().GetTubeList())
-                {
-                    if(NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["Color"] != null)
-                        tube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
-                }
+                    tube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
         }
     }
 

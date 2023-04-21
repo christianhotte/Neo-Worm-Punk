@@ -21,8 +21,10 @@ public class PlayerColorChanger : MonoBehaviour
         for (int i = 0; i < colorButtons.Length; i++)
             AdjustButtonColor(colorButtons[i], i);
 
-        if(PhotonNetwork.IsConnected)
+        if (PhotonNetwork.IsConnected)
             StartCoroutine(RefreshButtonsOnStart());
+        else
+            RefreshOfflineButtons();
     }
 
     /// <summary>
@@ -91,7 +93,10 @@ public class PlayerColorChanger : MonoBehaviour
         if(PhotonNetwork.IsConnected)
             NetworkManagerScript.localNetworkPlayer.SetNetworkPlayerProperties("Color", colorOption);
         else
+        {
             PlayerPrefs.SetInt("PreferredColorOption", colorOption);
+            RefreshOfflineButtons();
+        }
 
         PlayerController.instance.ApplyAndSyncSettings(); //Apply settings to player (NOTE TO PETER: Call this whenever you want to change a setting and sync it across the network)
         Debug.Log("Changing Player Color To " + newColorText);
@@ -112,5 +117,19 @@ public class PlayerColorChanger : MonoBehaviour
             colorButtons[(int)player.CustomProperties["Color"]].LockButton(true);
             colorButtons[(int)player.CustomProperties["Color"]].EnableButton(false);
         }
+    }
+
+    private void RefreshOfflineButtons()
+    {
+        foreach (var button in colorButtons)
+        {
+            button.ShowText(false);
+            button.LockButton(false);
+            button.EnableButton(true);
+        }
+
+        colorButtons[PlayerPrefs.GetInt("PreferredColorOption")].ShowText(true);
+        colorButtons[PlayerPrefs.GetInt("PreferredColorOption")].LockButton(true);
+        colorButtons[PlayerPrefs.GetInt("PreferredColorOption")].EnableButton(false);
     }
 }

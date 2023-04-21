@@ -182,11 +182,6 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         //Late setup:
-
-        //Set the player's color to their ideal color at the start of the title screen
-        if (SceneManager.GetActiveScene().name == GameSettings.titleScreenScene)
-            PlayerSettingsController.Instance.charData.playerColor = PlayerSettingsController.playerColors[PlayerPrefs.GetInt("PreferredColorOption")];
-
         playerSetup.ApplyAllSettings(); //Make sure settings are all updated on this player instance
 
         //Move to spawnpoint:
