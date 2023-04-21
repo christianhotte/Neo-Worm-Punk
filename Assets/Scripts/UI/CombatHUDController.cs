@@ -13,6 +13,18 @@ public class CombatHUDController : MonoBehaviour
     [SerializeField, Tooltip("The game HUD combat container.")] private GameObject combatInfoTransform;
     [SerializeField, Tooltip("The game HUD kill feed container.")] private Transform killFeedTransform;
     [SerializeField, Tooltip("The prefab for the kill message.")] private GameObject killMessagePrefab;
+    [SerializeField, Tooltip("The image of the helmet overlay.")] private Image helmetOverlay;
+    [SerializeField, Tooltip("The image of the helmet outline.")] private Image helmetOutline;
+
+    /// <summary>
+    /// Changes the color of the helmet.
+    /// </summary>
+    /// <param name="newColor">The new color of the helmet.</param>
+    public void ChangeHelmetColor(Color newColor)
+    {
+        helmetOverlay.color = newColor;
+        helmetOutline.color = newColor;
+    }
 
     /// <summary>
     /// Update the player stats on the combat HUD.
