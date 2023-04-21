@@ -23,7 +23,7 @@ public class RearView : MonoBehaviour
     private void Awake()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
-       // mirrorWidth = GetComponentInChildren<RectTransform>().sizeDelta.x;
+        mirrorWidth = GetComponentInChildren<RectTransform>().rect.width;
     }
     private void OnDestroy()
     {
