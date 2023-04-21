@@ -7,12 +7,15 @@ public class TutorialManager : MonoBehaviour
     public enum Tutorial { GUNS, TURN, MOVE, CHAINSAW, HOOKSHOT, PARRY }
 
     [SerializeField, Tooltip("The different tutorial segments.")] private TutorialSegment[] tutorialSegments;
+    [SerializeField, Tooltip("The tutorial checkpoint locations.")] private Transform[] checkpoints;
 
     private Tutorial currentTutorialSegment;
 
     //Progress variables
     private int targetsShot;
     private int targetGoal;
+    [SerializeField] Transform SpawnPoint;
+
 
     private void Start()
     {
@@ -64,6 +67,12 @@ public class TutorialManager : MonoBehaviour
                 PlayerController.instance.inverteboy.UpdateTutorialProgress("Shoot Five Targets.\n"+ targetsShot +" / " + targetGoal);
                 break;
         }
+    }
+
+    public void MoveSpawnPoint(int checkpoint)
+    {
+        SpawnPoint.position = checkpoints[checkpoint].position;
+        SpawnPoint.rotation = checkpoints[checkpoint].rotation;
     }
 
     /// <summary>

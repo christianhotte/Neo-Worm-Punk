@@ -18,6 +18,9 @@ public class SpectatorCamera : MonoBehaviour
     private float currentHeight; // The current height from the player
     private float currentRotationX; // The current rotation around the player on the X-axis
     private float currentRotationY; // The current rotation around the player on the Y-axis
+    private PlayerController demoPlayer;
+    public Camera firstPersonCamera;
+    public Camera thirdPersonCamera;
 
     void Start()
     {
@@ -26,13 +29,14 @@ public class SpectatorCamera : MonoBehaviour
         currentRotationX = transform.rotation.eulerAngles.y;
         currentRotationY = transform.rotation.eulerAngles.x;
         target = GameObject.Find("XR Origin").transform;
+        demoPlayer = GetComponentInParent<PlayerController>();
 
         // Hides the mouse and centers it in the middle of the screen.
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
-    // Update is called once per frame
+    // Update is called once per end of frame
     void LateUpdate()
     {
         // Check if there is a target to follow
