@@ -217,17 +217,16 @@ public class WormHole : NetworkedArenaElement
         Destroy(wormZoneInstance);
         // locked = false;   //Unlock the Womrhole circut
         StartCoroutine(TimedLock());
+        triggerScript.StartCoroutine(triggerScript.TimedUnlock(6.0f));
+        startHole.StartCoroutine(startHole.TimedUnlock(6.0f));
     }
 
     public IEnumerator TimedLock()
     {
-        yield return new WaitForSeconds(10.0f);
+        yield return new WaitForSeconds(6.0f);
         if (lastEntry != null)
         {
             OpenExits.Add(lastEntry);
         }
-        triggerScript.reset = true; //tells the exit to open back up
-        EntryTrigger.reset = true;//tells the entrance to open back up
-        locked = false;
     }
 }
