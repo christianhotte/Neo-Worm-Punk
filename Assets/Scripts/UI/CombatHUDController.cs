@@ -15,6 +15,9 @@ public class CombatHUDController : MonoBehaviour
     [SerializeField, Tooltip("The prefab for the kill message.")] private GameObject killMessagePrefab;
     [SerializeField, Tooltip("The image of the helmet overlay.")] private Image helmetOverlay;
     [SerializeField, Tooltip("The image of the helmet outline.")] private Image helmetOutline;
+    [SerializeField, Tooltip("The container for the upgrade notifications.")] private Transform upgradeContainer;
+    [SerializeField, Tooltip("The upgrade info prefab.")] private UpgradeDisplay upgradeInfoPrefab;
+    [SerializeField, Tooltip("The ammo text.")] private TextMeshProUGUI[] ammoText;
 
     /// <summary>
     /// Changes the color of the helmet.
@@ -34,6 +37,22 @@ public class CombatHUDController : MonoBehaviour
     {
         playerStatsContainer.Find("PlayerDeaths").GetComponent<TextMeshProUGUI>().text = "D: " + playerStats.numOfDeaths;
         playerStatsContainer.Find("PlayerKills").GetComponent<TextMeshProUGUI>().text = "K: " + playerStats.numOfKills;
+    }
+
+    /// <summary>
+    /// Adds to the upgrade info container.
+    /// </summary>
+    /// <param name="powerUpType">The type of power up.</param>
+    /// <param name="powerUpTime">The amount of time for the powerup.</param>
+    public void AddToUpgradeInfo(PowerUp.PowerUpType powerUpType, float powerUpTime)
+    {
+        UpgradeDisplay currentUpgrade = Instantiate(upgradeInfoPrefab, upgradeContainer);
+        currentUpgrade.StartUpgradeTimer(powerUpType, powerUpTime);
+    }
+
+    public void UpdateAmmoText(CustomEnums.Handedness handedness, int currentAmmo, int maxAmmo)
+    {
+        ammoText[handedness == CustomEnums.Handedness.Left ? 0 : 1].text = currentAmmo + "/" + maxAmmo;
     }
 
     /// <summary>
