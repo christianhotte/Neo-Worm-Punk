@@ -361,7 +361,7 @@ public class NetworkPlayer : MonoBehaviour
     /// </summary>
     public void SyncColors()
     {
-        photonView.RPC("UpdateTakenColors", RpcTarget.AllBuffered); //Send data to every player on the network (including this one)
+        photonView.RPC("UpdateTakenColors", RpcTarget.All); //Send data to every player on the network (including this one)
     }
     /// <summary>
     /// Manages material event priority for this particular network player.
@@ -456,6 +456,8 @@ public class NetworkPlayer : MonoBehaviour
     /// </summary>
     public void UpdateTakenColorsOnJoin()
     {
+        Debug.Log("Updating Colors On Join...");
+
         List<int> takenColors = new List<int>();
 
         bool mustReplaceColor = false;
