@@ -317,6 +317,8 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     public void UpdateWeaponry()
     {
+        Debug.Log("Menu Scene: " + inMenu.ToString());
+
         if (inMenu)
         {
             inCombat = false;
