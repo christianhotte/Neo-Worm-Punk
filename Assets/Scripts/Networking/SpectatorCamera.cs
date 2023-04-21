@@ -21,7 +21,6 @@ public class SpectatorCamera : MonoBehaviour
     private PlayerController demoPlayer;
     public Camera firstPersonCamera;
     public Camera thirdPersonCamera;
-    private int currentDisplayIndex = 0;
 
     void Start()
     {
@@ -46,22 +45,19 @@ public class SpectatorCamera : MonoBehaviour
         // Check if left mouse button is clicked
         if (Input.GetMouseButtonDown(0))
         {
-            if (Display.displays.Length > 1)
+            // Changes priority of the cameras from first person to third person and vice versa.
+            if (firstPersonCamera.depth == 1 && thirdPersonCamera.depth == 0)
             {
-                if (Camera.main.targetDisplay == 0)
-                {
-                    Camera.main.targetDisplay = 1;
-                    Debug.Log("Switching to Display 2");
-                }
-                else
-                {
-                    Camera.main.targetDisplay = 0;
-                    Debug.Log("Switching to Display 1");
-                }
+                Debug.Log("Testing dawg");
+                firstPersonCamera.depth = 0;
+                thirdPersonCamera.depth = 1;
             }
-            else
+
+            else if (firstPersonCamera.depth == 0 && thirdPersonCamera.depth == 1)
             {
-                Debug.Log("No secondary displays detected.");
+                Debug.Log("Testing gawd");
+                firstPersonCamera.depth = 1;
+                thirdPersonCamera.depth = 0;
             }
         }
     }
