@@ -55,6 +55,8 @@ public class NewShotgunController : PlayerEquipment
 
     private Material litPinMat;   //Color of firing pin indicator light when chamber is full (default color of LEFT FIRING PIN)
     private Material spentPinMat; //Color of firing pin indicator light when chamber is empty (default color of RIGHT FIRING PIN)
+    private Renderer leftPinLight;
+    private Renderer rightPinLight;
 
     //Events & Coroutines:
     /// <summary>
@@ -156,9 +158,14 @@ public class NewShotgunController : PlayerEquipment
         basePinPos = leftFiringPin.localPosition;             //Get base local position of both firing pins
 
         //Get pin colors:
-        litPinMat = leftFiringPin.Find("Light").GetComponent<Renderer>().material;    //Get lit color from left firing pin light
-        spentPinMat = rightFiringPin.Find("Light").GetComponent<Renderer>().material; //Get unlit color from right firing pin light
-        rightFiringPin.Find("Light").GetComponent<Renderer>().material = litPinMat;   //Set up right firing pin with lit color
+        if (leftFiringPin.Find("Light") != null)
+        {
+            leftPinLight = leftFiringPin.Find("Light").GetComponent<Renderer>();
+            rightPinLight = rightFiringPin.Find("Light").GetComponent<Renderer>();
+            litPinMat = leftPinLight.material;    //Get lit color from left firing pin light
+            spentPinMat = rightPinLight.material; //Get unlit color from right firing pin light
+            rightPinLight.material = litPinMat;   //Set up right firing pin with lit color
+        }
     }
     private protected override void Start()
     {
@@ -559,13 +566,13 @@ public class NewShotgunController : PlayerEquipment
         //Modify pins:
         if (side == Handedness.Left || side == Handedness.None) //Left pin is being moved
         {
-            leftFiringPin.localPosition = targetPinPos;                                   //Move left pin to target position
-            leftFiringPin.Find("Light").GetComponent<Renderer>().material = targetPinMat; //Change color of indicator light
+            leftFiringPin.localPosition = targetPinPos;                     //Move left pin to target position
+            if (leftPinLight != null) leftPinLight.material = targetPinMat; //Change color of indicator light
         }
         if (side == Handedness.Right || side == Handedness.None) //Right pin is being moved
         {
-            rightFiringPin.localPosition = targetPinPos;                                   //Move right pin to target position
-            rightFiringPin.Find("Light").GetComponent<Renderer>().material = targetPinMat; //Change color of indicator light
+            rightFiringPin.localPosition = targetPinPos;                      //Move right pin to target position
+            if (rightPinLight != null) rightPinLight.material = targetPinMat; //Change color of indicator light
         }
     }
     /// <summary>

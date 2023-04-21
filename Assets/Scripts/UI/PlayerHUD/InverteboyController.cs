@@ -32,9 +32,18 @@ public class InverteboyController : MonoBehaviour
     [SerializeField, Tooltip("The Inverteboy popup GameObject.")] private GameObject popupPrefab;
     [SerializeField, Tooltip("The Inverteboy popup container.")] private Transform popupContainer;
     [SerializeField, Tooltip("The information window images.")] private Image[] infoWindow;
+
+    [Header("Hologram Settings")]
     [SerializeField, Tooltip("The label text.")] private TextMeshProUGUI labelText;
     [SerializeField, Tooltip("The tutorial text.")] private TextMeshProUGUI tutorialText;
     [SerializeField, Tooltip("The tutorial progress text.")] private TextMeshProUGUI tutorialProgressText;
+    [SerializeField, Tooltip("The tutorial diagram image.")] private Image tutorialImage;
+    [Space(10)]
+    [SerializeField, Tooltip("The speed that the diagram image shrinks.")] private float shrinkImageDuration;
+    [SerializeField, Tooltip("The animation curve for the diagram shrink image animation.")] private LeanTweenType diagramShrinkEaseType;
+    [SerializeField, Tooltip("The animation curve for the diagram grow image animation.")] private LeanTweenType diagramGrowEaseType;
+    [SerializeField, Tooltip("The speed that the diagram image grows.")] private float growImageDuration;
+    [Space(10)]
 
     [SerializeField, Tooltip("The list of the different menus on the main inverteboy.")] private Canvas[] inverteboyMainCanvases;
     [SerializeField, Tooltip("The list of the different menus on the inverteboy hologram.")] private Canvas[] inverteboyHologramCanvases;
@@ -66,6 +75,8 @@ public class InverteboyController : MonoBehaviour
     private IEnumerator hologramAnimation;
     private IEnumerator flashAnimation;
 
+    private Sprite defaultTutorialSprite;
+
     private void Awake()
     {
         audioSource = GetComponent<AudioSource>();
@@ -73,6 +84,8 @@ public class InverteboyController : MonoBehaviour
         currentHologramCanvas = inverteboyHologramCanvases[(int)InverteboyHologramScreens.MAIN];
         defaultInfoWindowColor = infoWindow[0].color;
         ShowHologram(false);
+
+        defaultTutorialSprite = tutorialImage.sprite;
 
         UpdateVolume();
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -279,12 +292,30 @@ public class InverteboyController : MonoBehaviour
     /// Updates the tutorial menu text.
     /// </summary>
     /// <param name="message">The message for the tutorial.</param>
-    /// <param name="label">The label of the tutorial.</param>
-    public void UpdateTutorialText(string message, string label = "", string progress = "")
+    /// <param name="label">The label for the tutorial.</param>
+    /// <param name="diagramSprite">The diagram for the tutorial.</param>
+    public void UpdateTutorialText(string message, string label = "", Sprite diagramSprite = null)
     {
         labelText.text = label;
         tutorialText.text = message;
-        UpdateTutorialProgress(progress);
+
+        Sprite currentTutorialSprite = tutorialImage.sprite;
+        Sprite newTutorialSprite;
+
+        if (diagramSprite != null)
+            newTutorialSprite = diagramSprite;
+        else
+            newTutorialSprite = defaultTutorialSprite;
+
+        //If the new diagram is different, play an animation
+        if (newTutorialSprite != tutorialImage.sprite)
+            DiagramSpriteAnimation(newTutorialSprite);
+    }
+
+    private void DiagramSpriteAnimation(Sprite newSprite)
+    {
+        LeanTween.scale(tutorialImage.gameObject, Vector3.zero, shrinkImageDuration).setEase(diagramShrinkEaseType).setOnComplete(() => tutorialImage.sprite = newSprite);
+        LeanTween.delayedCall(shrinkImageDuration, () => LeanTween.scale(tutorialImage.gameObject, Vector3.one, growImageDuration).setEase(diagramGrowEaseType));
     }
 
     public void UpdateTutorialProgress(string progressText)

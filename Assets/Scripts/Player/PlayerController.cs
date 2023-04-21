@@ -425,7 +425,7 @@ public class PlayerController : MonoBehaviour
         }
 
         //Put player in limbo:
-        photonView.RPC("RPC_MakeInvisible", RpcTarget.Others);                           //Hide trailrenderers for all other players
+        if (PhotonNetwork.IsConnected) photonView.RPC("RPC_MakeInvisible", RpcTarget.Others);                           //Hide trailrenderers for all other players
         bodyRb.velocity = Vector3.zero;                                                  //Reset player velocity
         CenterCamera();                                                                  //Center camera (this is worth doing during any major transition)
         foreach (PlayerEquipment equipment in attachedEquipment) equipment.Shutdown(-1); //Stow and disable all equipment on player

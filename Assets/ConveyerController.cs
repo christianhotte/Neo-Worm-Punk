@@ -11,20 +11,18 @@ public class ConveyerController : MonoBehaviour
     [SerializeField, Tooltip("Refference to MenuStationController")] private MenuStationController menuStationControllerRef;
     [SerializeField, Tooltip("Indicates whether or not this is the player's conveyerbelt")] private bool isPlayerBelt;
 
-    private bool conveyerBeltIsMoving = false;
-    private int[] newConveyerObjectPositions;
-    private bool changingHereBoi = false;
-
-
     [Header("PLAYER Conveyer")]
     [SerializeField, Tooltip("Ref to the launch tube")] private Transform tube;
     [SerializeField, Tooltip("Ref to the launch tube Window")] private Transform tubeWindow;
     [SerializeField, Tooltip("Ref to the lobbyUI controller")] private LobbyUIScript lubbyUIScriptRef;
     [SerializeField, Tooltip("Ref to the FindRoomUI controller")] private FindRoomController findRoomControllerRef;
 
+    private bool conveyerBeltIsMoving = false;
+    private int[] newConveyerObjectPositions;
+    private bool changingHereBoi = false;
     private bool createRoomOption;
     private bool yeetNotYetNoob = false;
-    
+    private bool tutorialOption = false;
 
 
 
@@ -172,7 +170,7 @@ public class ConveyerController : MonoBehaviour
         changingHereBoi = true;
 
         float timeElapsed = 0;
-        float endTransportTime = 1.0f;
+        float endTransportTime = 0.25f;
 
         Vector3 startYPos = tubeWindow.localPosition;
         Vector3 endYPos = new Vector3(startYPos.x, 0.12f, startYPos.z);
@@ -200,6 +198,7 @@ public class ConveyerController : MonoBehaviour
 
         //reset timer
         timeElapsed = 0f;
+        endTransportTime = 0.9f;
 
         Vector3 startYRot = tube.localRotation.eulerAngles;
         Vector3 endYRot = Vector3.zero;
@@ -226,13 +225,13 @@ public class ConveyerController : MonoBehaviour
         tube.localRotation = Quaternion.Euler(endYRot);
 
         timeElapsed = 0f;
-        endTransportTime = 10.0f;
+        endTransportTime = 5.0f;
 
         startYPos = tube.localPosition;
+        Vector3 secondStartYPos = conveyerBeltObjects[0].position;
         endYPos = startYPos;
         endYPos += new Vector3(0, 10, 0);
-
-        
+        yeetNotYetNoob = false;
 
         //lerp whole tube up
         while (timeElapsed < endTransportTime)
@@ -240,23 +239,24 @@ public class ConveyerController : MonoBehaviour
             //will  cut this off once you start loading the new scene
             if (GameManager.Instance.levelTransitionActive) { break; }
 
-            //smooth lerp duration alg
-            float t = timeElapsed / endTransportTime;
-            t = t * t * (3f - 2f * t);
+            tube.localPosition = Vector3.Lerp(startYPos, endYPos, timeElapsed / endTransportTime);
+            conveyerBeltObjects[0].position += Vector3.Lerp(startYPos, endYPos, timeElapsed / endTransportTime);
 
-            tube.localPosition = Vector3.Lerp(startYPos, endYPos, t);
-
-            if(!yeetNotYetNoob && timeElapsed > 0.5f)
+            if (!yeetNotYetNoob && timeElapsed > 2.0f)
             {
                 yeetNotYetNoob = true;
-                StartCoroutine(FadeToBlackAndGoToLockerRoom());
+                Debug.Log("_________________________________________________________________________________________ fade to part");
+                StartCoroutine(FadeToBlackAndGoToNextScene());
             }
+
+            //advance time
+            timeElapsed += Time.deltaTime;
 
             yield return null;
         }
     }
 
-    private IEnumerator FadeToBlackAndGoToLockerRoom()
+    private IEnumerator FadeToBlackAndGoToNextScene()
     {
         yeetNotYetNoob = true;
 
@@ -266,7 +266,11 @@ public class ConveyerController : MonoBehaviour
         yield return null;
 
         //join or create room based on which one works
-        if (createRoomOption)
+        if(tutorialOption)
+        {
+            GameManager.Instance.LoadGame(GameSettings.tutorialScene);
+        }
+        else if (createRoomOption)
         {
             lubbyUIScriptRef.CreateRoom();
         }
@@ -279,11 +283,18 @@ public class ConveyerController : MonoBehaviour
     public void CreateRoomOptionChosen()
     {
         createRoomOption = true;
+        tutorialOption = false;
     }
 
     public void JoinRoomOptionChosen()
     {
         createRoomOption = false;
+        tutorialOption = false;
+    }
+
+    public void TutorialOptionChosen()
+    {
+        tutorialOption = true;
     }
 
     /// <summary>

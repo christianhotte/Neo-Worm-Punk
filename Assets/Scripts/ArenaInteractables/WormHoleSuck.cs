@@ -9,17 +9,19 @@ public class WormHoleSuck : MonoBehaviour
     public Transform womrHoleCenter;
     internal GameObject player;
     internal Rigidbody playerRB;
+    internal WormHoleTrigger WHT;
     internal WormHole WHS;
     // Start is called before the first frame update
     void Start()
     {
+        WHT = GetComponentInParent<WormHoleTrigger>();
         WHS = GetComponentInParent<WormHole>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (suckin&&!WHS.locked)
+        if (suckin&&!WHT.locked)
         {
           //  Debug.Log("TrynaSuck");
             Vector3 newVel;
@@ -30,7 +32,7 @@ public class WormHoleSuck : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
-        if (other.name == "XR Origin")
+        if (other.name == "XR Origin"&&!WHT.locked)
         {
             playerRB = other.GetComponent<Rigidbody>();
             player = other.gameObject;

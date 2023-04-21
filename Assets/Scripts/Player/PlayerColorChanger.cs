@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
 public enum ColorOptions { DEFAULT, PINK, ORANGE, YELLOW, GREEN, CYAN, VIOLET, RAZZMATAZZ, WHITE }
 
@@ -19,6 +20,18 @@ public class PlayerColorChanger : MonoBehaviour
         Debug.Log("Color Buttons Length: " + colorButtons.Length);
         for (int i = 0; i < colorButtons.Length; i++)
             AdjustButtonColor(colorButtons[i], i);
+
+        StartCoroutine(RefreshButtonsOnStart());
+    }
+
+    /// <summary>
+    /// Waits until the player has a color to refresh the buttons.
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator RefreshButtonsOnStart()
+    {
+        yield return new WaitUntil(() => NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["Color"] != null);
+        RefreshButtons();
     }
 
     private void AdjustButtonColor(PhysicalButtonController currentButton, int colorOption)
@@ -91,7 +104,6 @@ public class PlayerColorChanger : MonoBehaviour
 
         foreach (var player in NetworkManagerScript.instance.GetPlayerList())
         {
-            Debug.Log(player.NickName + "'s Color: " + (ColorOptions)player.CustomProperties["Color"]);
             colorButtons[(int)player.CustomProperties["Color"]].ShowText(true);
             colorButtons[(int)player.CustomProperties["Color"]].LockButton(true);
             colorButtons[(int)player.CustomProperties["Color"]].EnableButton(false);
