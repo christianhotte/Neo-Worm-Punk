@@ -454,9 +454,9 @@ public class NetworkPlayer : MonoBehaviour
     /// <summary>
     /// When a user joins, try to take either their color or the next available color.
     /// </summary>
-    public void UpdateTakenColorsOnJoin()
+    public IEnumerator UpdateTakenColorsOnJoin()
     {
-        Debug.Log("Updating Colors On Join...");
+        yield return new WaitUntil(() => photonView.Owner.CustomProperties["Color"] != null);
 
         List<int> takenColors = new List<int>();
 
@@ -473,7 +473,7 @@ public class NetworkPlayer : MonoBehaviour
             Debug.Log("Checking " + currentPlayer.NickName + "'s Color: " + (ColorOptions)currentPlayer.CustomProperties["Color"]);
             takenColors.Add((int)currentPlayer.CustomProperties["Color"]);
 
-            if ((int)currentPlayer.CustomProperties["Color"] == PlayerPrefs.GetInt("PreferredColorOption"))
+            if ((int)currentPlayer.CustomProperties["Color"] == (int)photonView.Owner.CustomProperties["Color"])
             {
                 Debug.Log((ColorOptions)currentPlayer.CustomProperties["Color"] + " is taken.");
                 mustReplaceColor = true;
@@ -493,11 +493,6 @@ public class NetworkPlayer : MonoBehaviour
                     break;
                 }
             }
-        }
-        else
-        {
-            ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().ChangePlayerColor(PlayerPrefs.GetInt("PreferredColorOption"));
-            SetNetworkPlayerProperties("Color", PlayerPrefs.GetInt("PreferredColorOption"));
         }
     }
 
