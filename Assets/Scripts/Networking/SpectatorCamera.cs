@@ -18,6 +18,10 @@ public class SpectatorCamera : MonoBehaviour
     private float currentHeight; // The current height from the player
     private float currentRotationX; // The current rotation around the player on the X-axis
     private float currentRotationY; // The current rotation around the player on the Y-axis
+    private PlayerController demoPlayer;
+    public Camera firstPersonCamera;
+    public Camera thirdPersonCamera;
+    private int currentDisplayIndex = 0;
 
     void Start()
     {
@@ -26,13 +30,43 @@ public class SpectatorCamera : MonoBehaviour
         currentRotationX = transform.rotation.eulerAngles.y;
         currentRotationY = transform.rotation.eulerAngles.x;
         target = GameObject.Find("XR Origin").transform;
+        demoPlayer = GetComponentInParent<PlayerController>();
+
+        // Set the game window to use the first available display by default
+        Display.main.SetRenderingResolution(Screen.width, Screen.height);
 
         // Hides the mouse and centers it in the middle of the screen.
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
     // Update is called once per frame
+    void Update()
+    {
+        // Check if left mouse button is clicked
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (Display.displays.Length > 1)
+            {
+                if (Camera.main.targetDisplay == 0)
+                {
+                    Camera.main.targetDisplay = 1;
+                    Debug.Log("Switching to Display 2");
+                }
+                else
+                {
+                    Camera.main.targetDisplay = 0;
+                    Debug.Log("Switching to Display 1");
+                }
+            }
+            else
+            {
+                Debug.Log("No secondary displays detected.");
+            }
+        }
+    }
+
+    // Update is called once per end of frame
     void LateUpdate()
     {
         // Check if there is a target to follow
