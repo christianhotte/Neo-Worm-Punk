@@ -82,42 +82,8 @@ public class LeaderboardDisplay : MonoBehaviour
     /// </summary>
     private void SortLeaderboard()
     {
-        for(int i = 1; i < leaderBoardList.Count; i++)
-        {
-            LeaderboardItem currentPlayer = leaderBoardList[i];
-            LeaderboardItem previousPlayer = leaderBoardList[i-1];
-
-            //If the current player's rank is not equal to the previous player's rank
-            if (!CurrentPlayerEqualRank(currentPlayer, previousPlayer))
-            {
-                //If the current player is higher rank
-                if(CurrentPlayerHigherRank(currentPlayer, previousPlayer))
-                {
-                    //If the current player is lower ranked than the previous one, raise the current player's rank
-                    if(currentPlayer.GetRanking() > previousPlayer.GetRanking())
-                        currentPlayer.UpdateRank(currentPlayer.GetRanking() - 1);
-
-                    //If the current player is less than or equal rank to the previous one, lower the previous player's rank
-                    if (currentPlayer.GetRanking() <= previousPlayer.GetRanking())
-                        previousPlayer.UpdateRank(previousPlayer.GetRanking() + 1);
-                }
-
-                //If the current player is lower rank
-                else
-                {
-                    //If the current player's rank is less than or equal to the previous player's rank, lower the previous player's rank
-                    if (currentPlayer.GetRanking() <= previousPlayer.GetRanking())
-                        currentPlayer.UpdateRank(currentPlayer.GetRanking() + 1);
-                }
-            }
-            //If the current player's rank is equal to the previous player, but their rank numbers are not equal, take the previous player's rank number
-            else if (currentPlayer.GetRanking() != previousPlayer.GetRanking())
-            {
-                currentPlayer.UpdateRank(previousPlayer.GetRanking());
-            }
-        }
-
-        leaderBoardList = leaderBoardList.OrderBy(player => player.GetRanking()).ToList();    //Sort the list by the ranking
+        //Sort the list by the kills in descending order, and then the deaths in ascending order
+        leaderBoardList = leaderBoardList.OrderByDescending(player => player.GetKills()).ThenBy(player => player.GetDeaths()).ToList();
         UpdateListPositions();
     }
 
@@ -126,16 +92,30 @@ public class LeaderboardDisplay : MonoBehaviour
     /// </summary>
     private void UpdateListPositions()
     {
+        int rank = 1;
+
         for (int i = 0; i < leaderBoardList.Count; i++)
         {
+            if(i > 0)
+            {
+                //If the current leaderboard item is not equal to the one above it, give it the next rank
+                if(!CurrentPlayerEqualRank(leaderBoardList[i], leaderBoardList[i - 1]))
+                {
+                    rank++;
+                    leaderBoardList[i].UpdateRank(rank);
+                }
+            }
+            //Always give the first leaderboard item the first rank
+            else
+                leaderBoardList[i].UpdateRank(rank);
+
             //If the leaderboard position is not in the right position, move it smoothly to the right position
-            if(leaderBoardList[i].GetComponent<RectTransform>().anchoredPosition.y != GetPosition(i))
+            if (leaderBoardList[i].GetComponent<RectTransform>().anchoredPosition.y != GetPosition(i))
                 LeanTween.moveY(leaderBoardList[i].GetComponent<RectTransform>(), GetPosition(i), itemMoveSpeed).setEase(easeType);
         }
     }
 
     private bool CurrentPlayerEqualRank(LeaderboardItem current, LeaderboardItem other) => (current.GetKills() == other.GetKills() && current.GetDeaths() == other.GetDeaths());
-    private bool CurrentPlayerHigherRank(LeaderboardItem current, LeaderboardItem other) => !(current.GetKills() < other.GetKills() && current.GetDeaths() > other.GetDeaths());
 
     private float GetPosition(int index) => -(leaderBoardHeight + spacing) * index;
 }
