@@ -136,9 +136,14 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         if (customRoomSettings == null)
         {
             customRoomSettings = new Hashtable();
-            customRoomSettings.Add("RoundLength", GameSettings.testMatchLength);
-            customRoomSettings.Add("PlayerHP", GameSettings.HPDefault);
         }
+
+        AddCustomRoomSetting("RoundLength", GameSettings.defaultMatchLength, ref customRoomSettings);
+        AddCustomRoomSetting("PlayerHP", GameSettings.HPDefault, ref customRoomSettings);
+        AddCustomRoomSetting("UpgradesActive", GameSettings.upgradesActiveDefault, ref customRoomSettings);
+        AddCustomRoomSetting("UpgradeFrequency", GameSettings.upgradeFrequency, ref customRoomSettings);
+        AddCustomRoomSetting("TeamMode", GameSettings.teamModeDefault, ref customRoomSettings);
+
         customRoomSettings.Add("TubeOccupants", new bool[6] { false, false, false, false, false, false});
 
         Debug.Log("Tube Occupants On Create Room: " + customRoomSettings["TubeOccupants"]);
@@ -149,6 +154,15 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         roomOptions.CustomRoomProperties = customRoomSettings;
         PhotonNetwork.JoinOrCreateRoom(roomName, roomOptions, TypedLobby.Default);
     }
+
+    public void AddCustomRoomSetting(string name, object value, ref Hashtable roomSettings)
+    {
+        if (!roomSettings.ContainsKey(name))
+            roomSettings.Add(name, value);
+        else
+            roomSettings[name] = value;
+    }
+
     public void JoinRoom(string roomName)
     {
         // Joins the room on the network
@@ -674,6 +688,27 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
                 SetTubeOccupantStatus(i, true);
                 break;
             }
+        }
+    }
+
+    // Is called when the button is pressed for TDM.
+    public void TeamDeathMatch()
+    {
+        UpdateRoomSettings("TeamMode", true);
+    }
+
+    // // Is called when the button is pressed for FFA.
+    public void FreeForAll()
+    {
+        UpdateRoomSettings("TeamMode", false);
+    }
+
+    // We want to switch this from just 2 teams to having multiple colors for teams.
+    public void SwitchTeam()
+    {
+        if (localNetworkPlayer.GetNetworkPlayerStats().enemyTeam == 0)
+        {
+
         }
     }
 }

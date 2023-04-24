@@ -431,8 +431,18 @@ public class Projectile : MonoBehaviourPunCallbacks
 
             //Hit using player:
             print("Projectile with origin ID " + originPlayerID + " hit player with ID " + targetPlayer.photonView.ViewID);
-            targetPlayer.photonView.RPC("RPC_Hit", RpcTarget.All, settings.damage, originPlayerID, velocity, (int)DeathCause.GUN);                      //Indicate to player that it has been hit (by projectile with given amount of velocity)
-            if (!dumbFired && originPlayerID != 0) PhotonNetwork.GetPhotonView(originPlayerID).RPC("RPC_HitEnemy", RpcTarget.All); //Indicate to origin player that it has shot something
+            //If you hit someone with the same color as you (same team)
+            if ((int)targetPlayer.photonView.Owner.CustomProperties["Color"] == (int)NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["Color"])
+            {
+                Debug.Log("You've shot your own teammate.");
+            }
+
+            // Hit somebody with a different color (different teams).
+            else
+            {
+                targetPlayer.photonView.RPC("RPC_Hit", RpcTarget.All, settings.damage, originPlayerID, velocity, (int)DeathCause.GUN); //Indicate to player that it has been hit (by projectile with given amount of velocity)
+                if (!dumbFired && originPlayerID != 0) PhotonNetwork.GetPhotonView(originPlayerID).RPC("RPC_HitEnemy", RpcTarget.All); //Indicate to origin player that it has shot something
+            }
 
             //Player hit effect:
             if (settings.playerHitPrefab != null)
@@ -441,6 +451,7 @@ public class Projectile : MonoBehaviourPunCallbacks
                 photonView.RPC("RPC_PlayerHit", RpcTarget.Others);
             }
         }
+
         else //Hit object is not a player
         {
             //Hit through targetable:

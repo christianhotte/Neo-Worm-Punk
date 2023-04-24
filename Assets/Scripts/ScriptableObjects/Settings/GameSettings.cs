@@ -11,10 +11,13 @@ public static class GameSettings
     public static float testSliderValue = 0f;
 
     //Default Room Settings
-    public static int[] matchLengths = { 30, 60, 120, 300, 420 };
+    public static int[] matchLengths = { 60, 120, 180, 300, 420, 600 };
     public static int roomCodeLength = 5;
-    public static int testMatchLength = 300;
+    public static int defaultMatchLength = matchLengths[0];
     public static int HPDefault = 3;
+    public static float upgradeFrequency = 1f;
+    public static bool upgradesActiveDefault = true;
+    public static bool teamModeDefault = false;
 
     public static string titleScreenScene = "DavidMenuScene";
     public static string roomScene = "NetworkLockerRoom";

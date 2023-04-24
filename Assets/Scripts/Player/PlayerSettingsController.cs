@@ -90,6 +90,8 @@ public class PlayerStats
     public int numOfDeaths = 0;
     public int killStreak = 0;
     public int deathStreak = 0;
+    public int enemyTeam = 0;
+    // In damage calculation, if other player is the same color, you do no damage
 
     public static string[] streakMessages =
     {

@@ -27,6 +27,7 @@ public class NewChainsawController : PlayerEquipment
     [SerializeField, Tooltip("Jointed component on front of system which moves forward and rotates during blade activation.")]                   private Transform wrist;
     [SerializeField, Tooltip("Rotating assembly which allows the wrist to be turned downward for reverse grip mode.")]                           private Transform wristPivot;
     [SerializeField, Tooltip("Invisible transform which indicates the extent to which blade tracks for grinding and hitting players.")]          private Transform bladeEnd;
+    [SerializeField, Tooltip("")]                                                                                                                private Transform bladeBackTip;
     [SerializeField, Tooltip("Position chainsaw fires deflected projectiles out of.")]                                                           private Transform barrel;
 
     private Transform hand;             //Real position of player hand used by this equipment
@@ -56,6 +57,7 @@ public class NewChainsawController : PlayerEquipment
 
     private Vector3 bladeOriginPos;    //Initial local (sheathed) position of blade
     private Vector3 wristOriginPos;    //Initial local (sheathed) position of wrist assembly
+    private float bladeOriginSize;     //Initial length of blade extender
     private float bladeBackOriginSize; //Initial length of rear blade extender
 
     //RUNTIME METHODS:
@@ -73,6 +75,7 @@ public class NewChainsawController : PlayerEquipment
         //Get runtime vars:
         bladeOriginPos = bladeTip.localPosition;              //Get starting local position of blade assembly
         wristOriginPos = wrist.localPosition;                 //Get starting local position of wrist assembly
+        bladeOriginSize = bladeExtender.localScale.z;         //Get starting local Z scale of blade extender
         bladeBackOriginSize = bladeExtenderBack.localScale.z; //Get starting local Z scale of rear blade extender
     }
     private protected override void Start()
@@ -435,12 +438,14 @@ public class NewChainsawController : PlayerEquipment
     /// </summary>
     private void UpdateBladeExtender()
     {
-        Vector3 newExtenderScale = bladeExtender.localScale; newExtenderScale.z = bladeTip.localPosition.z;                            //Match Z scale of extender to Z position of blade tip (should be fine if everything is set up right)
+        Vector3 newExtenderScale = bladeExtender.localScale; newExtenderScale.z = (bladeTip.localPosition.z * 5);                      //Match Z scale of extender to Z position of blade tip (should be fine if everything is set up right)
         bladeExtender.localScale = newExtenderScale;                                                                                   //Set blade extender's local scale so that it reaches and connects with blade tip
         newExtenderScale = bladeExtenderBack.localScale;                                                                               //Switch to modifying scale of rear blade extender
         float backExtenderInterpolant = Mathf.InverseLerp(bladeOriginPos.z, settings.bladeTraverseDistance, bladeTip.localPosition.z); //Get interpolant for back extender downscaling based on current blade length percentage
         newExtenderScale.z = Mathf.Lerp(bladeBackOriginSize, 0, backExtenderInterpolant);                                              //Use interpolant to scale down back extender as blade gets longer
         bladeExtenderBack.localScale = newExtenderScale;                                                                               //Apply new scale to back extender
+        Vector3 newBackTipPos = bladeBackTip.localPosition; newBackTipPos.z = bladeExtenderBack.localScale.z / 2.7657f;
+        bladeBackTip.localPosition = newBackTipPos;
     }
     /// <summary>
     /// Checks to see whether or not projectile striking player at given incoming direction can be deflected by chainsaw, then fires out a deflected projectile if so.
