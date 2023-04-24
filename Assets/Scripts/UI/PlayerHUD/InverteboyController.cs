@@ -331,10 +331,9 @@ public class InverteboyController : MonoBehaviour
     {
         Canvas newCanvas = inverteboyMainCanvases[canvasIndex];
 
-        Debug.Log("Switching To " + newCanvas.name);
-        Debug.Log("Current Canvas: " + currentMainCanvas.name);
+        if (currentMainCanvas != null)
+            currentMainCanvas.enabled = false;
 
-        currentMainCanvas.enabled = false;
         currentMainCanvas = newCanvas;
         currentMainCanvas.enabled = true;
     }
@@ -347,7 +346,9 @@ public class InverteboyController : MonoBehaviour
     {
         Canvas newCanvas = inverteboyHologramCanvases[canvasIndex];
 
-        currentHologramCanvas.enabled = false;
+        if (currentHologramCanvas != null)
+            currentHologramCanvas.enabled = false;
+
         currentHologramCanvas = newCanvas;
         currentHologramCanvas.enabled = true;
     }
@@ -360,7 +361,9 @@ public class InverteboyController : MonoBehaviour
     {
         Canvas newCanvas = inverteboyMainCanvases[(int)canvasIndex];
 
-        currentMainCanvas.enabled = false;
+        if (currentMainCanvas != null)
+            currentMainCanvas.enabled = false;
+
         currentMainCanvas = newCanvas;
         currentMainCanvas.enabled = true;
     }
@@ -373,7 +376,9 @@ public class InverteboyController : MonoBehaviour
     {
         Canvas newCanvas = inverteboyHologramCanvases[(int)canvasIndex];
 
-        currentHologramCanvas.enabled = false;
+        if(currentHologramCanvas != null)
+            currentHologramCanvas.enabled = false;
+
         currentHologramCanvas = newCanvas;
         currentHologramCanvas.enabled = true;
     }

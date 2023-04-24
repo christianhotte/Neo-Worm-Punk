@@ -136,9 +136,14 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         if (customRoomSettings == null)
         {
             customRoomSettings = new Hashtable();
-            customRoomSettings.Add("RoundLength", GameSettings.testMatchLength);
-            customRoomSettings.Add("PlayerHP", GameSettings.HPDefault);
         }
+
+        AddCustomRoomSetting("RoundLength", GameSettings.defaultMatchLength, ref customRoomSettings);
+        AddCustomRoomSetting("PlayerHP", GameSettings.HPDefault, ref customRoomSettings);
+        AddCustomRoomSetting("UpgradesActive", GameSettings.upgradesActiveDefault, ref customRoomSettings);
+        AddCustomRoomSetting("UpgradeFrequency", GameSettings.upgradeFrequency, ref customRoomSettings);
+        AddCustomRoomSetting("TeamMode", GameSettings.teamModeDefault, ref customRoomSettings);
+
         customRoomSettings.Add("TubeOccupants", new bool[6] { false, false, false, false, false, false});
 
         Debug.Log("Tube Occupants On Create Room: " + customRoomSettings["TubeOccupants"]);
@@ -149,6 +154,15 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         roomOptions.CustomRoomProperties = customRoomSettings;
         PhotonNetwork.JoinOrCreateRoom(roomName, roomOptions, TypedLobby.Default);
     }
+
+    public void AddCustomRoomSetting(string name, object value, ref Hashtable roomSettings)
+    {
+        if (!roomSettings.ContainsKey(name))
+            roomSettings.Add(name, value);
+        else
+            roomSettings[name] = value;
+    }
+
     public void JoinRoom(string roomName)
     {
         // Joins the room on the network

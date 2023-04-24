@@ -52,6 +52,11 @@ public class WormHoleTrigger : MonoBehaviour
             return;
         }
     }
+    public IEnumerator TimedUnlock(float waitTime)
+    {
+        yield return new WaitForSeconds(waitTime);
+        reset = true;
+    }
     public IEnumerator FlashLight()
     {
         flashin = true;

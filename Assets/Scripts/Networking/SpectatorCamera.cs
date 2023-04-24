@@ -18,6 +18,9 @@ public class SpectatorCamera : MonoBehaviour
     private float currentHeight; // The current height from the player
     private float currentRotationX; // The current rotation around the player on the X-axis
     private float currentRotationY; // The current rotation around the player on the Y-axis
+    private PlayerController demoPlayer;
+    public Camera firstPersonCamera;
+    public Camera thirdPersonCamera;
 
     void Start()
     {
@@ -26,13 +29,40 @@ public class SpectatorCamera : MonoBehaviour
         currentRotationX = transform.rotation.eulerAngles.y;
         currentRotationY = transform.rotation.eulerAngles.x;
         target = GameObject.Find("XR Origin").transform;
+        demoPlayer = GetComponentInParent<PlayerController>();
 
-        // Hides the mouse and centers it in the middle of the screen.
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        // Set the game window to use the first available display by default
+        Display.main.SetRenderingResolution(Screen.width, Screen.height);
     }
 
     // Update is called once per frame
+    void Update()
+    {
+        // Check if left mouse button is clicked
+        if (Input.GetMouseButtonDown(0))
+        {
+            // Changes priority of the cameras from first person to third person and vice versa.
+            if (firstPersonCamera.depth == 1 && thirdPersonCamera.depth == 0)
+            {
+                firstPersonCamera.depth = 0;
+                thirdPersonCamera.depth = 1;
+                Cursor.visible = false;
+                Cursor.lockState = CursorLockMode.Confined;
+                //Cursor.lockState = CursorLockMode.Locked;
+            }
+
+            // Going from third person to first person.
+            else if (firstPersonCamera.depth == 0 && thirdPersonCamera.depth == 1)
+            {
+                firstPersonCamera.depth = 1;
+                thirdPersonCamera.depth = 0;
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
+            }
+        }
+    }
+
+    // Update is called once per end of frame
     void LateUpdate()
     {
         // Check if there is a target to follow
