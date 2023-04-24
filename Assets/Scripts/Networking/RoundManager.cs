@@ -16,7 +16,14 @@ public class RoundManager : MonoBehaviourPunCallbacks, IPunObservable
     // Start is called before the first frame update
     void Start()
     {
-        roundTime = (int)PhotonNetwork.CurrentRoom.CustomProperties["RoundLength"];
+        if (PhotonNetwork.InRoom)
+            roundTime = (int)PhotonNetwork.CurrentRoom.CustomProperties["RoundLength"];
+        else
+        {
+            roundActive = false;
+            return;
+        }
+
         timeRemaining = roundTime;
         StartRound();
     }

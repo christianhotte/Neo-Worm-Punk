@@ -138,7 +138,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             customRoomSettings = new Hashtable();
         }
 
-        AddCustomRoomSetting("RoundLength", GameSettings.testMatchLength, ref customRoomSettings);
+        AddCustomRoomSetting("RoundLength", GameSettings.defaultMatchLength, ref customRoomSettings);
         AddCustomRoomSetting("PlayerHP", GameSettings.HPDefault, ref customRoomSettings);
         AddCustomRoomSetting("UpgradesActive", GameSettings.upgradesActiveDefault, ref customRoomSettings);
         AddCustomRoomSetting("UpgradeFrequency", GameSettings.upgradeFrequency, ref customRoomSettings);

@@ -102,7 +102,7 @@ public class UpgradeSpawner : MonoBehaviour
         {
             IsUpgradeActive = (bool)PhotonNetwork.CurrentRoom.CustomProperties["UpgradesActive"];
             powerupsPerMin = (float)PhotonNetwork.CurrentRoom.CustomProperties["UpgradeFrequency"];
-            timeUntilNextUpgrade = powerupsPerMin * 60f;
+            timeUntilNextUpgrade = 0f;
         }
     }
        
