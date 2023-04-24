@@ -15,7 +15,7 @@ public static class GameSettings
     public static int roomCodeLength = 5;
     public static int testMatchLength = 300;
     public static int HPDefault = 3;
-    public static float upgradeFrequency = 1;
+    public static float upgradeFrequency = 0.025f;
     public static bool upgradesActiveDefault = true;
     public static bool teamModeDefault = false;
 

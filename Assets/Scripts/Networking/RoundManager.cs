@@ -9,6 +9,7 @@ public class RoundManager : MonoBehaviourPunCallbacks, IPunObservable
     private float roundTime;
     private float timeRemaining;
     private bool roundActive = false; // Whether a round is currently active
+    private float timeElapsed;
 
     // Makes sure that the Round Manager is only instantiated once (for the master client only).
 
@@ -30,6 +31,7 @@ public class RoundManager : MonoBehaviourPunCallbacks, IPunObservable
             {
                 EndRound();
             }
+            timeElapsed += Time.deltaTime;
         }
     }
 
@@ -75,5 +77,6 @@ public class RoundManager : MonoBehaviourPunCallbacks, IPunObservable
     public string GetMinutes() => Mathf.FloorToInt(timeRemaining / 60f < 0 ? 0 : timeRemaining / 60f).ToString();
     public string GetSeconds() => Mathf.FloorToInt(timeRemaining % 60f < 0 ? 0 : timeRemaining % 60f).ToString("00");
     public float GetTotalSecondsLeft() => timeRemaining;
+    public float GetCurrentRoundTime() => timeElapsed;
     public float LevelTimePercentage() => 100f - ((timeRemaining / roundTime) * 100f);
 }
