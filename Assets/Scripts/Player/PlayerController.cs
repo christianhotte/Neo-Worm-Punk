@@ -375,7 +375,10 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     public void HitEnemy()
     {
-        if (targetHitSound != null) audioSource.PlayOneShot(targetHitSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play hit sound when player shoots (or damages) a target
+        if (targetHitSound != null)
+        {
+            audioSource.PlayOneShot(targetHitSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play hit sound when player shoots (or damages) a target
+        }
     }
     /// <summary>
     /// Called when player hits and kills an enemy with a projectile.

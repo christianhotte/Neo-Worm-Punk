@@ -690,4 +690,25 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             }
         }
     }
+
+    // Is called when the button is pressed for TDM.
+    public void TeamDeathMatch()
+    {
+        UpdateRoomSettings("TeamMode", true);
+    }
+
+    // // Is called when the button is pressed for FFA.
+    public void FreeForAll()
+    {
+        UpdateRoomSettings("TeamMode", false);
+    }
+
+    // We want to switch this from just 2 teams to having multiple colors for teams.
+    public void SwitchTeam()
+    {
+        if (localNetworkPlayer.GetNetworkPlayerStats().enemyTeam == 0)
+        {
+
+        }
+    }
 }
