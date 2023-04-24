@@ -47,7 +47,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8906a9879989004b947e0e8ccfbc885, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  WormholeTriggers: []
   spawnPoint: {fileID: 0}
+  randomIndex: 0
+  randRange: 0
   settings: {fileID: 11400000, guid: d5b7137c5d51f8c47b0a197df52c3d46, type: 2}
   upgradeResourceNames:
   - MultiShot
@@ -58,6 +61,8 @@ MonoBehaviour:
   SpawnDelay: 30
   currentPowerUp: 0
   powerupsPerMin: 1
+  startRoundBuffer: 15
+  endRoundBuffer: 15
   timeUntilNextUpgrade: 0
 --- !u!33 &8138048759502786587
 MeshFilter:
