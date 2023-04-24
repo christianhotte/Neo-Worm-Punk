@@ -15,6 +15,9 @@ public static class GameSettings
     public static int roomCodeLength = 5;
     public static int testMatchLength = 300;
     public static int HPDefault = 3;
+    public static int upgradeFrequency = 60;
+    public static bool upgradesActiveDefault = true;
+    public static bool teamModeDefault = false;
 
     public static string titleScreenScene = "DavidMenuScene";
     public static string roomScene = "NetworkLockerRoom";

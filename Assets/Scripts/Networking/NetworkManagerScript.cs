@@ -138,6 +138,9 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             customRoomSettings = new Hashtable();
             customRoomSettings.Add("RoundLength", GameSettings.testMatchLength);
             customRoomSettings.Add("PlayerHP", GameSettings.HPDefault);
+            customRoomSettings.Add("UpgradesActive", GameSettings.upgradesActiveDefault);
+            customRoomSettings.Add("UpgradeFrequency", GameSettings.upgradeFrequency);
+            customRoomSettings.Add("TeamMode", GameSettings.teamModeDefault);
         }
         customRoomSettings.Add("TubeOccupants", new bool[6] { false, false, false, false, false, false});
 
