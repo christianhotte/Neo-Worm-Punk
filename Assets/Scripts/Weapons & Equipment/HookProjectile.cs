@@ -82,7 +82,7 @@ public class HookProjectile : Projectile
         {
             case HookState.Deployed: //Hook has been launched and is flying through the air
                 base.Update(); //Use normal projectile movement and homing
-                if (photonView.IsMine && controller.settings.travelIntersectBehavior != HookshotSettings.LineIntersectBehavior.Ignore) //Hook needs to check if anything is intersecting its line
+                if ((!PhotonNetwork.IsConnected || photonView.IsMine) && controller.settings.travelIntersectBehavior != HookshotSettings.LineIntersectBehavior.Ignore) //Hook needs to check if anything is intersecting its line
                 {
                     if (Physics.Linecast(controller.barrel.position, transform.position, out RaycastHit hitInfo, controller.settings.lineCheckLayers)) //Check along line for collisions
                     {
