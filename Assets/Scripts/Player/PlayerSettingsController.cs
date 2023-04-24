@@ -27,10 +27,11 @@ public class PlayerSettingsController : MonoBehaviour
     public CharacterData charData;         //Object where player settings are set, stored and sent from
 
     //RUNTIME METHODS:
-    private void OnEnable()
+    private void Awake()
     {
         Instance = this;                //Create static reference to this settings container
         charData = new CharacterData(); //Create and store a fresh settings object upon instantiation
+        charData.playerColor = playerColors[PlayerPrefs.GetInt("PreferredColorOption")];    //Set the player's color to their ideal color at the start
     }
 
     //UTILITY METHODS:

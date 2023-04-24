@@ -117,7 +117,7 @@ public class PlayerController : MonoBehaviour
         foreach (PlayerEquipment equipment in attachedEquipment) equipment.inputEnabled = true; //Re-enable equipment input
         bodyRb.isKinematic = false; //Re-enable player physics
 
-        photonView.RPC("RPC_MakeVisible", RpcTarget.Others); //Unhide trailrenderers for all other players
+        if (PhotonNetwork.IsConnected) photonView.RPC("RPC_MakeVisible", RpcTarget.Others); //Unhide trailrenderers for all other players
         isDead = false;                                      //Indicate that player is no longer dead
         CenterCamera();                                      //Center camera (this is worth doing during any major transition)
     }
@@ -317,6 +317,8 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     public void UpdateWeaponry()
     {
+        Debug.Log("Menu Scene: " + inMenu.ToString());
+
         if (inMenu)
         {
             inCombat = false;
@@ -425,7 +427,7 @@ public class PlayerController : MonoBehaviour
         }
 
         //Put player in limbo:
-        photonView.RPC("RPC_MakeInvisible", RpcTarget.Others);                           //Hide trailrenderers for all other players
+        if (PhotonNetwork.IsConnected) photonView.RPC("RPC_MakeInvisible", RpcTarget.Others);                           //Hide trailrenderers for all other players
         bodyRb.velocity = Vector3.zero;                                                  //Reset player velocity
         CenterCamera();                                                                  //Center camera (this is worth doing during any major transition)
         foreach (PlayerEquipment equipment in attachedEquipment) equipment.Shutdown(-1); //Stow and disable all equipment on player

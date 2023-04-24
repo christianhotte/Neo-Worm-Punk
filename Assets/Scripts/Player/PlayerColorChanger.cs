@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
 public enum ColorOptions { DEFAULT, PINK, ORANGE, YELLOW, GREEN, CYAN, VIOLET, RAZZMATAZZ, WHITE }
 
@@ -19,6 +20,21 @@ public class PlayerColorChanger : MonoBehaviour
         Debug.Log("Color Buttons Length: " + colorButtons.Length);
         for (int i = 0; i < colorButtons.Length; i++)
             AdjustButtonColor(colorButtons[i], i);
+
+        if (PhotonNetwork.IsConnected)
+            StartCoroutine(RefreshButtonsOnStart());
+        else
+            RefreshOfflineButtons();
+    }
+
+    /// <summary>
+    /// Waits until the player has a color to refresh the buttons.
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator RefreshButtonsOnStart()
+    {
+        yield return new WaitUntil(() => NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["Color"] != null);
+        RefreshButtons();
     }
 
     private void AdjustButtonColor(PhysicalButtonController currentButton, int colorOption)
@@ -74,7 +90,14 @@ public class PlayerColorChanger : MonoBehaviour
         Color newColor = PlayerSettingsController.ColorOptionsToColor((ColorOptions)colorOption);
 
         PlayerSettingsController.Instance.charData.playerColor = newColor;   //Set the player color in the character data
-        NetworkManagerScript.localNetworkPlayer.SetNetworkPlayerProperties("Color", colorOption);
+
+        if(PhotonNetwork.IsConnected)
+            NetworkManagerScript.localNetworkPlayer.SetNetworkPlayerProperties("Color", colorOption);
+        else
+        {
+            PlayerPrefs.SetInt("PreferredColorOption", colorOption);
+            RefreshOfflineButtons();
+        }
 
         PlayerController.instance.ApplyAndSyncSettings(); //Apply settings to player (NOTE TO PETER: Call this whenever you want to change a setting and sync it across the network)
         Debug.Log("Changing Player Color To " + newColorText);
@@ -91,10 +114,23 @@ public class PlayerColorChanger : MonoBehaviour
 
         foreach (var player in NetworkManagerScript.instance.GetPlayerList())
         {
-            Debug.Log(player.NickName + "'s Color: " + (ColorOptions)player.CustomProperties["Color"]);
             colorButtons[(int)player.CustomProperties["Color"]].ShowText(true);
             colorButtons[(int)player.CustomProperties["Color"]].LockButton(true);
             colorButtons[(int)player.CustomProperties["Color"]].EnableButton(false);
         }
+    }
+
+    private void RefreshOfflineButtons()
+    {
+        foreach (var button in colorButtons)
+        {
+            button.ShowText(false);
+            button.LockButton(false);
+            button.EnableButton(true);
+        }
+
+        colorButtons[PlayerPrefs.GetInt("PreferredColorOption")].ShowText(true);
+        colorButtons[PlayerPrefs.GetInt("PreferredColorOption")].LockButton(true);
+        colorButtons[PlayerPrefs.GetInt("PreferredColorOption")].EnableButton(false);
     }
 }

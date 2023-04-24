@@ -26,14 +26,16 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        MoveToSpawnPoint();
+        StartCoroutine(MoveToSpawnPoint());
     }
 
     /// <summary>
     /// Moves the player to a spawn point in the scene.
     /// </summary>
-    public void MoveToSpawnPoint()
+    public IEnumerator MoveToSpawnPoint()
     {
+        yield return new WaitUntil(() => ReadyUpManager.instance != null);
+
         int tubeID = (int)NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["TubeID"];  //Get the tube ID from the current player
         LockerTubeController spawnTube = tubes[tubeID]; //Gets the tube associated with the tube ID
 
@@ -43,16 +45,12 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
             PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
             PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
 
-            if (ReadyUpManager.instance != null)
-            {
-                ReadyUpManager.instance.localPlayerTube = spawnTube;
-                ReadyUpManager.instance.UpdateStatus(tubeID + 1);
-                ReadyUpManager.instance.localPlayerTube.SpawnPlayerName(NetworkManagerScript.instance.GetLocalPlayerName());
-                NetworkManagerScript.localNetworkPlayer.UpdateTakenColorsOnJoin();
-                ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
-                if (PhotonNetwork.IsMasterClient)
-                    ReadyUpManager.instance.localPlayerTube.ShowHostSettings(true); //Show the settings if the player being moved is the master client
-            }
+            ReadyUpManager.instance.localPlayerTube = spawnTube;
+            ReadyUpManager.instance.UpdateStatus(tubeID + 1);
+            ReadyUpManager.instance.localPlayerTube.SpawnPlayerName(NetworkManagerScript.instance.GetLocalPlayerName());
+            StartCoroutine(NetworkManagerScript.localNetworkPlayer.UpdateTakenColorsOnJoin());
+            if (PhotonNetwork.IsMasterClient)
+                ReadyUpManager.instance.localPlayerTube.ShowHostSettings(true); //Show the settings if the player being moved is the master client
         }
     }
 

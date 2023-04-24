@@ -194,11 +194,9 @@ public class ConveyerController : MonoBehaviour
             yield return null;
         }
 
-        yield return new WaitForSeconds(0.5f);
-
         //reset timer
         timeElapsed = 0f;
-        endTransportTime = 0.9f;
+        endTransportTime = 0.7f;
 
         Vector3 startYRot = tube.localRotation.eulerAngles;
         Vector3 endYRot = Vector3.zero;
@@ -225,27 +223,27 @@ public class ConveyerController : MonoBehaviour
         tube.localRotation = Quaternion.Euler(endYRot);
 
         timeElapsed = 0f;
-        endTransportTime = 5.0f;
+        endTransportTime = 3.0f;
 
         startYPos = tube.localPosition;
-        Vector3 secondStartYPos = conveyerBeltObjects[0].localPosition;
+        Vector3 secondStartYPos = conveyerBeltObjects[0].position;
         endYPos = startYPos;
         endYPos += new Vector3(0, 10, 0);
+        Vector3 secondEndYPos = secondStartYPos + new Vector3(0, 10, 0);
         yeetNotYetNoob = false;
 
-        //lerp whole tube up
+        //lerp whole tube + player up
         while (timeElapsed < endTransportTime)
         {
             //will  cut this off once you start loading the new scene
             if (GameManager.Instance.levelTransitionActive) { break; }
 
             tube.localPosition = Vector3.Lerp(startYPos, endYPos, timeElapsed / endTransportTime);
-            conveyerBeltObjects[0].localPosition += Vector3.Lerp(startYPos, endYPos, timeElapsed / endTransportTime);
+            conveyerBeltObjects[0].position = Vector3.Lerp(secondStartYPos, secondEndYPos, timeElapsed / endTransportTime);
 
-            if (!yeetNotYetNoob && timeElapsed > 2.0f)
+            if (!yeetNotYetNoob && timeElapsed > 1.0f)
             {
                 yeetNotYetNoob = true;
-                Debug.Log("_________________________________________________________________________________________ fade to part");
                 StartCoroutine(FadeToBlackAndGoToNextScene());
             }
 
@@ -272,10 +270,12 @@ public class ConveyerController : MonoBehaviour
         }
         else if (createRoomOption)
         {
+            Debug.Log("You SHOULD be creating and joining a room right now");
             lubbyUIScriptRef.CreateRoom();
         }
         else
         {
+            Debug.Log("You SHOULD be joining someone else's room right now");
             findRoomControllerRef.ConnectToRoom();
         }
     }
