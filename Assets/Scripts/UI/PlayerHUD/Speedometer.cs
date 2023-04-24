@@ -22,9 +22,9 @@ public class Speedometer : MonoBehaviour
             currentTimer = 0;
             double mph = (PlayerController.instance.bodyRb.velocity.magnitude * 2.23694);
             if(mph < 0.01)
-                speedometerText.text = "Speed: " + (PlayerController.instance.bodyRb.velocity.magnitude * 2.23694).ToString("F0") + " mph";
+                speedometerText.text = (mph).ToString("F0") + " mph";
             else
-                speedometerText.text = "Speed: " + (PlayerController.instance.bodyRb.velocity.magnitude * 2.23694).ToString("F2") + " mph";
+                speedometerText.text = (mph).ToString("F2") + " mph";
         }
         else
             currentTimer += Time.deltaTime;
