@@ -39,14 +39,14 @@ public class PlayerSettingsController : MonoBehaviour
     public static string PlayerStatsToString(PlayerStats playerStats) => JsonUtility.ToJson(playerStats); //Sends player stats to a string (transmissible over RPC)
 
     public static Color[] playerColors = { 
-        new Color(247f / 255f, 128f / 255f, 128f / 255f),
-        new Color(255f / 255f, 99f / 255f, 255f / 255f),
-        new Color(232f / 255f, 131f / 255f, 23f / 255f),
+        new Color(247f / 255f, 128f / 255f, 128f / 255f), //Default
+        new Color(255f / 255f, 99f / 255f, 255f / 255f), //Pink
+        new Color(232f / 255f, 131f / 255f, 23f / 255f), //Orange
         Color.yellow,
         Color.green,
         Color.cyan,
-        new Color(52f / 255f, 31f / 255f, 224f / 255f),
-        new Color(215f / 255f, 36f / 255f,  77f / 255f),
+        new Color(52f / 255f, 31f / 255f, 224f / 255f), //Violet
+        new Color(215f / 255f, 36f / 255f,  77f / 255f), //Razzmatazz
         Color.white,
     };
 
