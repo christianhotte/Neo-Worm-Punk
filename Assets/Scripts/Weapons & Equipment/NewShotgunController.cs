@@ -487,6 +487,10 @@ public class NewShotgunController : PlayerEquipment
         newJointLimit.limit = 0;                                     //Set break angle to closed value
         breakJoint.highAngularXLimit = newJointLimit;                //Apply new joint limit
 
+        //Effects:
+        leftPinLight.material = litPinMat;
+        rightPinLight.material = litPinMat;
+
         //Cleanup:
         if (gunSettings.lockSound != null) audioSource.PlayOneShot(gunSettings.lockSound); //Play sound effect
         SendHapticImpulse(gunSettings.closeHaptics);                                       //Play haptic impulse
@@ -561,18 +565,17 @@ public class NewShotgunController : PlayerEquipment
     {
         //Initialization:
         Vector3 targetPinPos = basePinPos + (inward ? (Vector3.forward * gunSettings.pinTraverseDistance) : Vector3.zero); //Get position pin(s) are being moved to
-        Material targetPinMat = inward ? spentPinMat : litPinMat;                                                          //Determine material pin color is going to be changing to
 
         //Modify pins:
         if (side == Handedness.Left || side == Handedness.None) //Left pin is being moved
         {
-            leftFiringPin.localPosition = targetPinPos;                     //Move left pin to target position
-            if (leftPinLight != null) leftPinLight.material = targetPinMat; //Change color of indicator light
+            leftFiringPin.localPosition = targetPinPos; //Move left pin to target position
+            if (inward) leftPinLight.material = spentPinMat;
         }
         if (side == Handedness.Right || side == Handedness.None) //Right pin is being moved
         {
-            rightFiringPin.localPosition = targetPinPos;                      //Move right pin to target position
-            if (rightPinLight != null) rightPinLight.material = targetPinMat; //Change color of indicator light
+            rightFiringPin.localPosition = targetPinPos; //Move right pin to target position
+            if (inward) rightPinLight.material = spentPinMat;
         }
     }
     /// <summary>
