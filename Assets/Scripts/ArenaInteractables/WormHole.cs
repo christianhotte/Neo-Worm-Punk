@@ -22,6 +22,7 @@ public class WormHole : NetworkedArenaElement
     public WormZone wormZoneScript;
     internal NetworkPlayer netPlayer;
     public int luckyChance = 10,randRange;
+    private bool IsUpgradeActive;
     void Start()
     {
         wormHoleAud = this.GetComponent<AudioSource>();
@@ -42,6 +43,7 @@ public class WormHole : NetworkedArenaElement
             OpenExits.AddRange(FindObjectsOfType<WormHoleTrigger>());
             randRange = OpenExits.Count;
             int randomIndex = Random.Range(0, randRange);
+            IsUpgradeActive = (bool)PhotonNetwork.CurrentRoom.CustomProperties["UpgradesActive"];
         }
     }
     void Update()
@@ -66,7 +68,7 @@ public class WormHole : NetworkedArenaElement
                 Random.seed = (int)Time.realtimeSinceStartup;
                 int randRoll = Random.Range(0, 101);
                 Debug.Log("Roll is " + randRoll + " Target is " + randTarget);
-                if (randRoll > randTarget)
+                if (randRoll > randTarget && IsUpgradeActive)
                 {
                     luckyProc = true;
                     int randPower = Random.Range(1, 4);
@@ -89,7 +91,7 @@ public class WormHole : NetworkedArenaElement
             {
                 int randRoll = Random.Range(0, 101);
                 Debug.Log("Roll is " + randRoll + " Target is " + luckyChance);
-                if (randRoll < luckyChance)
+                if (randRoll < luckyChance&& IsUpgradeActive)
                 {
                     luckyProc = true;
                     int randPower = Random.Range(1, 4);
