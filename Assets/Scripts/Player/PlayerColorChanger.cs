@@ -60,30 +60,76 @@ public class PlayerColorChanger : MonoBehaviour
         {
             case (int)ColorOptions.PINK:
                 newColorText = "PINK";
+                // Change player stats to the color you change to (string)
+                if ((bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"] == true)
+                {
+                    NetworkManagerScript.localNetworkPlayer.SetNetworkPlayerProperties(NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().teamColor, "PINK");
+                    NetworkManagerScript.localNetworkPlayer.SyncStats();
+                }
                 break;
             case (int)ColorOptions.ORANGE:
                 newColorText = "ORANGE";
+                if ((bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"] == true)
+                {
+                    NetworkManagerScript.localNetworkPlayer.SetNetworkPlayerProperties(NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().teamColor, "ORANGE");
+                    NetworkManagerScript.localNetworkPlayer.SyncStats();
+                }
                 break;
             case (int)ColorOptions.YELLOW:
                 newColorText = "YELLOW";
+                if ((bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"] == true)
+                {
+                    NetworkManagerScript.localNetworkPlayer.SetNetworkPlayerProperties(NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().teamColor, "YELLOW");
+                    NetworkManagerScript.localNetworkPlayer.SyncStats();
+                }
                 break;
             case (int)ColorOptions.GREEN:
                 newColorText = "GREEN";
+                if ((bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"] == true)
+                {
+                    NetworkManagerScript.localNetworkPlayer.SetNetworkPlayerProperties(NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().teamColor, "GREEN");
+                    NetworkManagerScript.localNetworkPlayer.SyncStats();
+                }
                 break;
             case (int)ColorOptions.CYAN:
                 newColorText = "CYAN";
+                if ((bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"] == true)
+                {
+                    NetworkManagerScript.localNetworkPlayer.SetNetworkPlayerProperties(NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().teamColor, "CYAN");
+                    NetworkManagerScript.localNetworkPlayer.SyncStats();
+                }
                 break;
             case (int)ColorOptions.VIOLET:
                 newColorText = "VIOLET";
+                if ((bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"] == true)
+                {
+                    NetworkManagerScript.localNetworkPlayer.SetNetworkPlayerProperties(NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().teamColor, "VIOLET");
+                    NetworkManagerScript.localNetworkPlayer.SyncStats();
+                }
                 break;
             case (int)ColorOptions.RAZZMATAZZ:
                 newColorText = "RAZZMATAZZ";
+                if ((bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"] == true)
+                {
+                    NetworkManagerScript.localNetworkPlayer.SetNetworkPlayerProperties(NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().teamColor, "RAZZMATAZZ");
+                    NetworkManagerScript.localNetworkPlayer.SyncStats();
+                }
                 break;
             case (int)ColorOptions.WHITE:
                 newColorText = "WHITE";
+                if ((bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"] == true)
+                {
+                    NetworkManagerScript.localNetworkPlayer.SetNetworkPlayerProperties(NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().teamColor, "WHITE");
+                    NetworkManagerScript.localNetworkPlayer.SyncStats();
+                }
                 break;
             default:
                 newColorText = "DEFAULT";
+                if ((bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"] == true)
+                {
+                    NetworkManagerScript.localNetworkPlayer.SetNetworkPlayerProperties(NetworkManagerScript.localNetworkPlayer.GetNetworkPlayerStats().teamColor, "DEFAULT");
+                    NetworkManagerScript.localNetworkPlayer.SyncStats();
+                }
                 break;
         }
 

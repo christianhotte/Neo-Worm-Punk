@@ -695,6 +695,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     public void TeamDeathMatch()
     {
         UpdateRoomSettings("TeamMode", true);
+
+        // TO DO: Set teamColor player stats to the current color you have
     }
 
     // // Is called when the button is pressed for FFA.
@@ -706,9 +708,9 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     // We want to switch this from just 2 teams to having multiple colors for teams.
     public void SwitchTeam()
     {
-        if (localNetworkPlayer.GetNetworkPlayerStats().enemyTeam == 0)
+        if (localNetworkPlayer.GetNetworkPlayerStats().teamColor == "")
         {
-
+            
         }
     }
 }
