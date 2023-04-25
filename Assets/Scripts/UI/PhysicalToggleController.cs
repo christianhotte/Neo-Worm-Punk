@@ -170,4 +170,14 @@ public class PhysicalToggleController : MonoBehaviour
     /// </summary>
     /// <param name="locked">If true, the position of the toggle is locked. If false, the toggle can be pressed freely.</param>
     public void LockToggle(bool locked) => isInteractable = locked;
+
+    /// <summary>
+    /// Forces the toggle to switch on or off automatically.
+    /// </summary>
+    /// <param name="newIsOn">The new state for the toggle.</param>
+    public void ForceToggle(bool newIsOn)
+    {
+        isOn = newIsOn;
+        UpdateToggleAngle();
+    }
 }

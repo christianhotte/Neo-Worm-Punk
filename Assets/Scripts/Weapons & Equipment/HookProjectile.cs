@@ -319,7 +319,6 @@ public class HookProjectile : Projectile
         if (hitInfo.collider.GetComponentInParent<WormHoleTrigger>() != null || (hitInfo.collider.GetComponentInParent<Grinder>() != null&&hitInfo.collider.name=="GrapplePoint"))
         {
             controller.locked = true;
-            PlayerController.instance.bodyRb.velocity *= 2;
         }
         //Check for bounce:
         if (controller.settings.bounceLayers == (controller.settings.bounceLayers | (1 << hitInfo.collider.gameObject.layer))) //Hook is bouncing off of a non-hookable layer

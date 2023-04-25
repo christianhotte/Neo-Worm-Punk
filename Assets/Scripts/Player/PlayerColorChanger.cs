@@ -91,8 +91,12 @@ public class PlayerColorChanger : MonoBehaviour
 
         PlayerSettingsController.Instance.charData.playerColor = newColor;   //Set the player color in the character data
 
-        if(PhotonNetwork.IsConnected)
+        if (PhotonNetwork.IsConnected)
+        {
             NetworkManagerScript.localNetworkPlayer.SetNetworkPlayerProperties("Color", colorOption);
+            if ((bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"])
+                RefreshButtons();
+        }
         else
         {
             PlayerPrefs.SetInt("PreferredColorOption", colorOption);
@@ -112,11 +116,25 @@ public class PlayerColorChanger : MonoBehaviour
             button.EnableButton(true);
         }
 
-        foreach (var player in NetworkManagerScript.instance.GetPlayerList())
+        //If not on teams, make the player colors exclusive
+        if (!(bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"])
         {
-            colorButtons[(int)player.CustomProperties["Color"]].ShowText(true);
-            colorButtons[(int)player.CustomProperties["Color"]].LockButton(true);
-            colorButtons[(int)player.CustomProperties["Color"]].EnableButton(false);
+            foreach (var player in NetworkManagerScript.instance.GetPlayerList())
+            {
+                if (player.CustomProperties["Color"] != null)
+                {
+                    colorButtons[(int)player.CustomProperties["Color"]].ShowText(true);
+                    colorButtons[(int)player.CustomProperties["Color"]].LockButton(true);
+                    colorButtons[(int)player.CustomProperties["Color"]].EnableButton(false);
+                }
+            }
+        }
+        //If on teams, make the player colors inclusive
+        else
+        {
+            colorButtons[(int)NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["Color"]].ShowText(true);
+            colorButtons[(int)NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["Color"]].LockButton(true);
+            colorButtons[(int)NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["Color"]].EnableButton(false);
         }
     }
 

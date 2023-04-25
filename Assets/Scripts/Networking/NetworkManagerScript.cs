@@ -140,13 +140,13 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
         AddCustomRoomSetting("RoundLength", GameSettings.defaultMatchLength, ref customRoomSettings);
         AddCustomRoomSetting("PlayerHP", GameSettings.HPDefault, ref customRoomSettings);
+        AddCustomRoomSetting("HazardsActive", GameSettings.hazardsActiveDefault, ref customRoomSettings);
         AddCustomRoomSetting("UpgradesActive", GameSettings.upgradesActiveDefault, ref customRoomSettings);
         AddCustomRoomSetting("UpgradeFrequency", GameSettings.upgradeFrequency, ref customRoomSettings);
         AddCustomRoomSetting("TeamMode", GameSettings.teamModeDefault, ref customRoomSettings);
+        AddCustomRoomSetting("TubeOccupants", new bool[6] { false, false, false, false, false, false }, ref customRoomSettings);
 
-        customRoomSettings.Add("TubeOccupants", new bool[6] { false, false, false, false, false, false});
-
-        Debug.Log("Tube Occupants On Create Room: " + customRoomSettings["TubeOccupants"]);
+        // Debug.Log("Tube Occupants On Create Room: " + customRoomSettings["TubeOccupants"]);
 
         roomOptions.IsOpen = true; // The room is open.
         roomOptions.EmptyRoomTtl = 0; // Leave the room open for 0 milliseconds after the room is empty
@@ -649,6 +649,18 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     public Room GetMostRecentRoom() => mostRecentRoom;
     public string GetCurrentRoom() => PhotonNetwork.CurrentRoom.Name;
     public Player[] GetPlayerList() => PhotonNetwork.PlayerList;
+
+    public int GetPlayerIndexFromList()
+    {
+        for(int i = 0; i < GetPlayerList().Length; i++)
+        {
+            if (localNetworkPlayer.photonView.Owner == GetPlayerList()[i])
+                return i;
+        }
+
+        return -1;
+    }
+
     public string GetLocalPlayerName() => PhotonNetwork.LocalPlayer.NickName;
     public bool IsLocalPlayerInRoom() => PhotonNetwork.InRoom;
 
@@ -695,6 +707,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     public void TeamDeathMatch()
     {
         UpdateRoomSettings("TeamMode", true);
+
+        // TO DO: Set teamColor player stats to the current color you have
     }
 
     // // Is called when the button is pressed for FFA.
@@ -706,9 +720,9 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     // We want to switch this from just 2 teams to having multiple colors for teams.
     public void SwitchTeam()
     {
-        if (localNetworkPlayer.GetNetworkPlayerStats().enemyTeam == 0)
+        if (localNetworkPlayer.GetNetworkPlayerStats().teamColor == "")
         {
-
+            
         }
     }
 }

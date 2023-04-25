@@ -260,7 +260,7 @@ public class Projectile : MonoBehaviourPunCallbacks
             //NOTE: This is intended to allow projectiles to be better at making it around walls
             if (Physics.Linecast(transform.position, newPosition, out RaycastHit hitInfo, ~settings.ignoreLayers)) //Do a simple linecast, only ignoring designated layers
             {
-                if (!HitsOwnPlayer(hitInfo)) //Make sure projectile is not hitting its own player
+                if (dumbFired || !HitsOwnPlayer(hitInfo)) //Make sure projectile is not hitting its own player
                 {
                     totalDistance -= velocity.magnitude - hitInfo.distance; //Update totalDistance to reflect actual distance traveled at exact point of contact
                     HitObject(hitInfo);                                     //Trigger hit procedure
@@ -274,7 +274,7 @@ public class Projectile : MonoBehaviourPunCallbacks
                 RaycastHit[] hits = Physics.SphereCastAll(transform.position, settings.radius, velocity, travelDistance, ~settings.radiusIgnoreLayers); //Do a spherecast along bullet trajectory, get all colliders (in case it collides with own player)
                 foreach (RaycastHit hit in hits) //Iterate through each thing projectile has hit along path
                 {
-                    if (!HitsOwnPlayer(hit)) //Do not acnowledge hits on own player
+                    if (dumbFired || !HitsOwnPlayer(hit)) //Do not acnowledge hits on own player
                     {
                         totalDistance -= velocity.magnitude - hit.distance; //Update totalDistance to reflect actual distance traveled at exact point of contact
                         HitObject(hit);                                     //Trigger hit procedure
@@ -289,7 +289,7 @@ public class Projectile : MonoBehaviourPunCallbacks
         transform.rotation = Quaternion.LookRotation(velocity); //Rotate projectile to align with current velocity
 
         //Burnout check:
-        if (photonView.IsMine || dumbFired) ////Only check if projectile is authoritative version
+        if (photonView.IsMine || dumbFired || !PhotonNetwork.IsConnected) //Only check if projectile is authoritative version
         {
             timeAlive += Time.deltaTime;                                               //Update time tracker
             if (estimatedLifeTime > 0 && timeAlive > estimatedLifeTime) BurnOut();     //Burn projectile out if it has been alive for too long (if lifetime is being used)
@@ -325,12 +325,12 @@ public class Projectile : MonoBehaviourPunCallbacks
         {
             //Perform a mini position update:
             targetPosition += transform.forward * settings.barrelGap; //Get target starting position (with barrel gap)
-            if (photonView.IsMine) //Only have master projectile check for homing
+            if (photonView.IsMine || dumbFired || !PhotonNetwork.IsConnected) //Only have master projectile check for homing
             {
                 if (Physics.Linecast(startPosition, targetPosition, out RaycastHit hitInfo, ~settings.ignoreLayers)) //Barrel gap movement would cause projectile to hit something
                 {
-                    if (!HitsOwnPlayer(hitInfo)) { HitObject(hitInfo); return; }     //Make sure hit object is not the projectile's own player, then if not, hit it immediately
-                    if (settings.range <= settings.barrelGap) { BurnOut(); return; } //Burn projectile out in the unlikely event that the barrel gap is greater than its range
+                    if (dumbFired || !HitsOwnPlayer(hitInfo)) { HitObject(hitInfo); return; } //Make sure hit object is not the projectile's own player, then if not, hit it immediately
+                    if (settings.range <= settings.barrelGap) { BurnOut(); return; }          //Burn projectile out in the unlikely event that the barrel gap is greater than its range
                 }
             }
             totalDistance += settings.barrelGap; //Include distance in total distance traveled
@@ -339,7 +339,7 @@ public class Projectile : MonoBehaviourPunCallbacks
         //Cleanup:
         if (printDebug) print("Projectile Fired!"); //Print debug signal if called for
         transform.position = targetPosition;        //Move to initial position
-        if (photonView.IsMine || dumbFired) //This is the authoritative version of the projectile
+        if (photonView.IsMine || dumbFired || !PhotonNetwork.IsConnected) //This is the authoritative version of the projectile
         {
             if (settings.homingStrength > 0) StartCoroutine(DoTargetAcquisition()); //Begin doing target acquisition if projectile does homing
             estimatedLifeTime = settings.range / settings.initialVelocity;          //Calculate approximate lifetime based on range and velocity
@@ -400,7 +400,7 @@ public class Projectile : MonoBehaviourPunCallbacks
                 }
             }
         }
-        photonView.RPC("RPC_Move", RpcTarget.Others, transform.position); //Sync up position and velocity between all versions of networked projectile
+        if (PhotonNetwork.IsConnected) photonView.RPC("RPC_Move", RpcTarget.Others, transform.position); //Sync up position and velocity between all versions of networked projectile
     }
     /// <summary>
     /// Makes projectile lose its current target.
@@ -412,8 +412,8 @@ public class Projectile : MonoBehaviourPunCallbacks
         audioSource.Stop();                                                           //Stop playing homing sound
 
         //Cleanup:
-        target = null;                                                      //Clear active target
-        if (!dumbFired) photonView.RPC("RPC_LostTarget", RpcTarget.Others); //Indicate to all other projectiles that target has been lost
+        target = null;                                                                                   //Clear active target
+        if (!dumbFired && PhotonNetwork.IsConnected) photonView.RPC("RPC_LostTarget", RpcTarget.Others); //Indicate to all other projectiles that target has been lost
     }
     private protected virtual void HitObject(RaycastHit hitInfo)
     {
@@ -451,7 +451,22 @@ public class Projectile : MonoBehaviourPunCallbacks
                 photonView.RPC("RPC_PlayerHit", RpcTarget.Others);
             }
         }
-
+        else if (!PhotonNetwork.IsConnected && originPlayerID < 0 && hitInfo.collider.GetComponentInParent<PlayerController>() != null)
+        {
+            bool deflected = false;
+            foreach (PlayerEquipment equipment in PlayerController.instance.attachedEquipment)
+            {
+                if (equipment.TryGetComponent(out NewChainsawController chainsaw)) //Equipment is a chainsaw
+                {
+                    if (chainsaw.TryDeflect(velocity, "Projectiles/HotteProjectile1"))
+                    {
+                        print("deflect oog");
+                        deflected = true; //Do not deal damage if projectile could be deflected
+                    } 
+                }
+            }
+            if (!deflected) PlayerController.instance.IsHit(settings.damage); //Hit player directly if not deflected
+        }
         else //Hit object is not a player
         {
             //Hit through targetable:
@@ -599,8 +614,8 @@ public class Projectile : MonoBehaviourPunCallbacks
     }
     private void Delete()
     {
-        if (!dumbFired && photonView.IsMine) PhotonNetwork.Destroy(photonView);               //Destroy networked projectiles on the network
-        else if (dumbFired) { print("Destroying projectile locally."); Destroy(gameObject); } //Use normal destruction for non-networked projectiles
+        if (!dumbFired && photonView.IsMine) PhotonNetwork.Destroy(photonView);                                             //Destroy networked projectiles on the network
+        else if (dumbFired || !PhotonNetwork.IsConnected) { print("Destroying projectile locally."); Destroy(gameObject); } //Use normal destruction for non-networked projectiles
         //NOTE: Remote networked projectiles cannot delete themselves, they must be deleted from the network by their master version
     }
 }
