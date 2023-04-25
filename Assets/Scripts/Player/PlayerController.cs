@@ -107,7 +107,7 @@ public class PlayerController : MonoBehaviour
     public IEnumerator DeathSequence()
     {
         yield return new WaitForSeconds(healthSettings.deathTime); //Wait for designated number of seconds in death zone
-
+        if (GetComponentInChildren<NewGrapplerController>() != null) GetComponentInChildren<NewGrapplerController>().locked = false;
         if (SpawnManager.current != null && useSpawnPoint) //Spawn manager is present in scene
         {
             Transform spawnpoint = SpawnManager.current.GetRandomSpawnPoint();                    //Get spawnpoint from spawnpoint manager
