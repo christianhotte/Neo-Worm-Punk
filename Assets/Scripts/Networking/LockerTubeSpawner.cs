@@ -67,7 +67,7 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
     {
         for(int i = 0; i < NetworkManagerScript.instance.GetTubeOccupancy().Length; i++)
         {
-            if (NetworkManagerScript.instance.GetTubeOccupancy()[i])
+            if (NetworkManagerScript.instance.GetTubeOccupancy()[i] && i != (int)NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["TubeID"])
             {
                 tubes[i].StartTube(null, 0);
             }
