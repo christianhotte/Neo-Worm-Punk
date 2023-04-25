@@ -9,7 +9,7 @@ public class Grinder : MonoBehaviour
     private PlayerController hitPlayer;
     public GameObject leftDoorStart, rightDoorStart, leftDoorEnd, rightDoorEnd;
     private NetworkPlayer netPlayer;
-    public bool Activated = false, Closed = true;
+    public bool Activated = false, Closed = true,Enabled=true;
     public float doorSpeed = 3;
     public float LevelTimePercent;
     internal AudioSource GrinderAud;
@@ -38,7 +38,7 @@ public class Grinder : MonoBehaviour
         {
             Closed = true;
         }
-        if (!Activated && Closed)
+        if (!Activated && Closed&&Enabled)
         {
             //LevelTimePercent = jumbotronObject.GetLevelTimer().LevelTimePercentage();
             LevelTimePercent = roundManager.LevelTimePercentage();
@@ -51,12 +51,9 @@ public class Grinder : MonoBehaviour
     }
     private void OnTriggerStay(Collider other)
     {
-        //PlayerController.photonView.ViewID;
-        if (other.name == "XR Origin"&& Activated)
+        if (other.name == "XR Origin"&& Activated&&Enabled)
         {
-            // hitPlayer = other.GetComponent<PlayerController>();
             netPlayer = PlayerController.photonView.GetComponent<NetworkPlayer>();
-            // Debug.Log(netPlayer.name);
             netPlayer.photonView.RPC("RPC_Hit", RpcTarget.All, 100, netPlayer.photonView.ViewID, Vector3.zero, (int)DeathCause.TRAP);
         }
     }

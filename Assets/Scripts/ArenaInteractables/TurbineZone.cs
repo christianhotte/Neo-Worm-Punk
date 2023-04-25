@@ -20,7 +20,7 @@ public class TurbineZone : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        if (Gustin && StrongGust&&enabled)
+        if (Gustin && StrongGust&&Enabled)
         {
             Vector3 boostVel = TurbineForce * -turbineTrans.up;
             playerRB.velocity += boostVel;
@@ -43,7 +43,7 @@ public class TurbineZone : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        if (other.name == "XR Origin"&&killZone&&enabled)
+        if (other.name == "XR Origin"&&killZone&&Enabled)
         {
             netPlayer = PlayerController.photonView.GetComponent<NetworkPlayer>();
             netPlayer.photonView.RPC("RPC_Hit", RpcTarget.All, 100, netPlayer.photonView.ViewID, Vector3.zero, (int)DeathCause.TRAP);

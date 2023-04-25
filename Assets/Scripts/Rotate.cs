@@ -27,7 +27,7 @@ public class Rotate : MonoBehaviour
         {
             transform.Rotate(0, rotSpeed * Time.deltaTime, 0);
         }
-        else if (!grinder&&TurbineScript.enabled)
+        else if (!grinder&&TurbineScript.Enabled)
         {
             transform.Rotate(0, rotSpeed * Time.deltaTime, 0);
         }
