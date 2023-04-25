@@ -30,6 +30,7 @@ public class HostSettingsController : MonoBehaviour
     [Header("Labels")]
     [SerializeField] private TextMeshProUGUI matchLengthLabel;
     [SerializeField] private TextMeshProUGUI playerHPLabel;
+    [SerializeField] private TextMeshProUGUI upgradeFrequencyLabel;
     [Space(10)]
 
     [Header("Objects")]
@@ -37,6 +38,9 @@ public class HostSettingsController : MonoBehaviour
     [SerializeField] private DialRotationController matchDial;
     [SerializeField] private SliderController HPSlider;
     [SerializeField] private PhysicalToggleController teamsModeToggle;
+    [SerializeField] private PhysicalToggleController hazardsToggle;
+    [SerializeField] private PhysicalToggleController upgradesToggle;
+    [SerializeField] private SliderController upgradeFrequencySlider;
     [Space(10)]
 
     [Header("Game Mode and Preset Settings")]
@@ -85,15 +89,20 @@ public class HostSettingsController : MonoBehaviour
             matchDial.ResetDial();
             matchDial.MoveDial(Array.IndexOf(GameSettings.matchLengths, (int)GetRoom().CustomProperties["RoundLength"]));
 
-            Debug.Log("Player HP: " + (int)GetRoom().CustomProperties["PlayerHP"]);
+            //Debug.Log("Player HP: " + (int)GetRoom().CustomProperties["PlayerHP"]);
 
             //Moves the slider to the HP value
             HPSlider.MoveToValue((int)GetRoom().CustomProperties["PlayerHP"]);
 
+            teamsModeToggle.ForceToggle((bool)GetRoom().CustomProperties["TeamMode"]);
+            hazardsToggle.ForceToggle((bool)GetRoom().CustomProperties["HazardsActive"]);
+            upgradesToggle.ForceToggle((bool)GetRoom().CustomProperties["UpgradesActive"]);
+
+            upgradeFrequencySlider.MoveToValue(GameSettings.UpgradeFrequencyToInt((float)GetRoom().CustomProperties["UpgradeFrequency"]));
+
             UpdateMatchLengthLabel();
             UpdatePlayerHPLabel();
-
-            teamsModeToggle.ForceToggle((bool)GetRoom().CustomProperties["TeamMode"]);
+            UpdateUpgradeFrequencyLabel();
 
             NetworkManagerScript.localNetworkPlayer.UpdateRoomSettingsDisplay();
 
@@ -117,9 +126,9 @@ public class HostSettingsController : MonoBehaviour
     /// <param name="currentMatchLength">The index of the match length array.</param>
     public void UpdateMatchLength(float currentMatchLength)
     {
-        Debug.Log("Match Length: " + currentMatchLength);
-        Debug.Log("Match Index: " + Mathf.RoundToInt(currentMatchLength));
-        Debug.Log("Setting Match Length To " + GameSettings.matchLengths[Mathf.RoundToInt(currentMatchLength)]);
+        //Debug.Log("Match Length: " + currentMatchLength);
+        //Debug.Log("Match Index: " + Mathf.RoundToInt(currentMatchLength));
+        //Debug.Log("Setting Match Length To " + GameSettings.matchLengths[Mathf.RoundToInt(currentMatchLength)]);
         UpdateRoomSetting("RoundLength", GameSettings.matchLengths[Mathf.RoundToInt(currentMatchLength)]);
         UpdateMatchLengthLabel();
         NetworkManagerScript.localNetworkPlayer.UpdateRoomSettingsDisplay();
@@ -137,13 +146,55 @@ public class HostSettingsController : MonoBehaviour
     }
 
     /// <summary>
+    /// Determines whether teams are active or not.
+    /// </summary>
+    /// <param name="teamsModeActive">If true, teams are active. If false, teams are not active.</param>
+    public void ToggleTeamsMode(bool teamsModeActive)
+    {
+        UpdateRoomSetting("TeamMode", teamsModeActive);
+        NetworkManagerScript.localNetworkPlayer.UpdateRoomSettingsDisplay();
+        NetworkManagerScript.localNetworkPlayer.UpdateExclusiveColors(!(bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"]);
+    }
+
+    /// <summary>
+    /// Determines whether upgrades are active or not.
+    /// </summary>
+    /// <param name="hazardsActive">If true, upgrades are active. If false, upgrades are not active.</param>
+    public void ToggleHazardsActive(bool hazardsActive)
+    {
+        UpdateRoomSetting("HazardsActive", hazardsActive);
+        NetworkManagerScript.localNetworkPlayer.UpdateRoomSettingsDisplay();
+    }
+
+    /// <summary>
+    /// Determines whether upgrades are active or not.
+    /// </summary>
+    /// <param name="upgradesActive">If true, upgrades are active. If false, upgrades are not active.</param>
+    public void ToggleUpgradesActive(bool upgradesActive)
+    {
+        UpdateRoomSetting("UpgradesActive", upgradesActive);
+        NetworkManagerScript.localNetworkPlayer.UpdateRoomSettingsDisplay();
+    }
+
+    /// <summary>
+    /// Updates the number of hit points a player will have.
+    /// </summary>
+    /// <param name="upgradeFreq">The frequency of the upgrades spawning.</param>
+    public void UpdateUpgradeFrequency(float upgradeFreq)
+    {
+        UpdateRoomSetting("UpgradeFrequency", GameSettings.upgradeFrequencies[Mathf.RoundToInt(upgradeFreq)]);
+        UpdateUpgradeFrequencyLabel();
+        NetworkManagerScript.localNetworkPlayer.UpdateRoomSettingsDisplay();
+    }
+
+    /// <summary>
     /// Updates the match length label text.
     /// </summary>
     public void UpdateMatchLengthLabel()
     {
         matchLengthLabel.text = "Match Length: ";
 
-        Debug.Log("Match Length: " + GetRoom().CustomProperties["RoundLength"].ToString());
+        //Debug.Log("Match Length: " + GetRoom().CustomProperties["RoundLength"].ToString());
 
         int currentRoundLength = (int)GetRoom().CustomProperties["RoundLength"];
 
@@ -161,11 +212,27 @@ public class HostSettingsController : MonoBehaviour
         playerHPLabel.text = "Player HP: " + ((int)GetRoom().CustomProperties["PlayerHP"]).ToString();
     }
 
-    public void ToggleTeamsMode(bool teamsModeActive)
+    /// <summary>
+    /// Updates the label of the Upgrade Frequency text.
+    /// </summary>
+    public void UpdateUpgradeFrequencyLabel()
     {
-        UpdateRoomSetting("TeamMode", teamsModeActive);
-        NetworkManagerScript.localNetworkPlayer.UpdateRoomSettingsDisplay();
-        NetworkManagerScript.localNetworkPlayer.UpdateExclusiveColors(!(bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"]);
+        string upgradeFrequency = "Upgrade Frequency: ";
+
+        switch (GameSettings.UpgradeFrequencyToInt((float)GetRoom().CustomProperties["UpgradeFrequency"]))
+        {
+            case 0:
+                upgradeFrequency += "Low";
+                break;
+            case 1:
+                upgradeFrequency += "Medium";
+                break;
+            case 2:
+                upgradeFrequency += "High";
+                break;
+        }
+
+        upgradeFrequencyLabel.text = upgradeFrequency;
     }
 
     /// <summary>
