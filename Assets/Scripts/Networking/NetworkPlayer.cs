@@ -488,15 +488,23 @@ public class NetworkPlayer : MonoBehaviour
             //If the player must replace their color, change their color
             if (mustReplaceColor)
             {
+                int currentColor = (int)photonView.Owner.CustomProperties["Color"] + 1;
+
                 for (int i = 0; i < PlayerSettingsController.NumberOfPlayerColors(); i++)
                 {
+
+                    if (currentColor >= PlayerSettingsController.NumberOfPlayerColors())
+                        currentColor = 0;
+
                     //If the taken color list does not contain the current color list, take it
-                    if (!takenColors.Contains(i))
+                    if (!takenColors.Contains(currentColor))
                     {
                         ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().ChangePlayerColor(i);
                         SetNetworkPlayerProperties("Color", i);
                         break;
                     }
+
+                    currentColor++;
                 }
             }
         }
@@ -536,15 +544,23 @@ public class NetworkPlayer : MonoBehaviour
             //If the player must replace their color, change their color
             if (mustReplaceColor)
             {
+                int currentColor = (int)photonView.Owner.CustomProperties["Color"] + 1;
+
                 for (int i = 0; i < PlayerSettingsController.NumberOfPlayerColors(); i++)
                 {
+
+                    if(currentColor >= PlayerSettingsController.NumberOfPlayerColors())
+                        currentColor = 0;
+
                     //If the taken color list does not contain the current color list, take it
-                    if (!takenColors.Contains(i))
+                    if (!takenColors.Contains(currentColor))
                     {
                         ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().ChangePlayerColor(i);
                         SetNetworkPlayerProperties("Color", i);
                         break;
                     }
+
+                    currentColor++;
                 }
             }
         }
