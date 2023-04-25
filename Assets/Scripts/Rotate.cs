@@ -7,10 +7,15 @@ public class Rotate : MonoBehaviour
     public int rotSpeed;
     public bool grinder = false;
     internal Grinder grindScript;
+    internal TurbineZone TurbineScript;
     // Start is called before the first frame update
     void Start()
     {
         if(grinder) grindScript = GetComponentInParent<Grinder>();
+        else
+        {
+            TurbineScript = GetComponentInParent<TurbineZone>();
+        }
 
         rotSpeed = 200;
     }
@@ -22,7 +27,7 @@ public class Rotate : MonoBehaviour
         {
             transform.Rotate(0, rotSpeed * Time.deltaTime, 0);
         }
-        else if (!grinder)
+        else if (!grinder&&TurbineScript.Enabled)
         {
             transform.Rotate(0, rotSpeed * Time.deltaTime, 0);
         }

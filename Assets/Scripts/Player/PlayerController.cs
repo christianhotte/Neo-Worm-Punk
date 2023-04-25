@@ -393,6 +393,7 @@ public class PlayerController : MonoBehaviour
     public bool IsHit(int damage)
     {
         //Hit effects:
+        print("player hit by projectile");
         if (timeUntilVulnerable > 0) return false;                              //Do not allow players to be hurt while invulnerable
         currentHealth -= Mathf.Max((float)damage, 0);                           //Deal projectile damage, floor at 0
         healthVolume.weight = 1 - HealthPercent;                                //Update health visualization
