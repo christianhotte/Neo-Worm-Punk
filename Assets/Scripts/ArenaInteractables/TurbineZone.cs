@@ -1,15 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using Photon.Pun;
 public class TurbineZone : MonoBehaviour
 {
     public float TurbineForce = 10f;
     private PlayerController PC;
     private Rigidbody playerRB;
     private Transform turbineTrans;
-    public bool StrongGust = false;
+    public bool StrongGust = false,killZone=false,Enabled=true;
     internal bool Gustin;
+    private NetworkPlayer netPlayer;
     // Start is called before the first frame update
     void Start()
     {
@@ -19,12 +20,10 @@ public class TurbineZone : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        if (Gustin && StrongGust)
+        if (Gustin && StrongGust&&enabled)
         {
             Vector3 boostVel = TurbineForce * -turbineTrans.up;
-
             playerRB.velocity += boostVel;
-            Debug.Log("Big Gust");
         }
         else if (Gustin)
         {
@@ -41,23 +40,16 @@ public class TurbineZone : MonoBehaviour
             Gustin = true;
         }
     }
-    /*
+
     private void OnTriggerStay(Collider other)
     {
-        if (other.name == "XR Origin")
+        if (other.name == "XR Origin"&&killZone&&enabled)
         {
-            float addAcceleration = 3f;
-
-            PC = PlayerController.instance;
-            playerRB = PC.bodyRb;
-            if (playerRB.velocity.y < -0.4f)
-            {
-                playerRB.velocity -= new Vector3(0, addAcceleration, 0);
-            }
-            Gustin = true;
+            netPlayer = PlayerController.photonView.GetComponent<NetworkPlayer>();
+            netPlayer.photonView.RPC("RPC_Hit", RpcTarget.All, 100, netPlayer.photonView.ViewID, Vector3.zero, (int)DeathCause.TRAP);
         }
     }
-    */
+
     private void OnTriggerExit(Collider other)
     {
         if(other.name == "XR Origin")
