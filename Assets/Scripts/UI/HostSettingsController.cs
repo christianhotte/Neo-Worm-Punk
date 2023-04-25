@@ -36,6 +36,7 @@ public class HostSettingsController : MonoBehaviour
     [SerializeField] private LeverController roomTypeController;
     [SerializeField] private DialRotationController matchDial;
     [SerializeField] private SliderController HPSlider;
+    [SerializeField] private PhysicalToggleController teamsModeToggle;
     [Space(10)]
 
     [Header("Game Mode and Preset Settings")]
@@ -91,6 +92,8 @@ public class HostSettingsController : MonoBehaviour
 
             UpdateMatchLengthLabel();
             UpdatePlayerHPLabel();
+
+            teamsModeToggle.ForceToggle((bool)GetRoom().CustomProperties["TeamMode"]);
 
             NetworkManagerScript.localNetworkPlayer.UpdateRoomSettingsDisplay();
 
@@ -156,6 +159,15 @@ public class HostSettingsController : MonoBehaviour
     public void UpdatePlayerHPLabel()
     {
         playerHPLabel.text = "Player HP: " + ((int)GetRoom().CustomProperties["PlayerHP"]).ToString();
+    }
+
+    public void ToggleTeamsMode(bool teamsModeActive)
+    {
+        UpdateRoomSetting("TeamMode", teamsModeActive);
+        NetworkManagerScript.localNetworkPlayer.UpdateRoomSettingsDisplay();
+
+        if((bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"])
+            ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
     }
 
     /// <summary>

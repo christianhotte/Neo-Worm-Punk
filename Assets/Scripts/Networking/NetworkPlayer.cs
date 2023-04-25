@@ -336,6 +336,7 @@ public class NetworkPlayer : MonoBehaviour
     {
         //Update any instance of the room settings display
         UpdateAllRoomSettingsDisplays();
+        
     }
 
     public void UpdateAllRoomSettingsDisplays()
@@ -361,7 +362,8 @@ public class NetworkPlayer : MonoBehaviour
     /// </summary>
     public void SyncColors()
     {
-        photonView.RPC("UpdateTakenColors", RpcTarget.All); //Send data to every player on the network (including this one)
+        if (!(bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"])
+            photonView.RPC("UpdateTakenColors", RpcTarget.All); //Send data to every player on the network (including this one)
     }
     /// <summary>
     /// Manages material event priority for this particular network player.
@@ -458,39 +460,43 @@ public class NetworkPlayer : MonoBehaviour
     {
         yield return new WaitUntil(() => photonView.Owner.CustomProperties["Color"] != null);
 
-        List<int> takenColors = new List<int>();
-
-        bool mustReplaceColor = false;
-
-        for (int i = 0; i < NetworkManagerScript.instance.GetPlayerList().Length; i++)
+        //Update the taken colors on join if the room does not have team mode
+        if (!(bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"])
         {
-            Player currentPlayer = NetworkManagerScript.instance.GetPlayerList()[i];
+            List<int> takenColors = new List<int>();
 
-            //If the current player is the owner of this network player, skip them
-            if (currentPlayer == photonView.Owner)
-                continue;
+            bool mustReplaceColor = false;
 
-            Debug.Log("Checking " + currentPlayer.NickName + "'s Color: " + (ColorOptions)currentPlayer.CustomProperties["Color"]);
-            takenColors.Add((int)currentPlayer.CustomProperties["Color"]);
-
-            if ((int)currentPlayer.CustomProperties["Color"] == (int)photonView.Owner.CustomProperties["Color"])
+            for (int i = 0; i < NetworkManagerScript.instance.GetPlayerList().Length; i++)
             {
-                Debug.Log((ColorOptions)currentPlayer.CustomProperties["Color"] + " is taken.");
-                mustReplaceColor = true;
-            }
-        }
+                Player currentPlayer = NetworkManagerScript.instance.GetPlayerList()[i];
 
-        //If the player must replace their color, change their color
-        if (mustReplaceColor)
-        {
-            for (int i = 0; i < PlayerSettingsController.NumberOfPlayerColors(); i++)
-            {
-                //If the taken color list does not contain the current color list, take it
-                if (!takenColors.Contains(i))
+                //If the current player is the owner of this network player, skip them
+                if (currentPlayer == photonView.Owner)
+                    continue;
+
+                Debug.Log("Checking " + currentPlayer.NickName + "'s Color: " + (ColorOptions)currentPlayer.CustomProperties["Color"]);
+                takenColors.Add((int)currentPlayer.CustomProperties["Color"]);
+
+                if ((int)currentPlayer.CustomProperties["Color"] == (int)photonView.Owner.CustomProperties["Color"])
                 {
-                    ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().ChangePlayerColor(i);
-                    SetNetworkPlayerProperties("Color", i);
-                    break;
+                    Debug.Log((ColorOptions)currentPlayer.CustomProperties["Color"] + " is taken.");
+                    mustReplaceColor = true;
+                }
+            }
+
+            //If the player must replace their color, change their color
+            if (mustReplaceColor)
+            {
+                for (int i = 0; i < PlayerSettingsController.NumberOfPlayerColors(); i++)
+                {
+                    //If the taken color list does not contain the current color list, take it
+                    if (!takenColors.Contains(i))
+                    {
+                        ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().ChangePlayerColor(i);
+                        SetNetworkPlayerProperties("Color", i);
+                        break;
+                    }
                 }
             }
         }
