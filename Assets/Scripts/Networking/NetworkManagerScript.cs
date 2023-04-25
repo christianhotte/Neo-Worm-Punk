@@ -649,6 +649,18 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     public Room GetMostRecentRoom() => mostRecentRoom;
     public string GetCurrentRoom() => PhotonNetwork.CurrentRoom.Name;
     public Player[] GetPlayerList() => PhotonNetwork.PlayerList;
+
+    public int GetPlayerIndexFromList()
+    {
+        for(int i = 0; i < GetPlayerList().Length; i++)
+        {
+            if (localNetworkPlayer.photonView.Owner == GetPlayerList()[i])
+                return i;
+        }
+
+        return -1;
+    }
+
     public string GetLocalPlayerName() => PhotonNetwork.LocalPlayer.NickName;
     public bool IsLocalPlayerInRoom() => PhotonNetwork.InRoom;
 
@@ -688,6 +700,29 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
                 SetTubeOccupantStatus(i, true);
                 break;
             }
+        }
+    }
+
+    // Is called when the button is pressed for TDM.
+    public void TeamDeathMatch()
+    {
+        UpdateRoomSettings("TeamMode", true);
+
+        // TO DO: Set teamColor player stats to the current color you have
+    }
+
+    // // Is called when the button is pressed for FFA.
+    public void FreeForAll()
+    {
+        UpdateRoomSettings("TeamMode", false);
+    }
+
+    // We want to switch this from just 2 teams to having multiple colors for teams.
+    public void SwitchTeam()
+    {
+        if (localNetworkPlayer.GetNetworkPlayerStats().teamColor == "")
+        {
+            
         }
     }
 }

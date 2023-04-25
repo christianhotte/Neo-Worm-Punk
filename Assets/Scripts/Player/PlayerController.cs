@@ -107,7 +107,7 @@ public class PlayerController : MonoBehaviour
     public IEnumerator DeathSequence()
     {
         yield return new WaitForSeconds(healthSettings.deathTime); //Wait for designated number of seconds in death zone
-
+        if (GetComponentInChildren<NewGrapplerController>() != null) GetComponentInChildren<NewGrapplerController>().locked = false;
         if (SpawnManager.current != null && useSpawnPoint) //Spawn manager is present in scene
         {
             Transform spawnpoint = SpawnManager.current.GetRandomSpawnPoint();                    //Get spawnpoint from spawnpoint manager
@@ -375,7 +375,10 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     public void HitEnemy()
     {
-        if (targetHitSound != null) audioSource.PlayOneShot(targetHitSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play hit sound when player shoots (or damages) a target
+        if (targetHitSound != null)
+        {
+            audioSource.PlayOneShot(targetHitSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play hit sound when player shoots (or damages) a target
+        }
     }
     /// <summary>
     /// Called when player hits and kills an enemy with a projectile.

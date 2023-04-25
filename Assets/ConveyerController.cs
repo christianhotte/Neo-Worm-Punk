@@ -5,7 +5,7 @@ using UnityEngine;
 public class ConveyerController : MonoBehaviour
 {
     [Header("ALL Conveyers")]
-    [SerializeField, Tooltip("teehee this is a fake tooltip")] private Transform[] conveyerBeltStopPositions;
+    [SerializeField, Tooltip("teehee this is a fake tooltip bet you'll never find this Hotte")] private Transform[] conveyerBeltStopPositions;
     [SerializeField, Tooltip("All of the objects on the conveyer belt")] private Transform[] conveyerBeltObjects;
     [SerializeField, Tooltip("How much time it takes for objects to get from conveyerbelt stop positions")] private float transportTime;
     [SerializeField, Tooltip("Refference to MenuStationController")] private MenuStationController menuStationControllerRef;
@@ -39,11 +39,14 @@ public class ConveyerController : MonoBehaviour
             //set position to where they are
             for(int i = 0; i < conveyerBeltObjects.Length; i++)
             {
+                newConveyerObjectPositions[i] = i;
+                /*
                 //if the conveyer position is equal to the current position of the belt, then set it to that position index
-                for(int j = 0; j < conveyerBeltStopPositions.Length; j++)
+                for (int j = 0; j < conveyerBeltStopPositions.Length; j++)
                 {
                     if(conveyerBeltStopPositions[j].position.z == conveyerBeltObjects[i].position.z) { newConveyerObjectPositions[i] = j; }
                 }
+                */
             }
             //make the belt move automatically and start somewhat randomly
             InvokeRepeating("DisplayBeltMove", Random.Range(0.5f, 3f), transportTime * 1.5f);
@@ -200,6 +203,7 @@ public class ConveyerController : MonoBehaviour
 
         Vector3 startYRot = tube.localRotation.eulerAngles;
         Vector3 endYRot = Vector3.zero;
+
 
 
         //lerp door around
