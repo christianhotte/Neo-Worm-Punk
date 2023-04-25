@@ -68,6 +68,7 @@ public class LockerTubeController : MonoBehaviour
     /// <returns></returns>
     IEnumerator MoveTubeAndPlayer(Vector3 transformChange, float moveTime)
     {
+
         //set initial time to 0
         float timeElapsed = 0;
 
@@ -105,6 +106,9 @@ public class LockerTubeController : MonoBehaviour
 
             yield return null;
         }
+
+        transform.localPosition = endPos;
+        if (myPlayerObject != null) { myPlayerObject.position = playerEndPos; }
     }
 
     /// <summary>
