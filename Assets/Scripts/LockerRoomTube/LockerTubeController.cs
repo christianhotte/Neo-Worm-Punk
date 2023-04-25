@@ -21,12 +21,24 @@ public class LockerTubeController : MonoBehaviour
     internal Transform spawnPoint;
 
     private Transform myPlayerObject;
+    private Vector3[] tubeCheckpoints = new Vector3[4];
+    private Vector3[] playerCheckpoints = new Vector3[4];
+    [SerializeField] private Vector3 spawnPointBias;
 
     private void Awake()
     {
         spawnManager = FindObjectOfType<LockerTubeSpawner>();
         spawnPoint = transform.Find("Spawnpoint");
+        tubeCheckpoints[1] = transform.localPosition;
         transform.localPosition -= new Vector3(0, 10, 0);
+        tubeCheckpoints[0] = transform.localPosition;
+        tubeCheckpoints[2] = transform.localPosition + transform.forward * 4;
+        tubeCheckpoints[3] = transform.localPosition + transform.forward * 4 + new Vector3(0, 10, 0);
+
+        for(int i = 0; i < tubeCheckpoints.Length; i++)
+        {
+            playerCheckpoints[i] = tubeCheckpoints[i] + spawnPointBias;
+        }
     }
 
     private void Start()
@@ -36,29 +48,53 @@ public class LockerTubeController : MonoBehaviour
         //do countdown and have the middle shotgun thing spin (last chance to put levers back)
 
         //stop spin, move players together, locked in.
-        //StartCoroutine(MoveTubeAndPlayer((transform.localPosition + transform.forward * 4), 6));
 
         //THEN move up
-        //StartCoroutine(MoveTubeAndPlayer((transform.localPosition + new Vector3(0, 10, 0)), 8));
         //in the middle of the last one, fade out and switch scenes
 
     }
 
-    public void StartTube(Transform playerObject)
+    public void StartTube(Transform playerObject, float duration)
     {
         myPlayerObject = playerObject;
-        StartCoroutine(MoveTubeAndPlayer((new Vector3(0, 10, 0)), 8));
+        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[1], playerCheckpoints[1], duration));
     }
 
-    IEnumerator MoveTubeAndPlayer(Vector3 transformChange, float moveTime)
+    public void TubesToCenter(float duration)
     {
+        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[2], playerCheckpoints[2], duration));
+    }
+
+    public void TubesUp(float duration)
+    {
+        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[3], playerCheckpoints[3], duration));
+    }
+
+    public void TubeExit(float duration)
+    {
+        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[0], playerCheckpoints[0], duration));
+    }
+
+    /// <summary>
+    /// Moves the tube and player to the next location they should go to
+    /// </summary>
+    /// <param name="transformChange"></param>
+    /// <param name="moveTime"></param>
+    /// <returns></returns>
+    IEnumerator MoveTubeAndPlayer(Vector3 endPos, Vector3 playerEndPos, float moveTime)
+    {
+
         //set initial time to 0
         float timeElapsed = 0;
 
         Vector3 startPos = transform.localPosition;
-        Vector3 endPos = transform.localPosition + transformChange;
-        Vector3 playerStartPos = myPlayerObject.position;
-        Vector3 playerEndPos = myPlayerObject.position + transformChange;
+        Vector3 playerStartPos = Vector3.zero;
+
+
+        if (myPlayerObject != null)
+        {
+            playerStartPos = myPlayerObject.position;
+        }
 
         //lerp the objects from start to end positions
         while (timeElapsed < moveTime)
@@ -71,16 +107,22 @@ public class LockerTubeController : MonoBehaviour
             t = t * t * (3f - 2f * t);
 
             transform.localPosition = Vector3.Lerp(startPos, endPos, t);
-            myPlayerObject.position = Vector3.Lerp(playerStartPos, playerEndPos, t);
+            if(myPlayerObject != null)
+            {
+                myPlayerObject.position = Vector3.Lerp(playerStartPos, playerEndPos, t);            //HOW ABOUT WE ONLY MODIFY ALONG THAT AXIS??? no jitter, then
+            }
             
-
             //advance time
             timeElapsed += Time.deltaTime;
 
             yield return null;
         }
 
+        transform.localPosition = endPos;
+        if (myPlayerObject != null) { myPlayerObject.position = playerEndPos; }
     }
+
+
 
 
     /// <summary>
