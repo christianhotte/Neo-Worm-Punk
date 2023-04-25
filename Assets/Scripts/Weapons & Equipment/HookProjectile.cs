@@ -309,7 +309,7 @@ public class HookProjectile : Projectile
         //Initialization:
         target = null; //Clear target
         Debug.Log(hitInfo.collider.name);
-        if (hitInfo.collider.GetComponentInParent<WormHoleTrigger>() != null || hitInfo.collider.GetComponent<Grinder>() != null)
+        if (hitInfo.collider.GetComponentInParent<WormHoleTrigger>() != null || (hitInfo.collider.GetComponentInParent<Grinder>() != null&&hitInfo.collider.gameObject.layer==17))
         {
             Debug.Log("TryingToLock");
             controller.locked = true;

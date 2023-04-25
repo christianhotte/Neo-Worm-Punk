@@ -169,6 +169,7 @@ public class NewGrapplerController : PlayerEquipment
     public void ForceReleased()
     {
         audioSource.loop = false; //Make audiosource stop looping reel sound
+        locked = false;
         audioSource.Stop();       //Make sure audiosource stops playing reel sound
         if (settings.releaseSound != null) audioSource.PlayOneShot(settings.releaseSound); //Play sound effect
         SendHapticImpulse(settings.releaseHaptics);                                        //Play haptic impulse
@@ -179,6 +180,7 @@ public class NewGrapplerController : PlayerEquipment
     public void Bounced()
     {
         if (settings.bounceSound != null) hook.audioSource.PlayOneShot(settings.bounceSound); //Play sound effect (on projectile)
+        locked = false;
         SendHapticImpulse(settings.releaseHaptics);                                           //Play haptic impulse
     }
 
