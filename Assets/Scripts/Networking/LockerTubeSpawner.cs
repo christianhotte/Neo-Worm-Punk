@@ -6,10 +6,12 @@ using UnityEngine.SceneManagement;
 
 public class LockerTubeSpawner : MonoBehaviourPunCallbacks
 {
+    public static LockerTubeSpawner instance;
     [SerializeField, Tooltip("The list of tubes for players to spawn into.")] private LockerTubeController[] tubes;
 
     private void Awake()
     {
+        instance = this;
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
@@ -46,6 +48,9 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
             PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
             spawnTube.StartTube(PlayerController.instance.bodyRb.transform);
 
+            //now everyone else do it too
+            NetworkManagerScript.localNetworkPlayer.photonView.RPC("RPC_StartTube", RpcTarget.OthersBuffered, tubeID);
+
             ReadyUpManager.instance.localPlayerTube = spawnTube;
             ReadyUpManager.instance.UpdateStatus(tubeID + 1);
             ReadyUpManager.instance.localPlayerTube.SpawnPlayerName(NetworkManagerScript.instance.GetLocalPlayerName());
@@ -54,6 +59,15 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
                 ReadyUpManager.instance.localPlayerTube.ShowHostSettings(true); //Show the settings if the player being moved is the master client
 
         }
+    }
+
+    /// <summary>
+    /// Stoopid.
+    /// </summary>
+    /// <param name="tubeID">Also stoopid</param>
+    public void StartMyTubeForOthersByDavid(int tubeID)
+    {
+        tubes[tubeID].StartTube(null);
     }
 
     public void OnLeverStateChanged()

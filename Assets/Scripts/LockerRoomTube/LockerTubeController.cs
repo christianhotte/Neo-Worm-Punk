@@ -50,6 +50,22 @@ public class LockerTubeController : MonoBehaviour
         StartCoroutine(MoveTubeAndPlayer((new Vector3(0, 10, 0)), 8));
     }
 
+    public void TubesToCenter()
+    {
+        StartCoroutine(MoveTubeAndPlayer((transform.forward * 4), 6));
+    }
+
+    public void TubesUp()
+    {
+        StartCoroutine(MoveTubeAndPlayer(new Vector3(0, 10, 0), 6));
+    }
+
+    /// <summary>
+    /// Moves the tube and player to the next location they should go to
+    /// </summary>
+    /// <param name="transformChange"></param>
+    /// <param name="moveTime"></param>
+    /// <returns></returns>
     IEnumerator MoveTubeAndPlayer(Vector3 transformChange, float moveTime)
     {
         //set initial time to 0
@@ -57,8 +73,15 @@ public class LockerTubeController : MonoBehaviour
 
         Vector3 startPos = transform.localPosition;
         Vector3 endPos = transform.localPosition + transformChange;
-        Vector3 playerStartPos = myPlayerObject.position;
-        Vector3 playerEndPos = myPlayerObject.position + transformChange;
+        Vector3 playerStartPos = Vector3.zero;
+        Vector3 playerEndPos = Vector3.zero;
+
+
+        if (myPlayerObject != null)
+        {
+            playerStartPos = myPlayerObject.position;
+            playerEndPos = myPlayerObject.position + transformChange;
+        }
 
         //lerp the objects from start to end positions
         while (timeElapsed < moveTime)
@@ -71,17 +94,18 @@ public class LockerTubeController : MonoBehaviour
             t = t * t * (3f - 2f * t);
 
             transform.localPosition = Vector3.Lerp(startPos, endPos, t);
-            myPlayerObject.position = Vector3.Lerp(playerStartPos, playerEndPos, t);
+            if(myPlayerObject != null)
+            {
+                myPlayerObject.position = Vector3.Lerp(playerStartPos, playerEndPos, t);
+            }
             
-
+            
             //advance time
             timeElapsed += Time.deltaTime;
 
             yield return null;
         }
-
     }
-
 
     /// <summary>
     /// Updates the lights depending on whether the player is ready or not.
