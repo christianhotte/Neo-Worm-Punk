@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
+using UnityEngine.SceneManagement;
 public class TurbineZone : MonoBehaviour
 {
     public float TurbineForce = 10f;
@@ -12,13 +13,21 @@ public class TurbineZone : MonoBehaviour
     internal bool Gustin;
     private NetworkPlayer netPlayer;
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         turbineTrans = this.transform;
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+    public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        //check to see if activated in room setting
+        Enabled = (bool)PhotonNetwork.CurrentRoom.CustomProperties["HazardsActive"];
+
+
     }
 
-    // Update is called once per frame
-    void FixedUpdate()
+        // Update is called once per frame
+        void FixedUpdate()
     {
         if (Gustin && StrongGust&&Enabled)
         {

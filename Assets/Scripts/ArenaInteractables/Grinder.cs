@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using Unity.XR.CoreUtils;
+using UnityEngine.SceneManagement;
 
 public class Grinder : MonoBehaviour
 {
@@ -18,14 +19,21 @@ public class Grinder : MonoBehaviour
     private RoundManager roundManager;
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         //jumbotronObject = FindObjectOfType<Jumbotron>();
         GrinderAud = this.GetComponent<AudioSource>();
         PhotonView masterPV = PhotonView.Find(17);
         roundManager = masterPV.GetComponent<RoundManager>();
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
+    public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        //check to see if activated in room setting
+        Enabled=(bool)PhotonNetwork.CurrentRoom.CustomProperties["HazardsActive"];
 
+
+    }
     // Update is called once per frame
     void Update()
     {
