@@ -439,6 +439,66 @@ MonoBehaviour:
   roomSettings: {fileID: 1423715396779090924}
   countdownContainer: {fileID: 2548420101370795261}
   countdownText: {fileID: 4421005360883543638}
+  roundStartMessage: Worm!
+  entranceDuration: 0.3
+  entranceEaseType:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 2.0058386
+      outSlope: 2.0058386
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.5004581
+      value: 1.0038382
+      inSlope: 0.87650406
+      outSlope: 0.87650406
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.5003305
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: -0.007683403
+      outSlope: -0.007683403
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  exitDuration: 0.1
+  exitEaseType:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &4170404661916769976
 GameObject:
   m_ObjectHideFlags: 0
@@ -657,7 +717,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 1
+  m_PresetInfoIsWorld: 0
 --- !u!114 &4170404662296052463
 MonoBehaviour:
   m_ObjectHideFlags: 0
