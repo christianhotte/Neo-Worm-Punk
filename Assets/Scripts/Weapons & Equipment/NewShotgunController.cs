@@ -358,7 +358,8 @@ public class NewShotgunController : PlayerEquipment
             if (debugFireLocal || !PhotonNetwork.InRoom) //Weapon is in local fire mode
             {
                 newProjectile = ((GameObject)Instantiate(Resources.Load(activeProjName))).GetComponent<Projectile>(); //Instantiate projectile
-                newProjectile.FireDumb(currentBarrel);                                                                //Initialize projectile
+                if (handedness == Handedness.None) newProjectile.FireDumb(currentBarrel);                             //Initialize projectile
+                else newProjectile.Fire(currentBarrel, 0);
             }
             else //Weapon is firing on the network
             {
