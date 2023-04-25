@@ -29,10 +29,24 @@ public class LockerTubeController : MonoBehaviour
 
     private void Start()
     {
-        //only call when a player is in the tube
+        //at the very beginning
         //transform.localPosition -= new Vector3(0, 10, 0);
+
+
+
+
+
+
+
+        //when all players start the match
+        //StartCoroutine(MoveTubeAndPlayer((transform.localPosition + transform.forward * 4), 6));
+        //THEN
         //StartCoroutine(MoveTubeAndPlayer((transform.localPosition + new Vector3(0, 10, 0)), 8));
-        StartCoroutine(MoveTubeAndPlayer((transform.localPosition + Vector3.back * 4), 2));
+    }
+
+    public void StartTube()
+    {
+        StartCoroutine(MoveTubeAndPlayer((transform.localPosition + new Vector3(0, 10, 0)), 8));
     }
 
     IEnumerator MoveTubeAndPlayer(Vector3 endPos, float moveTime)
