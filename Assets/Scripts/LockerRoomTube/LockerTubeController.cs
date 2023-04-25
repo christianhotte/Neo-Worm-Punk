@@ -39,9 +39,12 @@ public class LockerTubeController : MonoBehaviour
 
 
         //when all players start the match
+        //do countdown and have the middle shotgun thing spin (last chance to put levers back)
+        //spot spin, move players together, locked in.
         //StartCoroutine(MoveTubeAndPlayer((transform.localPosition + transform.forward * 4), 6));
-        //THEN
+        //THEN move up
         //StartCoroutine(MoveTubeAndPlayer((transform.localPosition + new Vector3(0, 10, 0)), 8));
+        //in the middle of the last one, fade out and switch scenes
     }
 
     public void StartTube()
