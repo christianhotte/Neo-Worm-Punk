@@ -504,52 +504,50 @@ public class NetworkPlayer : MonoBehaviour
 
     public void UpdateExclusiveColors(bool exclusiveColors)
     {
+        Debug.Log("Updating Exclusive Color System...");
         photonView.RPC("RPC_UpdateExclusiveColors", RpcTarget.All, exclusiveColors); //Send data to every player on the network (including this one)
     }
 
     [PunRPC]
     public void RPC_UpdateExclusiveColors(bool exclusiveColors)
     {
-        if (photonView.IsMine)
+        if (exclusiveColors)
         {
-            if (exclusiveColors)
+            List<int> takenColors = new List<int>();
+
+            bool mustReplaceColor = false;
+
+            for (int i = NetworkManagerScript.instance.GetPlayerIndexFromList(); i > 0; i--)
             {
-                List<int> takenColors = new List<int>();
+                Player otherPlayer = NetworkManagerScript.instance.GetPlayerList()[i - 1];
 
-                bool mustReplaceColor = false;
+                Debug.Log("Checking " + otherPlayer.NickName + "'s Color: " + (ColorOptions)otherPlayer.CustomProperties["Color"]);
+                takenColors.Add((int)otherPlayer.CustomProperties["Color"]);
 
-                for (int i = NetworkManagerScript.instance.GetPlayerIndexFromList(); i > 0; i--)
+                if ((int)otherPlayer.CustomProperties["Color"] == (int)photonView.Owner.CustomProperties["Color"])
                 {
-                    Player otherPlayer = NetworkManagerScript.instance.GetPlayerList()[i - 1];
-
-                    Debug.Log("Checking " + otherPlayer.NickName + "'s Color: " + (ColorOptions)otherPlayer.CustomProperties["Color"]);
-                    takenColors.Add((int)otherPlayer.CustomProperties["Color"]);
-
-                    if ((int)otherPlayer.CustomProperties["Color"] == (int)photonView.Owner.CustomProperties["Color"])
-                    {
-                        Debug.Log((ColorOptions)otherPlayer.CustomProperties["Color"] + " is taken.");
-                        mustReplaceColor = true;
-                    }
-                }
-
-                //If the player must replace their color, change their color
-                if (mustReplaceColor)
-                {
-                    for (int i = 0; i < PlayerSettingsController.NumberOfPlayerColors(); i++)
-                    {
-                        //If the taken color list does not contain the current color list, take it
-                        if (!takenColors.Contains(i))
-                        {
-                            ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().ChangePlayerColor(i);
-                            SetNetworkPlayerProperties("Color", i);
-                            break;
-                        }
-                    }
+                    Debug.Log((ColorOptions)otherPlayer.CustomProperties["Color"] + " is taken.");
+                    mustReplaceColor = true;
                 }
             }
 
-            ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
+            //If the player must replace their color, change their color
+            if (mustReplaceColor)
+            {
+                for (int i = 0; i < PlayerSettingsController.NumberOfPlayerColors(); i++)
+                {
+                    //If the taken color list does not contain the current color list, take it
+                    if (!takenColors.Contains(i))
+                    {
+                        ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().ChangePlayerColor(i);
+                        SetNetworkPlayerProperties("Color", i);
+                        break;
+                    }
+                }
+            }
         }
+
+        ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
     }
 
     /// <summary>
