@@ -44,7 +44,7 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
             // Moves the player to the spawn point
             PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
             PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
-            spawnTube.StartTube();
+            spawnTube.StartTube(PlayerController.instance.bodyRb.transform);
 
             ReadyUpManager.instance.localPlayerTube = spawnTube;
             ReadyUpManager.instance.UpdateStatus(tubeID + 1);

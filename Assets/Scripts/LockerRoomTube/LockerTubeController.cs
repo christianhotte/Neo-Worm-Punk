@@ -20,6 +20,8 @@ public class LockerTubeController : MonoBehaviour
     internal int currentPlayerID;
     internal Transform spawnPoint;
 
+    private Transform myPlayerObject;
+
     private void Awake()
     {
         spawnManager = FindObjectOfType<LockerTubeSpawner>();
@@ -42,15 +44,21 @@ public class LockerTubeController : MonoBehaviour
 
     }
 
-    public void StartTube()
+    public void StartTube(Transform playerObject)
     {
-        StartCoroutine(MoveTubeAndPlayer((transform.localPosition + new Vector3(0, 10, 0)), 8));
+        myPlayerObject = playerObject;
+        StartCoroutine(MoveTubeAndPlayer((new Vector3(0, 10, 0)), 8));
     }
 
-    IEnumerator MoveTubeAndPlayer(Vector3 endPos, float moveTime)
+    IEnumerator MoveTubeAndPlayer(Vector3 transformChange, float moveTime)
     {
         //set initial time to 0
         float timeElapsed = 0;
+
+        Vector3 startPos = transform.localPosition;
+        Vector3 endPos = transform.localPosition + transformChange;
+        Vector3 playerStartPos = myPlayerObject.position;
+        Vector3 playerEndPos = myPlayerObject.position + transformChange;
 
         //lerp the objects from start to end positions
         while (timeElapsed < moveTime)
@@ -58,21 +66,19 @@ public class LockerTubeController : MonoBehaviour
             //just in case, stay safe :)
             if (GameManager.Instance.levelTransitionActive) { break; }
 
-            Vector3 startPos = transform.localPosition;
-
             //smooth lerp duration alg
             float t = timeElapsed / moveTime;
             t = t * t * (3f - 2f * t);
 
             transform.localPosition = Vector3.Lerp(startPos, endPos, t);
+            myPlayerObject.position = Vector3.Lerp(playerStartPos, playerEndPos, t);
+            
 
             //advance time
             timeElapsed += Time.deltaTime;
 
-
             yield return null;
         }
-
 
     }
 
