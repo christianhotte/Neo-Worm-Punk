@@ -24,13 +24,15 @@ public class LockerTubeController : MonoBehaviour
     {
         spawnManager = FindObjectOfType<LockerTubeSpawner>();
         spawnPoint = transform.Find("Spawnpoint");
-        transform.localPosition -= new Vector3(0, 5, 0);
+        
     }
 
     private void Start()
     {
         //only call when a player is in the tube
-        StartCoroutine(MoveTubeAndPlayer(transform.localPosition += new Vector3(0, 5, 0), 4));
+        //transform.localPosition -= new Vector3(0, 10, 0);
+        //StartCoroutine(MoveTubeAndPlayer((transform.localPosition + new Vector3(0, 10, 0)), 8));
+        StartCoroutine(MoveTubeAndPlayer((transform.localPosition + Vector3.back * 4), 2));
     }
 
     IEnumerator MoveTubeAndPlayer(Vector3 endPos, float moveTime)
