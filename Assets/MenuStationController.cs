@@ -29,13 +29,14 @@ public class MenuStationController : MonoBehaviour
         {
             menuStations[i].stationTransform = menuStationTransforms[i];
             menuStations[i].activePosition = menuStationTransforms[i].position;
-            menuStations[i].stationTransform.position += new Vector3(0, 5, 0);
+            menuStations[i].stationTransform.position += new Vector3(0, 6, 0);
             menuStations[i].inactivePosition = menuStations[i].stationTransform.position;
             menuStations[i].isActive = false;
             menuStations[i].isMoving = false;
         }
         menuStations[0].isActive = true;
-        menuStations[0].stationTransform.position += new Vector3(0, -5, 0);
+        menuStations[0].stationTransform.position += new Vector3(0, -6, 0);
+        menuStations[0].inactivePosition += new Vector3(0, -12, 0);
         //teleport station to correct positon
         //by default the first one should actually be set to true, bc that's the menu color select etc.
     }

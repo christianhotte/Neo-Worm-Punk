@@ -572,6 +572,7 @@ public class NewShotgunController : PlayerEquipment
     private void MovePin(Handedness side, bool inward)
     {
         //Initialization:
+        if (handedness == Handedness.None) return;
         Vector3 targetPinPos = basePinPos + (inward ? (Vector3.forward * gunSettings.pinTraverseDistance) : Vector3.zero); //Get position pin(s) are being moved to
 
         //Modify pins:

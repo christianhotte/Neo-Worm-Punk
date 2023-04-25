@@ -24,7 +24,44 @@ public class LockerTubeController : MonoBehaviour
     {
         spawnManager = FindObjectOfType<LockerTubeSpawner>();
         spawnPoint = transform.Find("Spawnpoint");
+        transform.localPosition -= new Vector3(0, 5, 0);
     }
+
+    private void Start()
+    {
+        //only call when a player is in the tube
+        StartCoroutine(MoveTubeAndPlayer(transform.localPosition += new Vector3(0, 5, 0), 4));
+    }
+
+    IEnumerator MoveTubeAndPlayer(Vector3 endPos, float moveTime)
+    {
+        //set initial time to 0
+        float timeElapsed = 0;
+
+        //lerp the objects from start to end positions
+        while (timeElapsed < moveTime)
+        {
+            //just in case, stay safe :)
+            if (GameManager.Instance.levelTransitionActive) { break; }
+
+            Vector3 startPos = transform.localPosition;
+
+            //smooth lerp duration alg
+            float t = timeElapsed / moveTime;
+            t = t * t * (3f - 2f * t);
+
+            transform.localPosition = Vector3.Lerp(startPos, endPos, t);
+
+            //advance time
+            timeElapsed += Time.deltaTime;
+
+
+            yield return null;
+        }
+
+
+    }
+
 
     /// <summary>
     /// Updates the lights depending on whether the player is ready or not.
