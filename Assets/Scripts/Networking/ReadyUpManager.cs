@@ -118,13 +118,38 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
             // If all players are ready, load the game scene
             if (forceLoadViaMasterClient || !GameManager.Instance.levelTransitionActive && (playersReady == playersInRoom && (playersInRoom >= MINIMUM_PLAYERS_NEEDED || GameSettings.debugMode)))
             {
-                //Reset all players
-                foreach (var player in NetworkPlayer.instances)
-                    player.networkPlayerStats = new PlayerStats();
-
-                NetworkManagerScript.instance.LoadSceneWithFade(GameSettings.arenaScene);
+                StartCoroutine(OnEveryoneReady());
             }
         }
+    }
+
+    IEnumerator OnEveryoneReady()
+    {
+        //countdown from 3,2,1,WORM!
+
+        //if someone cancels early, cancel coroutine
+
+        //at the end 
+        //start tube anims
+        yield return new WaitForSeconds(3f);
+        OnStartRound();
+    }
+
+
+
+    public void OnStartRound()
+    {
+        //start tube anims
+
+
+
+        //FINAL
+        //Reset all players
+        foreach (var player in NetworkPlayer.instances)
+            player.networkPlayerStats = new PlayerStats();
+
+        NetworkManagerScript.instance.LoadSceneWithFade(GameSettings.arenaScene);
+        //FINAL
     }
 
     /// <summary>
