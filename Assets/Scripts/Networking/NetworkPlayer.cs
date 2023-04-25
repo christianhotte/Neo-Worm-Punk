@@ -456,7 +456,7 @@ public class NetworkPlayer : MonoBehaviour
     /// <summary>
     /// When a user joins, try to take either their color or the next available color.
     /// </summary>
-    public IEnumerator UpdateTakenColorsOnJoin()
+    public IEnumerator CheckExclusiveColors()
     {
         yield return new WaitUntil(() => photonView.Owner.CustomProperties["Color"] != null);
 
@@ -481,6 +481,51 @@ public class NetworkPlayer : MonoBehaviour
                 if ((int)currentPlayer.CustomProperties["Color"] == (int)photonView.Owner.CustomProperties["Color"])
                 {
                     Debug.Log((ColorOptions)currentPlayer.CustomProperties["Color"] + " is taken.");
+                    mustReplaceColor = true;
+                }
+            }
+
+            //If the player must replace their color, change their color
+            if (mustReplaceColor)
+            {
+                for (int i = 0; i < PlayerSettingsController.NumberOfPlayerColors(); i++)
+                {
+                    //If the taken color list does not contain the current color list, take it
+                    if (!takenColors.Contains(i))
+                    {
+                        ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().ChangePlayerColor(i);
+                        SetNetworkPlayerProperties("Color", i);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    public void UpdateExclusiveColors()
+    {
+        photonView.RPC("RPC_UpdateExclusiveColors", RpcTarget.All); //Send data to every player on the network (including this one)
+    }
+
+    [PunRPC]
+    public void RPC_UpdateExclusiveColors()
+    {
+        if (photonView.IsMine)
+        {
+            List<int> takenColors = new List<int>();
+
+            bool mustReplaceColor = false;
+
+            for (int i = NetworkManagerScript.instance.GetPlayerIndexFromList(); i > 0; i--)
+            {
+                Player otherPlayer = NetworkManagerScript.instance.GetPlayerList()[i - 1];
+
+                Debug.Log("Checking " + otherPlayer.NickName + "'s Color: " + (ColorOptions)otherPlayer.CustomProperties["Color"]);
+                takenColors.Add((int)otherPlayer.CustomProperties["Color"]);
+
+                if ((int)otherPlayer.CustomProperties["Color"] == (int)photonView.Owner.CustomProperties["Color"])
+                {
+                    Debug.Log((ColorOptions)otherPlayer.CustomProperties["Color"] + " is taken.");
                     mustReplaceColor = true;
                 }
             }

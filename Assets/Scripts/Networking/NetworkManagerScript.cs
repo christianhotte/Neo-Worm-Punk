@@ -649,6 +649,18 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     public Room GetMostRecentRoom() => mostRecentRoom;
     public string GetCurrentRoom() => PhotonNetwork.CurrentRoom.Name;
     public Player[] GetPlayerList() => PhotonNetwork.PlayerList;
+
+    public int GetPlayerIndexFromList()
+    {
+        for(int i = 0; i < GetPlayerList().Length; i++)
+        {
+            if (localNetworkPlayer.photonView.Owner == GetPlayerList()[i])
+                return i;
+        }
+
+        return -1;
+    }
+
     public string GetLocalPlayerName() => PhotonNetwork.LocalPlayer.NickName;
     public bool IsLocalPlayerInRoom() => PhotonNetwork.InRoom;
 

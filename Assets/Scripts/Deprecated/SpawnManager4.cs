@@ -45,7 +45,7 @@ public class SpawnManager4 : MonoBehaviourPunCallbacks
                         ReadyUpManager.instance.localPlayerTube = spawnTube;
                         ReadyUpManager.instance.UpdateStatus(spawnNumber + 1);
                         ReadyUpManager.instance.localPlayerTube.SpawnPlayerName(NetworkManagerScript.instance.GetLocalPlayerName());
-                        NetworkManagerScript.localNetworkPlayer.UpdateTakenColorsOnJoin();
+                        NetworkManagerScript.localNetworkPlayer.CheckExclusiveColors();
                         ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
                         if (PhotonNetwork.IsMasterClient)
                             ReadyUpManager.instance.localPlayerTube.ShowHostSettings(true); //Show the settings if the player being moved is the master client
@@ -92,7 +92,7 @@ public class SpawnManager4 : MonoBehaviourPunCallbacks
                         ReadyUpManager.instance.localPlayerTube = spawnTube;
                         ReadyUpManager.instance.UpdateStatus(spawnNumber + 1);
                         ReadyUpManager.instance.localPlayerTube.SpawnPlayerName(NetworkManagerScript.instance.GetLocalPlayerName());
-                        NetworkManagerScript.localNetworkPlayer.UpdateTakenColorsOnJoin();
+                        NetworkManagerScript.localNetworkPlayer.CheckExclusiveColors();
                         ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
                         if (PhotonNetwork.IsMasterClient)
                             ReadyUpManager.instance.localPlayerTube.ShowHostSettings(true); //Show the settings if the player being moved is the master client

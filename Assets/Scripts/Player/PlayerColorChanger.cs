@@ -91,8 +91,12 @@ public class PlayerColorChanger : MonoBehaviour
 
         PlayerSettingsController.Instance.charData.playerColor = newColor;   //Set the player color in the character data
 
-        if(PhotonNetwork.IsConnected)
+        if (PhotonNetwork.IsConnected)
+        {
             NetworkManagerScript.localNetworkPlayer.SetNetworkPlayerProperties("Color", colorOption);
+            if ((bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"])
+                RefreshButtons();
+        }
         else
         {
             PlayerPrefs.SetInt("PreferredColorOption", colorOption);
