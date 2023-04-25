@@ -126,7 +126,7 @@ public class HookProjectile : Projectile
                     //newVelocity += otherEffectsThatCanOccurInLevel
                     if (controller.locked)
                     {
-                        newVelocity *= 5;                                //Gives a boost to locked hook
+                        newVelocity *= 2.5f;                                //Gives a boost to locked hook
                         controller.player.bodyRb.velocity = newVelocity; //Apply new velocity
                     }
                     else
