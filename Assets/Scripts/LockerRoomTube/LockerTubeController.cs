@@ -44,20 +44,20 @@ public class LockerTubeController : MonoBehaviour
 
     }
 
-    public void StartTube(Transform playerObject)
+    public void StartTube(Transform playerObject, float duration)
     {
         myPlayerObject = playerObject;
-        StartCoroutine(MoveTubeAndPlayer((new Vector3(0, 10, 0)), 8));
+        StartCoroutine(MoveTubeAndPlayer((new Vector3(0, 10, 0)), duration));
     }
 
-    public void TubesToCenter()
+    public void TubesToCenter(float duration)
     {
-        StartCoroutine(MoveTubeAndPlayer((transform.forward * 4), 6));
+        StartCoroutine(MoveTubeAndPlayer((transform.forward * 4), duration));
     }
 
-    public void TubesUp()
+    public void TubesUp(float duration)
     {
-        StartCoroutine(MoveTubeAndPlayer(new Vector3(0, 10, 0), 6));
+        StartCoroutine(MoveTubeAndPlayer(new Vector3(0, 10, 0), duration));
     }
 
     /// <summary>
