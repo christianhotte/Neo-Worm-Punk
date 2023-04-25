@@ -126,12 +126,14 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     IEnumerator OnEveryoneReady()
     {
         //countdown from 3,2,1,WORM!
+        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(1f);
+        //if someone cancels early in these zones, cancel coroutine
 
-        //if someone cancels early, cancel coroutine
-
-        //at the end 
         //start tube anims
-        yield return new WaitForSeconds(3f);
+
+        //should not be here at the end
         OnStartRound();
     }
 
