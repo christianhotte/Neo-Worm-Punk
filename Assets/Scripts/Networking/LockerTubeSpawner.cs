@@ -44,6 +44,10 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
             // Moves the player to the spawn point
             PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
             PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
+            //parent it?
+            PlayerController.instance.bodyRb.transform.parent = spawnTube.spawnPoint;              //THIS MIGHT BREAK THINGS JUST IN CASE HERES A DEBUG DOWN BELOW
+            Debug.Log("I hope this doesn't break anything in the above line");
+            spawnTube.StartTube();
 
             ReadyUpManager.instance.localPlayerTube = spawnTube;
             ReadyUpManager.instance.UpdateStatus(tubeID + 1);
@@ -51,6 +55,7 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
             StartCoroutine(NetworkManagerScript.localNetworkPlayer.CheckExclusiveColors());
             if (PhotonNetwork.IsMasterClient)
                 ReadyUpManager.instance.localPlayerTube.ShowHostSettings(true); //Show the settings if the player being moved is the master client
+
         }
     }
 

@@ -24,15 +24,32 @@ public class LockerTubeController : MonoBehaviour
     {
         spawnManager = FindObjectOfType<LockerTubeSpawner>();
         spawnPoint = transform.Find("Spawnpoint");
-        
+        transform.localPosition -= new Vector3(0, 10, 0);
     }
 
     private void Start()
     {
-        //only call when a player is in the tube
-        //transform.localPosition -= new Vector3(0, 10, 0);
+        //at the very beginning
+        
+
+
+
+
+
+
+
+        //when all players start the match
+        //do countdown and have the middle shotgun thing spin (last chance to put levers back)
+        //spot spin, move players together, locked in.
+        //StartCoroutine(MoveTubeAndPlayer((transform.localPosition + transform.forward * 4), 6));
+        //THEN move up
         //StartCoroutine(MoveTubeAndPlayer((transform.localPosition + new Vector3(0, 10, 0)), 8));
-        StartCoroutine(MoveTubeAndPlayer((transform.localPosition + Vector3.back * 4), 2));
+        //in the middle of the last one, fade out and switch scenes
+    }
+
+    public void StartTube()
+    {
+        StartCoroutine(MoveTubeAndPlayer((transform.localPosition + new Vector3(0, 10, 0)), 8));
     }
 
     IEnumerator MoveTubeAndPlayer(Vector3 endPos, float moveTime)
