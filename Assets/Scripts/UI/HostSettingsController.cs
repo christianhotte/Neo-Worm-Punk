@@ -165,11 +165,7 @@ public class HostSettingsController : MonoBehaviour
     {
         UpdateRoomSetting("TeamMode", teamsModeActive);
         NetworkManagerScript.localNetworkPlayer.UpdateRoomSettingsDisplay();
-
-        if ((bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"])
-            ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
-        else
-            NetworkManagerScript.localNetworkPlayer.UpdateExclusiveColors();
+        NetworkManagerScript.localNetworkPlayer.UpdateExclusiveColors(!(bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"]);
     }
 
     /// <summary>
