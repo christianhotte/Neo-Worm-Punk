@@ -48,7 +48,7 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
             ReadyUpManager.instance.localPlayerTube = spawnTube;
             ReadyUpManager.instance.UpdateStatus(tubeID + 1);
             ReadyUpManager.instance.localPlayerTube.SpawnPlayerName(NetworkManagerScript.instance.GetLocalPlayerName());
-            StartCoroutine(NetworkManagerScript.localNetworkPlayer.UpdateTakenColorsOnJoin());
+            StartCoroutine(NetworkManagerScript.localNetworkPlayer.CheckExclusiveColors());
             if (PhotonNetwork.IsMasterClient)
                 ReadyUpManager.instance.localPlayerTube.ShowHostSettings(true); //Show the settings if the player being moved is the master client
         }

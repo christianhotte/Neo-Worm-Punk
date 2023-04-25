@@ -316,10 +316,21 @@ public class NewChainsawController : PlayerEquipment
                 NetworkPlayer hitPlayer = hitInfo.collider.GetComponentInParent<NetworkPlayer>(); //Try to get networkplayer from hit
                 if (hitPlayer != null && !hitPlayer.photonView.IsMine) //Player (other than self) has been hit by blade
                 {
-                    hitPlayer.photonView.RPC("RPC_Hit", RpcTarget.AllBuffered, 3, PlayerController.photonView.ViewID, Vector3.zero, (int)DeathCause.CHAINSAW); //Hit target
+                    //If you chainsaw someone with the same color as you (same team), do not kill
+                    if ((int)hitPlayer.photonView.Owner.CustomProperties["Color"] == (int)NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["Color"])
+                    {
+                        Debug.Log("You chainsawed your own teammate.");
+                    }
+
+                    // Chainsaw somebody with a different color (different teams).
+                    else
+                    {
+                        hitPlayer.photonView.RPC("RPC_Hit", RpcTarget.AllBuffered, 100, PlayerController.photonView.ViewID, Vector3.zero, (int)DeathCause.CHAINSAW); //Hit target
+                    }
                 }
             }
         }
+
         else if (mode == BladeMode.Retracting) //Blade is currently retracting
         {
             //Return to base rotation:

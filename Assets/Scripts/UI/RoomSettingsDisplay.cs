@@ -29,8 +29,9 @@ public class RoomSettingsDisplay : MonoBehaviour
             matchLength += (currentRoundLength / 60).ToString() + " minute" + (currentRoundLength / 60 > 1 ? "s" : "");
 
         string playerHP = "Player HP: " + ((int)GetRoom().CustomProperties["PlayerHP"]).ToString();
+        string teamsMode = "Teams Mode: " + ((bool)GetRoom().CustomProperties["TeamMode"]? "On" : "Off");
 
-        roomSettingsText.text = roomType + "\n" + matchLength + "\n" + playerHP;
+        roomSettingsText.text = roomType + "\n" + matchLength + "\n" + playerHP + "\n" + teamsMode;
     }
 
     public Room GetRoom() => PhotonNetwork.CurrentRoom;
