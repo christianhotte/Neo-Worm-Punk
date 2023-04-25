@@ -1,14 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.XR;
-using UnityEngine.XR.Interaction.Toolkit;
-using TMPro;
 using Photon.Pun;
 using Photon.Realtime;
-using Hashtable = ExitGames.Client.Photon.Hashtable;
-using UnityEngine.SceneManagement;
 using RootMotion.FinalIK;
+using System.Collections;
+using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 // This script was used from https://youtu.be/KHWuTBmT1oI?t=1511\
 // ^ Now heavily modified by Invertebrates
@@ -817,6 +815,8 @@ public class NetworkPlayer : MonoBehaviour
     [PunRPC]
     public void RPC_StartTube(int tubeID)
     {
+        //get access to and pass to the startmytubeforothers the "timeElapsed," "moveTime", and currentPosition of every other players' tube
+
         LockerTubeSpawner.instance.StartMyTubeForOthersByDavid(tubeID);
     }
 

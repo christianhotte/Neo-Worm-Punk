@@ -25,6 +25,8 @@ public class LockerTubeController : MonoBehaviour
     private Vector3[] playerCheckpoints = new Vector3[4];
     [SerializeField] private Vector3 spawnPointBias;
 
+    public float timeElapsed = 0;
+
     private void Awake()
     {
         spawnManager = FindObjectOfType<LockerTubeSpawner>();
@@ -85,7 +87,7 @@ public class LockerTubeController : MonoBehaviour
     {
 
         //set initial time to 0
-        float timeElapsed = 0;
+        timeElapsed = 0;
 
         Vector3 startPos = transform.localPosition;
         Vector3 playerStartPos = Vector3.zero;
