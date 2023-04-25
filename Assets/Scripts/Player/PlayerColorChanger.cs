@@ -121,9 +121,12 @@ public class PlayerColorChanger : MonoBehaviour
         {
             foreach (var player in NetworkManagerScript.instance.GetPlayerList())
             {
-                colorButtons[(int)player.CustomProperties["Color"]].ShowText(true);
-                colorButtons[(int)player.CustomProperties["Color"]].LockButton(true);
-                colorButtons[(int)player.CustomProperties["Color"]].EnableButton(false);
+                if (player.CustomProperties["Color"] != null)
+                {
+                    colorButtons[(int)player.CustomProperties["Color"]].ShowText(true);
+                    colorButtons[(int)player.CustomProperties["Color"]].LockButton(true);
+                    colorButtons[(int)player.CustomProperties["Color"]].EnableButton(false);
+                }
             }
         }
         //If on teams, make the player colors inclusive
