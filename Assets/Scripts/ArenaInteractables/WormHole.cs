@@ -53,6 +53,7 @@ public class WormHole : NetworkedArenaElement
     {
         inZone = true;
         PC = PlayerController.instance;
+        if (GetComponentInChildren<NewGrapplerController>() != null) PC.GetComponentInChildren<NewGrapplerController>().locked = false;
         PlayerController.instance.UnHolsterAll();
         if (PhotonNetwork.IsConnected)
         {

@@ -124,7 +124,15 @@ public class HookProjectile : Projectile
                         newVelocity -= addVel;                                                                //Apply additional velocity (rotated based on player orientation)
                     }
                     //newVelocity += otherEffectsThatCanOccurInLevel
-                    controller.player.bodyRb.velocity = newVelocity; //Apply new velocity
+                    if (controller.locked)
+                    {
+                        newVelocity *= 5;                                //Gives a boost to locked hook
+                        controller.player.bodyRb.velocity = newVelocity; //Apply new velocity
+                    }
+                    else
+                    {
+                        controller.player.bodyRb.velocity = newVelocity; //Apply new velocity
+                    }
                 }
                 break;
             case HookState.PlayerTethered: //Grappling hook is attached to an enemy player
@@ -308,7 +316,11 @@ public class HookProjectile : Projectile
     {
         //Initialization:
         target = null; //Clear target
-
+        if (hitInfo.collider.GetComponentInParent<WormHoleTrigger>() != null || (hitInfo.collider.GetComponentInParent<Grinder>() != null&&hitInfo.collider.name=="GrapplePoint"))
+        {
+            controller.locked = true;
+            PlayerController.instance.bodyRb.velocity *= 2;
+        }
         //Check for bounce:
         if (controller.settings.bounceLayers == (controller.settings.bounceLayers | (1 << hitInfo.collider.gameObject.layer))) //Hook is bouncing off of a non-hookable layer
         {
