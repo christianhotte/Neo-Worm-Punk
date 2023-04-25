@@ -155,7 +155,10 @@ public class UpgradeSpawner : MonoBehaviour
                                 timeUntilNextUpgrade = -1;
                             }*/
                         }
-
+                        else
+                        {
+                            timeUntilNextUpgrade = (powerupsPerMin * 60f);
+                        }
                     }
                     else
                         timeUntilNextUpgrade -= Time.deltaTime;
