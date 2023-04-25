@@ -24,13 +24,13 @@ public class LockerTubeController : MonoBehaviour
     {
         spawnManager = FindObjectOfType<LockerTubeSpawner>();
         spawnPoint = transform.Find("Spawnpoint");
-        
+        transform.localPosition -= new Vector3(0, 10, 0);
     }
 
     private void Start()
     {
         //at the very beginning
-        //transform.localPosition -= new Vector3(0, 10, 0);
+        
 
 
 
