@@ -15,6 +15,7 @@ public class CombatHUDController : MonoBehaviour
     [SerializeField, Tooltip("The prefab for the kill message.")] private GameObject killMessagePrefab;
     [SerializeField, Tooltip("The image of the helmet overlay.")] private Image helmetOverlay;
     [SerializeField, Tooltip("The image of the helmet outline.")] private Image helmetOutline;
+    [SerializeField, Tooltip("The background of the speedometer.")] private Image speedometerBackground;
     [SerializeField, Tooltip("The container for the upgrade notifications.")] private Transform upgradeContainer;
     [SerializeField, Tooltip("The upgrade info prefab.")] private UpgradeDisplay upgradeInfoPrefab;
     [SerializeField, Tooltip("The ammo text.")] private TextMeshProUGUI[] ammoText;
@@ -27,6 +28,9 @@ public class CombatHUDController : MonoBehaviour
     {
         helmetOverlay.color = newColor;
         helmetOutline.color = newColor;
+
+        float speedometerAlpha = speedometerBackground.color.a;
+        speedometerBackground.color = new Color(newColor.r, newColor.g, newColor.b, speedometerAlpha);
     }
 
     /// <summary>

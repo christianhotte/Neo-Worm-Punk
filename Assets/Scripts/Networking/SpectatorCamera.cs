@@ -21,7 +21,6 @@ public class SpectatorCamera : MonoBehaviour
     private PlayerController demoPlayer;
     public Camera firstPersonCamera;
     public Camera thirdPersonCamera;
-    private int currentDisplayIndex = 0;
 
     void Start()
     {
@@ -34,10 +33,6 @@ public class SpectatorCamera : MonoBehaviour
 
         // Set the game window to use the first available display by default
         Display.main.SetRenderingResolution(Screen.width, Screen.height);
-
-        // Hides the mouse and centers it in the middle of the screen.
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
     }
 
     // Update is called once per frame
@@ -46,22 +41,23 @@ public class SpectatorCamera : MonoBehaviour
         // Check if left mouse button is clicked
         if (Input.GetMouseButtonDown(0))
         {
-            if (Display.displays.Length > 1)
+            // Changes priority of the cameras from first person to third person and vice versa.
+            if (firstPersonCamera.depth == 1 && thirdPersonCamera.depth == 0)
             {
-                if (Camera.main.targetDisplay == 0)
-                {
-                    Camera.main.targetDisplay = 1;
-                    Debug.Log("Switching to Display 2");
-                }
-                else
-                {
-                    Camera.main.targetDisplay = 0;
-                    Debug.Log("Switching to Display 1");
-                }
+                firstPersonCamera.depth = 0;
+                thirdPersonCamera.depth = 1;
+                Cursor.visible = false;
+                Cursor.lockState = CursorLockMode.Confined;
+                //Cursor.lockState = CursorLockMode.Locked;
             }
-            else
+
+            // Going from third person to first person.
+            else if (firstPersonCamera.depth == 0 && thirdPersonCamera.depth == 1)
             {
-                Debug.Log("No secondary displays detected.");
+                firstPersonCamera.depth = 1;
+                thirdPersonCamera.depth = 0;
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
             }
         }
     }
