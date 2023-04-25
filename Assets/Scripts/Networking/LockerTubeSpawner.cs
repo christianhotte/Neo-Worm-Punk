@@ -80,7 +80,7 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
     /// <param name="tubeID">Also stoopid</param>
     public void StartMyTubeForOthersByDavid(int tubeID)
     {
-        tubes[tubeID].StartTube(null, 8);
+        tubes[tubeID].StartTube(null, 4);
     }
 
     public void OnLeverStateChanged()

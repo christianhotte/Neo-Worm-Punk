@@ -112,7 +112,6 @@ public class LockerTubeController : MonoBehaviour
                 myPlayerObject.position = Vector3.Lerp(playerStartPos, playerEndPos, t);            //HOW ABOUT WE ONLY MODIFY ALONG THAT AXIS??? no jitter, then
             }
             
-            
             //advance time
             timeElapsed += Time.deltaTime;
 
@@ -122,6 +121,9 @@ public class LockerTubeController : MonoBehaviour
         transform.localPosition = endPos;
         if (myPlayerObject != null) { myPlayerObject.position = playerEndPos; }
     }
+
+
+
 
     /// <summary>
     /// Updates the lights depending on whether the player is ready or not.
