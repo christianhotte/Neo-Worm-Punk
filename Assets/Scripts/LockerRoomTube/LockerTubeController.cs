@@ -24,6 +24,7 @@ public class LockerTubeController : MonoBehaviour
     private Vector3[] tubeCheckpoints = new Vector3[4];
     private Vector3[] playerCheckpoints = new Vector3[4];
     [SerializeField] private Vector3 spawnPointBias;
+    [SerializeField] private AnimationCurve tubeRaiseCurve;
 
     public float timeElapsed = 0;
     private float startTubeTotalTime = 8;
@@ -88,9 +89,10 @@ public class LockerTubeController : MonoBehaviour
         if (isOther)
         {
             //what percent are you through the movement?
-            float totalDistance = tubeCheckpoints[1].y - tubeCheckpoints[0].y;
+            /*float totalDistance = tubeCheckpoints[1].y - tubeCheckpoints[0].y;
             float distanceTraveled = (networkPlayerPos.y - spawnPointBias.y) - tubeCheckpoints[0].y;
-            float fraction = distanceTraveled / totalDistance;
+            float fraction = distanceTraveled / totalDistance;*/
+            float fraction = Mathf.InverseLerp(tubeCheckpoints[0].y, tubeCheckpoints[1].y, networkPlayerPos.y - spawnPointBias.y);
             //total time = 4
             //current time = ?
             //fractional time = fraction
@@ -115,7 +117,7 @@ public class LockerTubeController : MonoBehaviour
 
             //smooth lerp duration alg
             float t = timeElapsed / moveTime;
-            t = t * t * (3f - 2f * t);
+            t = tubeRaiseCurve.Evaluate(t);
 
             transform.localPosition = Vector3.Lerp(startPos, endPos, t);
             if(myPlayerObject != null)
@@ -128,7 +130,7 @@ public class LockerTubeController : MonoBehaviour
 
             yield return null;
         }
-
+        
         transform.localPosition = endPos;
         if (myPlayerObject != null) { myPlayerObject.position = playerEndPos; }
     }
