@@ -74,6 +74,8 @@ public class NetworkPlayer : MonoBehaviour
     private Transform leftHandRig;     //Networked transform which follows position of player left hand
     private Transform rightHandRig;    //Networked transform which follows position of player right hand
     private Transform modelRig;        //Networked transform which follows position of player model
+    private Transform originTarget;
+    private Transform originRig;
 
     //Runtime Variables:
     /// <summary>
@@ -109,6 +111,7 @@ public class NetworkPlayer : MonoBehaviour
             if (view.name.Contains("Left")) { leftHandRig = view.transform; continue; }       //Get left hand rig
             if (view.name.Contains("Right")) { rightHandRig = view.transform; continue; }     //Get right hand rig
             if (view.TryGetComponent(out VRIK vrik)) { modelRig = view.transform; continue; } //Get model rig
+            if (view.name.Contains("Origin")) { originRig = view.transform; continue; }
         }
         if (headRig == null || leftHandRig == null || rightHandRig == null) { Debug.LogError("Network Player " + name + " was not able to successfully get its rigged components. Have the names of its children been changed?"); }
 
@@ -188,6 +191,7 @@ public class NetworkPlayer : MonoBehaviour
             MapPosition(leftHandRig, leftHandTarget);   //Update position of left hand rig
             MapPosition(rightHandRig, rightHandTarget); //Update position of right hand rig
             MapPosition(modelRig, modelTarget);         //Update position of base model
+            MapPosition(originRig, originTarget);
         }
 
         //Sync colors:
@@ -289,6 +293,7 @@ public class NetworkPlayer : MonoBehaviour
         leftHandTarget = attachedPlayer.leftHand.transform;   //Get left hand from player script (since it has already automatically collected the reference)
         rightHandTarget = attachedPlayer.rightHand.transform; //Get right hand from player script (since it has already automatically collected the reference)
         modelTarget = attachedPlayer.bodyRig.transform;       //Get base model transform from player script
+        originTarget = attachedPlayer.xrOrigin.transform;
     }
     private void OnPlayerDisconnected(NetworkPlayer player)
     {
@@ -802,7 +807,7 @@ public class NetworkPlayer : MonoBehaviour
     [PunRPC]
     public void RPC_StartTube(int tubeID)
     {
-        LockerTubeSpawner.instance.StartMyTubeForOthersByDavid(tubeID, transform);
+        LockerTubeSpawner.instance.StartMyTubeForOthersByDavid(tubeID, originRig);
     }
 
 
