@@ -50,11 +50,11 @@ public class LockerTubeController : MonoBehaviour
     private void Update()
     {
         //if I have a player to track
-        if(myPlayerObject != null)
+        if (myPlayerObject != null)
         {
             //every frame move the tube to the player minus the offset
             transform.localPosition = myPlayerObject.position - spawnPointBias;
-            Debug.Log("networkplayerPos = " + myPlayerObject.position);
+            Debug.Log("Tube #" + GetTubeNumber() + " | AssocPlayer = " + myPlayerObject.GetComponentInParent<NetworkPlayer>().photonView.ViewID);
         }
     }
 
