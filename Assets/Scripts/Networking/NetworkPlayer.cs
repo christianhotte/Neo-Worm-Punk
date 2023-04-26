@@ -797,6 +797,15 @@ public class NetworkPlayer : MonoBehaviour
         
     }
 
+
+    //gives the new player a tube
+    [PunRPC]
+    public void RPC_StartTube(int tubeID)
+    {
+        LockerTubeSpawner.instance.StartMyTubeForOthersByDavid(tubeID, transform);
+    }
+
+
     //BELOW METHODS ONLY GET CALLED ON MASTER CLIENT
     [PunRPC]
     public void RPC_GiveMeSpawnpoint(int myViewID)
@@ -812,11 +821,8 @@ public class NetworkPlayer : MonoBehaviour
             }
         }
     }
-    [PunRPC]
-    public void RPC_StartTube(int tubeID)
-    {
-        LockerTubeSpawner.instance.StartMyTubeForOthersByDavid(tubeID, transform);
-    }
+
+
 
     //UTILITY METHODS:
     /// <summary>

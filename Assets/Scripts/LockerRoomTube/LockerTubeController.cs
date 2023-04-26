@@ -53,7 +53,8 @@ public class LockerTubeController : MonoBehaviour
         if(myPlayerObject != null)
         {
             //every frame move the tube to the player minus the offset
-            transform.localPosition = myPlayerObject.position - spawnPointBias;
+            transform.localPosition = myPlayerObject.position + spawnPointBias;
+            Debug.Log("networkplayerPos = " + myPlayerObject.position);
         }
     }
 
