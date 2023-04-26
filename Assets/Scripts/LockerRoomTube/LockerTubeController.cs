@@ -47,27 +47,27 @@ public class LockerTubeController : MonoBehaviour
     public void StartTube(Transform playerObject)
     {
         myPlayerObject = playerObject;
-        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[1], playerCheckpoints[1], Vector3.zero, startTubeTotalTime));
+        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[1], playerCheckpoints[1], Vector3.zero, startTubeTotalTime, false));
     }
 
     public void StartOtherPlayersTube(Vector3 networkPlayerPos)
     {
-        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[1], playerCheckpoints[1], networkPlayerPos, startTubeTotalTime));
+        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[1], playerCheckpoints[1], networkPlayerPos, startTubeTotalTime, true));
     }
 
     public void TubesToCenter(float duration)
     {
-        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[2], playerCheckpoints[2], Vector3.zero, duration));
+        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[2], playerCheckpoints[2], Vector3.zero, duration, false));
     }
 
     public void TubesUp(float duration)
     {
-        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[3], playerCheckpoints[3], Vector3.zero, duration));
+        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[3], playerCheckpoints[3], Vector3.zero, duration, false));
     }
 
     public void TubeExit(float duration)
     {
-        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[0], playerCheckpoints[0], Vector3.zero, duration));
+        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[0], playerCheckpoints[0], Vector3.zero, duration, false));
     }
 
     /// <summary>
@@ -76,7 +76,7 @@ public class LockerTubeController : MonoBehaviour
     /// <param name="transformChange"></param>
     /// <param name="moveTime"></param>
     /// <returns></returns>
-    IEnumerator MoveTubeAndPlayer(Vector3 endPos, Vector3 playerEndPos, Vector3 networkPlayerPos, float moveTime)
+    IEnumerator MoveTubeAndPlayer(Vector3 endPos, Vector3 playerEndPos, Vector3 networkPlayerPos, float moveTime, bool isOther)
     {
         //set initial time to initial time
         timeElapsed = 0;
@@ -85,7 +85,7 @@ public class LockerTubeController : MonoBehaviour
         Vector3 startPos = transform.localPosition;
         Vector3 playerStartPos = Vector3.zero;
 
-        if (networkPlayerPos != Vector3.zero)
+        if (isOther)
         {
             //is a network player tube, collec the network player stuff and set that stuff up
             startPos = networkPlayerPos - spawnPointBias;
@@ -99,9 +99,10 @@ public class LockerTubeController : MonoBehaviour
             //fraction time = current time / total time
             //fraction time * total time = current time to start at
             Debug.Log("MY FRACTION = " + fraction);
+
             timeElapsed = fraction * startTubeTotalTime;
         }
-
+        Debug.Log("NETWORKPLAYER= " + networkPlayerPos);
 
         if (myPlayerObject != null)
         {
