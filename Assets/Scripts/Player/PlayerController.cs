@@ -110,9 +110,10 @@ public class PlayerController : MonoBehaviour
         if (GetComponentInChildren<NewGrapplerController>() != null) GetComponentInChildren<NewGrapplerController>().locked = false;
         if (SpawnManager.current != null && useSpawnPoint) //Spawn manager is present in scene
         {
-            Transform spawnpoint = SpawnManager.current.GetRandomSpawnPoint();                    //Get spawnpoint from spawnpoint manager
+            /*Transform spawnpoint = SpawnManager.current.GetRandomSpawnPoint();                    //Get spawnpoint from spawnpoint manager
             xrOrigin.transform.position = spawnpoint.position;                                    //Move spawned player to target position
-            xrOrigin.transform.eulerAngles = Vector3.Project(spawnpoint.eulerAngles, Vector3.up); //Rotate player to designated spawnpoint rotation
+            xrOrigin.transform.eulerAngles = Vector3.Project(spawnpoint.eulerAngles, Vector3.up); //Rotate player to designated spawnpoint rotation*/
+            SpawnManager.current.Respawn(xrOrigin.gameObject);
         }
         foreach (PlayerEquipment equipment in attachedEquipment) equipment.inputEnabled = true; //Re-enable equipment input
         bodyRb.isKinematic = false; //Re-enable player physics
@@ -187,8 +188,9 @@ public class PlayerController : MonoBehaviour
         //Move to spawnpoint:
         if (SpawnManager.current != null && useSpawnPoint) //Spawn manager is present in scene
         {
-            Transform spawnpoint = SpawnManager.current.GetRandomSpawnPoint(); //Get spawnpoint from spawnpoint manager
-            xrOrigin.transform.position = spawnpoint.position;           //Move spawned player to target position
+            /*Transform spawnpoint = SpawnManager.current.GetRandomSpawnPoint(); //Get spawnpoint from spawnpoint manager
+            xrOrigin.transform.position = spawnpoint.position;           //Move spawned player to target position*/
+            SpawnManager.current.Respawn(xrOrigin.gameObject);
         }
 
         //Hide equipment in menus:

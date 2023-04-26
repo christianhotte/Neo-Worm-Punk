@@ -14,6 +14,8 @@ public class SpawnManager : MonoBehaviour
     public List<Transform> spawnPoints = new List<Transform>();
     [Tooltip("The place players temporarily go to when they die.")] public Transform deathZone;
     public float deathZoneRotSpeed;
+    public Transform[] spawnPoints6;
+    private int lastSpawnIndex = -1;
 
     //Settings:
 
@@ -25,6 +27,14 @@ public class SpawnManager : MonoBehaviour
     {
         current = this; //Always set newest-loaded spawnManager script to current
     }
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        // Shuffle the spawn points array to get random order
+        ShuffleArray(spawnPoints6);
+    }
+
     private void Update()
     {
         if (deathZone != null && PlayerController.instance.isDead)
@@ -47,6 +57,49 @@ public class SpawnManager : MonoBehaviour
 
         return spawnPoint;
     }
+
+    // Respawns a player
+    public void Respawn(GameObject player)
+    {
+        // Find a new spawn point that hasn't been used recently
+        int newSpawnIndex = GetNewSpawnIndex();
+        Transform newSpawnPoint = spawnPoints6[newSpawnIndex];
+
+        Debug.Log("Spawning player.");
+
+        // Set player's position to the new spawn point
+        player.transform.position = newSpawnPoint.position;
+        player.transform.eulerAngles = Vector3.Project(newSpawnPoint.eulerAngles, Vector3.up);
+
+        // Update the last spawn index
+        lastSpawnIndex = newSpawnIndex;
+    }
+
+    private int GetNewSpawnIndex()
+    {
+        int newIndex = Random.Range(0, spawnPoints6.Length);
+
+        // If the new index is the same as the last one, get a new one
+        if (newIndex == lastSpawnIndex)
+        {
+            newIndex = GetNewSpawnIndex();
+        }
+
+        return newIndex;
+    }
+
+    // Fisher-Yates shuffle algorithm
+    private void ShuffleArray<T>(T[] arr)
+    {
+        for (int i = arr.Length - 1; i > 0; i--)
+        {
+            int j = Random.Range(0, i + 1);
+            T temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
+        }
+    }
+
     /*
     /// <summary>
     /// Returns lowest spawn point which a player is not currently at. Returns -1 if no points are available.
