@@ -47,7 +47,22 @@ public class RoomSettingsDisplay : MonoBehaviour
                 break;
         }
 
-        roomSettingsText.text = roomType + "\n" + matchLength + "\n" + playerHP + "\n" + teamsMode + "\n" + hazardsActive + "\n" + upgradesActive + (((bool)GetRoom().CustomProperties["UpgradesActive"])? ("\n" + upgradeFrequency).ToString(): "");
+        string upgradeLength = "Upgrade Length: ";
+
+        switch (GameSettings.UpgradeLengthToInt((float)GetRoom().CustomProperties["UpgradeLength"]))
+        {
+            case 0:
+                upgradeLength += "Short";
+                break;
+            case 1:
+                upgradeLength += "Medium";
+                break;
+            case 2:
+                upgradeLength += "Long";
+                break;
+        }
+
+        roomSettingsText.text = roomType + "\n" + matchLength + "\n" + playerHP + "\n" + teamsMode + "\n" + hazardsActive + "\n" + upgradesActive + (((bool)GetRoom().CustomProperties["UpgradesActive"])? ("\n" + upgradeFrequency).ToString(): "") + (((bool)GetRoom().CustomProperties["UpgradesActive"]) ? ("\n" + upgradeLength).ToString() : "");
     }
 
     public Room GetRoom() => PhotonNetwork.CurrentRoom;
