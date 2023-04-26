@@ -98,6 +98,7 @@ public class LockerTubeController : MonoBehaviour
             //fractional time = fraction
             //fraction time = current time / total time
             //fraction time * total time = current time to start at
+            Debug.Log("MY FRACTION = " + fraction);
             timeElapsed = fraction * startTubeTotalTime;
         }
 

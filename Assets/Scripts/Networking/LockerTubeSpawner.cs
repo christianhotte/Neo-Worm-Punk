@@ -66,7 +66,10 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
     {
         foreach(var networkPlayer in NetworkPlayer.instances)
         {
-            tubes[(int)networkPlayer.photonView.Owner.CustomProperties["TubeID"]].StartOtherPlayersTube(networkPlayer.transform.position);
+            if(networkPlayer != NetworkManagerScript.localNetworkPlayer)
+            {
+                tubes[(int)networkPlayer.photonView.Owner.CustomProperties["TubeID"]].StartOtherPlayersTube(networkPlayer.transform.position);
+            }
         }
     }
 
