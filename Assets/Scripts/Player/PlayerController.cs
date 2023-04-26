@@ -129,6 +129,11 @@ public class PlayerController : MonoBehaviour
         yield return new WaitUntil(() => photonView != null);
         MakeInvulnerable(timeUntilVulnerable);
     }
+    public IEnumerator TryToSpawn()
+    {
+        yield return new WaitUntil(() => spawnManager6 != null);
+        spawnManager6.Respawn(xrOrigin.gameObject);
+    }
 
     //RUNTIME METHODS:
     private void Awake()
@@ -191,7 +196,7 @@ public class PlayerController : MonoBehaviour
         {
             /*Transform spawnpoint = SpawnManager.current.GetRandomSpawnPoint(); //Get spawnpoint from spawnpoint manager
             xrOrigin.transform.position = spawnpoint.position;           //Move spawned player to target position*/
-            spawnManager6.Respawn(xrOrigin.gameObject);
+            StartCoroutine(TryToSpawn());
         }
 
         //Hide equipment in menus:
