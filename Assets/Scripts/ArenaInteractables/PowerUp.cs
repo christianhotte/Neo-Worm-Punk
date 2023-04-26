@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
-
+using UnityEngine.SceneManagement;
 public class PowerUp : Targetable
 {
     public enum PowerUpType { None, MultiShot, HeatVision, InfiniShot, Invulnerability }
@@ -20,6 +20,7 @@ public class PowerUp : Targetable
     private PhotonView photonView;
     internal Rigidbody rb;
     public bool dummyPowerup = false;
+    internal float roomPowerUpTime;
     private protected override void Awake()
     {
         base.Awake();
@@ -27,7 +28,7 @@ public class PowerUp : Targetable
         thisModel = GetComponent<MeshRenderer>();
         powerUpAud = this.GetComponent<AudioSource>();
         currentHealth = health;
-
+        SceneManager.sceneLoaded += OnSceneLoaded;
         if (photonView.IsMine)
         {
             rb = gameObject.AddComponent<Rigidbody>();
@@ -36,6 +37,13 @@ public class PowerUp : Targetable
             rb.drag = 5;
         }
 
+    }
+    public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (PhotonNetwork.InRoom)
+        {
+            roomPowerUpTime = (float)PhotonNetwork.CurrentRoom.CustomProperties["UpgradeLength"];
+        }
     }
     private void FixedUpdate()
     {
@@ -47,7 +55,7 @@ public class PowerUp : Targetable
 
         if (currentHealth - damage <= 0) //Give local player an upgrade
         {
-            UpgradeSpawner.primary.StartCoroutine(UpgradeSpawner.primary.DoPowerUp(powerType, PowerupTime));
+            UpgradeSpawner.primary.StartCoroutine(UpgradeSpawner.primary.DoPowerUp(powerType, roomPowerUpTime));
         }
 
         Vector3 hitForce = velocity.normalized * bounceForce;
@@ -74,15 +82,15 @@ public class PowerUp : Targetable
         {
             if (other.name == "XR Origin")
             {
-                UpgradeSpawner.primary.StartCoroutine(UpgradeSpawner.primary.DoPowerUp(powerType, PowerupTime));
-                PlayerController.instance.combatHUD.AddToUpgradeInfo(powerType, PowerupTime);   //Adds the power up to the player's HUD
+                UpgradeSpawner.primary.StartCoroutine(UpgradeSpawner.primary.DoPowerUp(powerType, roomPowerUpTime));
+                PlayerController.instance.combatHUD.AddToUpgradeInfo(powerType, roomPowerUpTime);   //Adds the power up to the player's HUD
                 this.gameObject.SetActive(false);
             }
         }
     }
     private void Delete()
     {
-        PlayerController.instance.combatHUD.AddToUpgradeInfo(powerType, PowerupTime);   //Adds the power up to the player's HUD
+        PlayerController.instance.combatHUD.AddToUpgradeInfo(powerType, roomPowerUpTime);   //Adds the power up to the player's HUD
         PhotonNetwork.Destroy(GetComponent<PhotonView>());
     }
 

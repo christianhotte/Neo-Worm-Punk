@@ -45,7 +45,15 @@ public class UpgradeDisplay : MonoBehaviour
 
     public void StartUpgradeTimer(PowerUp.PowerUpType powerUpType, float upgradeTimer)
     {
-        timeRemaining = upgradeTimer;
+        switch (powerUpType)
+        {
+            case PowerUp.PowerUpType.Invulnerability:
+                timeRemaining = upgradeTimer / 2;
+                break;
+            default:
+                timeRemaining = upgradeTimer;
+                break;
+        }
         timerText.text = GetTimeDisplay();
         upgradeActive = true;
     }
