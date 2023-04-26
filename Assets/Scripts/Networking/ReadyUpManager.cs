@@ -111,8 +111,8 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
                 print("Player " + player.photonView.ViewID + " ready status: " + (player.networkPlayerStats.isReady ? "READY" : "NOT READY"));
 
                 //If in debug mode, force the game to load when the master client readies up
-                if(player.photonView.Owner.IsMasterClient && player.networkPlayerStats.isReady && GameSettings.debugMode)
-                    forceLoadViaMasterClient = true;
+/*                if(player.photonView.Owner.IsMasterClient && player.networkPlayerStats.isReady && GameSettings.debugMode)
+                    forceLoadViaMasterClient = true;*/
             }
 
             // If all players are ready, load the game scene
