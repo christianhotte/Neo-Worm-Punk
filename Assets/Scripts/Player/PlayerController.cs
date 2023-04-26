@@ -42,7 +42,7 @@ public class PlayerController : MonoBehaviour
     [Tooltip("Equipment which is currently attached to the player")]       internal List<PlayerEquipment> attachedEquipment = new List<PlayerEquipment>();
     [Tooltip("Combat HUD Canvas.")]                                        internal CombatHUDController combatHUD;
     internal InverteboyController inverteboy;            //The player's inverteboy component
-    private SpawnManager6 spawnManager6;
+    private SpawnManager spawnManager6;
 
     internal Camera cam;                       //Primary camera for VR rendering, located on player head
     internal PlayerInput input;                //Input manager component used by player to send messages to hands and such
