@@ -26,7 +26,7 @@ public class LockerTubeController : MonoBehaviour
     [SerializeField] private Vector3 spawnPointBias;
 
     public float timeElapsed = 0;
-    private float startTubeTotalTime = 4;
+    private float startTubeTotalTime = 8;
 
     private void Awake()
     {
@@ -52,7 +52,7 @@ public class LockerTubeController : MonoBehaviour
 
     public void StartOtherPlayersTube(Vector3 networkPlayerPos)
     {
-        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[1], playerCheckpoints[1], networkPlayerPos, -1));
+        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[1], playerCheckpoints[1], networkPlayerPos, startTubeTotalTime));
     }
 
     public void TubesToCenter(float duration)
@@ -85,7 +85,7 @@ public class LockerTubeController : MonoBehaviour
         Vector3 startPos = transform.localPosition;
         Vector3 playerStartPos = Vector3.zero;
 
-        if (moveTime == -1)
+        if (networkPlayerPos != Vector3.zero)
         {
             //is a network player tube, collec the network player stuff and set that stuff up
             startPos = networkPlayerPos + spawnPointBias;
@@ -99,7 +99,6 @@ public class LockerTubeController : MonoBehaviour
             //fraction time = current time / total time
             //fraction time * total time = current time to start at
             timeElapsed = fraction * startTubeTotalTime;
-
         }
 
 
