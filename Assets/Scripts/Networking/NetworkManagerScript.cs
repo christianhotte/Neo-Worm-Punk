@@ -140,13 +140,14 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
         AddCustomRoomSetting("RoundLength", GameSettings.defaultMatchLength, ref customRoomSettings);
         AddCustomRoomSetting("PlayerHP", GameSettings.HPDefault, ref customRoomSettings);
+        AddCustomRoomSetting("HazardsActive", GameSettings.hazardsActiveDefault, ref customRoomSettings);
         AddCustomRoomSetting("UpgradesActive", GameSettings.upgradesActiveDefault, ref customRoomSettings);
-        AddCustomRoomSetting("UpgradeFrequency", GameSettings.upgradeFrequency, ref customRoomSettings);
+        AddCustomRoomSetting("UpgradeFrequency", GameSettings.defaultUpgradeFrequency, ref customRoomSettings);
+        AddCustomRoomSetting("UpgradeLength", GameSettings.defaultUpgradeLength, ref customRoomSettings);
         AddCustomRoomSetting("TeamMode", GameSettings.teamModeDefault, ref customRoomSettings);
+        AddCustomRoomSetting("TubeOccupants", new bool[6] { false, false, false, false, false, false }, ref customRoomSettings);
 
-        customRoomSettings.Add("TubeOccupants", new bool[6] { false, false, false, false, false, false});
-
-        Debug.Log("Tube Occupants On Create Room: " + customRoomSettings["TubeOccupants"]);
+        // Debug.Log("Tube Occupants On Create Room: " + customRoomSettings["TubeOccupants"]);
 
         roomOptions.IsOpen = true; // The room is open.
         roomOptions.EmptyRoomTtl = 0; // Leave the room open for 0 milliseconds after the room is empty

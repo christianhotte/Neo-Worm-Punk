@@ -519,10 +519,8 @@ public class NetworkPlayer : MonoBehaviour
     [PunRPC]
     public void RPC_UpdateExclusiveColors(bool exclusiveColors)
     {
-        Debug.Log("Updating My Color Or Some Shit...");
         if (exclusiveColors)
         {
-            Debug.Log("Exclusive Colours.");
             List<int> takenColors = new List<int>();
 
             bool mustReplaceColor = false;
@@ -565,7 +563,6 @@ public class NetworkPlayer : MonoBehaviour
             }
         }
 
-        Debug.Log("Update ze Buttons(tm).");
         ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
     }
 
@@ -816,6 +813,11 @@ public class NetworkPlayer : MonoBehaviour
                 inTube = true;
             }
         }
+    }
+    [PunRPC]
+    public void RPC_StartTube(int tubeID)
+    {
+        LockerTubeSpawner.instance.StartMyTubeForOthersByDavid(tubeID);
     }
 
     //UTILITY METHODS:

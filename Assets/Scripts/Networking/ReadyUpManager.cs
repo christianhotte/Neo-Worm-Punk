@@ -111,20 +111,47 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
                 print("Player " + player.photonView.ViewID + " ready status: " + (player.networkPlayerStats.isReady ? "READY" : "NOT READY"));
 
                 //If in debug mode, force the game to load when the master client readies up
-                if(player.photonView.Owner.IsMasterClient && player.networkPlayerStats.isReady && GameSettings.debugMode)
-                    forceLoadViaMasterClient = true;
+/*                if(player.photonView.Owner.IsMasterClient && player.networkPlayerStats.isReady && GameSettings.debugMode)
+                    forceLoadViaMasterClient = true;*/
             }
 
             // If all players are ready, load the game scene
             if (forceLoadViaMasterClient || !GameManager.Instance.levelTransitionActive && (playersReady == playersInRoom && (playersInRoom >= MINIMUM_PLAYERS_NEEDED || GameSettings.debugMode)))
             {
-                //Reset all players
-                foreach (var player in NetworkPlayer.instances)
-                    player.networkPlayerStats = new PlayerStats();
-
-                NetworkManagerScript.instance.LoadSceneWithFade(GameSettings.arenaScene);
+                StartCoroutine(OnEveryoneReady());
             }
         }
+    }
+
+    IEnumerator OnEveryoneReady()
+    {
+        //countdown from 3,2,1,WORM!
+        FindObjectOfType<Countdown>().StartCountdown(3);
+        yield return new WaitForSeconds(4f);
+        //if someone cancels early in these zones, cancel coroutine
+
+        //start tube anims
+        //LockerTubeController tube = FindObjectOfType<LockerTubeSpawner>().GetTubeByIndex(tubeID);
+
+        //should not be here at the end
+        OnStartRound();
+    }
+
+
+
+    public void OnStartRound()
+    {
+        //start tube anims
+
+
+
+        //FINAL
+        //Reset all players
+        foreach (var player in NetworkPlayer.instances)
+            player.networkPlayerStats = new PlayerStats();
+
+        NetworkManagerScript.instance.LoadSceneWithFade(GameSettings.arenaScene);
+        //FINAL
     }
 
     /// <summary>

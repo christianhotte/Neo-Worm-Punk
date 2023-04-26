@@ -316,7 +316,7 @@ public class HookProjectile : Projectile
     {
         //Initialization:
         target = null; //Clear target
-        if (hitInfo.collider.GetComponentInParent<WormHoleTrigger>() != null || (hitInfo.collider.GetComponentInParent<Grinder>() != null&&hitInfo.collider.name=="GrapplePoint"))
+        if (hitInfo.collider.GetComponentInParent<WormHoleTrigger>() != null || (hitInfo.collider.GetComponentInParent<Grinder>() != null&&hitInfo.collider.name=="GrapplePoint")||hitInfo.collider.GetComponentInParent<TurbineZone>())
         {
             controller.locked = true;
         }
