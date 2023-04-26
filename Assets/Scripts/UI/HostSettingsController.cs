@@ -31,6 +31,7 @@ public class HostSettingsController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI matchLengthLabel;
     [SerializeField] private TextMeshProUGUI playerHPLabel;
     [SerializeField] private TextMeshProUGUI upgradeFrequencyLabel;
+    [SerializeField] private TextMeshProUGUI upgradeLengthLabel;
     [Space(10)]
 
     [Header("Objects")]
@@ -41,6 +42,7 @@ public class HostSettingsController : MonoBehaviour
     [SerializeField] private PhysicalToggleController hazardsToggle;
     [SerializeField] private PhysicalToggleController upgradesToggle;
     [SerializeField] private SliderController upgradeFrequencySlider;
+    [SerializeField] private SliderController upgradeLengthSlider;
     [Space(10)]
 
     [Header("Game Mode and Preset Settings")]
@@ -99,10 +101,12 @@ public class HostSettingsController : MonoBehaviour
             upgradesToggle.ForceToggle((bool)GetRoom().CustomProperties["UpgradesActive"]);
 
             upgradeFrequencySlider.MoveToValue(GameSettings.UpgradeFrequencyToInt((float)GetRoom().CustomProperties["UpgradeFrequency"]));
+            upgradeLengthSlider.MoveToValue(GameSettings.UpgradeLengthToInt((float)GetRoom().CustomProperties["UpgradeLength"]));
 
             UpdateMatchLengthLabel();
             UpdatePlayerHPLabel();
             UpdateUpgradeFrequencyLabel();
+            UpdateUpgradeLengthLabel();
 
             NetworkManagerScript.localNetworkPlayer.UpdateRoomSettingsDisplay();
 
@@ -188,6 +192,17 @@ public class HostSettingsController : MonoBehaviour
     }
 
     /// <summary>
+    /// Updates the general length of an upgrade.
+    /// </summary>
+    /// <param name="upgradeLen">The length of the upgrade.</param>
+    public void UpdateUpgradeLength(float upgradeLen)
+    {
+        UpdateRoomSetting("UpgradeLength", GameSettings.upgradeLengths[Mathf.RoundToInt(upgradeLen)]);
+        UpdateUpgradeLengthLabel();
+        NetworkManagerScript.localNetworkPlayer.UpdateRoomSettingsDisplay();
+    }
+
+    /// <summary>
     /// Updates the match length label text.
     /// </summary>
     public void UpdateMatchLengthLabel()
@@ -233,6 +248,29 @@ public class HostSettingsController : MonoBehaviour
         }
 
         upgradeFrequencyLabel.text = upgradeFrequency;
+    }
+
+    /// <summary>
+    /// Updates the label of the Upgrade Length text.
+    /// </summary>
+    public void UpdateUpgradeLengthLabel()
+    {
+        string upgradeLength = "Upgrade Length: ";
+
+        switch (GameSettings.UpgradeLengthToInt((float)GetRoom().CustomProperties["UpgradeLength"]))
+        {
+            case 0:
+                upgradeLength += "Short";
+                break;
+            case 1:
+                upgradeLength += "Medium";
+                break;
+            case 2:
+                upgradeLength += "Long";
+                break;
+        }
+
+        upgradeLengthLabel.text = upgradeLength;
     }
 
     /// <summary>
