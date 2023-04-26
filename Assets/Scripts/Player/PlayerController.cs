@@ -42,6 +42,7 @@ public class PlayerController : MonoBehaviour
     [Tooltip("Equipment which is currently attached to the player")]       internal List<PlayerEquipment> attachedEquipment = new List<PlayerEquipment>();
     [Tooltip("Combat HUD Canvas.")]                                        internal CombatHUDController combatHUD;
     internal InverteboyController inverteboy;            //The player's inverteboy component
+    private SpawnManager6 spawnManager6;
 
     internal Camera cam;                       //Primary camera for VR rendering, located on player head
     internal PlayerInput input;                //Input manager component used by player to send messages to hands and such
@@ -110,9 +111,10 @@ public class PlayerController : MonoBehaviour
         if (GetComponentInChildren<NewGrapplerController>() != null) GetComponentInChildren<NewGrapplerController>().locked = false;
         if (SpawnManager.current != null && useSpawnPoint) //Spawn manager is present in scene
         {
-            Transform spawnpoint = SpawnManager.current.GetRandomSpawnPoint();                    //Get spawnpoint from spawnpoint manager
+            /*Transform spawnpoint = SpawnManager.current.GetRandomSpawnPoint();                    //Get spawnpoint from spawnpoint manager
             xrOrigin.transform.position = spawnpoint.position;                                    //Move spawned player to target position
-            xrOrigin.transform.eulerAngles = Vector3.Project(spawnpoint.eulerAngles, Vector3.up); //Rotate player to designated spawnpoint rotation
+            xrOrigin.transform.eulerAngles = Vector3.Project(spawnpoint.eulerAngles, Vector3.up); //Rotate player to designated spawnpoint rotation*/
+            spawnManager6.Respawn(xrOrigin.gameObject);
         }
         foreach (PlayerEquipment equipment in attachedEquipment) equipment.inputEnabled = true; //Re-enable equipment input
         bodyRb.isKinematic = false; //Re-enable player physics
@@ -187,8 +189,9 @@ public class PlayerController : MonoBehaviour
         //Move to spawnpoint:
         if (SpawnManager.current != null && useSpawnPoint) //Spawn manager is present in scene
         {
-            Transform spawnpoint = SpawnManager.current.GetRandomSpawnPoint(); //Get spawnpoint from spawnpoint manager
-            xrOrigin.transform.position = spawnpoint.position;           //Move spawned player to target position
+            /*Transform spawnpoint = SpawnManager.current.GetRandomSpawnPoint(); //Get spawnpoint from spawnpoint manager
+            xrOrigin.transform.position = spawnpoint.position;           //Move spawned player to target position*/
+            spawnManager6.Respawn(xrOrigin.gameObject);
         }
 
         //Hide equipment in menus:
