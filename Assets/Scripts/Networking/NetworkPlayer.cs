@@ -427,16 +427,13 @@ public class NetworkPlayer : MonoBehaviour
             if (!photonView.IsMine)
             {
                 trail.material = origTrailMat;
-                trail.colorGradient.colorKeys[0].color = currentColor;
-                trail.colorGradient.colorKeys[1].color = currentColor;
+                trail.material.SetColor("Base Map", currentColor);
             }
         }
         else //System is using unique material
         {
             if (!photonView.IsMine)
             {
-                trail.colorGradient.colorKeys[0].color = Color.white;
-                trail.colorGradient.colorKeys[1].color = Color.white;
                 trail.material = primaryMat;
             }
         }
