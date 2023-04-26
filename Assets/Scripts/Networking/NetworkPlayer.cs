@@ -815,9 +815,7 @@ public class NetworkPlayer : MonoBehaviour
     [PunRPC]
     public void RPC_StartTube(int tubeID)
     {
-        //get access to and pass to the startmytubeforothers the "timeElapsed," "moveTime", and currentPosition of every other players' tube
-
-        LockerTubeSpawner.instance.StartMyTubeForOthersByDavid(tubeID, transform.position);
+        LockerTubeSpawner.instance.StartMyTubeForOthersByDavid(tubeID, transform);
     }
 
     //UTILITY METHODS:

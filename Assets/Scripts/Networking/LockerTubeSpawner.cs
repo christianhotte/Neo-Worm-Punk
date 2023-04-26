@@ -46,11 +46,16 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
             // Moves the player to the spawn point
             PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
             PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
-            spawnTube.StartTube(PlayerController.instance.bodyRb.transform);
 
+            //set own player up
+            spawnTube.GiveTubeAPlayer(PlayerController.instance.bodyRb.transform);
+            //move your own player up
+            spawnTube.PlayerToLobbyPosition();
+
+            //renders everyone's tubes FOR ME if they're already spawned
             SetExistingTubePositions();
 
-            //now everyone else do it too
+            //notify all other players that I have spawned
             NetworkManagerScript.localNetworkPlayer.photonView.RPC("RPC_StartTube", RpcTarget.Others, tubeID);
 
             ReadyUpManager.instance.localPlayerTube = spawnTube;
@@ -64,22 +69,26 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
 
     private void SetExistingTubePositions()
     {
-        foreach(var networkPlayer in NetworkPlayer.instances)
+        foreach (var networkPlayer in NetworkPlayer.instances)
         {
-            if(networkPlayer != NetworkManagerScript.localNetworkPlayer)
+            if (networkPlayer != NetworkManagerScript.localNetworkPlayer)
             {
-                tubes[(int)networkPlayer.photonView.Owner.CustomProperties["TubeID"]].StartOtherPlayersTube(networkPlayer.transform.position);
+                //tubes[(int)networkPlayer.photonView.Owner.CustomProperties["TubeID"]].StartOtherPlayersTube(networkPlayer.transform.position);
+                //tubes[(int)networkPlayer.photonView.Owner.CustomProperties["TubeID"]].transform.position = networkPlayer.transform.position - tubes[(int)networkPlayer.photonView.Owner.CustomProperties["TubeID"]].spawnPointBias;
+                tubes[(int)networkPlayer.photonView.Owner.CustomProperties["TubeID"]].GiveTubeAPlayer(networkPlayer.transform);
             }
         }
     }
+
+
 
     /// <summary>
     /// Stoopid.
     /// </summary>
     /// <param name="tubeID">Also stoopid</param>
-    public void StartMyTubeForOthersByDavid(int tubeID, Vector3 networkPlayerPos)
+    public void StartMyTubeForOthersByDavid(int tubeID, Transform networkPlayerTransform)
     {
-        tubes[tubeID].StartOtherPlayersTube(networkPlayerPos);
+        tubes[tubeID].GiveTubeAPlayer(networkPlayerTransform);
     }
 
     public void OnLeverStateChanged()
