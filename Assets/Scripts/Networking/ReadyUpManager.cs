@@ -118,22 +118,46 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
             // If all players are ready, load the game scene
             if (forceLoadViaMasterClient || !GameManager.Instance.levelTransitionActive && (playersReady == playersInRoom && (playersInRoom >= MINIMUM_PLAYERS_NEEDED || GameSettings.debugMode)))
             {
-                StartCoroutine(OnEveryoneReady());
+                
+                StartCoroutine(OnEveryoneReady(tube));
+
+                /*
+                //go through every network player and trigger their new positional changes
+                foreach (NetworkPlayer networkPlayer in NetworkPlayer.instances)
+                {
+                    //find their tube
+                    //networkPlayer.photonView.Owner.CustomProperties["TubeID"]].
+                    
+
+                    //StartCoroutine(OnEveryoneReady(networkPlayer));
+                }*/
             }
         }
     }
 
-    IEnumerator OnEveryoneReady()
+    IEnumerator OnEveryoneReady(LockerTubeController tube)
     {
+        float delayTime = 3;
         //countdown from 3,2,1,WORM!
-        FindObjectOfType<Countdown>().StartCountdown(3);
-        yield return new WaitForSeconds(4f);
-        //if someone cancels early in these zones, cancel coroutine
+        FindObjectOfType<Countdown>().StartCountdown((int)delayTime);
+        yield return new WaitForSeconds(delayTime);
+        //if someone cancels early in these zones, cancel coroutine?
 
-        //start tube anims
-        //LockerTubeController tube = FindObjectOfType<LockerTubeSpawner>().GetTubeByIndex(tubeID);
+        delayTime = 4;
+        //call all tubes to the center
+        tube.PlayerToReadyPosition(delayTime);
+        //wait for equivilent time
+        yield return new WaitForSeconds(delayTime);
 
-        //should not be here at the end
+        delayTime = 6;
+        //call all tubes up
+        tube.PlayerToExitPosition(delayTime);
+        //wait half the time
+        yield return new WaitForSeconds(delayTime);
+
+        //fade the camera and then...
+
+        //start the round
         OnStartRound();
     }
 
@@ -141,10 +165,6 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
 
     public void OnStartRound()
     {
-        //start tube anims
-
-
-
         //FINAL
         //Reset all players
         foreach (var player in NetworkPlayer.instances)

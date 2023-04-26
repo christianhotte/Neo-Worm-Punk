@@ -53,7 +53,8 @@ public class LockerTubeController : MonoBehaviour
         if (myPlayerObject != null)
         {
             //every frame move the tube to the player minus the offset
-            transform.position = myPlayerObject.position - spawnPointBias;
+            //transform.position = myPlayerObject.position - spawnPointBias;
+            transform.position = Vector3.Lerp(transform.position, myPlayerObject.position - spawnPointBias, Time.deltaTime * 4);
             //Debug.Log("Tube #" + GetTubeNumber() + " | AssocPlayer = " + myPlayerObject.GetComponentInParent<NetworkPlayer>().photonView.ViewID);
         }
     }
@@ -68,15 +69,15 @@ public class LockerTubeController : MonoBehaviour
         //StartCoroutine(MovePlayerToNextPosition(transform, originalTubePosition, 8));
     }
 
-    public void PlayerToReadyPosition()
+    public void PlayerToReadyPosition(float duration)
     {
-
+        StartCoroutine(MovePlayerToNextPosition(myPlayerObject, playerCheckpoints[2], duration));
     }
 
 
-    public void PlayerToExitPosition()
+    public void PlayerToExitPosition(float duration)
     {
-
+        StartCoroutine(MovePlayerToNextPosition(myPlayerObject, playerCheckpoints[3], duration));
     }
 
     IEnumerator MovePlayerToNextPosition(Transform moveMe, Vector3 endPos, float moveTime)
