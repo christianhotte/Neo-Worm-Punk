@@ -102,6 +102,8 @@ public class HostSettingsController : MonoBehaviour
 
             upgradeFrequencySlider.MoveToValue(GameSettings.UpgradeFrequencyToInt((float)GetRoom().CustomProperties["UpgradeFrequency"]));
             upgradeLengthSlider.MoveToValue(GameSettings.UpgradeLengthToInt((float)GetRoom().CustomProperties["UpgradeLength"]));
+            upgradeFrequencySlider.gameObject.SetActive((bool)GetRoom().CustomProperties["UpgradesActive"]);
+            upgradeLengthSlider.gameObject.SetActive((bool)GetRoom().CustomProperties["UpgradesActive"]);
 
             UpdateMatchLengthLabel();
             UpdatePlayerHPLabel();
@@ -177,6 +179,10 @@ public class HostSettingsController : MonoBehaviour
     public void ToggleUpgradesActive(bool upgradesActive)
     {
         UpdateRoomSetting("UpgradesActive", upgradesActive);
+
+        upgradeFrequencySlider.gameObject.SetActive((bool)GetRoom().CustomProperties["UpgradesActive"]);
+        upgradeLengthSlider.gameObject.SetActive((bool)GetRoom().CustomProperties["UpgradesActive"]);
+
         NetworkManagerScript.localNetworkPlayer.UpdateRoomSettingsDisplay();
     }
 
