@@ -63,7 +63,8 @@ public class TurbineZone : MonoBehaviour
                     {
                         if (grappler.locked == true)
                         {
-                            grappler.ForceReleased();
+                            grappler.locked = false;
+                            grappler.hook.Stow();
                         }
                     }
 
