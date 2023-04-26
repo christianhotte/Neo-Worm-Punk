@@ -91,7 +91,11 @@ public class UpgradeDisplay : MonoBehaviour
         warningFlickerLeantween = LeanTween.alphaCanvas(GetComponent<CanvasGroup>(), warningFlickerAlpha, warningFlickerSpeed).setEase(flickerEaseType).setLoopPingPong();
     }
 
-    private void StopWarningFlicker() => LeanTween.cancel(warningFlickerLeantween.id);
+    private void StopWarningFlicker()
+    {
+        if(warningFlickerLeantween != null)
+            LeanTween.cancel(warningFlickerLeantween.id);
+    }
 
     private void StartFinalFlicker()
     {
@@ -101,7 +105,11 @@ public class UpgradeDisplay : MonoBehaviour
         finalFlickerLeantween = LeanTween.alphaCanvas(GetComponent<CanvasGroup>(), finalFlickerAlpha, finalFlickerSpeed).setEase(flickerEaseType).setLoopPingPong();
     }
 
-    private void StopFinalFlicker() => LeanTween.cancel(finalFlickerLeantween.id);
+    private void StopFinalFlicker()
+    {
+        if(finalFlickerLeantween != null)
+            LeanTween.cancel(finalFlickerLeantween.id);
+    }
 
     public string GetTimeDisplay() => GetMinutes() + ":" + GetSeconds();
     public string GetMinutes() => Mathf.FloorToInt(timeRemaining / 60f < 0 ? 0 : timeRemaining / 60f).ToString();

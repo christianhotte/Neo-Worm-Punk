@@ -28,23 +28,23 @@ public class PowerUp : Targetable
         thisModel = GetComponent<MeshRenderer>();
         powerUpAud = this.GetComponent<AudioSource>();
         currentHealth = health;
-        SceneManager.sceneLoaded += OnSceneLoaded;
-        if (photonView.IsMine)
-        {
-            rb = gameObject.AddComponent<Rigidbody>();
-            rb.useGravity = false;
-            rb.constraints = RigidbodyConstraints.FreezeRotation;
-            rb.drag = 5;
-        }
 
-    }
-    public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
         if (PhotonNetwork.InRoom)
         {
             roomPowerUpTime = (float)PhotonNetwork.CurrentRoom.CustomProperties["UpgradeLength"];
+            Debug.Log("The Voices In My Head Tell Me The Power Up Time Is " + roomPowerUpTime);
+
+            if (photonView.IsMine)
+            {
+                rb = gameObject.AddComponent<Rigidbody>();
+                rb.useGravity = false;
+                rb.constraints = RigidbodyConstraints.FreezeRotation;
+                rb.drag = 5;
+            }
+
         }
     }
+
     private void FixedUpdate()
     {
         if (photonView.IsMine && rb.drag > 0 && rb.velocity.magnitude < restingSpeed) rb.drag = 0;

@@ -12,10 +12,6 @@ public class Rotate : MonoBehaviour
     void Start()
     {
         if(grinder) grindScript = GetComponentInParent<Grinder>();
-        else
-        {
-            TurbineScript = GetComponentInParent<TurbineZone>();
-        }
 
         rotSpeed = 200;
     }
