@@ -75,7 +75,7 @@ public class NetworkPlayer : MonoBehaviour
     private Transform rightHandRig;    //Networked transform which follows position of player right hand
     private Transform modelRig;        //Networked transform which follows position of player model
     private Transform originTarget;
-    private Transform originRig;
+    internal Transform originRig;
 
     //Runtime Variables:
     /// <summary>

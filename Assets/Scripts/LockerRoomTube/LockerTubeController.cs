@@ -53,8 +53,8 @@ public class LockerTubeController : MonoBehaviour
         if (myPlayerObject != null)
         {
             //every frame move the tube to the player minus the offset
-            transform.localPosition = myPlayerObject.position - spawnPointBias;
-            Debug.Log("Tube #" + GetTubeNumber() + " | AssocPlayer = " + myPlayerObject.GetComponentInParent<NetworkPlayer>().photonView.ViewID);
+            transform.position = myPlayerObject.position - spawnPointBias;
+            //Debug.Log("Tube #" + GetTubeNumber() + " | AssocPlayer = " + myPlayerObject.GetComponentInParent<NetworkPlayer>().photonView.ViewID);
         }
     }
 

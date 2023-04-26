@@ -75,7 +75,7 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
             {
                 //tubes[(int)networkPlayer.photonView.Owner.CustomProperties["TubeID"]].StartOtherPlayersTube(networkPlayer.transform.position);
                 //tubes[(int)networkPlayer.photonView.Owner.CustomProperties["TubeID"]].transform.position = networkPlayer.transform.position - tubes[(int)networkPlayer.photonView.Owner.CustomProperties["TubeID"]].spawnPointBias;
-                tubes[(int)networkPlayer.photonView.Owner.CustomProperties["TubeID"]].GiveTubeAPlayer(networkPlayer.transform);
+                tubes[(int)networkPlayer.photonView.Owner.CustomProperties["TubeID"]].GiveTubeAPlayer(networkPlayer.originRig);
             }
         }
     }
