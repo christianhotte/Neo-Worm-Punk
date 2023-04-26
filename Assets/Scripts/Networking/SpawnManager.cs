@@ -65,6 +65,8 @@ public class SpawnManager : MonoBehaviour
         int newSpawnIndex = GetNewSpawnIndex();
         Transform newSpawnPoint = spawnPoints6[newSpawnIndex];
 
+        Debug.Log("Spawning player.");
+
         // Set player's position to the new spawn point
         player.transform.position = newSpawnPoint.position;
         player.transform.eulerAngles = Vector3.Project(newSpawnPoint.eulerAngles, Vector3.up);
