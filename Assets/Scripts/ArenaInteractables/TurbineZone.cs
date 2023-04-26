@@ -22,10 +22,7 @@ public class TurbineZone : MonoBehaviour
     {
         //check to see if activated in room setting
         Enabled = (bool)PhotonNetwork.CurrentRoom.CustomProperties["HazardsActive"];
-
-
     }
-
         // Update is called once per frame
         void FixedUpdate()
     {
@@ -43,22 +40,45 @@ public class TurbineZone : MonoBehaviour
     {
         if(other.name == "XR Origin")
         {
-            PC = PlayerController.instance;
-            playerRB = PC.bodyRb;
+            if(killZone && Enabled)
+            {
+                Debug.Log("Trying To Kill You");
+                //netPlayer = PlayerController.photonView.GetComponent<NetworkPlayer>();
+                //netPlayer.photonView.RPC("RPC_Hit", RpcTarget.All, 100, netPlayer.photonView.ViewID, Vector3.zero, (int)DeathCause.TRAP);
+                Gustin = true;
+                foreach (PlayerEquipment equipment in PlayerController.instance.attachedEquipment)
+                {
+                    if (equipment.TryGetComponent(out NewGrapplerController grappler)) grappler.locked = false;
+                }
+            }
+            else
+            {
+                Debug.Log("Trying to gust you");
+                PC = PlayerController.instance;
+                playerRB = PC.bodyRb;
+                Gustin = true;
+                foreach (PlayerEquipment equipment in PlayerController.instance.attachedEquipment)
+                {
+                    if (equipment.TryGetComponent(out NewGrapplerController grappler))
+                    {
+                        if (grappler.locked == true)
+                        {
+                            grappler.ForceReleased();
+                        }
+                    }
 
-            Gustin = true;
+                }
+            }
         }
     }
-
-    private void OnTriggerStay(Collider other)
-    {
-        if (other.name == "XR Origin"&&killZone&&Enabled)
-        {
-            netPlayer = PlayerController.photonView.GetComponent<NetworkPlayer>();
-            netPlayer.photonView.RPC("RPC_Hit", RpcTarget.All, 100, netPlayer.photonView.ViewID, Vector3.zero, (int)DeathCause.TRAP);
-        }
-    }
-
+    //private void OnTriggerStay(Collider other)
+    //{
+    //    if (other.name == "XR Origin"&&killZone&&Enabled)
+    //    {
+    //        netPlayer = PlayerController.photonView.GetComponent<NetworkPlayer>();
+    //        netPlayer.photonView.RPC("RPC_Hit", RpcTarget.All, 100, netPlayer.photonView.ViewID, Vector3.zero, (int)DeathCause.TRAP);
+    //    }
+    //}
     private void OnTriggerExit(Collider other)
     {
         if(other.name == "XR Origin")
