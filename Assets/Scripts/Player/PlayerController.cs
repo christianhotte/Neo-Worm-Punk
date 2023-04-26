@@ -393,6 +393,7 @@ public class PlayerController : MonoBehaviour
     /// <summary>
     /// Method called when this player is hit by a projectile.
     /// </summary>
+    /// <returns>Whether or not the player was killed by this damage.</returns>>
     public bool IsHit(int damage)
     {
         //Hit effects:
@@ -415,6 +416,21 @@ public class PlayerController : MonoBehaviour
             if (healthSettings.regenSpeed > 0) timeUntilRegen = healthSettings.regenPauseTime;                                                             //Optionally begin regeneration sequence
             return false;
         }
+    }
+    /// <summary>
+    /// Replacement for NetworkPlayer.RPC_IsHit for when player is hit by projectiles offline.
+    /// </summary>
+    public bool IsHit(int damage, Vector3 projVel)
+    {
+        if (isDead) return false; //Prevent dead players from being killed
+        foreach (PlayerEquipment equipment in attachedEquipment)
+        {
+            if (equipment.TryGetComponent(out NewChainsawController chainsaw)) //Equipment is a chainsaw
+            {
+                if (chainsaw.TryDeflect(projVel, "Projectiles/HotteProjectile1")) return false; //Do not deal damage if projectile could be deflected
+            }
+        }
+        return IsHit(damage);
     }
     /// <summary>
     /// Method called when something kills this player.

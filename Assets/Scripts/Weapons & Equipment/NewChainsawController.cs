@@ -471,10 +471,10 @@ public class NewChainsawController : PlayerEquipment
         {
             barrel.rotation = Quaternion.LookRotation(-incomingDirection, Vector3.up);
             Projectile newProjectile; //Initialize reference container for spawned projectile
-            if (!PhotonNetwork.InRoom) //Weapon is in local fire mode
+            if (!PhotonNetwork.IsConnected) //Weapon is in local fire mode
             {
                 newProjectile = ((GameObject)Instantiate(Resources.Load(projectileName))).GetComponent<Projectile>(); //Instantiate projectile
-                newProjectile.FireDumb(barrel);                                                                       //Initialize projectile
+                newProjectile.FireKindaDumb(barrel);
             }
             else //Weapon is firing on the network
             {
