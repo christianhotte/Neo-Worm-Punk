@@ -120,17 +120,6 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
             {
                 
                 StartCoroutine(OnEveryoneReady(tube));
-
-                /*
-                //go through every network player and trigger their new positional changes
-                foreach (NetworkPlayer networkPlayer in NetworkPlayer.instances)
-                {
-                    //find their tube
-                    //networkPlayer.photonView.Owner.CustomProperties["TubeID"]].
-                    
-
-                    //StartCoroutine(OnEveryoneReady(networkPlayer));
-                }*/
             }
         }
     }
@@ -139,7 +128,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     {
         float delayTime = 3;
         //countdown from 3,2,1,WORM!
-        FindObjectOfType<Countdown>().StartCountdown((int)delayTime);
+        //FindObjectOfType<Countdown>().StartCountdown((int)delayTime);                                                             //THIS NEEDS TO BE PUT IN BY PETER
         yield return new WaitForSeconds(delayTime);
         //if someone cancels early in these zones, cancel coroutine?
 
