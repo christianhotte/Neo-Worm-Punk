@@ -26,6 +26,7 @@ public class LockerTubeController : MonoBehaviour
     [SerializeField] private Vector3 spawnPointBias;
 
     public float timeElapsed = 0;
+    private float startTubeTotalTime = 4;
 
     private void Awake()
     {
@@ -43,38 +44,30 @@ public class LockerTubeController : MonoBehaviour
         }
     }
 
-    private void Start()
-    {
-
-        //when all players start the match
-        //do countdown and have the middle shotgun thing spin (last chance to put levers back)
-
-        //stop spin, move players together, locked in.
-
-        //THEN move up
-        //in the middle of the last one, fade out and switch scenes
-
-    }
-
-    public void StartTube(Transform playerObject, float duration)
+    public void StartTube(Transform playerObject)
     {
         myPlayerObject = playerObject;
-        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[1], playerCheckpoints[1], duration));
+        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[1], playerCheckpoints[1], Vector3.zero, startTubeTotalTime));
+    }
+
+    public void StartOtherPlayersTube(Vector3 networkPlayerPos)
+    {
+        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[1], playerCheckpoints[1], networkPlayerPos, -1));
     }
 
     public void TubesToCenter(float duration)
     {
-        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[2], playerCheckpoints[2], duration));
+        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[2], playerCheckpoints[2], Vector3.zero, duration));
     }
 
     public void TubesUp(float duration)
     {
-        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[3], playerCheckpoints[3], duration));
+        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[3], playerCheckpoints[3], Vector3.zero, duration));
     }
 
     public void TubeExit(float duration)
     {
-        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[0], playerCheckpoints[0], duration));
+        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[0], playerCheckpoints[0], Vector3.zero, duration));
     }
 
     /// <summary>
@@ -83,14 +76,31 @@ public class LockerTubeController : MonoBehaviour
     /// <param name="transformChange"></param>
     /// <param name="moveTime"></param>
     /// <returns></returns>
-    IEnumerator MoveTubeAndPlayer(Vector3 endPos, Vector3 playerEndPos, float moveTime)
+    IEnumerator MoveTubeAndPlayer(Vector3 endPos, Vector3 playerEndPos, Vector3 networkPlayerPos, float moveTime)
     {
-
-        //set initial time to 0
+        //set initial time to initial time
         timeElapsed = 0;
+        
 
         Vector3 startPos = transform.localPosition;
         Vector3 playerStartPos = Vector3.zero;
+
+        if (moveTime == -1)
+        {
+            //is a network player tube, collec the network player stuff and set that stuff up
+            startPos = networkPlayerPos + spawnPointBias;
+            //what percent are you through the movement?
+            float totalDistance = tubeCheckpoints[1].y - tubeCheckpoints[0].y;
+            float distanceTraveled = startPos.y - tubeCheckpoints[0].y;
+            float fraction = distanceTraveled / totalDistance;
+            //total time = 4
+            //current time = ?
+            //fractional time = fraction
+            //fraction time = current time / total time
+            //fraction time * total time = current time to start at
+            timeElapsed = fraction * startTubeTotalTime;
+
+        }
 
 
         if (myPlayerObject != null)

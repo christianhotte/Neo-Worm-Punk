@@ -817,7 +817,7 @@ public class NetworkPlayer : MonoBehaviour
     {
         //get access to and pass to the startmytubeforothers the "timeElapsed," "moveTime", and currentPosition of every other players' tube
 
-        LockerTubeSpawner.instance.StartMyTubeForOthersByDavid(tubeID);
+        LockerTubeSpawner.instance.StartMyTubeForOthersByDavid(tubeID, transform.position);
     }
 
     //UTILITY METHODS:

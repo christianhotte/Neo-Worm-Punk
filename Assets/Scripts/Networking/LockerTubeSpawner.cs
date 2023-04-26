@@ -46,7 +46,7 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
             // Moves the player to the spawn point
             PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
             PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
-            spawnTube.StartTube(PlayerController.instance.bodyRb.transform, 8);
+            spawnTube.StartTube(PlayerController.instance.bodyRb.transform);
 
             SetExistingTubePositions();
 
@@ -59,18 +59,14 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
             StartCoroutine(NetworkManagerScript.localNetworkPlayer.CheckExclusiveColors());
             if (PhotonNetwork.IsMasterClient)
                 ReadyUpManager.instance.localPlayerTube.ShowHostSettings(true); //Show the settings if the player being moved is the master client
-
         }
     }
 
     private void SetExistingTubePositions()
     {
-        for(int i = 0; i < NetworkManagerScript.instance.GetTubeOccupancy().Length; i++)
+        foreach(var networkPlayer in NetworkPlayer.instances)
         {
-            if (NetworkManagerScript.instance.GetTubeOccupancy()[i] && i != (int)NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["TubeID"])
-            {
-                tubes[i].StartTube(null, 0);
-            }
+            tubes[(int)networkPlayer.photonView.Owner.CustomProperties["TubeID"]].StartOtherPlayersTube(networkPlayer.transform.position);
         }
     }
 
@@ -78,9 +74,9 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
     /// Stoopid.
     /// </summary>
     /// <param name="tubeID">Also stoopid</param>
-    public void StartMyTubeForOthersByDavid(int tubeID)
+    public void StartMyTubeForOthersByDavid(int tubeID, Vector3 networkPlayerPos)
     {
-        tubes[tubeID].StartTube(null, 4);
+        tubes[tubeID].StartOtherPlayersTube(networkPlayerPos);
     }
 
     public void OnLeverStateChanged()
