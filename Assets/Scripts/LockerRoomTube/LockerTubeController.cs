@@ -88,7 +88,7 @@ public class LockerTubeController : MonoBehaviour
         if (networkPlayerPos != Vector3.zero)
         {
             //is a network player tube, collec the network player stuff and set that stuff up
-            startPos = networkPlayerPos + spawnPointBias;
+            startPos = networkPlayerPos - spawnPointBias;
             //what percent are you through the movement?
             float totalDistance = tubeCheckpoints[1].y - tubeCheckpoints[0].y;
             float distanceTraveled = startPos.y - tubeCheckpoints[0].y;
