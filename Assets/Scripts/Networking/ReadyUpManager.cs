@@ -118,7 +118,6 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
             // If all players are ready, load the game scene
             if (forceLoadViaMasterClient || !GameManager.Instance.levelTransitionActive && (playersReady == playersInRoom && (playersInRoom >= MINIMUM_PLAYERS_NEEDED || GameSettings.debugMode)))
             {
-                
                 StartCoroutine(OnEveryoneReady(tube));
             }
         }

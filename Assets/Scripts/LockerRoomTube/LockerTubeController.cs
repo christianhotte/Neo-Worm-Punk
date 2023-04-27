@@ -67,12 +67,13 @@ public class LockerTubeController : MonoBehaviour
 
     public void PlayerToReadyPosition(float duration)
     {
+        if(isMyLocalTube) { Debug.Log("I should personally be going to my ready position"); }
         StartCoroutine(MovePlayerToNextPosition(myPlayerObject, playerCheckpoints[2], duration));
     }
 
-
     public void PlayerToExitPosition(float duration)
     {
+        if (isMyLocalTube) { Debug.Log("I should personally be going to my exit position"); }
         StartCoroutine(MovePlayerToNextPosition(myPlayerObject, playerCheckpoints[3], duration));
     }
 
