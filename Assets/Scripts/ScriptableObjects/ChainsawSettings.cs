@@ -63,6 +63,7 @@ public class ChainsawSettings : ScriptableObject
     [Space()]
     [Tooltip("Sound played while deflector is idle.")]                                       public AudioClip deflectIdleSound;
     [Tooltip("Sound made when player deflects a projectile with the chainsaw.")]             public AudioClip deflectSound;
+    [Tooltip("Sound made when player kills another player with chainsaw")]                   public AudioClip KillSound;
     [Header("Haptics:")]
     [Tooltip("Haptic effect which plays when player extends their blade.")]                                            public PlayerController.HapticData extendHaptics;
     [Tooltip("Haptic effect which plays when player retracts their blade.")]                                           public PlayerController.HapticData retractHaptics;

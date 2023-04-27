@@ -350,9 +350,8 @@ public class NewShotgunController : PlayerEquipment
         for (int x = 0; x < shots; x++) //Iterate for number of projectiles spawned by shot
         {
             //Reposition barrel:
-            Vector2 randomAngles = Random.insideUnitCircle * spread;                                            //Get random angles of shot spread
-            currentBarrel.localEulerAngles = origBarrelEulers + new Vector3(randomAngles.x, randomAngles.y, 0); //Rotate barrel using random angular values
-
+            Vector2 randomAngles = Random.insideUnitCircle * spread;                                                                 //Get random angles of shot spread
+            currentBarrel.localEulerAngles = origBarrelEulers + new Vector3(randomAngles.x, randomAngles.y, Random.Range(0f, 360f)); //Rotate barrel using random angular values
             //Generate new projectiles:
             Projectile newProjectile; //Initialize reference container for spawned projectile
             if (debugFireLocal || !PhotonNetwork.InRoom) //Weapon is in local fire mode
