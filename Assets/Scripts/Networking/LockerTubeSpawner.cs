@@ -7,9 +7,7 @@ using UnityEngine.SceneManagement;
 public class LockerTubeSpawner : MonoBehaviourPunCallbacks
 {
     public static LockerTubeSpawner instance;
-    [SerializeField, Tooltip("The list of tubes for players to spawn into.")] private LockerTubeController[] tubes = new LockerTubeController[6];
-    [SerializeField, Tooltip("The list of spawn points to instantiate the spawn tubes at.")] private Transform[] spawnPoints;
-    [SerializeField, Tooltip("The tube prefab.")] private GameObject tubePrefab;
+    [SerializeField, Tooltip("The list of tubes for players to spawn into.")] private LockerTubeController[] tubes;
 
     private void Awake()
     {
@@ -41,14 +39,6 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
         yield return new WaitUntil(() => ReadyUpManager.instance != null);
 
         int tubeID = (int)NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["TubeID"];  //Get the tube ID from the current player
-
-        if(tubes[tubeID] == null)
-        {
-            LockerTubeController newTube = PhotonNetwork.Instantiate(tubePrefab.name, spawnPoints[tubeID].position, spawnPoints[tubeID].rotation).GetComponent<LockerTubeController>();
-            newTube.name = "PlayerTube" + (tubeID + 1);
-            tubes[tubeID] = newTube;
-        }
-
         LockerTubeController spawnTube = tubes[tubeID]; //Gets the tube associated with the tube ID
 
         if (spawnTube != null)
