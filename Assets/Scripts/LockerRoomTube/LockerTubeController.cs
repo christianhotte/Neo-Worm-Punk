@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using Photon.Pun;
+using Photon.Realtime;
 
 public class LockerTubeController : MonoBehaviour
 {
@@ -20,6 +22,7 @@ public class LockerTubeController : MonoBehaviour
     internal int currentPlayerID;
     internal Transform spawnPoint;
 
+    internal PhotonView photonView;
     private Transform myPlayerObject;
 
     private Vector3[] playerCheckpoints = new Vector3[4];
@@ -28,18 +31,17 @@ public class LockerTubeController : MonoBehaviour
     [SerializeField] public Vector3 spawnPointBias;
     [SerializeField] private AnimationCurve tubeRaiseCurve;
 
-    public float timeElapsed = 0;
-
     private void Awake()
     {
+        photonView = GetComponent<PhotonView>();
         spawnManager = FindObjectOfType<LockerTubeSpawner>();
         spawnPoint = transform.Find("Spawnpoint");
         playerCheckpoints[1] = transform.position + spawnPointBias;
+        playerCheckpoints[2] = transform.position + (transform.forward * 4) + spawnPointBias;
+        playerCheckpoints[3] = transform.position + (transform.forward * 4) + spawnPointBias + new Vector3(0, 10, 0);
         originalTubePosition = transform.position;
-        transform.localPosition -= new Vector3(0, 15, 0);
+        transform.position -= new Vector3(0, 10, 0);
         playerCheckpoints[0] = transform.position + spawnPointBias;
-        playerCheckpoints[2] = transform.position + transform.forward * 4 + spawnPointBias;
-        playerCheckpoints[3] = transform.position + transform.forward * 4 + spawnPointBias + new Vector3(0, 10, 0);
     }
 
     public void GiveTubeAPlayer(Transform playerTransform)
@@ -54,8 +56,7 @@ public class LockerTubeController : MonoBehaviour
         {
             //every frame move the tube to the player minus the offset
             //transform.position = myPlayerObject.position - spawnPointBias;
-            transform.position = Vector3.Lerp(transform.position, myPlayerObject.position - spawnPointBias, Time.deltaTime * 8);
-            //Debug.Log("Tube #" + GetTubeNumber() + " | AssocPlayer = " + myPlayerObject.GetComponentInParent<NetworkPlayer>().photonView.ViewID);
+            //transform.position = Vector3.Slerp(transform.position, myPlayerObject.position - spawnPointBias, Time.deltaTime * 8);
         }
     }
 
@@ -83,7 +84,8 @@ public class LockerTubeController : MonoBehaviour
     IEnumerator MovePlayerToNextPosition(Transform moveMe, Vector3 endPos, float moveTime)
     {
         //set initial time to initial time
-        timeElapsed = 0;
+        float timeElapsed = 0;
+        StartCoroutine(MoveTubeToNextPosition(endPos, moveTime));
 
         Vector3 startPos = moveMe.position;
 
@@ -105,6 +107,33 @@ public class LockerTubeController : MonoBehaviour
         }
 
         moveMe.position = endPos;
+    }
+
+    public IEnumerator MoveTubeToNextPosition(Vector3 endPos, float moveTime)
+    {
+        //set initial time to initial time
+        float timeElapsed = 0;
+
+        Vector3 startPos = transform.position;
+
+        while (timeElapsed < moveTime)
+        {
+            //just in case, stay safe ;)
+            if (GameManager.Instance.levelTransitionActive) { break; }
+
+            //smooth lerp duration alg
+            float t = timeElapsed / moveTime;
+            t = tubeRaiseCurve.Evaluate(t);
+
+            transform.position = Vector3.Lerp(startPos - spawnPointBias, endPos - spawnPointBias, t);
+
+            //advance time
+            timeElapsed += Time.deltaTime;
+
+            yield return null;
+        }
+
+        transform.position = endPos - spawnPointBias;
     }
 
 
