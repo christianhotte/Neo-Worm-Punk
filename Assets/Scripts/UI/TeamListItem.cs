@@ -72,10 +72,10 @@ public class TeamListItem : MonoBehaviour
         numberOfTeamMembers = 0;
     }
 
-    public void ChangeBackgroundColor(ColorOptions newColor)
+    public void ChangeBackgroundColor(int newColor)
     {
-        backgroundImage.color = PlayerSettingsController.ColorOptionsToColor(newColor);
-        currentColor = newColor;
+        backgroundImage.color = PlayerSettingsController.playerColors[newColor];
+        currentColor = (ColorOptions)newColor;
     }
 
     public void ChangeLabel(int colorLabel)

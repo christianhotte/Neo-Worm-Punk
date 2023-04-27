@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
+using Photon.Pun;
 
 public class TeamsDisplay : MonoBehaviour
 {
@@ -13,6 +13,12 @@ public class TeamsDisplay : MonoBehaviour
 
     private Dictionary<string, int> playerTeams = new Dictionary<string, int>();
 
+    private void Start()
+    {
+        if (PhotonNetwork.IsConnected)
+            StartCoroutine(SpawnTeamsAfterPlayerColorInit());
+    }
+
     private void OnEnable()
     {
         SpawnTeamNames();
@@ -23,12 +29,18 @@ public class TeamsDisplay : MonoBehaviour
         RemoveTeamNames();
     }
 
+    private IEnumerator SpawnTeamsAfterPlayerColorInit()
+    {
+        yield return new WaitUntil(() => NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["Color"] != null);
+        SpawnTeamNames();
+    }
+
     private void SpawnTeamNames()
     {
         for(int i = 0; i < PlayerSettingsController.NumberOfPlayerColors(); i++)
         {
             TeamListItem newTeam = Instantiate(teamColorDisplay, teamColorContainer).GetComponent<TeamListItem>();
-            newTeam.ChangeBackgroundColor(PlayerSettingsController.ColorToColorOptions(PlayerSettingsController.playerColors[i]));
+            newTeam.ChangeBackgroundColor(i);
             newTeam.ChangeLabel(i);
 
             InitializePlayerTeams();

@@ -17,7 +17,7 @@ public class PlayerColorChanger : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Debug.Log("Color Buttons Length: " + colorButtons.Length);
+       //Debug.Log("Color Buttons Length: " + colorButtons.Length);
         for (int i = 0; i < colorButtons.Length; i++)
             AdjustButtonColor(colorButtons[i], i);
 
@@ -39,7 +39,7 @@ public class PlayerColorChanger : MonoBehaviour
 
     private void AdjustButtonColor(PhysicalButtonController currentButton, int colorOption)
     {
-        Debug.Log("Changing Initial Button Color To: " + (ColorOptions)colorOption);
+        //Debug.Log("Changing Initial Button Color To: " + (ColorOptions)colorOption);
 
         Color newColor;
 
@@ -95,7 +95,10 @@ public class PlayerColorChanger : MonoBehaviour
         {
             NetworkManagerScript.localNetworkPlayer.SetNetworkPlayerProperties("Color", colorOption);
             if ((bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"])
+            {
                 RefreshButtons();
+                NetworkManagerScript.localNetworkPlayer.SyncTeams();
+            }
         }
         else
         {

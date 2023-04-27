@@ -374,9 +374,14 @@ public class NetworkPlayer : MonoBehaviour
     {
         if (!(bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"])
             photonView.RPC("UpdateTakenColors", RpcTarget.All); //Send data to every player on the network (including this one)
-        else
+    }
+
+    public void SyncTeams()
+    {
+        if ((bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"])
             photonView.RPC("UpdateTeamDisplays", RpcTarget.All, photonView.Owner.NickName, (int)photonView.Owner.CustomProperties["Color"]); //Send data to every player on the network (including this one)
     }
+
     /// <summary>
     /// Manages material event priority for this particular network player.
     /// </summary>
@@ -534,6 +539,7 @@ public class NetworkPlayer : MonoBehaviour
     {
         if (exclusiveColors)
         {
+            Debug.Log("Exclusive Colors Needed. Creating Exclusive Colors...");
             List<int> takenColors = new List<int>();
 
             bool mustReplaceColor = false;
