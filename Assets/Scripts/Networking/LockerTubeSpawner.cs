@@ -69,7 +69,6 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
 
     private void SetExistingTubePositions()
     {
-        /*
         foreach (var networkPlayer in NetworkPlayer.instances)
         {
             if (networkPlayer != NetworkManagerScript.localNetworkPlayer)
@@ -78,7 +77,7 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
                 //tubes[(int)networkPlayer.photonView.Owner.CustomProperties["TubeID"]].transform.position = networkPlayer.transform.position - tubes[(int)networkPlayer.photonView.Owner.CustomProperties["TubeID"]].spawnPointBias;
                 tubes[(int)networkPlayer.photonView.Owner.CustomProperties["TubeID"]].GiveTubeAPlayer(networkPlayer.originRig);
             }
-        }*/
+        }
     }
 
 
