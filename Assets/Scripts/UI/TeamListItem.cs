@@ -20,38 +20,42 @@ public class TeamListItem : MonoBehaviour
 
     private int numberOfTeamMembers;
 
-    public void RefreshPlayerList(string [] playerNames)
+    public void RefreshPlayerList(Dictionary<string, int> playerNames)
     {
         ClearPlayerNames();
 
         foreach (var player in playerNames)
         {
-            TextMeshProUGUI newPlayer = Instantiate(playerNamePrefab, playerNameContainer);
-            ChangePlayerName(newPlayer, player);
-            switch (currentColor)
+            Debug.Log("Checking " + player.Key + " Color: " + player.Value);
+            if(player.Value == (int)currentColor)
             {
-                case ColorOptions.YELLOW:
-                    ChangeLabelColor(Color.black);
-                    ChangePlayerNameColor(newPlayer, Color.black);
-                    break;
-                case ColorOptions.GREEN:
-                    ChangeLabelColor(Color.black);
-                    ChangePlayerNameColor(newPlayer, Color.black);
-                    break;
-                case ColorOptions.CYAN:
-                    ChangeLabelColor(Color.black);
-                    ChangePlayerNameColor(newPlayer, Color.black);
-                    break;
-                case ColorOptions.WHITE:
-                    ChangeLabelColor(Color.black);
-                    ChangePlayerNameColor(newPlayer, Color.black);
-                    break;
-                default:
-                    ChangeLabelColor(Color.white);
-                    ChangePlayerNameColor(newPlayer, Color.white);
-                    break;
+                TextMeshProUGUI newPlayer = Instantiate(playerNamePrefab, playerNameContainer);
+                ChangePlayerName(newPlayer, player.Key);
+                switch (currentColor)
+                {
+                    case ColorOptions.YELLOW:
+                        ChangeLabelColor(Color.black);
+                        ChangePlayerNameColor(newPlayer, Color.black);
+                        break;
+                    case ColorOptions.GREEN:
+                        ChangeLabelColor(Color.black);
+                        ChangePlayerNameColor(newPlayer, Color.black);
+                        break;
+                    case ColorOptions.CYAN:
+                        ChangeLabelColor(Color.black);
+                        ChangePlayerNameColor(newPlayer, Color.black);
+                        break;
+                    case ColorOptions.WHITE:
+                        ChangeLabelColor(Color.black);
+                        ChangePlayerNameColor(newPlayer, Color.black);
+                        break;
+                    default:
+                        ChangeLabelColor(Color.white);
+                        ChangePlayerNameColor(newPlayer, Color.white);
+                        break;
+                }
+                numberOfTeamMembers++;
             }
-            numberOfTeamMembers++;
         }
 
         if (numberOfTeamMembers == 0)

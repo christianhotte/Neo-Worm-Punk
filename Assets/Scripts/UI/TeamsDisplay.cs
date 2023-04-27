@@ -32,7 +32,7 @@ public class TeamsDisplay : MonoBehaviour
             newTeam.ChangeLabel(i);
 
             InitializePlayerTeams();
-            newTeam.RefreshPlayerList(playerTeams.Where(pair => pair.Value == i).Select(pair => pair.Key).ToArray());
+            newTeam.RefreshPlayerList(playerTeams);
         }
     }
 
@@ -58,11 +58,11 @@ public class TeamsDisplay : MonoBehaviour
             if(newColor != currentPlayerColor)
             {
                 playerTeams[nickname] = newColor;
-                teamColorContainer.GetChild(currentPlayerColor).GetComponent<TeamListItem>().RefreshPlayerList(playerTeams.Where(pair => pair.Value == currentPlayerColor).Select(pair => pair.Key).ToArray());
+                teamColorContainer.GetChild(currentPlayerColor).GetComponent<TeamListItem>().RefreshPlayerList(playerTeams);
                 if (!teamColorContainer.GetChild(newColor).gameObject.activeInHierarchy)
                 {
                     teamColorContainer.GetChild(newColor).gameObject.SetActive(true);
-                    teamColorContainer.GetChild(newColor).GetComponent<TeamListItem>().RefreshPlayerList(playerTeams.Where(pair => pair.Value == newColor).Select(pair => pair.Key).ToArray());
+                    teamColorContainer.GetChild(newColor).GetComponent<TeamListItem>().RefreshPlayerList(playerTeams);
                 }
             }
         }
