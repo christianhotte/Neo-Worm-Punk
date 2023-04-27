@@ -587,10 +587,12 @@ public class NetworkPlayer : MonoBehaviour
 
         if (ReadyUpManager.instance != null)
         {
-            //Refreshes the tubes
-            if (FindObjectOfType<LockerTubeSpawner>() != null)
-                foreach (var tube in FindObjectOfType<LockerTubeSpawner>().GetTubeList())
-                    tube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
+            ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
+
+            /*            //Refreshes the tubes
+                        if (FindObjectOfType<LockerTubeSpawner>() != null)
+                            foreach (var tube in FindObjectOfType<LockerTubeSpawner>().GetTubeList())
+                                tube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();*/
         }
     }
 

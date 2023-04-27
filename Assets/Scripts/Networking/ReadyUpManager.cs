@@ -203,7 +203,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
         if(SceneManager.GetActiveScene().name == GameSettings.roomScene)
         {
             //Hide the host settings for all tubes
-            foreach (var tube in FindObjectOfType<LockerTubeSpawner>().GetTubeList())
+            foreach (var tube in FindObjectsOfType<LockerTubeController>())
                 tube.ShowHostSettings(false);
         }
     }

@@ -53,6 +53,8 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
 
         if (spawnTube != null)
         {
+            ReadyUpManager.instance.localPlayerTube = spawnTube;
+
             // Moves the player to the spawn point
             PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
             PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
@@ -65,10 +67,6 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
             //renders everyone's tubes FOR ME if they're already spawned
             SetExistingTubePositions();
 
-            //notify all other players that I have spawned
-            NetworkManagerScript.localNetworkPlayer.photonView.RPC("RPC_StartTube", RpcTarget.Others, tubeID);
-
-            ReadyUpManager.instance.localPlayerTube = spawnTube;
             ReadyUpManager.instance.UpdateStatus(tubeID + 1);
             ReadyUpManager.instance.localPlayerTube.SpawnPlayerName(NetworkManagerScript.instance.GetLocalPlayerName());
             StartCoroutine(NetworkManagerScript.localNetworkPlayer.CheckExclusiveColors());
