@@ -16,7 +16,9 @@ public static class GameSettings
     public static int defaultMatchLength = matchLengths[0];
     public static int HPDefault = 3;
     public static float[] upgradeFrequencies = { 1f, 0.5f, 0.25f };
-    public static float upgradeFrequency = upgradeFrequencies[1];
+    public static float defaultUpgradeFrequency = upgradeFrequencies[1];
+    public static float[] upgradeLengths = { 10f, 20f, 30f };
+    public static float defaultUpgradeLength = upgradeLengths[1];
     public static bool upgradesActiveDefault = true;
     public static bool hazardsActiveDefault = true;
     public static bool teamModeDefault = false;
@@ -36,6 +38,17 @@ public static class GameSettings
         for(int i = 0; i < upgradeFrequencies.Length; i++)
         {
             if (upgradeFrequency == upgradeFrequencies[i])
+                return i;
+        }
+
+        return -1;
+    }
+
+    public static int UpgradeLengthToInt(float upgradeLength)
+    {
+        for (int i = 0; i < upgradeLengths.Length; i++)
+        {
+            if (upgradeLength == upgradeLengths[i])
                 return i;
         }
 

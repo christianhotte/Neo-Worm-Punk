@@ -10,6 +10,7 @@ public class SpectatorCamera : MonoBehaviour
     [SerializeField] private float height = 1.0f; // The height from the player
     [SerializeField] private float rotationSpeed = 160.0f; // The rotation speed
     [SerializeField] private float zoomSpeed = 10.0f; // The zoom speed
+    [SerializeField] private float fovChangeSpeed = 1f;
     [SerializeField] private float minDistance = 2.0f; // The minimum distance from the player
     [SerializeField] private float maxDistance = 10.0f; // The maximum distance from the player
     [SerializeField] private float minHeight = 1.0f; // The minimum height from the player
@@ -22,6 +23,8 @@ public class SpectatorCamera : MonoBehaviour
     public Camera firstPersonCamera;
     public Camera thirdPersonCamera;
 
+    private float originFov;
+
     void Start()
     {
         currentDistance = distance;
@@ -33,6 +36,7 @@ public class SpectatorCamera : MonoBehaviour
 
         // Set the game window to use the first available display by default
         Display.main.SetRenderingResolution(Screen.width, Screen.height);
+        originFov = firstPersonCamera.fieldOfView;
     }
 
     // Update is called once per frame
@@ -42,9 +46,9 @@ public class SpectatorCamera : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             // Changes priority of the cameras from first person to third person and vice versa.
-            if (firstPersonCamera.depth == 1 && thirdPersonCamera.depth == 0)
+            if (firstPersonCamera.depth == 1 && thirdPersonCamera.depth == 2)
             {
-                firstPersonCamera.depth = 0;
+                firstPersonCamera.depth = 2;
                 thirdPersonCamera.depth = 1;
                 Cursor.visible = false;
                 Cursor.lockState = CursorLockMode.Confined;
@@ -52,12 +56,23 @@ public class SpectatorCamera : MonoBehaviour
             }
 
             // Going from third person to first person.
-            else if (firstPersonCamera.depth == 0 && thirdPersonCamera.depth == 1)
+            else if (firstPersonCamera.depth == 2 && thirdPersonCamera.depth == 1)
             {
                 firstPersonCamera.depth = 1;
-                thirdPersonCamera.depth = 0;
+                thirdPersonCamera.depth = 2;
                 Cursor.visible = true;
                 Cursor.lockState = CursorLockMode.None;
+            }
+        }
+        if (Input.GetMouseButtonDown(2))
+        {
+            if (firstPersonCamera.depth < thirdPersonCamera.depth)
+            {
+
+            }
+            else
+            {
+                firstPersonCamera.fieldOfView = originFov;
             }
         }
     }
@@ -72,22 +87,32 @@ public class SpectatorCamera : MonoBehaviour
         }
 
         // Zoom in/out with scroll wheel
-        currentDistance -= Input.GetAxis("Mouse ScrollWheel") * zoomSpeed;
-        currentDistance = Mathf.Clamp(currentDistance, minDistance, maxDistance);
+        float scrollAmt = Input.GetAxis("Mouse ScrollWheel");
+        if (firstPersonCamera.depth < thirdPersonCamera.depth)
+        {
+            currentDistance -= scrollAmt * zoomSpeed;
+            currentDistance = Mathf.Clamp(currentDistance, minDistance, maxDistance);
 
-        // Rotate around player with mouse input
-        currentRotationX += Input.GetAxis("Mouse X") * rotationSpeed * Time.deltaTime;
-        currentRotationY -= Input.GetAxis("Mouse Y") * rotationSpeed * Time.deltaTime;
-        currentRotationY = Mathf.Clamp(currentRotationY, -90.0f, 90.0f);
+            // Rotate around player with mouse input
+            currentRotationX += Input.GetAxis("Mouse X") * rotationSpeed * Time.deltaTime;
+            currentRotationY -= Input.GetAxis("Mouse Y") * rotationSpeed * Time.deltaTime;
+            currentRotationY = Mathf.Clamp(currentRotationY, -90.0f, 90.0f);
 
-        // Calculate new camera position and rotation
-        Vector3 direction = new Vector3(0.0f, 0.0f, -currentDistance);
-        Quaternion rotation = Quaternion.Euler(currentRotationY, currentRotationX, 0.0f);
-        Vector3 position = target.position + rotation * direction + Vector3.up * currentHeight;
+            // Calculate new camera position and rotation
+            Vector3 direction = new Vector3(0.0f, 0.0f, -currentDistance);
+            Quaternion rotation = Quaternion.Euler(currentRotationY, currentRotationX, 0.0f);
+            Vector3 position = target.position + rotation * direction + Vector3.up * currentHeight;
 
-        // Set camera position and rotation
-        transform.position = position;
-        transform.rotation = rotation;
+            // Set camera position and rotation
+            transform.position = position;
+            transform.rotation = rotation;
+        }
+        else
+        {
+            float currentFov = firstPersonCamera.fieldOfView;
+            currentFov -= scrollAmt * fovChangeSpeed;
+            firstPersonCamera.fieldOfView = currentFov;
+        }
     }
 
     // Sets the target of what you want the camera to follow

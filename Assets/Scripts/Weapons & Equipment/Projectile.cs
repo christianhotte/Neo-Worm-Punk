@@ -360,6 +360,10 @@ public class Projectile : MonoBehaviourPunCallbacks
     {
         FireDumb(barrel.position, barrel.rotation); //Pass to more granular FireDumb method
     }
+    public void FireKindaDumb(Transform barrel)
+    {
+        Fire(barrel.position, barrel.rotation, 0);
+    }
     /// <summary>
     /// Called whenever projectile strikes an object.
     /// </summary>
@@ -453,19 +457,7 @@ public class Projectile : MonoBehaviourPunCallbacks
         }
         else if (!PhotonNetwork.IsConnected && originPlayerID < 0 && hitInfo.collider.GetComponentInParent<PlayerController>() != null)
         {
-            bool deflected = false;
-            foreach (PlayerEquipment equipment in PlayerController.instance.attachedEquipment)
-            {
-                if (equipment.TryGetComponent(out NewChainsawController chainsaw)) //Equipment is a chainsaw
-                {
-                    if (chainsaw.TryDeflect(velocity, "Projectiles/HotteProjectile1"))
-                    {
-                        print("deflect oog");
-                        deflected = true; //Do not deal damage if projectile could be deflected
-                    } 
-                }
-            }
-            if (!deflected) PlayerController.instance.IsHit(settings.damage); //Hit player directly if not deflected
+            PlayerController.instance.IsHit(settings.damage, velocity); //Hit player directly if not deflected
         }
         else //Hit object is not a player
         {

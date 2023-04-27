@@ -39,7 +39,7 @@ public class UpgradeSpawner : MonoBehaviour
     [SerializeField, Tooltip("The amount of time left in a round when upgrades stop spawning.")] private float endRoundBuffer;
 
     //Runtime Variables:
-    internal float powerupsPerMin;
+    internal float powerupsPerMin,powerupTime;
     
     private float timeUntilNextUpgrade = 0;
 
@@ -50,7 +50,7 @@ public class UpgradeSpawner : MonoBehaviour
         switch (currentPowerUp)
         {
             case PowerUp.PowerUpType.Invulnerability:
-                PlayerController.instance.MakeInvulnerable(waitTime);
+                PlayerController.instance.MakeInvulnerable(waitTime / 2);
                 break;
             case PowerUp.PowerUpType.HeatVision:
                 PlayerController.photonView.RPC("StartMaterialEvent", RpcTarget.All, 1, 2, waitTime);
