@@ -254,7 +254,7 @@ public class Projectile : MonoBehaviourPunCallbacks
         }
 
         //Check for hit:
-        if (photonView.IsMine || dumbFired) //Only check for hits on local projectile
+        if (photonView.IsMine || dumbFired || !PhotonNetwork.IsConnected) //Only check for hits on local projectile
         {
             //Thin collision check:
             //NOTE: This is intended to allow projectiles to be better at making it around walls
@@ -398,7 +398,7 @@ public class Projectile : MonoBehaviourPunCallbacks
             {
                 if (collider.transform == target) //Target can be acquired with this solution
                 {
-                    photonView.RPC("RPC_AcquireTargetDumb", RpcTarget.Others, target.position); //Send position of target as identifying acquisition data
+                    if (PhotonNetwork.IsConnected) photonView.RPC("RPC_AcquireTargetDumb", RpcTarget.Others, target.position); //Send position of target as identifying acquisition data if 
                     if (printDebug) print("Dumb Target Acquired: " + target.name);              //Indicate that a target has been acquired
                     break;                                                                      //Exit collider iteration
                 }
@@ -476,7 +476,8 @@ public class Projectile : MonoBehaviourPunCallbacks
 
         //Cleanup:
         if (printDebug) print("Projectile hit " + hitInfo.collider.name); //Indicate what the projectile hit if debug logging is on
-        Delete();                                                         //Destroy projectile
+        print("About to delete from hit");
+        Delete();                                                       //Destroy projectile
     }
     /// <summary>
     /// Called if projectile range is exhausted and projectile hasn't hit anything.
@@ -590,8 +591,8 @@ public class Projectile : MonoBehaviourPunCallbacks
         if (hitPlayer != null && hitPlayer.photonView.ViewID == originPlayerID) return true; //Return true if raycast hits projectile's own player
         
         //Check demo player:
-        PlayerController hitRealPlayer = hit.collider.GetComponentInParent<PlayerController>();         //Try to get real player controller from collision
-        if (hitRealPlayer == null) hitRealPlayer = hit.collider.GetComponent<PlayerController>();       //Try again to get real player controller from collision
+        PlayerController hitRealPlayer = hit.collider.GetComponentInParent<PlayerController>();   //Try to get real player controller from collision
+        if (hitRealPlayer == null) hitRealPlayer = hit.collider.GetComponent<PlayerController>(); //Try again to get real player controller from collision
         if (hitRealPlayer != null)
         {
             if (PlayerController.photonView != null)
@@ -604,10 +605,15 @@ public class Projectile : MonoBehaviourPunCallbacks
 
         return false; //No possible self-hit could be detected, return false
     }
-    private void Delete()
+    /// <summary>
+    /// Deletes projectile safely by determining whether or not it should be deleting itself, and how to delete itself.
+    /// </summary>
+    /// <returns>Whether or not projectile was successfully deleted.</returns>
+    private bool Delete()
     {
-        if (!dumbFired && photonView.IsMine) PhotonNetwork.Destroy(photonView);                                             //Destroy networked projectiles on the network
-        else if (dumbFired || !PhotonNetwork.IsConnected) { print("Destroying projectile locally."); Destroy(gameObject); } //Use normal destruction for non-networked projectiles
+        if (!dumbFired && photonView.IsMine) { PhotonNetwork.Destroy(photonView); return true; }                                         //Destroy networked projectiles on the network
+        else if (dumbFired || !PhotonNetwork.IsConnected) { print("Destroying projectile locally."); Destroy(gameObject); return true; } //Use normal destruction for non-networked projectiles
+        return false;
         //NOTE: Remote networked projectiles cannot delete themselves, they must be deleted from the network by their master version
     }
 }
