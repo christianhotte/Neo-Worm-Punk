@@ -85,6 +85,7 @@ public class LockerTubeController : MonoBehaviour
     {
         //set initial time to initial time
         float timeElapsed = 0;
+        StartCoroutine(MoveTubeToNextPosition(endPos, moveTime));
 
         Vector3 startPos = moveMe.position;
 
@@ -98,7 +99,6 @@ public class LockerTubeController : MonoBehaviour
             t = tubeRaiseCurve.Evaluate(t);
 
             moveMe.position = Vector3.Lerp(startPos, endPos, t);
-            transform.position = Vector3.Lerp(startPos - spawnPointBias, endPos - spawnPointBias, t);
 
             //advance time
             timeElapsed += Time.deltaTime;
@@ -107,6 +107,32 @@ public class LockerTubeController : MonoBehaviour
         }
 
         moveMe.position = endPos;
+    }
+
+    public IEnumerator MoveTubeToNextPosition(Vector3 endPos, float moveTime)
+    {
+        //set initial time to initial time
+        float timeElapsed = 0;
+
+        Vector3 startPos = transform.position;
+
+        while (timeElapsed < moveTime)
+        {
+            //just in case, stay safe ;)
+            if (GameManager.Instance.levelTransitionActive) { break; }
+
+            //smooth lerp duration alg
+            float t = timeElapsed / moveTime;
+            t = tubeRaiseCurve.Evaluate(t);
+
+            transform.position = Vector3.Lerp(startPos - spawnPointBias, endPos - spawnPointBias, t);
+
+            //advance time
+            timeElapsed += Time.deltaTime;
+
+            yield return null;
+        }
+
         transform.position = endPos - spawnPointBias;
     }
 
@@ -200,10 +226,6 @@ public class LockerTubeController : MonoBehaviour
     }
     */
 
-    public void CheckReadyState()
-    {
-        ReadyUpManager.instance.LeverStateChanged();
-    }
 
 
     /// <summary>
