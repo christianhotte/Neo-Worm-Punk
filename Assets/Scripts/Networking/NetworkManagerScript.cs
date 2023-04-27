@@ -35,6 +35,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     [SerializeField] private WordStructure[] wormAdjectivesBad = { new WordStructure("Guzzling", new int[4]), new WordStructure("Fleshy", new int[4]), new WordStructure("Sopping", new int[4]), new WordStructure("Throbbing", new int[4]), new WordStructure("Promiscuous", new int[4]), new WordStructure("Flaccid", new int[4]), new WordStructure("Erect", new int[4]), new WordStructure("Gaping", new int[4]) };
     [SerializeField] private WordStructure[] wormNounsBad = { new WordStructure("Guzzler", new int[4]), new WordStructure("Pervert", new int[4]), new WordStructure("Fucko", new int[4]), new WordStructure("Pissbaby", new int[4]) };
 
+    [SerializeField, Tooltip("The names for the teams.")] private string[] teamNames;
+
     List<WordStructure> availableWormAdjectives = new List<WordStructure>();
     List<WordStructure> availableWormNouns = new List<WordStructure>();
 
@@ -146,6 +148,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         AddCustomRoomSetting("UpgradeLength", GameSettings.defaultUpgradeLength, ref customRoomSettings);
         AddCustomRoomSetting("TeamMode", GameSettings.teamModeDefault, ref customRoomSettings);
         AddCustomRoomSetting("TubeOccupants", new bool[6] { false, false, false, false, false, false }, ref customRoomSettings);
+        AddCustomRoomSetting("TeamNames", GenerateTeamNameList().ToArray(), ref customRoomSettings);
 
         // Debug.Log("Tube Occupants On Create Room: " + customRoomSettings["TubeOccupants"]);
 
@@ -154,6 +157,33 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         roomOptions.MaxPlayers = 6;
         roomOptions.CustomRoomProperties = customRoomSettings;
         PhotonNetwork.JoinOrCreateRoom(roomName, roomOptions, TypedLobby.Default);
+    }
+
+    /// <summary>
+    /// Generates a list of random team names.
+    /// </summary>
+    /// <returns>The list of random team names that has a length that equals the number of player colors.</returns>
+    public List<string> GenerateTeamNameList()
+    {
+        //Generates random team names for the room
+        List<string> currentTeamNames = new List<string>();
+        for (int i = 0; i < PlayerSettingsController.NumberOfPlayerColors(); i++)
+        {
+            bool validTeamName = false;
+            while (!validTeamName)
+            {
+                Random.InitState(System.DateTime.Now.Millisecond);  //Seeds the randomizer
+                string newTeamName = teamNames[Random.Range(0, teamNames.Length)];
+
+                if (!currentTeamNames.Contains(newTeamName))
+                {
+                    validTeamName = true;
+                    currentTeamNames.Add(newTeamName);
+                }
+            }
+        }
+
+        return currentTeamNames;
     }
 
     public void AddCustomRoomSetting(string name, object value, ref Hashtable roomSettings)
@@ -726,4 +756,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             
         }
     }
+
+    public string[] GetTeamNameList() => teamNames;
 }

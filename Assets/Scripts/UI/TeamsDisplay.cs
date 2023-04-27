@@ -1,41 +1,70 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class TeamsDisplay : MonoBehaviour
 {
     [Header("Prefabs")]
     [SerializeField] private RectTransform teamColorDisplay;
-    [SerializeField] private RectTransform teamNameDisplay;
 
     [Header("Containers")]
     [SerializeField] private Transform teamColorContainer;
 
-    private Dictionary<int, string> playerTeams = new Dictionary<int, string>();
+    private Dictionary<string, int> playerTeams = new Dictionary<string, int>();
 
-    // Start is called before the first frame update
-    void Start()
+    private void OnEnable()
     {
-        
+        SpawnTeamNames();
+    }
+
+    private void OnDisable()
+    {
+        RemoveTeamNames();
+    }
+
+    private void SpawnTeamNames()
+    {
+        for(int i = 0; i < PlayerSettingsController.NumberOfPlayerColors(); i++)
+        {
+            TeamListItem newTeam = Instantiate(teamColorDisplay, teamColorContainer).GetComponent<TeamListItem>();
+            newTeam.ChangeBackgroundColor(PlayerSettingsController.ColorToColorOptions(PlayerSettingsController.playerColors[i]));
+            newTeam.ChangeLabel(i);
+
+            InitializePlayerTeams();
+            newTeam.RefreshPlayerList(playerTeams.Where(pair => pair.Value == i).Select(pair => pair.Key).ToArray());
+        }
+    }
+
+    private void RemoveTeamNames()
+    {
+        foreach (Transform trans in teamColorContainer)
+            Destroy(trans.gameObject);
     }
 
     public void InitializePlayerTeams()
     {
         foreach(var player in NetworkManagerScript.instance.GetPlayerList())
         {
-            if (!playerTeams.ContainsValue(player.NickName))
-                playerTeams.Add((int)player.CustomProperties["Color"], player.NickName);
+            if (!playerTeams.ContainsKey(player.NickName))
+                playerTeams.Add(player.NickName, (int)player.CustomProperties["Color"]);
         }
     }
 
-    // Update is called once per frame
-    void Update()
+    public void UpdatePlayerTeams(string nickname, int newColor)
     {
-        
-    }
-
-    public void UpdatePlayerTeams()
-    {
-
+        if (playerTeams.TryGetValue(nickname, out int currentPlayerColor))
+        {
+            if(newColor != currentPlayerColor)
+            {
+                playerTeams[nickname] = newColor;
+                teamColorContainer.GetChild(currentPlayerColor).GetComponent<TeamListItem>().RefreshPlayerList(playerTeams.Where(pair => pair.Value == currentPlayerColor).Select(pair => pair.Key).ToArray());
+                if (!teamColorContainer.GetChild(newColor).gameObject.activeInHierarchy)
+                {
+                    teamColorContainer.GetChild(newColor).gameObject.SetActive(true);
+                    teamColorContainer.GetChild(newColor).GetComponent<TeamListItem>().RefreshPlayerList(playerTeams.Where(pair => pair.Value == newColor).Select(pair => pair.Key).ToArray());
+                }
+            }
+        }
     }
 }
