@@ -10,6 +10,7 @@ public class TutorialManager : MonoBehaviour
     [SerializeField, Tooltip("The tutorial checkpoint locations.")] private Transform[] checkpoints;
 
     private Tutorial currentTutorialSegment;
+    private Transform playerObject;
 
     //Progress variables
     private int targetsShot;
@@ -19,6 +20,7 @@ public class TutorialManager : MonoBehaviour
 
     private void Start()
     {
+        playerObject = PlayerController.instance.xrOrigin.transform;
         DisplayEmptyText();
         Invoke("StartTutorial", 2f);
     }
@@ -116,6 +118,23 @@ public class TutorialManager : MonoBehaviour
     }
 
     public Tutorial GetCurrentTutorialSegment() => currentTutorialSegment;
+
+    public void ReturnToMenu()
+    {
+        //GameManager.Instance.LoadGame(GameSettings.titleScreenScene);
+        Debug.Log("Returning to Menu");
+        StartCoroutine(FadeRoutine());
+    }
+
+    private IEnumerator FadeRoutine()
+    {
+        playerObject.GetComponentInChildren<FadeScreen>().FadeOut();
+
+        yield return new WaitForSeconds(playerObject.GetComponentInChildren<FadeScreen>().GetFadeDuration());
+        yield return null;
+
+        GameManager.Instance.LoadGame(GameSettings.titleScreenScene);
+    }
 }
 
 [System.Serializable]

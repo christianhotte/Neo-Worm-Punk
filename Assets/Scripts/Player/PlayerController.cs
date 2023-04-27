@@ -110,9 +110,10 @@ public class PlayerController : MonoBehaviour
         if (GetComponentInChildren<NewGrapplerController>() != null) GetComponentInChildren<NewGrapplerController>().locked = false;
         if (SpawnManager.current != null && useSpawnPoint) //Spawn manager is present in scene
         {
-            Transform spawnpoint = SpawnManager.current.GetRandomSpawnPoint();                    //Get spawnpoint from spawnpoint manager
+            /*Transform spawnpoint = SpawnManager.current.GetRandomSpawnPoint();                    //Get spawnpoint from spawnpoint manager
             xrOrigin.transform.position = spawnpoint.position;                                    //Move spawned player to target position
-            xrOrigin.transform.eulerAngles = Vector3.Project(spawnpoint.eulerAngles, Vector3.up); //Rotate player to designated spawnpoint rotation
+            xrOrigin.transform.eulerAngles = Vector3.Project(spawnpoint.eulerAngles, Vector3.up); //Rotate player to designated spawnpoint rotation*/
+            SpawnManager.current.Respawn(xrOrigin.gameObject);
         }
         foreach (PlayerEquipment equipment in attachedEquipment) equipment.inputEnabled = true; //Re-enable equipment input
         bodyRb.isKinematic = false; //Re-enable player physics
@@ -187,8 +188,9 @@ public class PlayerController : MonoBehaviour
         //Move to spawnpoint:
         if (SpawnManager.current != null && useSpawnPoint) //Spawn manager is present in scene
         {
-            Transform spawnpoint = SpawnManager.current.GetRandomSpawnPoint(); //Get spawnpoint from spawnpoint manager
-            xrOrigin.transform.position = spawnpoint.position;           //Move spawned player to target position
+            /*Transform spawnpoint = SpawnManager.current.GetRandomSpawnPoint(); //Get spawnpoint from spawnpoint manager
+            xrOrigin.transform.position = spawnpoint.position;           //Move spawned player to target position*/
+            SpawnManager.current.Respawn(xrOrigin.gameObject);
         }
 
         //Hide equipment in menus:
@@ -390,6 +392,7 @@ public class PlayerController : MonoBehaviour
     /// <summary>
     /// Method called when this player is hit by a projectile.
     /// </summary>
+    /// <returns>Whether or not the player was killed by this damage.</returns>>
     public bool IsHit(int damage)
     {
         //Hit effects:
@@ -412,6 +415,21 @@ public class PlayerController : MonoBehaviour
             if (healthSettings.regenSpeed > 0) timeUntilRegen = healthSettings.regenPauseTime;                                                             //Optionally begin regeneration sequence
             return false;
         }
+    }
+    /// <summary>
+    /// Replacement for NetworkPlayer.RPC_IsHit for when player is hit by projectiles offline.
+    /// </summary>
+    public bool IsHit(int damage, Vector3 projVel)
+    {
+        if (isDead) return false; //Prevent dead players from being killed
+        foreach (PlayerEquipment equipment in attachedEquipment)
+        {
+            if (equipment.TryGetComponent(out NewChainsawController chainsaw)) //Equipment is a chainsaw
+            {
+                if (chainsaw.TryDeflect(projVel, "Projectiles/HotteProjectile1")) return false; //Do not deal damage if projectile could be deflected
+            }
+        }
+        return IsHit(damage);
     }
     /// <summary>
     /// Method called when something kills this player.
