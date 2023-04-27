@@ -21,58 +21,118 @@ public class LockerTubeController : MonoBehaviour
     internal Transform spawnPoint;
 
     private Transform myPlayerObject;
-    private Vector3[] tubeCheckpoints = new Vector3[4];
+
     private Vector3[] playerCheckpoints = new Vector3[4];
-    [SerializeField] private Vector3 spawnPointBias;
+    private Vector3 originalTubePosition;
+
+    [SerializeField] public Vector3 spawnPointBias;
+    [SerializeField] private AnimationCurve tubeRaiseCurve;
+
+    public float timeElapsed = 0;
 
     private void Awake()
     {
         spawnManager = FindObjectOfType<LockerTubeSpawner>();
         spawnPoint = transform.Find("Spawnpoint");
-        tubeCheckpoints[1] = transform.localPosition;
-        transform.localPosition -= new Vector3(0, 10, 0);
-        tubeCheckpoints[0] = transform.localPosition;
-        tubeCheckpoints[2] = transform.localPosition + transform.forward * 4;
-        tubeCheckpoints[3] = transform.localPosition + transform.forward * 4 + new Vector3(0, 10, 0);
+        playerCheckpoints[1] = transform.position + spawnPointBias;
+        originalTubePosition = transform.position;
+        transform.localPosition -= new Vector3(0, 15, 0);
+        playerCheckpoints[0] = transform.position + spawnPointBias;
+        playerCheckpoints[2] = transform.position + transform.forward * 4 + spawnPointBias;
+        playerCheckpoints[3] = transform.position + transform.forward * 4 + spawnPointBias + new Vector3(0, 10, 0);
+    }
 
-        for(int i = 0; i < tubeCheckpoints.Length; i++)
+    public void GiveTubeAPlayer(Transform playerTransform)
+    {
+        myPlayerObject = playerTransform;
+    }
+
+    private void Update()
+    {
+        //if I have a player to track
+        if (myPlayerObject != null)
         {
-            playerCheckpoints[i] = tubeCheckpoints[i] + spawnPointBias;
+            //every frame move the tube to the player minus the offset
+            //transform.position = myPlayerObject.position - spawnPointBias;
+            transform.position = Vector3.Lerp(transform.position, myPlayerObject.position - spawnPointBias, Time.deltaTime * 8);
+            //Debug.Log("Tube #" + GetTubeNumber() + " | AssocPlayer = " + myPlayerObject.GetComponentInParent<NetworkPlayer>().photonView.ViewID);
         }
     }
 
-    private void Start()
+    public void PlayerToLobbyPosition()
     {
-
-        //when all players start the match
-        //do countdown and have the middle shotgun thing spin (last chance to put levers back)
-
-        //stop spin, move players together, locked in.
-
-        //THEN move up
-        //in the middle of the last one, fade out and switch scenes
-
+        StartCoroutine(MovePlayerToNextPosition(myPlayerObject, playerCheckpoints[1], 8));
     }
 
-    public void StartTube(Transform playerObject, float duration)
+    public void TubeToBeginningPosition()
+    {
+        //StartCoroutine(MovePlayerToNextPosition(transform, originalTubePosition, 8));
+    }
+
+    public void PlayerToReadyPosition(float duration)
+    {
+        StartCoroutine(MovePlayerToNextPosition(myPlayerObject, playerCheckpoints[2], duration));
+    }
+
+
+    public void PlayerToExitPosition(float duration)
+    {
+        StartCoroutine(MovePlayerToNextPosition(myPlayerObject, playerCheckpoints[3], duration));
+    }
+
+    IEnumerator MovePlayerToNextPosition(Transform moveMe, Vector3 endPos, float moveTime)
+    {
+        //set initial time to initial time
+        timeElapsed = 0;
+
+        Vector3 startPos = moveMe.position;
+
+        while(timeElapsed < moveTime)
+        {
+            //just in case, stay safe ;)
+            if (GameManager.Instance.levelTransitionActive) { break; }
+
+            //smooth lerp duration alg
+            float t = timeElapsed / moveTime;
+            t = tubeRaiseCurve.Evaluate(t);
+
+            moveMe.position = Vector3.Lerp(startPos, endPos, t);
+
+            //advance time
+            timeElapsed += Time.deltaTime;
+
+            yield return null;
+        }
+
+        moveMe.position = endPos;
+    }
+
+
+    /*
+    public void StartTube(Transform playerObject)
     {
         myPlayerObject = playerObject;
-        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[1], playerCheckpoints[1], duration));
+        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[1], playerCheckpoints[1], Vector3.zero, startTubeTotalTime, false));
+    }
+
+    public void StartOtherPlayersTube(Vector3 networkPlayerPos)
+    {
+        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[1], playerCheckpoints[1], networkPlayerPos, startTubeTotalTime, true));
     }
 
     public void TubesToCenter(float duration)
     {
-        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[2], playerCheckpoints[2], duration));
+        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[2], playerCheckpoints[2], Vector3.zero, duration, false));
     }
 
     public void TubesUp(float duration)
     {
-        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[3], playerCheckpoints[3], duration));
+        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[3], playerCheckpoints[3], Vector3.zero, duration, false));
     }
 
     public void TubeExit(float duration)
     {
-        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[0], playerCheckpoints[0], duration));
+        StartCoroutine(MoveTubeAndPlayer(tubeCheckpoints[0], playerCheckpoints[0], Vector3.zero, duration, false));
     }
 
     /// <summary>
@@ -81,15 +141,29 @@ public class LockerTubeController : MonoBehaviour
     /// <param name="transformChange"></param>
     /// <param name="moveTime"></param>
     /// <returns></returns>
-    IEnumerator MoveTubeAndPlayer(Vector3 endPos, Vector3 playerEndPos, float moveTime)
+    IEnumerator MoveTubeAndPlayer(Vector3 endPos, Vector3 playerEndPos, Vector3 networkPlayerPos, float moveTime, bool isOther)
     {
-
-        //set initial time to 0
-        float timeElapsed = 0;
+        //set initial time to initial time
+        timeElapsed = 0;
+                                                                                                                                                //just base this off of the players' movement
 
         Vector3 startPos = transform.localPosition;
         Vector3 playerStartPos = Vector3.zero;
 
+        if (isOther)
+        {
+            //what percent are you through the movement?
+            float fraction = Mathf.InverseLerp(tubeCheckpoints[0].y, tubeCheckpoints[1].y, networkPlayerPos.y - spawnPointBias.y);
+            //total time = 4
+            //current time = ?
+            //fractional time = fraction
+            //fraction time = current time / total time
+            //fraction time * total time = current time to start at
+            Debug.Log("MY FRACTION = " + fraction);
+
+            timeElapsed = fraction * startTubeTotalTime;
+        }
+        Debug.Log("NETWORKPLAYER= " + networkPlayerPos);
 
         if (myPlayerObject != null)
         {
@@ -104,7 +178,7 @@ public class LockerTubeController : MonoBehaviour
 
             //smooth lerp duration alg
             float t = timeElapsed / moveTime;
-            t = t * t * (3f - 2f * t);
+            t = tubeRaiseCurve.Evaluate(t);
 
             transform.localPosition = Vector3.Lerp(startPos, endPos, t);
             if(myPlayerObject != null)
@@ -117,11 +191,11 @@ public class LockerTubeController : MonoBehaviour
 
             yield return null;
         }
-
+        
         transform.localPosition = endPos;
         if (myPlayerObject != null) { myPlayerObject.position = playerEndPos; }
     }
-
+    */
 
 
 
