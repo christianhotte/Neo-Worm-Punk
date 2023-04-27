@@ -65,6 +65,10 @@ public class NetworkPlayer : MonoBehaviour
     [Header("Material System:")]
     public Material[] altMaterials;
     public MatChangeCombo[] matCombos;
+    [Header("Damage Effects:")]
+    public GameObject bulletHitEffect;
+    public GameObject bulletKillEffect;
+    public GameObject chainsawKillEffect;
 
     private Transform headTarget;      //True local position of player head
     private Transform leftHandTarget;  //True local position of player left hand
@@ -670,6 +674,8 @@ public class NetworkPlayer : MonoBehaviour
             }
 
             //Damage & death:
+            Vector3 origPos = PlayerController.instance.xrOrigin.transform.position;
+            Quaternion origRot = PlayerController.instance.xrOrigin.transform.rotation;
             bool killedPlayer = PlayerController.instance.IsHit(damage); //Inflict damage upon local player
             if (killedPlayer)
             {
@@ -685,9 +691,59 @@ public class NetworkPlayer : MonoBehaviour
                 photonView.RPC("RPC_UpdateLeaderboard", RpcTarget.All, PhotonNetwork.LocalPlayer.NickName, networkPlayerStats.numOfDeaths, networkPlayerStats.numOfKills, networkPlayerStats.killStreak);
                 if (enemyID != photonView.ViewID) PhotonNetwork.GetPhotonView(enemyID).RPC("RPC_KilledEnemy", RpcTarget.AllBuffered, photonView.ViewID, deathCause);
             }
+
+            //Effects:
+            if (!killedPlayer)
+            {
+                if (bulletHitEffect != null) Instantiate(bulletHitEffect, origPos, origRot);
+            }
+            else
+            {
+                switch ((DeathCause)deathCause)
+                {
+                    case DeathCause.GUN:
+                        if (bulletKillEffect != null) Instantiate(bulletKillEffect, origPos, origRot);
+                        break;
+                    case DeathCause.CHAINSAW:
+                        if (chainsawKillEffect != null) Instantiate(chainsawKillEffect, origPos, origRot);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            photonView.RPC("RPC_PlayHitEffect", RpcTarget.Others, killedPlayer, deathCause);
         }
     }
 
+    [PunRPC]
+    public void RPC_PlayHitEffect(bool killed, int damageType)
+    {
+        if (!killed)
+        {
+            switch ((DeathCause)damageType)
+            {
+                case DeathCause.GUN:
+                    Instantiate(bulletHitEffect, originRig.position, originRig.rotation);
+                    break;
+                default:
+                    break;
+            }
+        }
+        else
+        {
+            switch ((DeathCause)damageType)
+            {
+                case DeathCause.GUN:
+                    if (bulletKillEffect != null) Instantiate(bulletKillEffect, originRig.position, originRig.rotation);
+                    break;
+                case DeathCause.CHAINSAW:
+                    if (chainsawKillEffect != null) Instantiate(chainsawKillEffect, originRig.position, originRig.rotation);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
     /// <summary>
     /// Launches this player with given amount of force.
     /// </summary>

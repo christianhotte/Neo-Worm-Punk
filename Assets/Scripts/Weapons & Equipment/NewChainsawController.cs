@@ -326,6 +326,8 @@ public class NewChainsawController : PlayerEquipment
                     else
                     {
                         hitPlayer.photonView.RPC("RPC_Hit", RpcTarget.AllBuffered, 100, PlayerController.photonView.ViewID, Vector3.zero, (int)DeathCause.CHAINSAW); //Hit target
+                        SendHapticImpulse(settings.extendHaptics);
+                        PlayerController.instance.audioSource.PlayOneShot(settings.KillSound);
                     }
                 }
             }
