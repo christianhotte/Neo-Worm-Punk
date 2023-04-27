@@ -47,7 +47,7 @@ public class PlayerController : MonoBehaviour
     internal PlayerInput input;                //Input manager component used by player to send messages to hands and such
     internal SkinnedMeshRenderer bodyRenderer; //Mesh renderer for player's physical worm body
     internal PlayerBodyManager bodyManager;    //Reference to script on player that manages body collisions and special effects
-    private AudioSource audioSource;           //Main player audio source
+    internal AudioSource audioSource;           //Main player audio source
     private Transform camOffset;               //Object used to offset camera position in case of weirdness
     private InputActionMap inputMap;           //Input map which player uses
     private ScreenShakeVR screenShaker;        //Component used to safely shake player's screen without causing nausea
