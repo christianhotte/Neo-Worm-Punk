@@ -1,14 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.XR;
-using UnityEngine.XR.Interaction.Toolkit;
-using TMPro;
 using Photon.Pun;
 using Photon.Realtime;
-using Hashtable = ExitGames.Client.Photon.Hashtable;
-using UnityEngine.SceneManagement;
 using RootMotion.FinalIK;
+using System.Collections;
+using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 // This script was used from https://youtu.be/KHWuTBmT1oI?t=1511\
 // ^ Now heavily modified by Invertebrates
@@ -76,6 +74,8 @@ public class NetworkPlayer : MonoBehaviour
     private Transform leftHandRig;     //Networked transform which follows position of player left hand
     private Transform rightHandRig;    //Networked transform which follows position of player right hand
     private Transform modelRig;        //Networked transform which follows position of player model
+    private Transform originTarget;
+    internal Transform originRig;
 
     //Runtime Variables:
     /// <summary>
@@ -111,6 +111,7 @@ public class NetworkPlayer : MonoBehaviour
             if (view.name.Contains("Left")) { leftHandRig = view.transform; continue; }       //Get left hand rig
             if (view.name.Contains("Right")) { rightHandRig = view.transform; continue; }     //Get right hand rig
             if (view.TryGetComponent(out VRIK vrik)) { modelRig = view.transform; continue; } //Get model rig
+            if (view.name.Contains("Origin")) { originRig = view.transform; continue; }
         }
         if (headRig == null || leftHandRig == null || rightHandRig == null) { Debug.LogError("Network Player " + name + " was not able to successfully get its rigged components. Have the names of its children been changed?"); }
 
@@ -190,6 +191,7 @@ public class NetworkPlayer : MonoBehaviour
             MapPosition(leftHandRig, leftHandTarget);   //Update position of left hand rig
             MapPosition(rightHandRig, rightHandTarget); //Update position of right hand rig
             MapPosition(modelRig, modelTarget);         //Update position of base model
+            MapPosition(originRig, originTarget);
         }
 
         //Sync colors:
@@ -291,6 +293,7 @@ public class NetworkPlayer : MonoBehaviour
         leftHandTarget = attachedPlayer.leftHand.transform;   //Get left hand from player script (since it has already automatically collected the reference)
         rightHandTarget = attachedPlayer.rightHand.transform; //Get right hand from player script (since it has already automatically collected the reference)
         modelTarget = attachedPlayer.bodyRig.transform;       //Get base model transform from player script
+        originTarget = attachedPlayer.xrOrigin.transform;
     }
     private void OnPlayerDisconnected(NetworkPlayer player)
     {
@@ -423,17 +426,15 @@ public class NetworkPlayer : MonoBehaviour
             targetRenderer.material.SetColor("_Color", currentColor);
             if (!photonView.IsMine)
             {
+                print("Setting player " + photonView.ViewID + " trail color to " + currentColor);
                 trail.material = origTrailMat;
-                trail.colorGradient.colorKeys[0].color = currentColor;
-                trail.colorGradient.colorKeys[1].color = currentColor;
+                trail.material.SetColor("Base Map", currentColor);
             }
         }
         else //System is using unique material
         {
             if (!photonView.IsMine)
             {
-                trail.colorGradient.colorKeys[0].color = Color.white;
-                trail.colorGradient.colorKeys[1].color = Color.white;
                 trail.material = primaryMat;
             }
         }
@@ -616,8 +617,7 @@ public class NetworkPlayer : MonoBehaviour
         //Apply settings:
         SetWormNicknameText(photonView.Owner.NickName);
         foreach (Material mat in bodyRenderer.materials) mat.color = currentColor; //Apply color to entire player body
-        trail.colorGradient.colorKeys[0].color = currentColor;
-        trail.colorGradient.colorKeys[1].color = currentColor;
+        trail.material.SetColor("Base Map", currentColor);
 
         /*for (int x = 0; x < trail.colorGradient.colorKeys.Length; x++) //Iterate through color keys in trail gradient
         {
@@ -639,7 +639,8 @@ public class NetworkPlayer : MonoBehaviour
         if (newMaterial == altMaterials[0])
         {
             bodyRenderer.material.SetColor("_Color", PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]]);
-            trail.material.SetColor("_Color", PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]]);
+            //trail.material.SetColor("_Color", PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]]);
+            trail.material.SetColor("Base Map", currentColor);
         }
     }
     public void ChangeNetworkPlayerMaterial(int matIndex)
@@ -798,6 +799,15 @@ public class NetworkPlayer : MonoBehaviour
         
     }
 
+
+    //gives the new player a tube
+    [PunRPC]
+    public void RPC_StartTube(int tubeID)
+    {
+        LockerTubeSpawner.instance.StartMyTubeForOthersByDavid(tubeID, originRig);
+    }
+
+
     //BELOW METHODS ONLY GET CALLED ON MASTER CLIENT
     [PunRPC]
     public void RPC_GiveMeSpawnpoint(int myViewID)
@@ -813,11 +823,8 @@ public class NetworkPlayer : MonoBehaviour
             }
         }
     }
-    [PunRPC]
-    public void RPC_StartTube(int tubeID)
-    {
-        LockerTubeSpawner.instance.StartMyTubeForOthersByDavid(tubeID);
-    }
+
+
 
     //UTILITY METHODS:
     /// <summary>
