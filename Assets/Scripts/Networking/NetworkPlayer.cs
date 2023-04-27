@@ -585,7 +585,7 @@ public class NetworkPlayer : MonoBehaviour
     {
         Debug.Log("Updating Taken Color List...");
 
-        if (ReadyUpManager.instance != null)
+        if (ReadyUpManager.instance != null && ReadyUpManager.instance.localPlayerTube != null)
         {
             ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
 
