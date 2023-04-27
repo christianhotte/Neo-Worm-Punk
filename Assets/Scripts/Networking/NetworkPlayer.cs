@@ -426,6 +426,7 @@ public class NetworkPlayer : MonoBehaviour
             targetRenderer.material.SetColor("_Color", currentColor);
             if (!photonView.IsMine)
             {
+                print("Setting player " + photonView.ViewID + " trail color to " + currentColor);
                 trail.material = origTrailMat;
                 trail.material.SetColor("Base Map", currentColor);
             }
