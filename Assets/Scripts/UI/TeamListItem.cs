@@ -27,8 +27,10 @@ public class TeamListItem : MonoBehaviour
         foreach (var player in playerNames)
         {
             Debug.Log("Checking " + player.Key + " Color: " + player.Value);
+            Debug.Log("Current Color: " + (int)currentColor);
             if(player.Value == (int)currentColor)
             {
+                Debug.Log("Adding " + player.Key + " To " + teamLabel.text + "...");
                 TextMeshProUGUI newPlayer = Instantiate(playerNamePrefab, playerNameContainer);
                 ChangePlayerName(newPlayer, player.Key);
                 switch (currentColor)
