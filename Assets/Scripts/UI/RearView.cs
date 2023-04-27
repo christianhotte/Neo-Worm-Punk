@@ -51,7 +51,7 @@ public class RearView : MonoBehaviour
                 Vector3 facingDir = playerCam.forward;
                 float playerAngle = Vector3.SignedAngle(facingDir, PlayerToNet, playerCam.up);
                 //Debug.Log(playerAngle);
-                Debug.Log(sqrPlayerDist);
+                //Debug.Log(sqrPlayerDist);
                 
                 Vector3 newPos = Vector3.zero;
 
