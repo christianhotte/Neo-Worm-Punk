@@ -96,10 +96,6 @@ public class WristUIController : MonoBehaviour
     /// </summary>
     public void LeaveRoomToMain()
     {
-        //Destroy the player's locker tube upon leaving if they have one
-        if (ReadyUpManager.instance != null && ReadyUpManager.instance.localPlayerTube != null)
-            PhotonNetwork.Destroy(ReadyUpManager.instance.localPlayerTube.photonView);
-
         PhotonNetwork.LeaveRoom();  //Leave the room
         PhotonNetwork.LeaveLobby(); //Leave the lobby
         PhotonNetwork.Disconnect(); //Disconnects from the server
