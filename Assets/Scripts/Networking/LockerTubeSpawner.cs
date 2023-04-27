@@ -46,11 +46,16 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
             // Moves the player to the spawn point
             PlayerController.instance.bodyRb.transform.position = spawnTube.spawnPoint.position;
             PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
-            spawnTube.StartTube(PlayerController.instance.bodyRb.transform, 8);
 
+            //set own player up
+            spawnTube.GiveTubeAPlayer(PlayerController.instance.xrOrigin.transform);
+            //move your own player up
+            spawnTube.PlayerToLobbyPosition();
+
+            //renders everyone's tubes FOR ME if they're already spawned
             SetExistingTubePositions();
 
-            //now everyone else do it too
+            //notify all other players that I have spawned
             NetworkManagerScript.localNetworkPlayer.photonView.RPC("RPC_StartTube", RpcTarget.Others, tubeID);
 
             ReadyUpManager.instance.localPlayerTube = spawnTube;
@@ -59,28 +64,31 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
             StartCoroutine(NetworkManagerScript.localNetworkPlayer.CheckExclusiveColors());
             if (PhotonNetwork.IsMasterClient)
                 ReadyUpManager.instance.localPlayerTube.ShowHostSettings(true); //Show the settings if the player being moved is the master client
-
         }
     }
 
     private void SetExistingTubePositions()
     {
-        for(int i = 0; i < NetworkManagerScript.instance.GetTubeOccupancy().Length; i++)
+        foreach (var networkPlayer in NetworkPlayer.instances)
         {
-            if (NetworkManagerScript.instance.GetTubeOccupancy()[i] && i != (int)NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["TubeID"])
+            if (networkPlayer != NetworkManagerScript.localNetworkPlayer)
             {
-                tubes[i].StartTube(null, 0);
+                //tubes[(int)networkPlayer.photonView.Owner.CustomProperties["TubeID"]].StartOtherPlayersTube(networkPlayer.transform.position);
+                //tubes[(int)networkPlayer.photonView.Owner.CustomProperties["TubeID"]].transform.position = networkPlayer.transform.position - tubes[(int)networkPlayer.photonView.Owner.CustomProperties["TubeID"]].spawnPointBias;
+                tubes[(int)networkPlayer.photonView.Owner.CustomProperties["TubeID"]].GiveTubeAPlayer(networkPlayer.originRig);
             }
         }
     }
+
+
 
     /// <summary>
     /// Stoopid.
     /// </summary>
     /// <param name="tubeID">Also stoopid</param>
-    public void StartMyTubeForOthersByDavid(int tubeID)
+    public void StartMyTubeForOthersByDavid(int tubeID, Transform networkPlayerTransform)
     {
-        tubes[tubeID].StartTube(null, 4);
+        tubes[tubeID].GiveTubeAPlayer(networkPlayerTransform);
     }
 
     public void OnLeverStateChanged()
