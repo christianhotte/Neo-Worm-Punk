@@ -48,7 +48,7 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
             PlayerController.instance.bodyRb.transform.rotation = spawnTube.spawnPoint.rotation;
 
             //set own player up
-            spawnTube.GiveTubeAPlayer(PlayerController.instance.xrOrigin.transform);
+            spawnTube.GiveTubeAPlayer(PlayerController.instance.xrOrigin.transform, true);
             //move your own player up
             spawnTube.PlayerToLobbyPosition();
 
@@ -75,7 +75,7 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
             {
                 //tubes[(int)networkPlayer.photonView.Owner.CustomProperties["TubeID"]].StartOtherPlayersTube(networkPlayer.transform.position);
                 //tubes[(int)networkPlayer.photonView.Owner.CustomProperties["TubeID"]].transform.position = networkPlayer.transform.position - tubes[(int)networkPlayer.photonView.Owner.CustomProperties["TubeID"]].spawnPointBias;
-                tubes[(int)networkPlayer.photonView.Owner.CustomProperties["TubeID"]].GiveTubeAPlayer(networkPlayer.originRig);
+                tubes[(int)networkPlayer.photonView.Owner.CustomProperties["TubeID"]].GiveTubeAPlayer(networkPlayer.originRig, false);
             }
         }
     }
@@ -88,7 +88,7 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
     /// <param name="tubeID">Also stoopid</param>
     public void StartMyTubeForOthersByDavid(int tubeID, Transform networkPlayerTransform)
     {
-        tubes[tubeID].GiveTubeAPlayer(networkPlayerTransform);
+        tubes[tubeID].GiveTubeAPlayer(networkPlayerTransform, false);
     }
 
     public void OnLeverStateChanged()
