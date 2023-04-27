@@ -118,13 +118,13 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
             // If all players are ready, load the game scene
             if (forceLoadViaMasterClient || !GameManager.Instance.levelTransitionActive && (playersReady == playersInRoom && (playersInRoom >= MINIMUM_PLAYERS_NEEDED || GameSettings.debugMode)))
             {
-                
-                StartCoroutine(OnEveryoneReady(tube));
+
+                StartCoroutine(OnEveryoneReady());
             }
         }
     }
 
-    IEnumerator OnEveryoneReady(LockerTubeController tube)
+    IEnumerator OnEveryoneReady()
     {
         float delayTime = 3;
         //countdown from 3,2,1,WORM!
@@ -134,13 +134,13 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
 
         delayTime = 2;
         //call all tubes to the center
-        tube.PlayerToReadyPosition(delayTime);
+        localPlayerTube.PlayerToReadyPosition(delayTime);
         //wait for equivilent time
         yield return new WaitForSeconds(delayTime + 0.5f);
 
         delayTime = 4;
         //call all tubes up
-        tube.PlayerToExitPosition(delayTime);
+        localPlayerTube.PlayerToExitPosition(delayTime);
         //wait half the time
         yield return new WaitForSeconds(delayTime / 2);
 
