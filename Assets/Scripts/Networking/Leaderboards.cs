@@ -42,7 +42,7 @@ public class Leaderboards : MonoBehaviourPunCallbacks
         screenObject = transform.parent.Find("LeaderboardScreen").gameObject;
 
         //Initialization:
-        if (PhotonNetwork.LocalPlayer.ActorNumber != GetComponentInParent<LockerTubeController>().GetTubeNumber()) { gameObject.SetActive(false); return; } //Hide board if it does not correspond with player's tube
+        //if (PhotonNetwork.LocalPlayer.ActorNumber != GetComponentInParent<LockerTubeController>().GetTubeNumber()) { gameObject.SetActive(false); return; } //Hide board if it does not correspond with player's tube
 
         //Check scene state:
         foreach (NetworkPlayer player in NetworkPlayer.instances)
