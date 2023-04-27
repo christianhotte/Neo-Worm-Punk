@@ -617,8 +617,7 @@ public class NetworkPlayer : MonoBehaviour
         //Apply settings:
         SetWormNicknameText(photonView.Owner.NickName);
         foreach (Material mat in bodyRenderer.materials) mat.color = currentColor; //Apply color to entire player body
-        trail.colorGradient.colorKeys[0].color = currentColor;
-        trail.colorGradient.colorKeys[1].color = currentColor;
+        trail.material.SetColor("Base Map", currentColor);
 
         /*for (int x = 0; x < trail.colorGradient.colorKeys.Length; x++) //Iterate through color keys in trail gradient
         {
@@ -640,7 +639,8 @@ public class NetworkPlayer : MonoBehaviour
         if (newMaterial == altMaterials[0])
         {
             bodyRenderer.material.SetColor("_Color", PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]]);
-            trail.material.SetColor("_Color", PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]]);
+            //trail.material.SetColor("_Color", PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]]);
+            trail.material.SetColor("Base Map", currentColor);
         }
     }
     public void ChangeNetworkPlayerMaterial(int matIndex)
