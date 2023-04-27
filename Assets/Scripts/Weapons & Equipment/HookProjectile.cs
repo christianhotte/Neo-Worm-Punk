@@ -124,7 +124,7 @@ public class HookProjectile : Projectile
                         newVelocity -= addVel;                                                                //Apply additional velocity (rotated based on player orientation)
                     }
                     //newVelocity += otherEffectsThatCanOccurInLevel
-                    if (controller.locked)
+                    if (controller.locked||controller.playerHooked)
                     {
                         newVelocity *= 2.5f;                                //Gives a boost to locked hook
                         controller.player.bodyRb.velocity = newVelocity; //Apply new velocity
@@ -370,6 +370,7 @@ public class HookProjectile : Projectile
     {
         //Validity checks:
         hitPlayer = player;                                                                                                                                    //Store reference to hit player
+        controller.playerHooked = true;
         if (hitPlayer.photonView.ViewID == PlayerController.photonView.ViewID) { print("Grappling hook hit own player, despite it all."); Release(); return; } //Prevent hook from ever hitting its own player
 
         //Move to target:
