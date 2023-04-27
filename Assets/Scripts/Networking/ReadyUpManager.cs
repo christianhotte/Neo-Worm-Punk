@@ -96,7 +96,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
         if(FindObjectOfType<LockerTubeSpawner>() != null)
         {
             Debug.Log("Tube ID is: " + tubeID);
-            LockerTubeController tube = FindObjectOfType<LockerTubeSpawner>().GetTubeByIndex(tubeID);
+            LockerTubeController tube = localPlayerTube;
             if (tube != null) tube.UpdateLights(updatedPlayerReady);
 
             // Get the number of players that have readied up
