@@ -15,6 +15,10 @@ public class TutorialManager : MonoBehaviour
     //Progress variables
     private int targetsShot;
     private int targetGoal;
+
+    private int timesParried;
+    private int parryGoal;
+
     [SerializeField] Transform SpawnPoint;
 
 
@@ -68,6 +72,11 @@ public class TutorialManager : MonoBehaviour
                 targetGoal = 5;
                 PlayerController.instance.inverteboy.UpdateTutorialProgress("Shoot Five Targets.\n"+ targetsShot +" / " + targetGoal);
                 break;
+            case Tutorial.PARRY:
+                timesParried = 0;
+                parryGoal = 3;
+                PlayerController.instance.inverteboy.UpdateTutorialProgress("Parry Three Times.\n" + timesParried + " / " + parryGoal);
+                break;
             default:
                 PlayerController.instance.inverteboy.UpdateTutorialProgress("");
                 break;
@@ -94,6 +103,13 @@ public class TutorialManager : MonoBehaviour
                 else
                     OnTaskComplete();
                 break;
+            case Tutorial.PARRY:
+                timesParried++;
+                if (timesParried < parryGoal)
+                    PlayerController.instance.inverteboy.UpdateTutorialProgress("Parry Three Times.\n" + timesParried + " / " + parryGoal);
+                else
+                    OnTaskComplete();
+                break;
         }
     }
 
@@ -102,11 +118,11 @@ public class TutorialManager : MonoBehaviour
     /// </summary>
     private void OnTaskComplete()
     {
-        PlayerController.instance.inverteboy.UpdateTutorialProgress("Task Complete.");
         switch (currentTutorialSegment)
         {
             default:
                 //Task completed
+                PlayerController.instance.inverteboy.UpdateTutorialProgress("Task Complete.");
                 break;
         }
     }
