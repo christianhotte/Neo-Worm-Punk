@@ -464,9 +464,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             lobbyUI.UpdateRoomList();
         }
 
-        if (ReadyUpManager.instance != null)
-            ReadyUpManager.instance.UpdateReadyText();
-
         AdjustVoiceVolume();
     }
 
@@ -478,6 +475,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         // Raises an event on player left room.
         PhotonNetwork.RaiseEvent(1, otherPlayer.ActorNumber, RaiseEventOptions.Default, SendOptions.SendReliable);
         localNetworkPlayer.SyncColors();
+        localNetworkPlayer.SyncTeams();
 
         SetTubeOccupantStatus((int)otherPlayer.CustomProperties["TubeID"], false);
 

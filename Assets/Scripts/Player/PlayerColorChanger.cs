@@ -87,26 +87,20 @@ public class PlayerColorChanger : MonoBehaviour
                 break;
         }
 
-        Color newColor = PlayerSettingsController.ColorOptionsToColor((ColorOptions)colorOption);
-
-        PlayerSettingsController.Instance.charData.playerColor = newColor;   //Set the player color in the character data
-
         if (PhotonNetwork.IsConnected)
         {
-            NetworkManagerScript.localNetworkPlayer.SetNetworkPlayerProperties("Color", colorOption);
+            NetworkManagerScript.localNetworkPlayer.ChangePlayerColorData(colorOption);
             if ((bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"])
-            {
                 RefreshButtons();
-                NetworkManagerScript.localNetworkPlayer.SyncTeams();
-            }
         }
         else
         {
+            Color newColor = PlayerSettingsController.ColorOptionsToColor((ColorOptions)colorOption);
+            PlayerSettingsController.Instance.charData.playerColor = newColor;   //Set the player color in the character data
             PlayerPrefs.SetInt("PreferredColorOption", colorOption);
             RefreshOfflineButtons();
+            PlayerController.instance.ApplyAndSyncSettings(); //Apply settings to player
         }
-
-        PlayerController.instance.ApplyAndSyncSettings(); //Apply settings to player (NOTE TO PETER: Call this whenever you want to change a setting and sync it across the network)
         Debug.Log("Changing Player Color To " + newColorText);
     }
 
