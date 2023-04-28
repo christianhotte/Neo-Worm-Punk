@@ -56,7 +56,10 @@ public class TeamsDisplay : MonoBehaviour
     {
         Dictionary <string, int> playerTeams = new Dictionary<string, int>();
         foreach(var player in NetworkManagerScript.instance.GetPlayerList())
-            playerTeams.Add(player.NickName, (int)player.CustomProperties["Color"]);
+        {
+            if(player.CustomProperties["Color"] != null)
+                playerTeams.Add(player.NickName, (int)player.CustomProperties["Color"]);
+        }
 
         return playerTeams;
     }
