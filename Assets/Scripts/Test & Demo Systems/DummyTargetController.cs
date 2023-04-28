@@ -62,7 +62,6 @@ public class DummyTargetController : Targetable
         print("Target hit!");                                                            //Indicate that target was hit
 
         TutorialManager tutorialManager = FindObjectOfType<TutorialManager>();
-
         if (tutorialManager != null && tutorialManager.GetCurrentTutorialSegment() == TutorialManager.Tutorial.GUNS)
             tutorialManager.IncrementTutorialProgress();
     }
