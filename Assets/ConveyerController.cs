@@ -292,6 +292,7 @@ public class ConveyerController : MonoBehaviour
 
     public void JoinRoomOptionChosen()
     {
+        findRoomControllerRef.SetRoomToConnectTo();
         createRoomOption = false;
         tutorialOption = false;
     }

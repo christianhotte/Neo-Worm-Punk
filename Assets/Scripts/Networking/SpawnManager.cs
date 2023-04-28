@@ -78,9 +78,9 @@ public class SpawnManager : MonoBehaviour
         int newIndex = Random.Range(0, spawnPoints.Count);
 
         // If the new index is the same as the last one, get a new one
-        if (newIndex == lastSpawnIndex)
+        if (spawnPoints.Count > 1 && newIndex == lastSpawnIndex)
         {
-            //newIndex = GetNewSpawnIndex();
+            newIndex = GetNewSpawnIndex();
         }
 
         return newIndex;

@@ -370,8 +370,7 @@ public class HookProjectile : Projectile
     public void HookToPlayer(NetworkPlayer player)
     {
         //Validity checks:
-        hitPlayer = player;                                                                                                                                    //Store reference to hit player
-        controller.playerHooked = true;
+        hitPlayer = player;
         if (hitPlayer.photonView.ViewID == PlayerController.photonView.ViewID) { print("Grappling hook hit own player, despite it all."); Release(); return; } //Prevent hook from ever hitting its own player
 
         //Move to target:

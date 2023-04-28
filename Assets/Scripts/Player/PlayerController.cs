@@ -110,7 +110,6 @@ public class PlayerController : MonoBehaviour
         if (GetComponentInChildren<NewGrapplerController>() != null)
         {
             GetComponentInChildren<NewGrapplerController>().locked = false;
-            GetComponentInChildren<NewGrapplerController>().playerHooked = false;
         }
         if (SpawnManager.current != null && useSpawnPoint) //Spawn manager is present in scene
         {

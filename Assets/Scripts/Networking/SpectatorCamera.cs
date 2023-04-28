@@ -37,6 +37,7 @@ public class SpectatorCamera : MonoBehaviour
         // Set the game window to use the first available display by default
         Display.main.SetRenderingResolution(Screen.width, Screen.height);
         originFov = firstPersonCamera.fieldOfView;
+        Cursor.visible = false;
     }
 
     // Update is called once per frame
@@ -50,9 +51,8 @@ public class SpectatorCamera : MonoBehaviour
             {
                 firstPersonCamera.depth = 2;
                 thirdPersonCamera.depth = 1;
-                Cursor.visible = false;
-                Cursor.lockState = CursorLockMode.Confined;
-                //Cursor.lockState = CursorLockMode.Locked;
+                //Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
             }
 
             // Going from third person to first person.
@@ -60,8 +60,9 @@ public class SpectatorCamera : MonoBehaviour
             {
                 firstPersonCamera.depth = 1;
                 thirdPersonCamera.depth = 2;
-                Cursor.visible = true;
-                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = false;
+                Cursor.lockState = CursorLockMode.Confined;
+                //Cursor.lockState = CursorLockMode.Locked;
             }
         }
         if (Input.GetMouseButtonDown(2))

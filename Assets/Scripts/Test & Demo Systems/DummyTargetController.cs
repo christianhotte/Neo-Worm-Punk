@@ -14,6 +14,7 @@ public class DummyTargetController : Targetable
     [Header("Settings:")]
     [SerializeField, Tooltip("Array of points which target moves between.")]     private Transform[] movePoints;
     [SerializeField, Tooltip("Speed of target movement (in units per second).")] private float moveSpeed;
+    [SerializeField, Tooltip("The tutorial segment this target is used for.")] private TutorialManager.Tutorial tutorialSegmentUsed;
 
     //Runtime Variables:
     private int currentMoveIndex = 0; //Index of current move point target is moving from
@@ -62,7 +63,7 @@ public class DummyTargetController : Targetable
         print("Target hit!");                                                            //Indicate that target was hit
 
         TutorialManager tutorialManager = FindObjectOfType<TutorialManager>();
-        if (tutorialManager != null && tutorialManager.GetCurrentTutorialSegment() == TutorialManager.Tutorial.GUNS)
+        if (tutorialManager != null && tutorialManager.GetCurrentTutorialSegment() == tutorialSegmentUsed)
             tutorialManager.IncrementTutorialProgress();
     }
     public override void IsHit(int damage, int playerID, Vector3 velocity)
