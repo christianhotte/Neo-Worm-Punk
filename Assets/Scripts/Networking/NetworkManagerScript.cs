@@ -140,6 +140,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             customRoomSettings = new Hashtable();
         }
 
+        AddCustomRoomSetting("RoundActive", false, ref customRoomSettings);
         AddCustomRoomSetting("RoundLength", GameSettings.defaultMatchLength, ref customRoomSettings);
         AddCustomRoomSetting("PlayerHP", GameSettings.HPDefault, ref customRoomSettings);
         AddCustomRoomSetting("HazardsActive", GameSettings.hazardsActiveDefault, ref customRoomSettings);
@@ -192,6 +193,12 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             roomSettings.Add(name, value);
         else
             roomSettings[name] = value;
+    }
+
+    public void SetMatchActive(bool isMatchActive)
+    {
+        PhotonNetwork.CurrentRoom.IsOpen = !isMatchActive;
+        UpdateRoomSettings("RoundActive", isMatchActive);
     }
 
     public void JoinRoom(string roomName)
@@ -398,6 +405,16 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         if (autoJoin != null && autoJoin.GoToLockerRoom())
             autoJoin.AutoLoadScene(GameSettings.roomScene);
 
+        //Sets the player's values
+        Hashtable photonPlayerSettings = new Hashtable();
+        photonPlayerSettings.Add("Color", PlayerPrefs.GetInt("PreferredColorOption"));
+        photonPlayerSettings.Add("IsReady", false);
+        photonPlayerSettings.Add("TubeID", -1);
+        PlayerController.photonView.Owner.SetCustomProperties(photonPlayerSettings);
+
+        //Assigns the player a tube ID
+        OccupyNextAvailableTube();
+
         //Loads the locker room scene when the player joins a room from the title screen. This is so epic can we hit 10 likes
         if (SceneManager.GetActiveScene().name == GameSettings.titleScreenScene)
             GameManager.Instance.LoadGame(GameSettings.roomScene);
@@ -423,14 +440,17 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     {
         Debug.LogError("Join Room Failed. Reason: " + message);
 
-        LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
+/*        LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
 
         //If there is a lobby in the scene, display an error message
         if (lobbyUI != null)
         {
             lobbyUI.UpdateErrorMessage("Join Room Failed. Reason: " + message);
             lobbyUI.SwitchMenu(LobbyMenuState.ERROR);
-        }
+        }*/
+
+        //Reload into the title screen scene for now
+        GameManager.Instance.LoadGame(GameSettings.titleScreenScene);
     }
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
@@ -585,7 +605,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         localNetworkPlayer = PhotonNetwork.Instantiate(networkPlayerName, Vector3.zero, Quaternion.identity).GetComponent<NetworkPlayer>(); //Spawn instance of network player and get reference to its script
 
         Debug.Log("Actor Number For " + GetLocalPlayerName() + ": " + PhotonNetwork.LocalPlayer.ActorNumber);
-        OccupyNextAvailableTube();
     }
 
     public void DeSpawnNetworkPlayer()

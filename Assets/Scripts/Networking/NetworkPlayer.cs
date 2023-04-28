@@ -60,7 +60,6 @@ public class NetworkPlayer : MonoBehaviour
     private SkinnedMeshRenderer bodyRenderer;                    //Renderer component for main player body/skin
     private TrailRenderer trail;                                 //Renderer for trail that makes players more visible to each other
     internal PlayerStats networkPlayerStats = new PlayerStats(); //The stats for the network player
-    internal Hashtable photonPlayerSettings;
     
     [Header("Material System:")]
     public Material[] altMaterials;
@@ -126,9 +125,6 @@ public class NetworkPlayer : MonoBehaviour
             PlayerController.photonView = photonView; //Give playerController a reference to local client photon view component
 
             //Local initialization:
-
-            photonPlayerSettings = new Hashtable();                       //Create new custom player settings
-            InitializePhotonPlayerSettings();
             PlayerController.instance.playerSetup.ApplyAllSettings();                                //Apply default settings to player
             SyncData();                                                                              //Sync settings between every version of this network player
             foreach (Renderer r in transform.GetComponentsInChildren<Renderer>()) r.enabled = false; //Local player should never be able to see their own NetworkPlayer
@@ -150,17 +146,6 @@ public class NetworkPlayer : MonoBehaviour
         SceneManager.sceneLoaded += OnSceneLoaded;     //Subscribe to scene load event (every NetworkPlayer should do this)
         SceneManager.sceneUnloaded += OnSceneUnloaded; //Subscribe to scene unload event (every NetworkPlayer should do this)
         DontDestroyOnLoad(gameObject);                 //Make sure network players are not destroyed when a new scene is loaded
-    }
-
-    /// <summary>
-    /// Initializes the player's photon player settings.
-    /// </summary>
-    private void InitializePhotonPlayerSettings()
-    {
-        photonPlayerSettings.Add("Color", PlayerPrefs.GetInt("PreferredColorOption"));
-        photonPlayerSettings.Add("IsReady", false);
-        photonPlayerSettings.Add("TubeID", -1);
-        PlayerController.photonView.Owner.SetCustomProperties(photonPlayerSettings);
     }
 
     void Start()
