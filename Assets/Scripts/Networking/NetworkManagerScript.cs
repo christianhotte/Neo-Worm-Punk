@@ -456,6 +456,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         base.OnPlayerEnteredRoom(newPlayer);
         Debug.Log(newPlayer.NickName + " has joined.");
 
+        PlayerController.instance.inverteboy.AddToRoomLog(newPlayer.NickName + " Joined The Game.");
+
         LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
 
         //Update room information
@@ -471,6 +473,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     {
         base.OnPlayerLeftRoom(otherPlayer);
         Debug.Log(otherPlayer.NickName + " has left or disconnected.");
+
+        PlayerController.instance.inverteboy.AddToRoomLog(otherPlayer.NickName + " Left The Game.");
 
         // Raises an event on player left room.
         PhotonNetwork.RaiseEvent(1, otherPlayer.ActorNumber, RaiseEventOptions.Default, SendOptions.SendReliable);

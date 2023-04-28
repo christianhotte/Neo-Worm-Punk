@@ -11,6 +11,11 @@ public class TeamsDisplay : MonoBehaviour
     [Header("Containers")]
     [SerializeField] private Transform teamColorContainer;
 
+    [SerializeField] private float animationDuration;
+    [SerializeField] private LeanTweenType animationEaseType;
+
+    private LTDescr openingAnimation;
+
     private List<TeamListItem> teamLists = new List<TeamListItem>();
 
     private void Start()
@@ -22,6 +27,18 @@ public class TeamsDisplay : MonoBehaviour
     private void OnEnable()
     {
         RefreshTeamLists();
+        OpenAnimation();
+    }
+
+    private void OnDisable()
+    {
+        LeanTween.cancel(openingAnimation.id);
+    }
+
+    private void OpenAnimation()
+    {
+        transform.localScale = Vector3.zero;
+        openingAnimation = LeanTween.scale(gameObject, new Vector3(0.01f, 0.01f, 0.01f), animationDuration).setEase(animationEaseType);
     }
 
     private IEnumerator SpawnTeamsAfterPlayerColorInit()
