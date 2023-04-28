@@ -465,6 +465,9 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             lobbyUI.UpdateRoomList();
         }
 
+        if (ReadyUpManager.instance != null)
+            ReadyUpManager.instance.UpdateReadyText();
+
         AdjustVoiceVolume();
     }
 
@@ -478,6 +481,9 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         localNetworkPlayer.SyncColors();
 
         SetTubeOccupantStatus((int)otherPlayer.CustomProperties["TubeID"], false);
+
+        if (ReadyUpManager.instance != null)
+            ReadyUpManager.instance.UpdateReadyText();
     }
 
     // This method is called when a custom event is received
