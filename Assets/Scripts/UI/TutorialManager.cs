@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class TutorialManager : MonoBehaviour
 {
-    public enum Tutorial { GUNS, TURN, MOVE, CHAINSAW, HOOKSHOT, PARRY }
+    public enum Tutorial { GUNS, TURN, MOVE, CHAINSAW, SPIN, HOOKSHOT, PARRY }
 
     [SerializeField, Tooltip("The different tutorial segments.")] private TutorialSegment[] tutorialSegments;
     [SerializeField, Tooltip("The tutorial checkpoint locations.")] private Transform[] checkpoints;
@@ -58,6 +58,13 @@ public class TutorialManager : MonoBehaviour
         PlayerController.instance.inverteboy.UpdateTutorialText(tutorialSegments[tutorialSegment].message, tutorialSegments[tutorialSegment].label, tutorialSegments[tutorialSegment].diagram);
         currentTutorialSegment = (Tutorial)tutorialSegment;
         ResetTutorialTask();
+    }
+
+    public void UpdateTutorialMessage(string newMessage, string newLabel = "")
+    {
+        PlayerController.instance.inverteboy.ShowInverteboyPopup("Spineless Benefactor");
+        PlayerController.instance.inverteboy.Flash();
+        PlayerController.instance.inverteboy.UpdateTutorialText(newMessage, newLabel);
     }
 
     /// <summary>
@@ -123,6 +130,7 @@ public class TutorialManager : MonoBehaviour
             default:
                 //Task completed
                 PlayerController.instance.inverteboy.UpdateTutorialProgress("Task Complete.");
+                UpdateTutorialMessage("Good job. Move onto the next section.");
                 break;
         }
     }
@@ -141,7 +149,7 @@ public class TutorialManager : MonoBehaviour
     public void ReturnToMenu()
     {
         //GameManager.Instance.LoadGame(GameSettings.titleScreenScene);
-        Debug.Log("Returning to Menu");
+        Debug.Log("Returning to Menu...");
         StartCoroutine(FadeRoutine());
     }
 

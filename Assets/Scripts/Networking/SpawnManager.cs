@@ -80,7 +80,7 @@ public class SpawnManager : MonoBehaviour
         // If the new index is the same as the last one, get a new one
         if (newIndex == lastSpawnIndex)
         {
-            newIndex = GetNewSpawnIndex();
+            //newIndex = GetNewSpawnIndex();
         }
 
         return newIndex;
