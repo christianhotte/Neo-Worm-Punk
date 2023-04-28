@@ -326,6 +326,7 @@ public class NewChainsawController : PlayerEquipment
                     else
                     {
                         hitPlayer.photonView.RPC("RPC_Hit", RpcTarget.AllBuffered, 100, PlayerController.photonView.ViewID, Vector3.zero, (int)DeathCause.CHAINSAW); //Hit target
+                        Debug.Log("ChainsawKill");
                         SendHapticImpulse(settings.extendHaptics);
                         PlayerController.instance.audioSource.PlayOneShot(settings.KillSound);
                     }
@@ -399,6 +400,9 @@ public class NewChainsawController : PlayerEquipment
                 if (hitPlayer != null && !hitPlayer.photonView.IsMine) //Player (other than self) has been hit by blade
                 {
                     hitPlayer.photonView.RPC("RPC_Hit", RpcTarget.AllBuffered, 3, PlayerController.photonView.ViewID, Vector3.zero, (int)DeathCause.CHAINSAW); //Hit target
+                    Debug.Log("DeflectingChainsawKill");
+                    SendHapticImpulse(settings.extendHaptics);
+                    PlayerController.instance.audioSource.PlayOneShot(settings.KillSound);
                 }
             }
         }
