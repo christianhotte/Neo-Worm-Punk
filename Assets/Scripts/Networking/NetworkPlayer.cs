@@ -607,7 +607,7 @@ public class NetworkPlayer : MonoBehaviour
 
         if (ReadyUpManager.instance != null && ReadyUpManager.instance.localPlayerTube != null)
         {
-            ReadyUpManager.instance.localPlayerTube.GetTeamsDisplay().UpdatePlayerTeams(nickName, color);
+            ReadyUpManager.instance.localPlayerTube.GetTeamsDisplay().RefreshTeamLists();
         }
     }
 

@@ -11,7 +11,7 @@ public class TeamsDisplay : MonoBehaviour
     [Header("Containers")]
     [SerializeField] private Transform teamColorContainer;
 
-    private Dictionary<string, int> playerTeams = new Dictionary<string, int>();
+    private List<TeamListItem> teamLists = new List<TeamListItem>();
 
     private void Start()
     {
@@ -21,12 +21,7 @@ public class TeamsDisplay : MonoBehaviour
 
     private void OnEnable()
     {
-        SpawnTeamNames();
-    }
-
-    private void OnDisable()
-    {
-        RemoveTeamNames();
+        RefreshTeamLists();
     }
 
     private IEnumerator SpawnTeamsAfterPlayerColorInit()
@@ -42,41 +37,27 @@ public class TeamsDisplay : MonoBehaviour
             TeamListItem newTeam = Instantiate(teamColorDisplay, teamColorContainer).GetComponent<TeamListItem>();
             newTeam.ChangeBackgroundColor(i);
             newTeam.ChangeLabel(i);
+            teamLists.Add(newTeam);
+        }
 
-            InitializePlayerTeams();
-            newTeam.RefreshPlayerList(playerTeams);
+        RefreshTeamLists();
+    }
+
+    public void RefreshTeamLists()
+    {
+        for(int i = 0; i < teamLists.Count; i++)
+        {
+            GetPlayerTeams();
+            teamLists[i].RefreshPlayerList(GetPlayerTeams());
         }
     }
 
-    private void RemoveTeamNames()
+    public Dictionary<string, int> GetPlayerTeams()
     {
-        foreach (Transform trans in teamColorContainer)
-            Destroy(trans.gameObject);
-    }
-
-    public void InitializePlayerTeams()
-    {
+        Dictionary <string, int> playerTeams = new Dictionary<string, int>();
         foreach(var player in NetworkManagerScript.instance.GetPlayerList())
-        {
-            if (!playerTeams.ContainsKey(player.NickName))
-                playerTeams.Add(player.NickName, (int)player.CustomProperties["Color"]);
-        }
-    }
+            playerTeams.Add(player.NickName, (int)player.CustomProperties["Color"]);
 
-    public void UpdatePlayerTeams(string nickname, int newColor)
-    {
-        if (playerTeams.TryGetValue(nickname, out int currentPlayerColor))
-        {
-            if(newColor != currentPlayerColor)
-            {
-                playerTeams[nickname] = newColor;
-                teamColorContainer.GetChild(currentPlayerColor).GetComponent<TeamListItem>().RefreshPlayerList(playerTeams);
-                if (!teamColorContainer.GetChild(newColor).gameObject.activeInHierarchy)
-                {
-                    teamColorContainer.GetChild(newColor).gameObject.SetActive(true);
-                    teamColorContainer.GetChild(newColor).GetComponent<TeamListItem>().RefreshPlayerList(playerTeams);
-                }
-            }
-        }
+        return playerTeams;
     }
 }
