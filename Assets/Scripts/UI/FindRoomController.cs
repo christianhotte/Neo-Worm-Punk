@@ -18,6 +18,7 @@ public class FindRoomController : MonoBehaviour
     private RoomListItem[] listedRooms;
 
     private int roomCount;
+    private string roomToConnectTo;
 
     private void OnEnable()
     {
@@ -98,8 +99,13 @@ public class FindRoomController : MonoBehaviour
     /// </summary>
     public void ConnectToRoom()
     {
-        if(selectedRoom != null)
-            selectedRoom.OnClick();
+        NetworkManagerScript.instance.JoinRoom(roomToConnectTo);
+    }
+
+    public void SetRoomToConnectTo()
+    {
+        if (selectedRoom != null)
+            roomToConnectTo = selectedRoom.GetRoomListInfo().Name;
     }
 
     /// <summary>
@@ -114,6 +120,7 @@ public class FindRoomController : MonoBehaviour
         scrollArea.anchoredPosition = Vector3.zero;
         UpdateMenu();
     }
+
 
     public float GetArrowYPos() => arrowObject.anchoredPosition.y;
 }

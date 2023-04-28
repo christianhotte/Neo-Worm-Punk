@@ -492,6 +492,11 @@ public class NewChainsawController : PlayerEquipment
                 newProjectile.photonView.RPC("RPC_Fire", RpcTarget.All, barrel.position, barrel.rotation, PlayerController.photonView.ViewID); //Initialize all projectiles simultaneously
             }
             audioSource.PlayOneShot(settings.deflectSound); //Play deflect sound
+
+            TutorialManager tutorialManager = FindObjectOfType<TutorialManager>();
+            if (tutorialManager != null && tutorialManager.GetCurrentTutorialSegment() == TutorialManager.Tutorial.PARRY)
+                tutorialManager.IncrementTutorialProgress();
+
             return true; //Indicate that projectile was deflected
         }
         else return false; //Indicate that projectile was not deflected
