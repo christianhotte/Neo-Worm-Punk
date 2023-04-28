@@ -365,7 +365,7 @@ public class NetworkPlayer : MonoBehaviour
 
     public void SyncTeams()
     {
-        if ((bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"] && photonView.Owner.CustomProperties["Color"] != null)
+        if ((bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"])
             photonView.RPC("UpdateTeamDisplays", RpcTarget.All); //Send data to every player on the network (including this one)
     }
 
@@ -589,9 +589,9 @@ public class NetworkPlayer : MonoBehaviour
             for (int i = 0; i < newColorList.Length; i++)
             {
                 Debug.Log(NetworkManagerScript.instance.GetPlayerList()[i].NickName + " Color: " + (ColorOptions)newColorList[i]);
-                Debug.Log("Photon Nickname: " + photonView.Owner.NickName);
+                Debug.Log("Photon Nickname: " + NetworkManagerScript.localNetworkPlayer.photonView.Owner.NickName);
 
-                if (NetworkManagerScript.instance.GetPlayerList()[i].NickName == photonView.Owner.NickName)
+                if (NetworkManagerScript.instance.GetPlayerList()[i].NickName == NetworkManagerScript.localNetworkPlayer.photonView.Owner.NickName)
                     ChangePlayerColorData(newColorList[i]);
             }
         }
