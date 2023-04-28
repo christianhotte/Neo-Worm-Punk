@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
+using UnityEngine.SceneManagement;
 
 public enum ColorOptions { DEFAULT, PINK, ORANGE, YELLOW, GREEN, CYAN, VIOLET, RAZZMATAZZ, WHITE }
 
@@ -21,7 +22,7 @@ public class PlayerColorChanger : MonoBehaviour
         for (int i = 0; i < colorButtons.Length; i++)
             AdjustButtonColor(colorButtons[i], i);
 
-        if (PhotonNetwork.IsConnected)
+        if (PhotonNetwork.IsConnected && SceneManager.GetActiveScene().name != GameSettings.titleScreenScene)
             StartCoroutine(RefreshButtonsOnStart());
         else
             RefreshOfflineButtons();

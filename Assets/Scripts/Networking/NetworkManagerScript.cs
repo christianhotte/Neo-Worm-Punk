@@ -204,7 +204,13 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     public void JoinRoom(string roomName)
     {
         // Joins the room on the network
-        PhotonNetwork.JoinRoom(roomName);
+        if (!PhotonNetwork.JoinRoom(roomName))
+        {
+            //Reload into the title screen scene for now if failed
+            PhotonNetwork.Disconnect();
+            Debug.Log("Returning To Main Menu...");
+            GameManager.Instance.LoadGame(GameSettings.titleScreenScene);
+        }
 
         mostRecentRoom = PhotonNetwork.CurrentRoom;
 
@@ -437,20 +443,20 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
     public override void OnJoinRoomFailed(short returnCode, string message)
     {
+        base.OnJoinRoomFailed(returnCode, message);
+
         Debug.LogError("Join Room Failed. Reason: " + message);
 
-/*        LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
+        /*        LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
 
-        //If there is a lobby in the scene, display an error message
-        if (lobbyUI != null)
-        {
-            lobbyUI.UpdateErrorMessage("Join Room Failed. Reason: " + message);
-            lobbyUI.SwitchMenu(LobbyMenuState.ERROR);
-        }*/
-
-        //Reload into the title screen scene for now
-        GameManager.Instance.LoadGame(GameSettings.titleScreenScene);
+                //If there is a lobby in the scene, display an error message
+                if (lobbyUI != null)
+                {
+                    lobbyUI.UpdateErrorMessage("Join Room Failed. Reason: " + message);
+                    lobbyUI.SwitchMenu(LobbyMenuState.ERROR);
+                }*/
     }
+
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
         base.OnPlayerEnteredRoom(newPlayer);

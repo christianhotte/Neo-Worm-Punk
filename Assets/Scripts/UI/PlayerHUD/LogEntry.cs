@@ -22,6 +22,7 @@ public class LogEntry : MonoBehaviour
 
     private void LogAnimation()
     {
+        transform.localScale = Vector3.zero;
         LeanTween.scale(gameObject, Vector3.one, startAnimationDuration).setEase(startingAnimationEaseType).setOnComplete(
             () => LeanTween.delayedCall(delayDuration, () => LeanTween.alphaCanvas(GetComponent<CanvasGroup>(), 0f, endAnimationDuration).setEase(endingAnimationEaseType).setDestroyOnComplete(true)));
     }
