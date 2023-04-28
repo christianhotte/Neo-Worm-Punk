@@ -406,6 +406,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             autoJoin.AutoLoadScene(GameSettings.roomScene);
 
         //Sets the player's values
+        SpawnNetworkPlayer();                                             //Always spawn a network player instance when joining a room
         Hashtable photonPlayerSettings = new Hashtable();
         photonPlayerSettings.Add("Color", PlayerPrefs.GetInt("PreferredColorOption"));
         photonPlayerSettings.Add("IsReady", false);
@@ -430,10 +431,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
         //Cleanup:
         Debug.Log("Joined " + PhotonNetwork.CurrentRoom.Name + " room."); //Indicate that room has been joined
-        SpawnNetworkPlayer();                                             //Always spawn a network player instance when joining a room
         localNetworkPlayer.SetNetworkPlayerProperties("IsReady", false);;
         AdjustVoiceVolume();
-        
     }
 
     public override void OnJoinRoomFailed(short returnCode, string message)
