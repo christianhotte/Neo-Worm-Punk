@@ -47,7 +47,7 @@ public class PlayerController : MonoBehaviour
     internal PlayerInput input;                //Input manager component used by player to send messages to hands and such
     internal SkinnedMeshRenderer bodyRenderer; //Mesh renderer for player's physical worm body
     internal PlayerBodyManager bodyManager;    //Reference to script on player that manages body collisions and special effects
-    private AudioSource audioSource;           //Main player audio source
+    internal AudioSource audioSource;           //Main player audio source
     private Transform camOffset;               //Object used to offset camera position in case of weirdness
     private InputActionMap inputMap;           //Input map which player uses
     private ScreenShakeVR screenShaker;        //Component used to safely shake player's screen without causing nausea
@@ -107,17 +107,21 @@ public class PlayerController : MonoBehaviour
     public IEnumerator DeathSequence()
     {
         yield return new WaitForSeconds(healthSettings.deathTime); //Wait for designated number of seconds in death zone
-
+        if (GetComponentInChildren<NewGrapplerController>() != null)
+        {
+            GetComponentInChildren<NewGrapplerController>().locked = false;
+        }
         if (SpawnManager.current != null && useSpawnPoint) //Spawn manager is present in scene
         {
-            Transform spawnpoint = SpawnManager.current.GetRandomSpawnPoint();                    //Get spawnpoint from spawnpoint manager
+            /*Transform spawnpoint = SpawnManager.current.GetRandomSpawnPoint();                    //Get spawnpoint from spawnpoint manager
             xrOrigin.transform.position = spawnpoint.position;                                    //Move spawned player to target position
-            xrOrigin.transform.eulerAngles = Vector3.Project(spawnpoint.eulerAngles, Vector3.up); //Rotate player to designated spawnpoint rotation
+            xrOrigin.transform.eulerAngles = Vector3.Project(spawnpoint.eulerAngles, Vector3.up); //Rotate player to designated spawnpoint rotation*/
+            SpawnManager.current.Respawn(xrOrigin.gameObject);
         }
         foreach (PlayerEquipment equipment in attachedEquipment) equipment.inputEnabled = true; //Re-enable equipment input
         bodyRb.isKinematic = false; //Re-enable player physics
 
-        photonView.RPC("RPC_MakeVisible", RpcTarget.Others); //Unhide trailrenderers for all other players
+        if (PhotonNetwork.IsConnected) photonView.RPC("RPC_MakeVisible", RpcTarget.Others); //Unhide trailrenderers for all other players
         isDead = false;                                      //Indicate that player is no longer dead
         CenterCamera();                                      //Center camera (this is worth doing during any major transition)
     }
@@ -187,8 +191,9 @@ public class PlayerController : MonoBehaviour
         //Move to spawnpoint:
         if (SpawnManager.current != null && useSpawnPoint) //Spawn manager is present in scene
         {
-            Transform spawnpoint = SpawnManager.current.GetRandomSpawnPoint(); //Get spawnpoint from spawnpoint manager
-            xrOrigin.transform.position = spawnpoint.position;           //Move spawned player to target position
+            /*Transform spawnpoint = SpawnManager.current.GetRandomSpawnPoint(); //Get spawnpoint from spawnpoint manager
+            xrOrigin.transform.position = spawnpoint.position;           //Move spawned player to target position*/
+            SpawnManager.current.Respawn(xrOrigin.gameObject);
         }
 
         //Hide equipment in menus:
@@ -317,6 +322,8 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     public void UpdateWeaponry()
     {
+        Debug.Log("Menu Scene: " + inMenu.ToString());
+
         if (inMenu)
         {
             inCombat = false;
@@ -338,7 +345,13 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        combatHUD.GetComponent<Canvas>().enabled = inCombat;
+        if (SceneManager.GetActiveScene().name != GameSettings.tutorialScene)
+        {
+            if (inCombat)
+                inverteboy.SwitchMainCanvas(InverteboyController.InverteboyMainScreens.ARENA);
+            else
+                inverteboy.SwitchMainCanvas(InverteboyController.InverteboyMainScreens.MAIN);
+        }
     }
 
     //INPUT METHODS:
@@ -367,7 +380,10 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     public void HitEnemy()
     {
-        if (targetHitSound != null) audioSource.PlayOneShot(targetHitSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play hit sound when player shoots (or damages) a target
+        if (targetHitSound != null)
+        {
+            audioSource.PlayOneShot(targetHitSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play hit sound when player shoots (or damages) a target
+        }
     }
     /// <summary>
     /// Called when player hits and kills an enemy with a projectile.
@@ -379,13 +395,15 @@ public class PlayerController : MonoBehaviour
     /// <summary>
     /// Method called when this player is hit by a projectile.
     /// </summary>
+    /// <returns>Whether or not the player was killed by this damage.</returns>>
     public bool IsHit(int damage)
     {
         //Hit effects:
+        print("player hit by projectile");
         if (timeUntilVulnerable > 0) return false;                              //Do not allow players to be hurt while invulnerable
         currentHealth -= Mathf.Max((float)damage, 0);                           //Deal projectile damage, floor at 0
         healthVolume.weight = 1 - HealthPercent;                                //Update health visualization
-        print(damage + " damage dealt to player with ID " + photonView.ViewID); //Indicate that damage has been dealt
+        //print(damage + " damage dealt to player with ID " + photonView.ViewID); //Indicate that damage has been dealt
         UpdateHealthIndicators();
 
         //Death check:
@@ -400,6 +418,21 @@ public class PlayerController : MonoBehaviour
             if (healthSettings.regenSpeed > 0) timeUntilRegen = healthSettings.regenPauseTime;                                                             //Optionally begin regeneration sequence
             return false;
         }
+    }
+    /// <summary>
+    /// Replacement for NetworkPlayer.RPC_IsHit for when player is hit by projectiles offline.
+    /// </summary>
+    public bool IsHit(int damage, Vector3 projVel)
+    {
+        if (isDead) return false; //Prevent dead players from being killed
+        foreach (PlayerEquipment equipment in attachedEquipment)
+        {
+            if (equipment.TryGetComponent(out NewChainsawController chainsaw)) //Equipment is a chainsaw
+            {
+                if (chainsaw.TryDeflect(projVel, "Projectiles/HotteProjectile1")) return false; //Do not deal damage if projectile could be deflected
+            }
+        }
+        return IsHit(damage);
     }
     /// <summary>
     /// Method called when something kills this player.
@@ -419,7 +452,7 @@ public class PlayerController : MonoBehaviour
         }
 
         //Put player in limbo:
-        photonView.RPC("RPC_MakeInvisible", RpcTarget.Others);                           //Hide trailrenderers for all other players
+        if (PhotonNetwork.IsConnected) photonView.RPC("RPC_MakeInvisible", RpcTarget.Others);                           //Hide trailrenderers for all other players
         bodyRb.velocity = Vector3.zero;                                                  //Reset player velocity
         CenterCamera();                                                                  //Center camera (this is worth doing during any major transition)
         foreach (PlayerEquipment equipment in attachedEquipment) equipment.Shutdown(-1); //Stow and disable all equipment on player

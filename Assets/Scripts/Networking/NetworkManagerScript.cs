@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using ExitGames.Client.Photon;
 using Photon.Voice.Unity;
+using System.Linq;
 
 /* Code was referenced from https://www.youtube.com/watch?v=KHWuTBmT1oI
  * https://www.youtube.com/watch?v=zPZK7C5_BQo&list=PLhsVv9Uw1WzjI8fEBjBQpTyXNZ6Yp1ZLw */
@@ -33,6 +34,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     [SerializeField] private WordStructure[] wormNounsGood;
     [SerializeField] private WordStructure[] wormAdjectivesBad = { new WordStructure("Guzzling", new int[4]), new WordStructure("Fleshy", new int[4]), new WordStructure("Sopping", new int[4]), new WordStructure("Throbbing", new int[4]), new WordStructure("Promiscuous", new int[4]), new WordStructure("Flaccid", new int[4]), new WordStructure("Erect", new int[4]), new WordStructure("Gaping", new int[4]) };
     [SerializeField] private WordStructure[] wormNounsBad = { new WordStructure("Guzzler", new int[4]), new WordStructure("Pervert", new int[4]), new WordStructure("Fucko", new int[4]), new WordStructure("Pissbaby", new int[4]) };
+
+    [SerializeField, Tooltip("The names for the teams.")] private string[] teamNames;
 
     List<WordStructure> availableWormAdjectives = new List<WordStructure>();
     List<WordStructure> availableWormNouns = new List<WordStructure>();
@@ -135,12 +138,20 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         if (customRoomSettings == null)
         {
             customRoomSettings = new Hashtable();
-            customRoomSettings.Add("RoundLength", GameSettings.testMatchLength);
-            customRoomSettings.Add("PlayerHP", GameSettings.HPDefault);
         }
-        customRoomSettings.Add("TubeOccupants", new bool[6] { false, false, false, false, false, false});
 
-        Debug.Log("Tube Occupants On Create Room: " + customRoomSettings["TubeOccupants"]);
+        AddCustomRoomSetting("RoundActive", false, ref customRoomSettings);
+        AddCustomRoomSetting("RoundLength", GameSettings.defaultMatchLength, ref customRoomSettings);
+        AddCustomRoomSetting("PlayerHP", GameSettings.HPDefault, ref customRoomSettings);
+        AddCustomRoomSetting("HazardsActive", GameSettings.hazardsActiveDefault, ref customRoomSettings);
+        AddCustomRoomSetting("UpgradesActive", GameSettings.upgradesActiveDefault, ref customRoomSettings);
+        AddCustomRoomSetting("UpgradeFrequency", GameSettings.defaultUpgradeFrequency, ref customRoomSettings);
+        AddCustomRoomSetting("UpgradeLength", GameSettings.defaultUpgradeLength, ref customRoomSettings);
+        AddCustomRoomSetting("TeamMode", GameSettings.teamModeDefault, ref customRoomSettings);
+        AddCustomRoomSetting("TubeOccupants", new bool[6] { false, false, false, false, false, false }, ref customRoomSettings);
+        AddCustomRoomSetting("TeamNames", GenerateTeamNameList().ToArray(), ref customRoomSettings);
+
+        // Debug.Log("Tube Occupants On Create Room: " + customRoomSettings["TubeOccupants"]);
 
         roomOptions.IsOpen = true; // The room is open.
         roomOptions.EmptyRoomTtl = 0; // Leave the room open for 0 milliseconds after the room is empty
@@ -148,6 +159,48 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         roomOptions.CustomRoomProperties = customRoomSettings;
         PhotonNetwork.JoinOrCreateRoom(roomName, roomOptions, TypedLobby.Default);
     }
+
+    /// <summary>
+    /// Generates a list of random team names.
+    /// </summary>
+    /// <returns>The list of random team names that has a length that equals the number of player colors.</returns>
+    public List<string> GenerateTeamNameList()
+    {
+        //Generates random team names for the room
+        List<string> currentTeamNames = new List<string>();
+        for (int i = 0; i < PlayerSettingsController.NumberOfPlayerColors(); i++)
+        {
+            bool validTeamName = false;
+            while (!validTeamName)
+            {
+                Random.InitState(System.DateTime.Now.Millisecond);  //Seeds the randomizer
+                string newTeamName = teamNames[Random.Range(0, teamNames.Length)];
+
+                if (!currentTeamNames.Contains(newTeamName))
+                {
+                    validTeamName = true;
+                    currentTeamNames.Add(newTeamName);
+                }
+            }
+        }
+
+        return currentTeamNames;
+    }
+
+    public void AddCustomRoomSetting(string name, object value, ref Hashtable roomSettings)
+    {
+        if (!roomSettings.ContainsKey(name))
+            roomSettings.Add(name, value);
+        else
+            roomSettings[name] = value;
+    }
+
+    public void SetMatchActive(bool isMatchActive)
+    {
+        PhotonNetwork.CurrentRoom.IsOpen = !isMatchActive;
+        UpdateRoomSettings("RoundActive", isMatchActive);
+    }
+
     public void JoinRoom(string roomName)
     {
         // Joins the room on the network
@@ -352,6 +405,21 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         if (autoJoin != null && autoJoin.GoToLockerRoom())
             autoJoin.AutoLoadScene(GameSettings.roomScene);
 
+        //Sets the player's values
+        SpawnNetworkPlayer();                                             //Always spawn a network player instance when joining a room
+        Hashtable photonPlayerSettings = new Hashtable();
+        photonPlayerSettings.Add("Color", PlayerPrefs.GetInt("PreferredColorOption"));
+        photonPlayerSettings.Add("IsReady", false);
+        photonPlayerSettings.Add("TubeID", -1);
+        PlayerController.photonView.Owner.SetCustomProperties(photonPlayerSettings);
+
+        //Assigns the player a tube ID
+        OccupyNextAvailableTube();
+
+        //Loads the locker room scene when the player joins a room from the title screen. This is so epic can we hit 10 likes
+        if (SceneManager.GetActiveScene().name == GameSettings.titleScreenScene)
+            GameManager.Instance.LoadGame(GameSettings.roomScene);
+
         //Update lobby UI:
         LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
         if (lobbyUI != null) //If there is a lobby in the scene, display room information
@@ -363,7 +431,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
         //Cleanup:
         Debug.Log("Joined " + PhotonNetwork.CurrentRoom.Name + " room."); //Indicate that room has been joined
-        SpawnNetworkPlayer();                                             //Always spawn a network player instance when joining a room
         localNetworkPlayer.SetNetworkPlayerProperties("IsReady", false);;
         AdjustVoiceVolume();
     }
@@ -372,14 +439,17 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     {
         Debug.LogError("Join Room Failed. Reason: " + message);
 
-        LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
+/*        LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
 
         //If there is a lobby in the scene, display an error message
         if (lobbyUI != null)
         {
             lobbyUI.UpdateErrorMessage("Join Room Failed. Reason: " + message);
             lobbyUI.SwitchMenu(LobbyMenuState.ERROR);
-        }
+        }*/
+
+        //Reload into the title screen scene for now
+        GameManager.Instance.LoadGame(GameSettings.titleScreenScene);
     }
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
@@ -394,6 +464,9 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             lobbyUI.UpdateRoomList();
         }
 
+        if (ReadyUpManager.instance != null)
+            ReadyUpManager.instance.UpdateReadyText();
+
         AdjustVoiceVolume();
     }
 
@@ -407,6 +480,9 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         localNetworkPlayer.SyncColors();
 
         SetTubeOccupantStatus((int)otherPlayer.CustomProperties["TubeID"], false);
+
+        if (ReadyUpManager.instance != null)
+            ReadyUpManager.instance.UpdateReadyText();
     }
 
     // This method is called when a custom event is received
@@ -440,6 +516,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             PhotonNetwork.LoadLevel(GameSettings.titleScreenScene);
     }
 
+    private Dictionary<string, RoomInfo> roomDictionary = new Dictionary<string, RoomInfo>();
+
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
         //base.OnRoomListUpdate(roomList);
@@ -451,7 +529,32 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         //If there is a lobby in the scene, update the room list
         if (lobbyUI != null)
         {
-            lobbyUI.UpdateLobbyList(roomList);
+            foreach(var room in roomList)
+            {
+                if (room.RemovedFromList)
+                {
+                    if (roomDictionary.ContainsKey(room.Name))
+                    {
+                        Debug.Log("Removing " + room.Name + " From Lobby List...");
+                        roomDictionary.Remove(room.Name);
+                    }
+                }
+                else
+                {
+                    if (roomDictionary.ContainsKey(room.Name))
+                    {
+                        Debug.Log("Updating " + room.Name + "In Lobby List...");
+                        roomDictionary[room.Name] = room;
+                    }
+                    else
+                    {
+                        Debug.Log("Adding " + room.Name + " To Lobby List...");
+                        roomDictionary.Add(room.Name, room);
+                    }
+                }
+            }
+
+            lobbyUI.UpdateLobbyList(roomDictionary.Values.ToList());
         }
     }
 
@@ -507,7 +610,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         localNetworkPlayer = PhotonNetwork.Instantiate(networkPlayerName, Vector3.zero, Quaternion.identity).GetComponent<NetworkPlayer>(); //Spawn instance of network player and get reference to its script
 
         Debug.Log("Actor Number For " + GetLocalPlayerName() + ": " + PhotonNetwork.LocalPlayer.ActorNumber);
-        OccupyNextAvailableTube();
     }
 
     public void DeSpawnNetworkPlayer()
@@ -569,12 +671,12 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         return playerNameList;
     }
 
-    public void LoadSceneWithFade(string sceneName, bool asyncLoad = true)
+    public void LoadSceneWithFade(string sceneName)
     {
-        StartCoroutine(FadeLevelRoutine(sceneName, asyncLoad));
+        StartCoroutine(FadeLevelRoutine(sceneName));
     }
 
-    private IEnumerator FadeLevelRoutine(string sceneName, bool asyncLoad)
+    private IEnumerator FadeLevelRoutine(string sceneName)
     {
         GameManager.Instance.levelTransitionActive = true;
 
@@ -587,7 +689,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         PhotonNetwork.LoadLevel(sceneName);
 
         // Unready
-        localNetworkPlayer.SetNetworkPlayerProperties("IsReady", false);
+        if(localNetworkPlayer != null)
+            localNetworkPlayer.SetNetworkPlayerProperties("IsReady", false);
 
         GameManager.Instance.levelTransitionActive = false;
     }
@@ -601,6 +704,18 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     public Room GetMostRecentRoom() => mostRecentRoom;
     public string GetCurrentRoom() => PhotonNetwork.CurrentRoom.Name;
     public Player[] GetPlayerList() => PhotonNetwork.PlayerList;
+
+    public int GetPlayerIndexFromList()
+    {
+        for(int i = 0; i < GetPlayerList().Length; i++)
+        {
+            if (localNetworkPlayer.photonView.Owner == GetPlayerList()[i])
+                return i;
+        }
+
+        return -1;
+    }
+
     public string GetLocalPlayerName() => PhotonNetwork.LocalPlayer.NickName;
     public bool IsLocalPlayerInRoom() => PhotonNetwork.InRoom;
 
@@ -642,4 +757,29 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             }
         }
     }
+
+    // Is called when the button is pressed for TDM.
+    public void TeamDeathMatch()
+    {
+        UpdateRoomSettings("TeamMode", true);
+
+        // TO DO: Set teamColor player stats to the current color you have
+    }
+
+    // // Is called when the button is pressed for FFA.
+    public void FreeForAll()
+    {
+        UpdateRoomSettings("TeamMode", false);
+    }
+
+    // We want to switch this from just 2 teams to having multiple colors for teams.
+    public void SwitchTeam()
+    {
+        if (localNetworkPlayer.GetNetworkPlayerStats().teamColor == "")
+        {
+            
+        }
+    }
+
+    public string[] GetTeamNameList() => teamNames;
 }

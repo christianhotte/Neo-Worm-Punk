@@ -82,7 +82,7 @@ public class HookProjectile : Projectile
         {
             case HookState.Deployed: //Hook has been launched and is flying through the air
                 base.Update(); //Use normal projectile movement and homing
-                if (photonView.IsMine && controller.settings.travelIntersectBehavior != HookshotSettings.LineIntersectBehavior.Ignore) //Hook needs to check if anything is intersecting its line
+                if ((!PhotonNetwork.IsConnected || photonView.IsMine) && controller.settings.travelIntersectBehavior != HookshotSettings.LineIntersectBehavior.Ignore) //Hook needs to check if anything is intersecting its line
                 {
                     if (Physics.Linecast(controller.barrel.position, transform.position, out RaycastHit hitInfo, controller.settings.lineCheckLayers)) //Check along line for collisions
                     {
@@ -94,19 +94,19 @@ public class HookProjectile : Projectile
                 break;
             case HookState.Retracting: //Hook is released and is being pulled back toward player
                 //Point away from player:
-                Vector3 retractionTarget = photonView.IsMine ? controller.barrel.position : originPlayerBody.position; //Determine which point to retract toward depending on whether or not projectile is remote
+                Vector3 retractionTarget = (!PhotonNetwork.IsConnected || photonView.IsMine) ? controller.barrel.position : originPlayerBody.position; //Determine which point to retract toward depending on whether or not projectile is remote
                 Vector3 pointDirection = (retractionTarget - transform.position).normalized; //Get direction from projectile to player
                 transform.forward = -pointDirection;                                                   //Always point grappling hook in direction of player
 
                 //Move toward player:
                 transform.position = Vector3.MoveTowards(transform.position, retractionTarget, retractSpeed * Time.deltaTime); //Retract toward player at given speed
-                if (photonView.IsMine && transform.position == retractionTarget) Stow();                                       //Stow once hook has gotten close enough to destination
+                if ((!PhotonNetwork.IsConnected || photonView.IsMine) && transform.position == retractionTarget) Stow();                                       //Stow once hook has gotten close enough to destination
                 break;
             case HookState.Hooked: //Grappling hook is attached to a stationary object
                 PointLock(hitPosition); //Rotate hook toward controlling player, maintaining world position of lock point
 
                 //Move player:
-                if (photonView.IsMine) //Only master version needs to be able to pull the player
+                if (!PhotonNetwork.IsConnected || photonView.IsMine) //Only master version needs to be able to pull the player
                 {
                     float effectivePullSpeed = controller.settings.basePullSpeed * (punchWhipped ? controller.settings.punchWhipBoost : 1); //Initialize value to pass as player pull speed (increase if hook was punch-whipped)
                     Vector3 newVelocity = (lockPoint.position - controller.barrel.position).normalized * effectivePullSpeed;                //Get base speed at which grappling hook pulls you toward target
@@ -124,14 +124,22 @@ public class HookProjectile : Projectile
                         newVelocity -= addVel;                                                                //Apply additional velocity (rotated based on player orientation)
                     }
                     //newVelocity += otherEffectsThatCanOccurInLevel
-                    controller.player.bodyRb.velocity = newVelocity; //Apply new velocity
+                    if (controller.locked)
+                    {
+                        newVelocity *= 2.5f;                                //Gives a boost to locked hook
+                        controller.player.bodyRb.velocity = newVelocity; //Apply new velocity
+                    }
+                    else
+                    {
+                        controller.player.bodyRb.velocity = newVelocity; //Apply new velocity
+                    }
                 }
                 break;
             case HookState.PlayerTethered: //Grappling hook is attached to an enemy player
                 PointLock(hitPlayer.GetComponent<Targetable>().targetPoint.position); //Rotate hook toward controlling player, maintaining position at center mass of tethered player
 
                 //Move player:
-                if (photonView.IsMine) //NOTE: This is temporarily an exact copy of the normal pull logic
+                if (!PhotonNetwork.IsConnected || photonView.IsMine) //NOTE: This is temporarily an exact copy of the normal pull logic
                 {
                     float effectivePullSpeed = controller.settings.basePullSpeed * (punchWhipped ? controller.settings.punchWhipBoost : 1);                 //Initialize value to pass as player pull speed (increase if hook was punch-whipped)
                     Vector3 newVelocity = (lockPoint.position - controller.barrel.position).normalized * effectivePullSpeed;                                //Get base speed at which grappling hook pulls you toward target
@@ -139,12 +147,13 @@ public class HookProjectile : Projectile
                     if (Vector3.Angle(handDiff, hitDirection) > 90) newVelocity -= Vector3.Project(handDiff, hitDirection) * controller.settings.yankForce; //Apply additional velocity to player based on how much they are pulling their arm back
                     if (!punchWhipped) newVelocity -= Vector3.ProjectOnPlane(handDiff, hitDirection) * controller.settings.lateralManeuverForce;            //Apply additional velocity to player based on how much they are pulling their arm to the side
                     //newVelocity += otherEffectsThatCanOccurInLevel
+                    newVelocity *= 2.5f;
                     controller.player.bodyRb.velocity = newVelocity;                                                                                        //Apply new velocity
                 }
                 break;
             default: break;
         }
-        if (photonView.IsMine && (state == HookState.Hooked || state == HookState.PlayerTethered)) //Hook is hooked onto something
+        if ((!PhotonNetwork.IsConnected || photonView.IsMine) && (state == HookState.Hooked || state == HookState.PlayerTethered)) //Hook is hooked onto something
         {
             //Check for hook intersects:
             if (controller.settings.hookedIntersectBehavior != HookshotSettings.LineIntersectBehavior.Ignore) //Hook needs to check if anything is intersecting its line
@@ -181,7 +190,7 @@ public class HookProjectile : Projectile
         //Update tether:
         if (state != HookState.Stowed) //Hook is currently out and about
         {
-            tether.SetPosition(0, photonView.IsMine ? controller.barrel.position : originPlayerBody.position); //Move start of line to current position of launcher (on player arm)
+            tether.SetPosition(0, (!PhotonNetwork.IsConnected || photonView.IsMine) ? controller.barrel.position : originPlayerBody.position); //Move start of line to current position of launcher (on player arm)
             tether.SetPosition(1, tetherPoint.position);                                                       //Move end of line to current position of this projectile
         }
     }
@@ -204,14 +213,14 @@ public class HookProjectile : Projectile
         if (PhotonNetwork.IsConnected)
         {
             if (photonView.IsMine) photonView.RPC("RPC_Fire", RpcTarget.OthersBuffered, startPosition, startRotation, playerID); //Fire hooks on the network
-            else originPlayerBody = PhotonNetwork.GetPhotonView(playerID).GetComponent<Targetable>().targetPoint; //Have remote projectiles get their player body from given playerID
+            else originPlayerBody = PhotonNetwork.GetPhotonView(playerID).GetComponent<Targetable>().targetPoint; //Have remote projectiles get their player body from given playerID   
         }
 
         //Initialize tether:
-        tether.SetPosition(0, photonView.IsMine ? controller.barrel.position : originPlayerBody.position); //Move start of line to current position of launcher (on player arm)
-        tether.SetPosition(1, tetherPoint.position);                                                       //Move end of line to current position of this projectile
-        tether.enabled = true;                                                                             //Make tether visible
-        if (trail != null) { trail.enabled = true; trail.Clear(); }                                        //Enable and clear particle trail
+        tether.SetPosition(0, (!PhotonNetwork.IsConnected || photonView.IsMine) ? controller.barrel.position : originPlayerBody.position); //Move start of line to current position of launcher (on player arm)
+        tether.SetPosition(1, tetherPoint.position);                //Move end of line to current position of this projectile
+        tether.enabled = true;                                      //Make tether visible
+        if (trail != null) { trail.enabled = true; trail.Clear(); } //Enable and clear particle trail
 
         //Cleanup:
         ChangeVisibility(true);     //Make projectile visible
@@ -308,7 +317,10 @@ public class HookProjectile : Projectile
     {
         //Initialization:
         target = null; //Clear target
-
+        if (hitInfo.collider.GetComponentInParent<WormHoleTrigger>() != null || (hitInfo.collider.GetComponentInParent<Grinder>() != null&&hitInfo.collider.name=="GrapplePoint")||hitInfo.collider.GetComponentInParent<TurbineZone>()!=null)  
+        {
+            controller.locked = true;
+        }
         //Check for bounce:
         if (controller.settings.bounceLayers == (controller.settings.bounceLayers | (1 << hitInfo.collider.gameObject.layer))) //Hook is bouncing off of a non-hookable layer
         {
@@ -358,7 +370,7 @@ public class HookProjectile : Projectile
     public void HookToPlayer(NetworkPlayer player)
     {
         //Validity checks:
-        hitPlayer = player;                                                                                                                                    //Store reference to hit player
+        hitPlayer = player;
         if (hitPlayer.photonView.ViewID == PlayerController.photonView.ViewID) { print("Grappling hook hit own player, despite it all."); Release(); return; } //Prevent hook from ever hitting its own player
 
         //Move to target:
@@ -412,7 +424,7 @@ public class HookProjectile : Projectile
     /// </summary>
     private void PointLock(Vector3 lockPosition)
     {
-        Vector3 pointDirection = ((photonView.IsMine ? controller.barrel.position : originPlayerBody.position) - lockPosition).normalized; //Get direction from lock point to end of player grappling arm
+        Vector3 pointDirection = (((!PhotonNetwork.IsConnected || photonView.IsMine) ? controller.barrel.position : originPlayerBody.position) - lockPosition).normalized; //Get direction from lock point to end of player grappling arm
         transform.forward = -pointDirection;                                                                                               //Always point grappling hook in direction of player
         transform.position = lockPosition - (transform.rotation * lockPoint.localPosition);                                                //Move hook so that lockPoint is at target position
     }

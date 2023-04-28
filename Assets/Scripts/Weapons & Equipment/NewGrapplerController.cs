@@ -4,6 +4,7 @@ using UnityEngine;
 using Photon.Pun;
 using UnityEngine.InputSystem;
 using CustomEnums;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Used by player to lock onto walls and move rapidly through the level. Launches a special type of projectile which is always tracked on the network.
@@ -28,6 +29,7 @@ public class NewGrapplerController : PlayerEquipment
 
     //Runtime Variables:
     internal Vector3 hookedHandPos; //Player hand position (relative to body) when hook lands on surface
+    internal bool locked = false;   //Stops player from releasing the grapple.
 
     //EVENTS & COROUTINES:
     /// <summary>
@@ -52,6 +54,8 @@ public class NewGrapplerController : PlayerEquipment
         if (handedness == Handedness.None) { Debug.LogError("GrapplingHook cannot recognize which side it is on. Make sure parent has the word Left or Right in its name."); Destroy(this); } //Make sure grappling hook knows which hand it is associated with
         if (!hookVisibleOnBarrel) { stowPoint = transform.Find("StowPoint"); if (stowPoint == null) stowPoint = transform; } //Get stow position (use own transform if none is given)
         barrel = transform.Find("Barrel"); if (barrel == null) barrel = transform;                                           //Get barrel position (use own transform if none is given)
+
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
     private protected override void Start()
     {
@@ -91,7 +95,12 @@ public class NewGrapplerController : PlayerEquipment
             if (PhotonNetwork.IsConnected) PhotonNetwork.Destroy(hook.gameObject); //Destroy hook object when destroying this equipment
             else Destroy(hook.gameObject);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  //Peepee poopoo, destroy on local
         }
-            
+
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+    public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        locked = false;
     }
 
     //INPUT METHODS:
@@ -104,7 +113,7 @@ public class NewGrapplerController : PlayerEquipment
                 float gripValue = context.ReadValue<float>();                                                                                                                //Get current position of grip axis
                 if (hook == null) break;                                                                                                                                     //Do not try to launch hook before it has been spawned
                 if (hook.state == HookProjectile.HookState.Stowed && gripValue >= settings.deployThreshold) Launch();                                                        //Launch hook when grip is squeezed
-                if (hook.state != HookProjectile.HookState.Stowed && hook.state != HookProjectile.HookState.Retracting && gripValue <= settings.releaseThreshold) Release(); //Begin retracting hook when grip is released
+                if (hook.state != HookProjectile.HookState.Stowed && hook.state != HookProjectile.HookState.Retracting && gripValue <= settings.releaseThreshold&&!locked) Release(); //Begin retracting hook when grip is released
                 break;
             default: break; //Ignore unrecognized actions
         }
@@ -160,6 +169,7 @@ public class NewGrapplerController : PlayerEquipment
     public void ForceReleased()
     {
         audioSource.loop = false; //Make audiosource stop looping reel sound
+        locked = false;
         audioSource.Stop();       //Make sure audiosource stops playing reel sound
         if (settings.releaseSound != null) audioSource.PlayOneShot(settings.releaseSound); //Play sound effect
         SendHapticImpulse(settings.releaseHaptics);                                        //Play haptic impulse
@@ -170,6 +180,7 @@ public class NewGrapplerController : PlayerEquipment
     public void Bounced()
     {
         if (settings.bounceSound != null) hook.audioSource.PlayOneShot(settings.bounceSound); //Play sound effect (on projectile)
+        locked = false;
         SendHapticImpulse(settings.releaseHaptics);                                           //Play haptic impulse
     }
 
@@ -185,7 +196,7 @@ public class NewGrapplerController : PlayerEquipment
         if (hook.punchWhipped && hook.timeInState < settings.punchWhipCooldown) return; //Do not allow hook to be launched before punch-whip cooldown has ended
 
         //Fire hook:
-        hook.Fire(barrel.position, hand.rotation, PlayerController.photonView.ViewID); //Fire using the position of barrel and rotation of hand (to allow for more directional flexibility)
+        hook.Fire(barrel.position, hand.rotation, PlayerController.photonView != null ? PlayerController.photonView.ViewID : -1); //Fire using the position of barrel and rotation of hand (to allow for more directional flexibility)
 
         //Effects:
         Vector3 forwardHandVel = Vector3.Project(RelativeVelocity, hand.forward); //Get forward hand velocity (relative to barrel)
@@ -237,5 +248,9 @@ public class NewGrapplerController : PlayerEquipment
     {
         base.Shutdown(disableInputTime); //Call base functionality
         hook.Stow();                     //Stow hook
+    }
+    public void Unlock()
+    {
+        locked = false;
     }
 }

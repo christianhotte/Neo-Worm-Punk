@@ -71,7 +71,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1620262600103442328}
   - component: {fileID: 1620262600103442329}
-  m_Layer: 9
+  - component: {fileID: 1205217119288514557}
+  - component: {fileID: 855706252469486315}
+  m_Layer: 17
   m_Name: WormEntrance
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -86,7 +88,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1620262600103442331}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 1.5}
+  m_LocalPosition: {x: 0, y: 0, z: 1.87}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -101,6 +103,34 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1620262600103442331}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!135 &1205217119288514557
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1620262600103442331}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 2.76
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &855706252469486315
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1620262600103442331}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fba8fd80747fad44dbc7560a3fe28b09, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetPoint: {fileID: 0}
+  type: 2
+  hookToCenter: 1
 --- !u!1 &1620262600561972265
 GameObject:
   m_ObjectHideFlags: 0
@@ -113,7 +143,6 @@ GameObject:
   - component: {fileID: 1620262600561972274}
   - component: {fileID: 1620262600561972268}
   - component: {fileID: 1620262600561972271}
-  - component: {fileID: 3605367630141126351}
   m_Layer: 9
   m_Name: Worm-HoleHole (1)
   m_TagString: Untagged
@@ -175,22 +204,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   light: {fileID: 5374682211338973234}
   WormHole: {fileID: 9109921427710634525}
+  particle: {fileID: 730297741547238853}
   wormholeEntrance: {fileID: 1620262601156547262}
---- !u!114 &3605367630141126351
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1620262600561972265}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fba8fd80747fad44dbc7560a3fe28b09, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  targetPoint: {fileID: 0}
-  type: 2
-  hookToCenter: 0
 --- !u!1 &1620262601031258323
 GameObject:
   m_ObjectHideFlags: 0
@@ -249,18 +264,19 @@ MonoBehaviour:
   wormZoneParticles: {fileID: 5120769077581133618, guid: 4f62d637fc7968845b5980a817dd33ac, type: 3}
   wormZoneInstance: {fileID: 0}
   playerCam: {fileID: 0}
-  particle1: {fileID: 730297741547238853}
-  particle2: {fileID: 584470618371506264}
   waitTime: 2
   exitSpeed: 30
   wormZoneSpeed: 5
+  randomExit: 0
   PC: {fileID: 0}
   playerOrigin: {fileID: 0}
+  OpenExits: []
   wormHoleAud: {fileID: 0}
   enterSound: {fileID: 8300000, guid: b0a64d7436126ce499301beef26175fa, type: 3}
   suctionSound: {fileID: 8300000, guid: 9d4cc2d3b1ccff84b9b1ebb65d46451e, type: 3}
   wormZoneScript: {fileID: 0}
   luckyChance: 10
+  randRange: 0
 --- !u!82 &1951368902157187744
 AudioSource:
   m_ObjectHideFlags: 0
@@ -382,7 +398,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1620262601096244178}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -129.32185, y: -500, z: -0.000015258789}
+  m_LocalPosition: {x: -129.32185, y: -5000, z: -0.000015258789}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -408,7 +424,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1620262601156547262}
   - component: {fileID: 1620262601156547263}
-  m_Layer: 9
+  - component: {fileID: 801577023377953259}
+  - component: {fileID: 5166581581737435693}
+  m_Layer: 17
   m_Name: WormEntrance
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -438,6 +456,34 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1620262601156547257}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!135 &801577023377953259
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1620262601156547257}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.32
+  m_Center: {x: 0, y: 0, z: 2.34}
+--- !u!114 &5166581581737435693
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1620262601156547257}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fba8fd80747fad44dbc7560a3fe28b09, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetPoint: {fileID: 0}
+  type: 2
+  hookToCenter: 1
 --- !u!1 &1620262601479060462
 GameObject:
   m_ObjectHideFlags: 0
@@ -450,7 +496,6 @@ GameObject:
   - component: {fileID: 1620262601479060467}
   - component: {fileID: 1620262601479060461}
   - component: {fileID: 1620262601479060460}
-  - component: {fileID: 2735634459400725784}
   m_Layer: 9
   m_Name: Worm-HoleHole
   m_TagString: Untagged
@@ -512,22 +557,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   light: {fileID: 9133768623429087693}
   WormHole: {fileID: 2460891239498265623}
+  particle: {fileID: 584470618371506264}
   wormholeEntrance: {fileID: 1620262600103442328}
---- !u!114 &2735634459400725784
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1620262601479060462}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fba8fd80747fad44dbc7560a3fe28b09, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  targetPoint: {fileID: 0}
-  type: 2
-  hookToCenter: 0
 --- !u!1 &2209894729004177128
 GameObject:
   m_ObjectHideFlags: 0

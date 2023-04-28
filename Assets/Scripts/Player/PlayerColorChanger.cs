@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
 public enum ColorOptions { DEFAULT, PINK, ORANGE, YELLOW, GREEN, CYAN, VIOLET, RAZZMATAZZ, WHITE }
 
@@ -16,14 +17,29 @@ public class PlayerColorChanger : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Debug.Log("Color Buttons Length: " + colorButtons.Length);
+       //Debug.Log("Color Buttons Length: " + colorButtons.Length);
         for (int i = 0; i < colorButtons.Length; i++)
             AdjustButtonColor(colorButtons[i], i);
+
+        if (PhotonNetwork.IsConnected)
+            StartCoroutine(RefreshButtonsOnStart());
+        else
+            RefreshOfflineButtons();
+    }
+
+    /// <summary>
+    /// Waits until the player has a color to refresh the buttons.
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator RefreshButtonsOnStart()
+    {
+        yield return new WaitUntil(() => NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["Color"] != null);
+        RefreshButtons();
     }
 
     private void AdjustButtonColor(PhysicalButtonController currentButton, int colorOption)
     {
-        Debug.Log("Changing Initial Button Color To: " + (ColorOptions)colorOption);
+        //Debug.Log("Changing Initial Button Color To: " + (ColorOptions)colorOption);
 
         Color newColor;
 
@@ -74,7 +90,21 @@ public class PlayerColorChanger : MonoBehaviour
         Color newColor = PlayerSettingsController.ColorOptionsToColor((ColorOptions)colorOption);
 
         PlayerSettingsController.Instance.charData.playerColor = newColor;   //Set the player color in the character data
-        NetworkManagerScript.localNetworkPlayer.SetNetworkPlayerProperties("Color", colorOption);
+
+        if (PhotonNetwork.IsConnected)
+        {
+            NetworkManagerScript.localNetworkPlayer.SetNetworkPlayerProperties("Color", colorOption);
+            if ((bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"])
+            {
+                RefreshButtons();
+                NetworkManagerScript.localNetworkPlayer.SyncTeams();
+            }
+        }
+        else
+        {
+            PlayerPrefs.SetInt("PreferredColorOption", colorOption);
+            RefreshOfflineButtons();
+        }
 
         PlayerController.instance.ApplyAndSyncSettings(); //Apply settings to player (NOTE TO PETER: Call this whenever you want to change a setting and sync it across the network)
         Debug.Log("Changing Player Color To " + newColorText);
@@ -89,12 +119,39 @@ public class PlayerColorChanger : MonoBehaviour
             button.EnableButton(true);
         }
 
-        foreach (var player in NetworkManagerScript.instance.GetPlayerList())
+        //If not on teams, make the player colors exclusive
+        if (!(bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"])
         {
-            Debug.Log(player.NickName + "'s Color: " + (ColorOptions)player.CustomProperties["Color"]);
-            colorButtons[(int)player.CustomProperties["Color"]].ShowText(true);
-            colorButtons[(int)player.CustomProperties["Color"]].LockButton(true);
-            colorButtons[(int)player.CustomProperties["Color"]].EnableButton(false);
+            foreach (var player in NetworkManagerScript.instance.GetPlayerList())
+            {
+                if (player.CustomProperties["Color"] != null)
+                {
+                    colorButtons[(int)player.CustomProperties["Color"]].ShowText(true);
+                    colorButtons[(int)player.CustomProperties["Color"]].LockButton(true);
+                    colorButtons[(int)player.CustomProperties["Color"]].EnableButton(false);
+                }
+            }
         }
+        //If on teams, make the player colors inclusive
+        else
+        {
+            colorButtons[(int)NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["Color"]].ShowText(true);
+            colorButtons[(int)NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["Color"]].LockButton(true);
+            colorButtons[(int)NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["Color"]].EnableButton(false);
+        }
+    }
+
+    private void RefreshOfflineButtons()
+    {
+        foreach (var button in colorButtons)
+        {
+            button.ShowText(false);
+            button.LockButton(false);
+            button.EnableButton(true);
+        }
+
+        colorButtons[PlayerPrefs.GetInt("PreferredColorOption")].ShowText(true);
+        colorButtons[PlayerPrefs.GetInt("PreferredColorOption")].LockButton(true);
+        colorButtons[PlayerPrefs.GetInt("PreferredColorOption")].EnableButton(false);
     }
 }

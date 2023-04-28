@@ -13,6 +13,25 @@ public class CombatHUDController : MonoBehaviour
     [SerializeField, Tooltip("The game HUD combat container.")] private GameObject combatInfoTransform;
     [SerializeField, Tooltip("The game HUD kill feed container.")] private Transform killFeedTransform;
     [SerializeField, Tooltip("The prefab for the kill message.")] private GameObject killMessagePrefab;
+    [SerializeField, Tooltip("The image of the helmet overlay.")] private Image helmetOverlay;
+    [SerializeField, Tooltip("The image of the helmet outline.")] private Image helmetOutline;
+    [SerializeField, Tooltip("The background of the speedometer.")] private Image speedometerBackground;
+    [SerializeField, Tooltip("The container for the upgrade notifications.")] private Transform upgradeContainer;
+    [SerializeField, Tooltip("The upgrade info prefab.")] private UpgradeDisplay upgradeInfoPrefab;
+    [SerializeField, Tooltip("The ammo text.")] private TextMeshProUGUI[] ammoText;
+
+    /// <summary>
+    /// Changes the color of the helmet.
+    /// </summary>
+    /// <param name="newColor">The new color of the helmet.</param>
+    public void ChangeHelmetColor(Color newColor)
+    {
+        helmetOverlay.color = newColor;
+        helmetOutline.color = newColor;
+
+        float speedometerAlpha = speedometerBackground.color.a;
+        speedometerBackground.color = new Color(newColor.r, newColor.g, newColor.b, speedometerAlpha);
+    }
 
     /// <summary>
     /// Update the player stats on the combat HUD.
@@ -22,6 +41,22 @@ public class CombatHUDController : MonoBehaviour
     {
         playerStatsContainer.Find("PlayerDeaths").GetComponent<TextMeshProUGUI>().text = "D: " + playerStats.numOfDeaths;
         playerStatsContainer.Find("PlayerKills").GetComponent<TextMeshProUGUI>().text = "K: " + playerStats.numOfKills;
+    }
+
+    /// <summary>
+    /// Adds to the upgrade info container.
+    /// </summary>
+    /// <param name="powerUpType">The type of power up.</param>
+    /// <param name="powerUpTime">The amount of time for the powerup.</param>
+    public void AddToUpgradeInfo(PowerUp.PowerUpType powerUpType, float powerUpTime)
+    {
+        UpgradeDisplay currentUpgrade = Instantiate(upgradeInfoPrefab, upgradeContainer);
+        currentUpgrade.StartUpgradeTimer(powerUpType, powerUpTime);
+    }
+
+    public void UpdateAmmoText(CustomEnums.Handedness handedness, int currentAmmo, int maxAmmo)
+    {
+        ammoText[handedness == CustomEnums.Handedness.Left ? 0 : 1].text = currentAmmo + "/" + maxAmmo;
     }
 
     /// <summary>

@@ -111,20 +111,59 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
                 print("Player " + player.photonView.ViewID + " ready status: " + (player.networkPlayerStats.isReady ? "READY" : "NOT READY"));
 
                 //If in debug mode, force the game to load when the master client readies up
-                if(player.photonView.Owner.IsMasterClient && player.networkPlayerStats.isReady && GameSettings.debugMode)
-                    forceLoadViaMasterClient = true;
+/*                if(player.photonView.Owner.IsMasterClient && player.networkPlayerStats.isReady && GameSettings.debugMode)
+                    forceLoadViaMasterClient = true;*/
             }
 
             // If all players are ready, load the game scene
             if (forceLoadViaMasterClient || !GameManager.Instance.levelTransitionActive && (playersReady == playersInRoom && (playersInRoom >= MINIMUM_PLAYERS_NEEDED || GameSettings.debugMode)))
             {
-                //Reset all players
-                foreach (var player in NetworkPlayer.instances)
-                    player.networkPlayerStats = new PlayerStats();
 
-                NetworkManagerScript.instance.LoadSceneWithFade(GameSettings.arenaScene);
+                StartCoroutine(OnEveryoneReady());
             }
         }
+    }
+
+    IEnumerator OnEveryoneReady()
+    {
+        if (PhotonNetwork.IsMasterClient)
+            NetworkManagerScript.instance.SetMatchActive(true);
+
+        float delayTime = 3;
+        //countdown from 3,2,1,WORM!
+        FindObjectOfType<Countdown>().StartCountdown((int)delayTime);                                                             //THIS NEEDS TO BE PUT IN BY PETER
+        yield return new WaitForSeconds(delayTime);
+        //if someone cancels early in these zones, cancel coroutine?
+
+        delayTime = 2;
+        //call all tubes to the center
+        localPlayerTube.PlayerToReadyPosition(delayTime);
+        //wait for equivilent time
+        yield return new WaitForSeconds(delayTime + 0.5f);
+
+        delayTime = 4;
+        //call all tubes up
+        localPlayerTube.PlayerToExitPosition(delayTime);
+        //wait half the time
+        yield return new WaitForSeconds(delayTime / 2);
+
+        //fade the camera and then...
+
+        //start the round
+        OnStartRound();
+    }
+
+
+
+    public void OnStartRound()
+    {
+        //FINAL
+        //Reset all players
+        foreach (var player in NetworkPlayer.instances)
+            player.networkPlayerStats = new PlayerStats();
+
+        NetworkManagerScript.instance.LoadSceneWithFade(GameSettings.arenaScene);
+        //FINAL
     }
 
     /// <summary>

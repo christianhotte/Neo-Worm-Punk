@@ -25,6 +25,8 @@ public class NewShotgunController : PlayerEquipment
     [SerializeField, Tooltip("Part on the side of the weapon which indicates barrel load status.")]     private Transform rightEjectorAssembly;
     [SerializeField, Tooltip("Pin on the back of the weapon which indicates when it is fired.")]        private Transform leftFiringPin;
     [SerializeField, Tooltip("Pin on the back of the weapon which indicates when it is fired.")]        private Transform rightFiringPin;
+    [SerializeField, Tooltip("Position where left shell is spawned in and ejected from.")]              private Transform leftChamber;
+    [SerializeField, Tooltip("Position where right shell is spawned in and ejected from.")]             private Transform rightChamber;
     [Header("Debug Settings:")]
     [SerializeField, Tooltip("Makes it so that weapon fires from the gun itself and not on the netwrok.")] private bool debugFireLocal = false;
 
@@ -50,6 +52,11 @@ public class NewShotgunController : PlayerEquipment
     private Vector3 baseEjectorLPos; //Base position of left ejector
     private Vector3 baseEjectorRPos; //Base position of right ejector
     private Vector3 basePinPos;      //Base position of both firing pins
+
+    private Material litPinMat;   //Color of firing pin indicator light when chamber is full (default color of LEFT FIRING PIN)
+    private Material spentPinMat; //Color of firing pin indicator light when chamber is empty (default color of RIGHT FIRING PIN)
+    private Renderer leftPinLight;
+    private Renderer rightPinLight;
 
     //Events & Coroutines:
     /// <summary>
@@ -98,7 +105,7 @@ public class NewShotgunController : PlayerEquipment
     /// <param name="forward">True moves ejector(s) forward, false moves it/them backward.</param>
     public IEnumerator MoveEjector(Handedness side, bool forward)
     {
-        //validity checks:
+        //Validity checks:
         bool leftInPlace = (leftEjectorAssembly.localPosition == baseEjectorLPos) != forward;   //Check whether or not left ejector is in target position
         bool rightInPlace = (rightEjectorAssembly.localPosition == baseEjectorRPos) != forward; //Check whether or not right ejector is in target position
         if (side == Handedness.None && leftInPlace && rightInPlace) yield return null; //End if both ejectors are already in target positions
@@ -107,6 +114,7 @@ public class NewShotgunController : PlayerEquipment
         Vector3 originAdd = forward ? Vector3.zero : (gunSettings.ejectorTraverseDistance * Vector3.forward); //Get amount to add to origin for each ejector
         Vector3 targetAdd = forward ? (gunSettings.ejectorTraverseDistance * Vector3.forward) : Vector3.zero; //Get amount to add to target for each ejector
 
+        //Transition:
         for (float totalTime = 0; totalTime < gunSettings.ejectorTraverseTime; totalTime += Time.fixedDeltaTime) //Iterate once each fixed update for duration of ejector phase
         {
             //Initialization:
@@ -148,6 +156,16 @@ public class NewShotgunController : PlayerEquipment
         baseEjectorLPos = leftEjectorAssembly.localPosition;  //Get base local position of left ejector assembly
         baseEjectorRPos = rightEjectorAssembly.localPosition; //Get base local position of right ejector assembly
         basePinPos = leftFiringPin.localPosition;             //Get base local position of both firing pins
+
+        //Get pin colors:
+        if (leftFiringPin.Find("Light") != null)
+        {
+            leftPinLight = leftFiringPin.Find("Light").GetComponent<Renderer>();
+            rightPinLight = rightFiringPin.Find("Light").GetComponent<Renderer>();
+            litPinMat = leftPinLight.material;    //Get lit color from left firing pin light
+            spentPinMat = rightPinLight.material; //Get unlit color from right firing pin light
+            rightPinLight.material = litPinMat;   //Set up right firing pin with lit color
+        }
     }
     private protected override void Start()
     {
@@ -161,6 +179,8 @@ public class NewShotgunController : PlayerEquipment
                 if (equipment.TryGetComponent(out NewShotgunController other) && other != this) otherGun = other; //Try to get other shotgun controller
             }
         }
+
+        PlayerController.instance.combatHUD.UpdateAmmoText(handedness, loadedShots, gunSettings.maxLoadedShots);
     }
     private protected override void Update()
     {
@@ -330,15 +350,15 @@ public class NewShotgunController : PlayerEquipment
         for (int x = 0; x < shots; x++) //Iterate for number of projectiles spawned by shot
         {
             //Reposition barrel:
-            Vector2 randomAngles = Random.insideUnitCircle * spread;                                            //Get random angles of shot spread
-            currentBarrel.localEulerAngles = origBarrelEulers + new Vector3(randomAngles.x, randomAngles.y, 0); //Rotate barrel using random angular values
-
+            Vector2 randomAngles = Random.insideUnitCircle * spread;                                                                 //Get random angles of shot spread
+            currentBarrel.localEulerAngles = origBarrelEulers + new Vector3(randomAngles.x, randomAngles.y, Random.Range(0f, 360f)); //Rotate barrel using random angular values
             //Generate new projectiles:
             Projectile newProjectile; //Initialize reference container for spawned projectile
             if (debugFireLocal || !PhotonNetwork.InRoom) //Weapon is in local fire mode
             {
                 newProjectile = ((GameObject)Instantiate(Resources.Load(activeProjName))).GetComponent<Projectile>(); //Instantiate projectile
-                newProjectile.FireDumb(currentBarrel);                                                                //Initialize projectile
+                if (handedness == Handedness.None) newProjectile.FireDumb(currentBarrel);                             //Initialize projectile
+                else newProjectile.Fire(currentBarrel, 0);
             }
             else //Weapon is firing on the network
             {
@@ -424,6 +444,7 @@ public class NewShotgunController : PlayerEquipment
             if (currentBarrelIndex >= barrels.Length) currentBarrelIndex = 0; //Overflow barrel index if relevant
         }
         if (!(UpgradeSpawner.primary != null && UpgradeSpawner.primary.currentPowerUp == PowerUp.PowerUpType.InfiniShot)) loadedShots = Mathf.Max(loadedShots - 1, 0); //Spend one shot (floor at zero)
+        PlayerController.instance.combatHUD.UpdateAmmoText(handedness, loadedShots, gunSettings.maxLoadedShots);
         return spawnedProjectiles.ToArray(); //Return reference to the master script of the projectile(s) spawned
     }
     /// <summary>
@@ -469,11 +490,17 @@ public class NewShotgunController : PlayerEquipment
         newJointLimit.limit = 0;                                     //Set break angle to closed value
         breakJoint.highAngularXLimit = newJointLimit;                //Apply new joint limit
 
+        //Effects:
+        leftPinLight.material = litPinMat;
+        rightPinLight.material = litPinMat;
+
         //Cleanup:
         if (gunSettings.lockSound != null) audioSource.PlayOneShot(gunSettings.lockSound); //Play sound effect
         SendHapticImpulse(gunSettings.closeHaptics);                                       //Play haptic impulse
         breachOpenTime = 0;                                                                //Reset breach open time tracker
         breachOpen = false;                                                                //Indicate that breach is now closed
+
+        PlayerController.instance.combatHUD.UpdateAmmoText(handedness, loadedShots, gunSettings.maxLoadedShots);
     }
     /// <summary>
     /// Fully reloads weapon to max ammo capacity.
@@ -483,6 +510,9 @@ public class NewShotgunController : PlayerEquipment
         //Cleanup:
         currentBarrelIndex = 0;                   //Reset barrel index
         loadedShots = gunSettings.maxLoadedShots; //Reset shot counter to maximum
+
+        if(!breachOpen)
+            PlayerController.instance.combatHUD.UpdateAmmoText(handedness, loadedShots, gunSettings.maxLoadedShots);
     }
     /// <summary>
     /// Called whenever player tries to fire weapon but weapon cannot be fired for some reason.
@@ -541,8 +571,27 @@ public class NewShotgunController : PlayerEquipment
     /// <param name="inward">Pass true to move pin inward, false to move it back out.</param>
     private void MovePin(Handedness side, bool inward)
     {
+        //Initialization:
+        if (handedness == Handedness.None) return;
         Vector3 targetPinPos = basePinPos + (inward ? (Vector3.forward * gunSettings.pinTraverseDistance) : Vector3.zero); //Get position pin(s) are being moved to
-        if (side == Handedness.Left || side == Handedness.None) leftFiringPin.localPosition = targetPinPos;                //Left pin is being moved
-        if (side == Handedness.Right || side == Handedness.None) rightFiringPin.localPosition = targetPinPos;              //Right pin is being moved
+
+        //Modify pins:
+        if (side == Handedness.Left || side == Handedness.None) //Left pin is being moved
+        {
+            leftFiringPin.localPosition = targetPinPos; //Move left pin to target position
+            if (inward) leftPinLight.material = spentPinMat;
+        }
+        if (side == Handedness.Right || side == Handedness.None) //Right pin is being moved
+        {
+            rightFiringPin.localPosition = targetPinPos; //Move right pin to target position
+            if (inward) rightPinLight.material = spentPinMat;
+        }
+    }
+    /// <summary>
+    /// Instantiates shells in both weapon chambers.
+    /// </summary>
+    private void LoadChambers()
+    {
+
     }
 }

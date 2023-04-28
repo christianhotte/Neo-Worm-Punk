@@ -60,12 +60,16 @@ public class HoopBoost : NetworkedArenaElement
         {
             //reset all velocity but in the direction of the hoop and give them a boost in that direction
             Vector3 entryVel = Vector3.Project(playerRB.velocity, hoopCenter.forward);//Gets the velocity on one axis in relation to the hoops forward
+            if (entryVel.magnitude <1)
+            {
+                entryVel = new Vector3(5, 0, 5);
+            }
             Vector3 exitVel = entryVel + (entryVel.normalized * boostAmount); // adds the projected amount to the players velocity
             playerRB.velocity = exitVel;//actually sets the velocity
         }
 
         
-        yield return new WaitForSeconds(0.2f);//cooldown so only one boost given
+        yield return new WaitForSeconds(0.4f);//cooldown so only one boost given
         launchin = false;
     }
     public IEnumerator SlimeHoop()
@@ -73,7 +77,7 @@ public class HoopBoost : NetworkedArenaElement
         yield return new WaitForSeconds(10.0f);
         slimed = false;
     }
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerStay(Collider other)
     {
         if(other.name == "XR Origin" && !launchin)
         {

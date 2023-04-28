@@ -2,12 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
+using UnityEngine.SceneManagement;
 
 public class UpgradeSpawner : MonoBehaviour
 {
     //Objects & Components:
     public static UpgradeSpawner primary;
     private static List<UpgradeSpawner> spawners = new List<UpgradeSpawner>();
+    public List<WormHoleTrigger> WormholeTriggers = new List<WormHoleTrigger>();
     /// <summary>
     /// Position and orientation where upgrades spawn (forward is the direction they are pushed in).
     /// </summary>
@@ -15,37 +17,48 @@ public class UpgradeSpawner : MonoBehaviour
     private Jumbotron jumboScript;
     private AudioSource thisAud;
     private int spawnedPowerups=0,totalLevelTime,powerDelay;
-    private bool Cooldown = false;
+    public int randomIndex, randRange;
+    private bool Cooldown = false, IsUpgradeActive;
+    private LevelTimer Timer;
+    private RoundManager roundTimer;
+
     //Settings:
     [Header("Settings:")]
     public PowerUpSettings settings;
+
     [SerializeField] private string[] upgradeResourceNames = { "PowerUpTest" };
     [Space()]
+    [Header("Debug Options:")]
+    public PowerUp.PowerUpType currentPowerUp;
     [SerializeField] private bool debugSpawn;
     [SerializeField] private bool debugGiveSelectedUpgrade;
-    public float SpawnDelay;
-    private LevelTimer Timer;
-    private RoundManager roundTimer;
+    [Space(10)]
+
+    [Header("Round Settings:")]
+    [SerializeField, Tooltip("The amount of time that we wait to start spawning upgrades as soon as the round starts.")] private float startRoundBuffer;
+    [SerializeField, Tooltip("The amount of time left in a round when upgrades stop spawning.")] private float endRoundBuffer;
+
     //Runtime Variables:
-    public PowerUp.PowerUpType currentPowerUp;
-    public float powerupsPerMin;
-    [SerializeField] private float timeUntilNextUpgrade = 0;
+    internal float powerupsPerMin,powerupTime;
+    
+    private float timeUntilNextUpgrade = 0;
 
     //EVENTS & COROUTINES:
     public IEnumerator DoPowerUp(PowerUp.PowerUpType powerType, float waitTime)
     {
         currentPowerUp = powerType;
-        if (currentPowerUp == PowerUp.PowerUpType.Invulnerability)
+        switch (currentPowerUp)
         {
-            PlayerController.instance.MakeInvulnerable(waitTime);
-        }
-        else if (currentPowerUp == PowerUp.PowerUpType.HeatVision)
-        {
-            PlayerController.photonView.RPC("StartMaterialEvent", RpcTarget.All, 1, 2, waitTime);
-            foreach (NetworkPlayer otherPlayer in NetworkPlayer.instances)
-            {
-                otherPlayer.StartMaterialEvent(1, 2, waitTime);
-            }
+            case PowerUp.PowerUpType.Invulnerability:
+                PlayerController.instance.MakeInvulnerable(waitTime / 2);
+                break;
+            case PowerUp.PowerUpType.HeatVision:
+                PlayerController.photonView.RPC("StartMaterialEvent", RpcTarget.All, 1, 2, waitTime);
+                foreach (NetworkPlayer otherPlayer in NetworkPlayer.instances)
+                {
+                    otherPlayer.StartMaterialEvent(1, 2, waitTime);
+                }
+                break;
         }
 
         yield return new WaitForSeconds(waitTime);
@@ -57,7 +70,7 @@ public class UpgradeSpawner : MonoBehaviour
     {
         primary = this;
         spawners.Add(this);
-
+        SceneManager.sceneLoaded += OnSceneLoaded;
         if (spawnPoint == null) spawnPoint = transform;
         thisAud = this.GetComponent<AudioSource>();
         jumboScript = FindObjectOfType<Jumbotron>();
@@ -66,13 +79,12 @@ public class UpgradeSpawner : MonoBehaviour
         roundTimer = masterPV.GetComponent<RoundManager>(); 
        // totalLevelTime = (int)PhotonNetwork.CurrentRoom.CustomProperties["RoundLength"];
         //powerDelay = totalLevelTime / (powerupsPerMin * 4);
-        timeUntilNextUpgrade = 30*powerupsPerMin;
       //  print("PowerDelay = " + (int)PhotonNetwork.CurrentRoom.CustomProperties["RoundLength"]);
     }
     private void OnDestroy()
     {
         if (spawners.Contains(this)) spawners.Remove(this);
-
+        SceneManager.sceneLoaded += OnSceneLoaded;
         if (currentPowerUp == PowerUp.PowerUpType.HeatVision)
         {
             foreach (var player in NetworkPlayer.instances)
@@ -81,19 +93,32 @@ public class UpgradeSpawner : MonoBehaviour
             }
         }
     }
-    private void Update()
+    public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        //if (debugSpawn)
-        //{
-        //    StartCoroutine(SpawnAlert());
-        //    debugSpawn = false;
-        //    SpawnUpgrade();
-        //}
-        //if (debugGiveSelectedUpgrade)
-        //{
-        //    debugGiveSelectedUpgrade = false;
-        //    StartCoroutine(DoPowerUp(currentPowerUp, 15));
-        //}
+        WormholeTriggers.AddRange(FindObjectsOfType<WormHoleTrigger>());
+        randRange = WormholeTriggers.Count;
+        int randomIndex = Random.Range(0, randRange);
+        if (PhotonNetwork.InRoom)
+        {
+            IsUpgradeActive = (bool)PhotonNetwork.CurrentRoom.CustomProperties["UpgradesActive"];
+            powerupsPerMin = (float)PhotonNetwork.CurrentRoom.CustomProperties["UpgradeFrequency"];
+            timeUntilNextUpgrade = 0f;
+        }
+    }
+       
+        private void Update()
+    {
+        if (debugSpawn)
+        {
+            StartCoroutine(SpawnAlert());
+            debugSpawn = false;
+            SpawnUpgrade();
+        }
+        if (debugGiveSelectedUpgrade)
+        {
+            debugGiveSelectedUpgrade = false;
+            StartCoroutine(DoPowerUp(currentPowerUp, 15));
+        }
         //if (!Cooldown)
         //{
         //    Cooldown = true;
@@ -106,35 +131,48 @@ public class UpgradeSpawner : MonoBehaviour
         //    }
         //}
 
-        if (primary == this && timeUntilNextUpgrade > 0)
+        if (IsUpgradeActive)
         {
-            timeUntilNextUpgrade -= Time.deltaTime;
-            if (timeUntilNextUpgrade <= 0)
+            //If the amount of seconds in the room has not reached the start buffer and the remaining time left is greater than the end round buffer, increment the spawn timer
+            if (roundTimer.GetCurrentRoundTime() > startRoundBuffer && roundTimer.GetTotalSecondsLeft() > endRoundBuffer)
             {
-                StartCoroutine(SpawnAlert());
-                if (PhotonNetwork.IsMasterClient&& timeUntilNextUpgrade <= 0)
+                if (primary == this)
                 {
-                    
-                    SpawnRandomUpgrade();
-                    if ((30 * powerupsPerMin) < roundTimer.GetTotalSecondsLeft())
+
+                    if (timeUntilNextUpgrade <= 0)
                     {
-                        timeUntilNextUpgrade = 30 * powerupsPerMin;
+                        StartCoroutine(SpawnAlert());
+                        if (PhotonNetwork.IsMasterClient)
+                        {
+                            SpawnRandomUpgrade();
+                            timeUntilNextUpgrade = (powerupsPerMin * 60f);
+/*                            if ((powerupsPerMin * 60f) >= roundTimer.GetTotalSecondsLeft())
+                            {
+                                timeUntilNextUpgrade = (powerupsPerMin * 60f);
+                            }
+                            else
+                            {
+                                timeUntilNextUpgrade = -1;
+                            }*/
+                        }
+                        else
+                        {
+                            timeUntilNextUpgrade = (powerupsPerMin * 60f);
+                        }
                     }
                     else
-                    {
-                        timeUntilNextUpgrade = -1;
-                    }
+                        timeUntilNextUpgrade -= Time.deltaTime;
+
                 }
-                
             }
-           
         }
     }
 
     //FUNCTIONALITY METHODS:
     public void SpawnUpgrade()
     {
-       
+        int randomIndex = Random.Range(0, randRange);
+        spawnPoint = WormholeTriggers[randomIndex].transform;
         if (!PhotonNetwork.IsMasterClient) return; 
         string resourceName = "PowerUps/" + upgradeResourceNames[Random.Range(0, upgradeResourceNames.Length)];
         PowerUp newUpgrade = PhotonNetwork.Instantiate(resourceName, spawnPoint.position, spawnPoint.rotation).GetComponent<PowerUp>();

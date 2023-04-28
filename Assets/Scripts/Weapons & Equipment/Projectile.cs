@@ -254,13 +254,13 @@ public class Projectile : MonoBehaviourPunCallbacks
         }
 
         //Check for hit:
-        if (photonView.IsMine || dumbFired) //Only check for hits on local projectile
+        if (photonView.IsMine || dumbFired || !PhotonNetwork.IsConnected) //Only check for hits on local projectile
         {
             //Thin collision check:
             //NOTE: This is intended to allow projectiles to be better at making it around walls
             if (Physics.Linecast(transform.position, newPosition, out RaycastHit hitInfo, ~settings.ignoreLayers)) //Do a simple linecast, only ignoring designated layers
             {
-                if (!HitsOwnPlayer(hitInfo)) //Make sure projectile is not hitting its own player
+                if (dumbFired || !HitsOwnPlayer(hitInfo)) //Make sure projectile is not hitting its own player
                 {
                     totalDistance -= velocity.magnitude - hitInfo.distance; //Update totalDistance to reflect actual distance traveled at exact point of contact
                     HitObject(hitInfo);                                     //Trigger hit procedure
@@ -274,7 +274,7 @@ public class Projectile : MonoBehaviourPunCallbacks
                 RaycastHit[] hits = Physics.SphereCastAll(transform.position, settings.radius, velocity, travelDistance, ~settings.radiusIgnoreLayers); //Do a spherecast along bullet trajectory, get all colliders (in case it collides with own player)
                 foreach (RaycastHit hit in hits) //Iterate through each thing projectile has hit along path
                 {
-                    if (!HitsOwnPlayer(hit)) //Do not acnowledge hits on own player
+                    if (dumbFired || !HitsOwnPlayer(hit)) //Do not acnowledge hits on own player
                     {
                         totalDistance -= velocity.magnitude - hit.distance; //Update totalDistance to reflect actual distance traveled at exact point of contact
                         HitObject(hit);                                     //Trigger hit procedure
@@ -289,7 +289,7 @@ public class Projectile : MonoBehaviourPunCallbacks
         transform.rotation = Quaternion.LookRotation(velocity); //Rotate projectile to align with current velocity
 
         //Burnout check:
-        if (photonView.IsMine || dumbFired) ////Only check if projectile is authoritative version
+        if (photonView.IsMine || dumbFired || !PhotonNetwork.IsConnected) //Only check if projectile is authoritative version
         {
             timeAlive += Time.deltaTime;                                               //Update time tracker
             if (estimatedLifeTime > 0 && timeAlive > estimatedLifeTime) BurnOut();     //Burn projectile out if it has been alive for too long (if lifetime is being used)
@@ -325,12 +325,12 @@ public class Projectile : MonoBehaviourPunCallbacks
         {
             //Perform a mini position update:
             targetPosition += transform.forward * settings.barrelGap; //Get target starting position (with barrel gap)
-            if (photonView.IsMine) //Only have master projectile check for homing
+            if (photonView.IsMine || dumbFired || !PhotonNetwork.IsConnected) //Only have master projectile check for homing
             {
                 if (Physics.Linecast(startPosition, targetPosition, out RaycastHit hitInfo, ~settings.ignoreLayers)) //Barrel gap movement would cause projectile to hit something
                 {
-                    if (!HitsOwnPlayer(hitInfo)) { HitObject(hitInfo); return; }     //Make sure hit object is not the projectile's own player, then if not, hit it immediately
-                    if (settings.range <= settings.barrelGap) { BurnOut(); return; } //Burn projectile out in the unlikely event that the barrel gap is greater than its range
+                    if (dumbFired || !HitsOwnPlayer(hitInfo)) { HitObject(hitInfo); return; } //Make sure hit object is not the projectile's own player, then if not, hit it immediately
+                    if (settings.range <= settings.barrelGap) { BurnOut(); return; }          //Burn projectile out in the unlikely event that the barrel gap is greater than its range
                 }
             }
             totalDistance += settings.barrelGap; //Include distance in total distance traveled
@@ -339,7 +339,7 @@ public class Projectile : MonoBehaviourPunCallbacks
         //Cleanup:
         if (printDebug) print("Projectile Fired!"); //Print debug signal if called for
         transform.position = targetPosition;        //Move to initial position
-        if (photonView.IsMine || dumbFired) //This is the authoritative version of the projectile
+        if (photonView.IsMine || dumbFired || !PhotonNetwork.IsConnected) //This is the authoritative version of the projectile
         {
             if (settings.homingStrength > 0) StartCoroutine(DoTargetAcquisition()); //Begin doing target acquisition if projectile does homing
             estimatedLifeTime = settings.range / settings.initialVelocity;          //Calculate approximate lifetime based on range and velocity
@@ -359,6 +359,10 @@ public class Projectile : MonoBehaviourPunCallbacks
     public void FireDumb(Transform barrel)
     {
         FireDumb(barrel.position, barrel.rotation); //Pass to more granular FireDumb method
+    }
+    public void FireKindaDumb(Transform barrel)
+    {
+        Fire(barrel.position, barrel.rotation, 0);
     }
     /// <summary>
     /// Called whenever projectile strikes an object.
@@ -394,13 +398,13 @@ public class Projectile : MonoBehaviourPunCallbacks
             {
                 if (collider.transform == target) //Target can be acquired with this solution
                 {
-                    photonView.RPC("RPC_AcquireTargetDumb", RpcTarget.Others, target.position); //Send position of target as identifying acquisition data
+                    if (PhotonNetwork.IsConnected) photonView.RPC("RPC_AcquireTargetDumb", RpcTarget.Others, target.position); //Send position of target as identifying acquisition data if 
                     if (printDebug) print("Dumb Target Acquired: " + target.name);              //Indicate that a target has been acquired
                     break;                                                                      //Exit collider iteration
                 }
             }
         }
-        photonView.RPC("RPC_Move", RpcTarget.Others, transform.position); //Sync up position and velocity between all versions of networked projectile
+        if (PhotonNetwork.IsConnected) photonView.RPC("RPC_Move", RpcTarget.Others, transform.position); //Sync up position and velocity between all versions of networked projectile
     }
     /// <summary>
     /// Makes projectile lose its current target.
@@ -412,8 +416,8 @@ public class Projectile : MonoBehaviourPunCallbacks
         audioSource.Stop();                                                           //Stop playing homing sound
 
         //Cleanup:
-        target = null;                                                      //Clear active target
-        if (!dumbFired) photonView.RPC("RPC_LostTarget", RpcTarget.Others); //Indicate to all other projectiles that target has been lost
+        target = null;                                                                                   //Clear active target
+        if (!dumbFired && PhotonNetwork.IsConnected) photonView.RPC("RPC_LostTarget", RpcTarget.Others); //Indicate to all other projectiles that target has been lost
     }
     private protected virtual void HitObject(RaycastHit hitInfo)
     {
@@ -431,8 +435,18 @@ public class Projectile : MonoBehaviourPunCallbacks
 
             //Hit using player:
             print("Projectile with origin ID " + originPlayerID + " hit player with ID " + targetPlayer.photonView.ViewID);
-            targetPlayer.photonView.RPC("RPC_Hit", RpcTarget.All, settings.damage, originPlayerID, velocity, (int)DeathCause.GUN);                      //Indicate to player that it has been hit (by projectile with given amount of velocity)
-            if (!dumbFired && originPlayerID != 0) PhotonNetwork.GetPhotonView(originPlayerID).RPC("RPC_HitEnemy", RpcTarget.All); //Indicate to origin player that it has shot something
+            //If you hit someone with the same color as you (same team)
+            if ((int)targetPlayer.photonView.Owner.CustomProperties["Color"] == (int)NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["Color"])
+            {
+                Debug.Log("You've shot your own teammate.");
+            }
+
+            // Hit somebody with a different color (different teams).
+            else
+            {
+                targetPlayer.photonView.RPC("RPC_Hit", RpcTarget.All, settings.damage, originPlayerID, velocity, (int)DeathCause.GUN); //Indicate to player that it has been hit (by projectile with given amount of velocity)
+                if (!dumbFired && originPlayerID != 0) PhotonNetwork.GetPhotonView(originPlayerID).RPC("RPC_HitEnemy", RpcTarget.All); //Indicate to origin player that it has shot something
+            }
 
             //Player hit effect:
             if (settings.playerHitPrefab != null)
@@ -440,6 +454,10 @@ public class Projectile : MonoBehaviourPunCallbacks
                 Instantiate(settings.playerHitPrefab, transform.position, transform.rotation);
                 photonView.RPC("RPC_PlayerHit", RpcTarget.Others);
             }
+        }
+        else if (!PhotonNetwork.IsConnected && originPlayerID < 0 && hitInfo.collider.GetComponentInParent<PlayerController>() != null)
+        {
+            PlayerController.instance.IsHit(settings.damage, velocity); //Hit player directly if not deflected
         }
         else //Hit object is not a player
         {
@@ -458,7 +476,8 @@ public class Projectile : MonoBehaviourPunCallbacks
 
         //Cleanup:
         if (printDebug) print("Projectile hit " + hitInfo.collider.name); //Indicate what the projectile hit if debug logging is on
-        Delete();                                                         //Destroy projectile
+        print("About to delete from hit");
+        Delete();                                                       //Destroy projectile
     }
     /// <summary>
     /// Called if projectile range is exhausted and projectile hasn't hit anything.
@@ -466,7 +485,7 @@ public class Projectile : MonoBehaviourPunCallbacks
     private protected virtual void BurnOut()
     {
         //Mid-air explosion:
-        if (PhotonNetwork.IsConnected && !photonView.IsMine) return; //Make sure non-main projectiles cannot burn out (only valid while projectiles are on the network)
+        if (!dumbFired && PhotonNetwork.IsConnected && !photonView.IsMine) return; //Make sure non-main projectiles cannot burn out (only valid while projectiles are on the network)
         if (settings.explosionPrefab != null) //Only explode if projectile has an explosion prefab
         {
             ExplosionController explosion = Instantiate(settings.explosionPrefab, transform.position, transform.rotation).GetComponent<ExplosionController>(); //Instantiate an explosion at burnout point
@@ -572,8 +591,8 @@ public class Projectile : MonoBehaviourPunCallbacks
         if (hitPlayer != null && hitPlayer.photonView.ViewID == originPlayerID) return true; //Return true if raycast hits projectile's own player
         
         //Check demo player:
-        PlayerController hitRealPlayer = hit.collider.GetComponentInParent<PlayerController>();         //Try to get real player controller from collision
-        if (hitRealPlayer == null) hitRealPlayer = hit.collider.GetComponent<PlayerController>();       //Try again to get real player controller from collision
+        PlayerController hitRealPlayer = hit.collider.GetComponentInParent<PlayerController>();   //Try to get real player controller from collision
+        if (hitRealPlayer == null) hitRealPlayer = hit.collider.GetComponent<PlayerController>(); //Try again to get real player controller from collision
         if (hitRealPlayer != null)
         {
             if (PlayerController.photonView != null)
@@ -586,10 +605,15 @@ public class Projectile : MonoBehaviourPunCallbacks
 
         return false; //No possible self-hit could be detected, return false
     }
-    private void Delete()
+    /// <summary>
+    /// Deletes projectile safely by determining whether or not it should be deleting itself, and how to delete itself.
+    /// </summary>
+    /// <returns>Whether or not projectile was successfully deleted.</returns>
+    private bool Delete()
     {
-        if (!dumbFired && photonView.IsMine) PhotonNetwork.Destroy(photonView);               //Destroy networked projectiles on the network
-        else if (dumbFired) { print("Destroying projectile locally."); Destroy(gameObject); } //Use normal destruction for non-networked projectiles
+        if (!dumbFired && photonView.IsMine) { PhotonNetwork.Destroy(photonView); return true; }                                         //Destroy networked projectiles on the network
+        else if (dumbFired || !PhotonNetwork.IsConnected) { print("Destroying projectile locally."); Destroy(gameObject); return true; } //Use normal destruction for non-networked projectiles
+        return false;
         //NOTE: Remote networked projectiles cannot delete themselves, they must be deleted from the network by their master version
     }
 }

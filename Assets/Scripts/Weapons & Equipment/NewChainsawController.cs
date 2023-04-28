@@ -27,11 +27,12 @@ public class NewChainsawController : PlayerEquipment
     [SerializeField, Tooltip("Jointed component on front of system which moves forward and rotates during blade activation.")]                   private Transform wrist;
     [SerializeField, Tooltip("Rotating assembly which allows the wrist to be turned downward for reverse grip mode.")]                           private Transform wristPivot;
     [SerializeField, Tooltip("Invisible transform which indicates the extent to which blade tracks for grinding and hitting players.")]          private Transform bladeEnd;
+    [SerializeField, Tooltip("")]                                                                                                                private Transform bladeBackTip;
     [SerializeField, Tooltip("Position chainsaw fires deflected projectiles out of.")]                                                           private Transform barrel;
 
     private Transform hand;             //Real position of player hand used by this equipment
     private PlayerEquipment handWeapon; //Player weapon held in the same hand as this chainsaw
-    private NewGrapplerController otherHandGrapple; 
+    private NewGrapplerController otherHandGrapple;
 
     //Settings:
     [Header("Settings:")]
@@ -56,7 +57,9 @@ public class NewChainsawController : PlayerEquipment
 
     private Vector3 bladeOriginPos;    //Initial local (sheathed) position of blade
     private Vector3 wristOriginPos;    //Initial local (sheathed) position of wrist assembly
+    private float bladeOriginSize;     //Initial length of blade extender
     private float bladeBackOriginSize; //Initial length of rear blade extender
+    private float afterKillCountdown;
 
     //RUNTIME METHODS:
     /// <summary>
@@ -73,6 +76,7 @@ public class NewChainsawController : PlayerEquipment
         //Get runtime vars:
         bladeOriginPos = bladeTip.localPosition;              //Get starting local position of blade assembly
         wristOriginPos = wrist.localPosition;                 //Get starting local position of wrist assembly
+        bladeOriginSize = bladeExtender.localScale.z;         //Get starting local Z scale of blade extender
         bladeBackOriginSize = bladeExtenderBack.localScale.z; //Get starting local Z scale of rear blade extender
     }
     private protected override void Start()
@@ -94,10 +98,11 @@ public class NewChainsawController : PlayerEquipment
 
         //Update timers:
         timeInMode += Time.deltaTime; //Increment mode time tracker
+        if (afterKillCountdown > 0) afterKillCountdown = Mathf.Max(afterKillCountdown - Time.deltaTime, 0);
         if (mode == BladeMode.Extended || mode == BladeMode.Extending) //Blade is in extended mode
         {
             timeUntilPulse -= Time.deltaTime; //Increment pulse time tracker
-            if (timeUntilPulse <= 0) //It is time for the next haptic pulse
+            if (timeUntilPulse <= 0 && afterKillCountdown <= 0) //It is time for the next haptic pulse
             {
                 PlayerController.HapticData newPulse = settings.activeHapticPulse;                                                                  //Get values from settings for active pulse
                 newPulse.amplitude += Random.Range(-settings.activeHapticMagnitudeVariance, settings.activeHapticMagnitudeVariance);                //Add a little bit of random variation to the pulse
@@ -170,13 +175,6 @@ public class NewChainsawController : PlayerEquipment
             timeInMode = 0;                            //Reset mode time tracker
             audioSource.PlayOneShot(settings.deflectIdleSound);
 
-            //Pull player forward:
-            if (settings.deflectPullImpulse != 0)
-            {
-                Vector3 pullForce = settings.deflectPullImpulse * transform.forward; //Get force by which player is being pulled forward
-                player.bodyRb.velocity = pullForce;                                                                                  //Add force to player body
-            }
-
             //Grinding disengagement:
             if (grinding) //Player is currently grinding on a surface
             {
@@ -184,13 +182,12 @@ public class NewChainsawController : PlayerEquipment
                 grindTime = 0;    //Reset grind time tracker
             }
         }
-        else if (mode == BladeMode.Deflecting && triggerValue < settings.triggerThresholds.x) //End deflect mode when player releases the trigger
+        else if (mode == BladeMode.Deflecting && triggerValue < settings.triggerThresholds.x && timeInMode >= settings.minimumDeflectTime) //End deflect mode when player releases the trigger
         {
             //Switch mode:
             prevMode = mode;            //Record previous blade mode
             mode = BladeMode.Extending; //Indicate that blade is no longer in deflect mode
             timeInMode = 0;             //Reset mode time tracker
-            //deflectTime = 0;            //Always fully reset deflect time tracker
         }
 
         //Blade movement:
@@ -263,8 +260,10 @@ public class NewChainsawController : PlayerEquipment
 
             //Wall grinding:
             Vector3 bladeOffset = wristPivot.right * settings.bladeWidth; //Get distance of offset for secondary blade cast
-            if (Physics.Linecast(wristPivot.position, bladeEnd.position, out RaycastHit hitInfo, settings.grindLayers) ||                //Check for obstacles intersecting back of the blade
-                Physics.Linecast(wristPivot.position + bladeOffset, bladeEnd.position + bladeOffset, out hitInfo, settings.grindLayers)) //Check for obstacles intersecting front of the blade
+            Vector3 bladeDir = wristPivot.position - bladeEnd.position;
+            if ((Physics.Linecast(wristPivot.position, bladeEnd.position, out RaycastHit hitInfo, settings.grindLayers) ||                  //Check for obstacles intersecting back of the blade
+                Physics.Linecast(wristPivot.position + bladeOffset, bladeEnd.position + bladeOffset, out hitInfo, settings.grindLayers)) && //Check for obstacles intersecting front of the blade
+                Vector3.Angle(bladeDir, hitInfo.normal) <= settings.maxGrindAngle)
             {
                 //Adjust player velocity:
                 Vector3 grindDirection = Vector3.Cross(hitInfo.normal, wrist.up).normalized;                                 //Get target direction of grind
@@ -319,10 +318,25 @@ public class NewChainsawController : PlayerEquipment
                 NetworkPlayer hitPlayer = hitInfo.collider.GetComponentInParent<NetworkPlayer>(); //Try to get networkplayer from hit
                 if (hitPlayer != null && !hitPlayer.photonView.IsMine) //Player (other than self) has been hit by blade
                 {
-                    hitPlayer.photonView.RPC("RPC_Hit", RpcTarget.AllBuffered, 3, PlayerController.photonView.ViewID, Vector3.zero, (int)DeathCause.CHAINSAW); //Hit target
+                    //If you chainsaw someone with the same color as you (same team), do not kill
+                    if ((int)hitPlayer.photonView.Owner.CustomProperties["Color"] == (int)NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["Color"])
+                    {
+                        Debug.Log("You chainsawed your own teammate.");
+                    }
+
+                    // Chainsaw somebody with a different color (different teams).
+                    else
+                    {
+                        hitPlayer.photonView.RPC("RPC_Hit", RpcTarget.AllBuffered, 100, PlayerController.photonView.ViewID, Vector3.zero, (int)DeathCause.CHAINSAW); //Hit target
+                        Debug.Log("ChainsawKill");
+                        SendHapticImpulse(settings.killHaptics);
+                        PlayerController.instance.audioSource.PlayOneShot(settings.KillSound);
+                        afterKillCountdown = settings.killHaptics.duration;
+                    }
                 }
             }
         }
+
         else if (mode == BladeMode.Retracting) //Blade is currently retracting
         {
             //Return to base rotation:
@@ -367,8 +381,9 @@ public class NewChainsawController : PlayerEquipment
             wrist.localRotation = targetWristRot;
 
             //Pull player forward:
-            Vector3 pullForce = settings.deflectPullForce * Time.deltaTime * transform.forward; //Get force by which player is being pulled forward
-            player.bodyRb.AddForce(pullForce, ForceMode.Acceleration);                          //Add force to player body
+            float interpolant = Mathf.Min(settings.deflectTime, timeInMode) / settings.deflectTime;
+            float pullForceMultiplier = settings.deflectPullForce * Time.deltaTime * settings.deflectPullForceCurve.Evaluate(interpolant);
+            player.bodyRb.AddForce(transform.forward * pullForceMultiplier, ForceMode.Force); //Add force to player body
 
             //targetWristRot = Quaternion.RotateTowards(wrist.parent.rotation, targetWristRot, settings.maxWristAngle);  //Clamp rotation to set angular limit
             //wrist.rotation = Quaternion.Lerp(wrist.rotation, targetWristRot, settings.wristLerpRate * Time.deltaTime); //Lerp wrist toward target rotation
@@ -388,6 +403,10 @@ public class NewChainsawController : PlayerEquipment
                 if (hitPlayer != null && !hitPlayer.photonView.IsMine) //Player (other than self) has been hit by blade
                 {
                     hitPlayer.photonView.RPC("RPC_Hit", RpcTarget.AllBuffered, 3, PlayerController.photonView.ViewID, Vector3.zero, (int)DeathCause.CHAINSAW); //Hit target
+                    Debug.Log("DeflectingChainsawKill");
+                    SendHapticImpulse(settings.killHaptics);
+                    PlayerController.instance.audioSource.PlayOneShot(settings.KillSound);
+                    afterKillCountdown = settings.killHaptics.duration;
                 }
             }
         }
@@ -440,12 +459,14 @@ public class NewChainsawController : PlayerEquipment
     /// </summary>
     private void UpdateBladeExtender()
     {
-        Vector3 newExtenderScale = bladeExtender.localScale; newExtenderScale.z = bladeTip.localPosition.z;                            //Match Z scale of extender to Z position of blade tip (should be fine if everything is set up right)
+        Vector3 newExtenderScale = bladeExtender.localScale; newExtenderScale.z = (bladeTip.localPosition.z * 5);                      //Match Z scale of extender to Z position of blade tip (should be fine if everything is set up right)
         bladeExtender.localScale = newExtenderScale;                                                                                   //Set blade extender's local scale so that it reaches and connects with blade tip
         newExtenderScale = bladeExtenderBack.localScale;                                                                               //Switch to modifying scale of rear blade extender
         float backExtenderInterpolant = Mathf.InverseLerp(bladeOriginPos.z, settings.bladeTraverseDistance, bladeTip.localPosition.z); //Get interpolant for back extender downscaling based on current blade length percentage
         newExtenderScale.z = Mathf.Lerp(bladeBackOriginSize, 0, backExtenderInterpolant);                                              //Use interpolant to scale down back extender as blade gets longer
         bladeExtenderBack.localScale = newExtenderScale;                                                                               //Apply new scale to back extender
+        Vector3 newBackTipPos = bladeBackTip.localPosition; newBackTipPos.z = bladeExtenderBack.localScale.z / 2.7657f;
+        bladeBackTip.localPosition = newBackTipPos;
     }
     /// <summary>
     /// Checks to see whether or not projectile striking player at given incoming direction can be deflected by chainsaw, then fires out a deflected projectile if so.
@@ -460,10 +481,10 @@ public class NewChainsawController : PlayerEquipment
         {
             barrel.rotation = Quaternion.LookRotation(-incomingDirection, Vector3.up);
             Projectile newProjectile; //Initialize reference container for spawned projectile
-            if (!PhotonNetwork.InRoom) //Weapon is in local fire mode
+            if (!PhotonNetwork.IsConnected) //Weapon is in local fire mode
             {
                 newProjectile = ((GameObject)Instantiate(Resources.Load(projectileName))).GetComponent<Projectile>(); //Instantiate projectile
-                newProjectile.FireDumb(barrel);                                                                       //Initialize projectile
+                newProjectile.FireKindaDumb(barrel);
             }
             else //Weapon is firing on the network
             {

@@ -1,14 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.XR;
-using UnityEngine.XR.Interaction.Toolkit;
-using TMPro;
 using Photon.Pun;
 using Photon.Realtime;
-using Hashtable = ExitGames.Client.Photon.Hashtable;
-using UnityEngine.SceneManagement;
 using RootMotion.FinalIK;
+using System.Collections;
+using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 // This script was used from https://youtu.be/KHWuTBmT1oI?t=1511\
 // ^ Now heavily modified by Invertebrates
@@ -62,11 +60,14 @@ public class NetworkPlayer : MonoBehaviour
     private SkinnedMeshRenderer bodyRenderer;                    //Renderer component for main player body/skin
     private TrailRenderer trail;                                 //Renderer for trail that makes players more visible to each other
     internal PlayerStats networkPlayerStats = new PlayerStats(); //The stats for the network player
-    internal Hashtable photonPlayerSettings;
     
     [Header("Material System:")]
     public Material[] altMaterials;
     public MatChangeCombo[] matCombos;
+    [Header("Damage Effects:")]
+    public GameObject bulletHitEffect;
+    public GameObject bulletKillEffect;
+    public GameObject chainsawKillEffect;
 
     private Transform headTarget;      //True local position of player head
     private Transform leftHandTarget;  //True local position of player left hand
@@ -76,6 +77,8 @@ public class NetworkPlayer : MonoBehaviour
     private Transform leftHandRig;     //Networked transform which follows position of player left hand
     private Transform rightHandRig;    //Networked transform which follows position of player right hand
     private Transform modelRig;        //Networked transform which follows position of player model
+    private Transform originTarget;
+    internal Transform originRig;
 
     //Runtime Variables:
     /// <summary>
@@ -111,6 +114,7 @@ public class NetworkPlayer : MonoBehaviour
             if (view.name.Contains("Left")) { leftHandRig = view.transform; continue; }       //Get left hand rig
             if (view.name.Contains("Right")) { rightHandRig = view.transform; continue; }     //Get right hand rig
             if (view.TryGetComponent(out VRIK vrik)) { modelRig = view.transform; continue; } //Get model rig
+            if (view.name.Contains("Origin")) { originRig = view.transform; continue; }
         }
         if (headRig == null || leftHandRig == null || rightHandRig == null) { Debug.LogError("Network Player " + name + " was not able to successfully get its rigged components. Have the names of its children been changed?"); }
 
@@ -121,14 +125,18 @@ public class NetworkPlayer : MonoBehaviour
             PlayerController.photonView = photonView; //Give playerController a reference to local client photon view component
 
             //Local initialization:
-
-            photonPlayerSettings = new Hashtable();                       //Create new custom player settings
-            InitializePhotonPlayerSettings();
             PlayerController.instance.playerSetup.ApplyAllSettings();                                //Apply default settings to player
             SyncData();                                                                              //Sync settings between every version of this network player
             foreach (Renderer r in transform.GetComponentsInChildren<Renderer>()) r.enabled = false; //Local player should never be able to see their own NetworkPlayer
 
             NetworkManagerScript.instance.AdjustVoiceVolume();  //Adjusts the volume of all players
+
+            //Bone evaporator:
+            foreach (Rigidbody tailRb in GetComponentsInChildren<Rigidbody>())
+            {
+                tailRb.isKinematic = true;
+                if (tailRb.TryGetComponent(out Collider coll)) Destroy(coll);
+            }
         }
 
         //Runtime variable setup:
@@ -138,17 +146,6 @@ public class NetworkPlayer : MonoBehaviour
         SceneManager.sceneLoaded += OnSceneLoaded;     //Subscribe to scene load event (every NetworkPlayer should do this)
         SceneManager.sceneUnloaded += OnSceneUnloaded; //Subscribe to scene unload event (every NetworkPlayer should do this)
         DontDestroyOnLoad(gameObject);                 //Make sure network players are not destroyed when a new scene is loaded
-    }
-
-    /// <summary>
-    /// Initializes the player's photon player settings.
-    /// </summary>
-    private void InitializePhotonPlayerSettings()
-    {
-        photonPlayerSettings.Add("Color", 0);
-        photonPlayerSettings.Add("IsReady", false);
-        photonPlayerSettings.Add("TubeID", -1);
-        PlayerController.photonView.Owner.SetCustomProperties(photonPlayerSettings);
     }
 
     void Start()
@@ -183,6 +180,7 @@ public class NetworkPlayer : MonoBehaviour
             MapPosition(leftHandRig, leftHandTarget);   //Update position of left hand rig
             MapPosition(rightHandRig, rightHandTarget); //Update position of right hand rig
             MapPosition(modelRig, modelTarget);         //Update position of base model
+            MapPosition(originRig, originTarget);
         }
 
         //Sync colors:
@@ -225,6 +223,7 @@ public class NetworkPlayer : MonoBehaviour
                 //Local scene setup:
                 RigToActivePlayer(); //Re-apply rig to new scene's PlayerController
 
+                //Local visibility:
                 if (scene.name == NetworkManagerScript.instance.mainMenuScene)
                 {
                     photonView.RPC("RPC_MakeInvisible", RpcTarget.OthersBuffered);  //Hide all remote players when entering main menu
@@ -283,6 +282,7 @@ public class NetworkPlayer : MonoBehaviour
         leftHandTarget = attachedPlayer.leftHand.transform;   //Get left hand from player script (since it has already automatically collected the reference)
         rightHandTarget = attachedPlayer.rightHand.transform; //Get right hand from player script (since it has already automatically collected the reference)
         modelTarget = attachedPlayer.bodyRig.transform;       //Get base model transform from player script
+        originTarget = attachedPlayer.xrOrigin.transform;
     }
     private void OnPlayerDisconnected(NetworkPlayer player)
     {
@@ -328,12 +328,16 @@ public class NetworkPlayer : MonoBehaviour
     {
         //Update any instance of the room settings display
         UpdateAllRoomSettingsDisplays();
+        
     }
 
     public void UpdateAllRoomSettingsDisplays()
     {
         foreach (var display in FindObjectsOfType<RoomSettingsDisplay>())
             display.UpdateRoomSettingsDisplay();
+
+        if(ReadyUpManager.instance != null && ReadyUpManager.instance.localPlayerTube != null)
+            ReadyUpManager.instance.localPlayerTube.ShowTeamsDisplay((bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"]);
     }
 
     /// <summary>
@@ -353,8 +357,16 @@ public class NetworkPlayer : MonoBehaviour
     /// </summary>
     public void SyncColors()
     {
-        photonView.RPC("UpdateTakenColors", RpcTarget.AllBuffered); //Send data to every player on the network (including this one)
+        if (!(bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"])
+            photonView.RPC("UpdateTakenColors", RpcTarget.All); //Send data to every player on the network (including this one)
     }
+
+    public void SyncTeams()
+    {
+        if ((bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"])
+            photonView.RPC("UpdateTeamDisplays", RpcTarget.All, photonView.Owner.NickName, (int)photonView.Owner.CustomProperties["Color"]); //Send data to every player on the network (including this one)
+    }
+
     /// <summary>
     /// Manages material event priority for this particular network player.
     /// </summary>
@@ -403,7 +415,7 @@ public class NetworkPlayer : MonoBehaviour
                 if (!materialsCombined) break;
             }
         }
-
+        
         //Set materials:
         SkinnedMeshRenderer targetRenderer = photonView.IsMine ? PlayerController.instance.bodyRenderer : bodyRenderer;
         targetRenderer.material = primaryMat;
@@ -411,23 +423,28 @@ public class NetworkPlayer : MonoBehaviour
         {
             currentColor = PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]];
             targetRenderer.material.SetColor("_Color", currentColor);
-            if (!photonView.IsMine)
+            /*if (!photonView.IsMine)
             {
-                trail.material = origTrailMat;
-                trail.colorGradient.colorKeys[0].color = currentColor;
-                trail.colorGradient.colorKeys[1].color = currentColor;
-            }
+                
+            }*/
+            print("Setting player " + photonView.ViewID + " trail color to " + currentColor);
+            trail.material = origTrailMat;
+            trail.startColor = currentColor;
+            trail.endColor = currentColor;
         }
         else //System is using unique material
         {
-            if (!photonView.IsMine)
+            /*if (!photonView.IsMine)
             {
-                trail.colorGradient.colorKeys[0].color = Color.white;
-                trail.colorGradient.colorKeys[1].color = Color.white;
-                trail.material = primaryMat;
-            }
+                
+            }*/
+            print("Setting player " + photonView.ViewID + " trail color to " + currentColor);
+            trail.material = primaryMat;
+            trail.startColor = currentColor;
+            trail.endColor = currentColor;
         }
     }
+
         /// <summary>
         /// Creates a material event on this network player which is able to change its material properties for a certain amount of time.
         /// </summary>
@@ -445,9 +462,12 @@ public class NetworkPlayer : MonoBehaviour
     /// <summary>
     /// When a user joins, try to take either their color or the next available color.
     /// </summary>
-    public void UpdateTakenColorsOnJoin()
+    public IEnumerator CheckExclusiveColors()
     {
-        if (ReadyUpManager.instance != null)
+        yield return new WaitUntil(() => photonView.Owner.CustomProperties["Color"] != null);
+
+        //Update the taken colors on join if the room does not have team mode
+        if (!(bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"])
         {
             List<int> takenColors = new List<int>();
 
@@ -474,18 +494,83 @@ public class NetworkPlayer : MonoBehaviour
             //If the player must replace their color, change their color
             if (mustReplaceColor)
             {
+                int currentColor = (int)photonView.Owner.CustomProperties["Color"] + 1;
+
                 for (int i = 0; i < PlayerSettingsController.NumberOfPlayerColors(); i++)
                 {
+
+                    if (currentColor >= PlayerSettingsController.NumberOfPlayerColors())
+                        currentColor = 0;
+
                     //If the taken color list does not contain the current color list, take it
-                    if (!takenColors.Contains(i))
+                    if (!takenColors.Contains(currentColor))
                     {
                         ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().ChangePlayerColor(i);
                         SetNetworkPlayerProperties("Color", i);
                         break;
                     }
+
+                    currentColor++;
                 }
             }
         }
+    }
+
+    public void UpdateExclusiveColors(bool exclusiveColors)
+    {
+        Debug.Log("Updating Exclusive Color System...");
+        photonView.RPC("RPC_UpdateExclusiveColors", RpcTarget.All, exclusiveColors); //Send data to every player on the network (including this one)
+    }
+
+    [PunRPC]
+    public void RPC_UpdateExclusiveColors(bool exclusiveColors)
+    {
+        if (exclusiveColors)
+        {
+            Debug.Log("Exclusive Colors Needed. Creating Exclusive Colors...");
+            List<int> takenColors = new List<int>();
+
+            bool mustReplaceColor = false;
+
+            for (int i = NetworkManagerScript.instance.GetPlayerIndexFromList(); i > 0; i--)
+            {
+                Player otherPlayer = NetworkManagerScript.instance.GetPlayerList()[i - 1];
+
+                Debug.Log("Checking " + otherPlayer.NickName + "'s Color: " + (ColorOptions)otherPlayer.CustomProperties["Color"]);
+                takenColors.Add((int)otherPlayer.CustomProperties["Color"]);
+
+                if ((int)otherPlayer.CustomProperties["Color"] == (int)photonView.Owner.CustomProperties["Color"])
+                {
+                    Debug.Log((ColorOptions)otherPlayer.CustomProperties["Color"] + " is taken.");
+                    mustReplaceColor = true;
+                }
+            }
+
+            //If the player must replace their color, change their color
+            if (mustReplaceColor)
+            {
+                int currentColor = (int)photonView.Owner.CustomProperties["Color"] + 1;
+
+                for (int i = 0; i < PlayerSettingsController.NumberOfPlayerColors(); i++)
+                {
+
+                    if(currentColor >= PlayerSettingsController.NumberOfPlayerColors())
+                        currentColor = 0;
+
+                    //If the taken color list does not contain the current color list, take it
+                    if (!takenColors.Contains(currentColor))
+                    {
+                        ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().ChangePlayerColor(i);
+                        SetNetworkPlayerProperties("Color", i);
+                        break;
+                    }
+
+                    currentColor++;
+                }
+            }
+        }
+
+        ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
     }
 
     /// <summary>
@@ -516,6 +601,17 @@ public class NetworkPlayer : MonoBehaviour
     }
 
     [PunRPC]
+    public void UpdateTeamDisplays(string nickName, int color)
+    {
+        Debug.Log("Updating Team Display...");
+
+        if (ReadyUpManager.instance != null && ReadyUpManager.instance.localPlayerTube != null)
+        {
+            ReadyUpManager.instance.localPlayerTube.GetTeamsDisplay().UpdatePlayerTeams(nickName, color);
+        }
+    }
+
+    [PunRPC]
     public void LoadPlayerStats(string data)
     {
         //Initialization:
@@ -538,8 +634,10 @@ public class NetworkPlayer : MonoBehaviour
         //Apply settings:
         SetWormNicknameText(photonView.Owner.NickName);
         foreach (Material mat in bodyRenderer.materials) mat.color = currentColor; //Apply color to entire player body
-        trail.colorGradient.colorKeys[0].color = currentColor;
-        trail.colorGradient.colorKeys[1].color = currentColor;
+        print("2Setting player " + photonView.ViewID + " trail color to " + currentColor);
+        trail.startColor = currentColor;
+        trail.endColor = currentColor;
+
         /*for (int x = 0; x < trail.colorGradient.colorKeys.Length; x++) //Iterate through color keys in trail gradient
         {
             if (currentColor == Color.black) trail.colorGradient.colorKeys[x].color = Color.white;
@@ -547,25 +645,6 @@ public class NetworkPlayer : MonoBehaviour
         }
         if (currentColor == Color.black) { trail.startColor = Color.white; trail.endColor = Color.white; }
         else { trail.startColor = currentColor; trail.endColor = currentColor; } //Set actual trail colors (just in case)*/
-    }
-
-    /// <summary>
-    /// Changes the NetworkPlayer's materials.
-    /// </summary>
-    /// <param name="newMaterial">The new NetworkPlayer materials.</param>
-    public void ChangeNetworkPlayerMaterial(Material newMaterial)
-    {
-        bodyRenderer.material = newMaterial;
-        trail.material = newMaterial;
-        if (newMaterial == altMaterials[0])
-        {
-            bodyRenderer.material.SetColor("_Color", PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]]);
-            trail.material.SetColor("_Color", PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]]);
-        }
-    }
-    public void ChangeNetworkPlayerMaterial(int matIndex)
-    {
-        ChangeNetworkPlayerMaterial(altMaterials[matIndex]);
     }
 
     /// <summary>
@@ -590,6 +669,8 @@ public class NetworkPlayer : MonoBehaviour
             }
 
             //Damage & death:
+            Vector3 origPos = PlayerController.instance.xrOrigin.transform.position;
+            Quaternion origRot = PlayerController.instance.xrOrigin.transform.rotation;
             bool killedPlayer = PlayerController.instance.IsHit(damage); //Inflict damage upon local player
             if (killedPlayer)
             {
@@ -604,11 +685,60 @@ public class NetworkPlayer : MonoBehaviour
                 AddToKillBoard(PhotonNetwork.GetPhotonView(enemyID).Owner.NickName, PhotonNetwork.LocalPlayer.NickName, (DeathCause)deathCause);
                 photonView.RPC("RPC_UpdateLeaderboard", RpcTarget.All, PhotonNetwork.LocalPlayer.NickName, networkPlayerStats.numOfDeaths, networkPlayerStats.numOfKills, networkPlayerStats.killStreak);
                 if (enemyID != photonView.ViewID) PhotonNetwork.GetPhotonView(enemyID).RPC("RPC_KilledEnemy", RpcTarget.AllBuffered, photonView.ViewID, deathCause);
-
             }
+
+            //Effects:
+            if (!killedPlayer)
+            {
+                if (bulletHitEffect != null) Instantiate(bulletHitEffect, origPos, origRot);
+            }
+            else
+            {
+                switch ((DeathCause)deathCause)
+                {
+                    case DeathCause.GUN:
+                        if (bulletKillEffect != null) Instantiate(bulletKillEffect, origPos, origRot);
+                        break;
+                    case DeathCause.CHAINSAW:
+                        if (chainsawKillEffect != null) Instantiate(chainsawKillEffect, origPos, origRot);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            photonView.RPC("RPC_PlayHitEffect", RpcTarget.Others, killedPlayer, deathCause);
         }
     }
 
+    [PunRPC]
+    public void RPC_PlayHitEffect(bool killed, int damageType)
+    {
+        if (!killed)
+        {
+            switch ((DeathCause)damageType)
+            {
+                case DeathCause.GUN:
+                    Instantiate(bulletHitEffect, originRig.position, originRig.rotation);
+                    break;
+                default:
+                    break;
+            }
+        }
+        else
+        {
+            switch ((DeathCause)damageType)
+            {
+                case DeathCause.GUN:
+                    if (bulletKillEffect != null) Instantiate(bulletKillEffect, originRig.position, originRig.rotation);
+                    break;
+                case DeathCause.CHAINSAW:
+                    if (chainsawKillEffect != null) Instantiate(chainsawKillEffect, originRig.position, originRig.rotation);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
     /// <summary>
     /// Launches this player with given amount of force.
     /// </summary>
@@ -664,11 +794,6 @@ public class NetworkPlayer : MonoBehaviour
     {
         print("why"); //This should never be called
     }
-    [PunRPC]
-    public void RPC_ChangeMaterial(int materialIndex)
-    {
-        ChangeNetworkPlayerMaterial(altMaterials[materialIndex]);
-    }
     /// <summary>
     /// Makes this player visible to the whole network and enables remote collisions (can also be used to clear their trail).
     /// </summary>
@@ -720,6 +845,15 @@ public class NetworkPlayer : MonoBehaviour
         
     }
 
+
+    //gives the new player a tube
+    [PunRPC]
+    public void RPC_StartTube(int tubeID)
+    {
+        LockerTubeSpawner.instance.StartMyTubeForOthersByDavid(tubeID, originRig);
+    }
+
+
     //BELOW METHODS ONLY GET CALLED ON MASTER CLIENT
     [PunRPC]
     public void RPC_GiveMeSpawnpoint(int myViewID)
@@ -735,6 +869,8 @@ public class NetworkPlayer : MonoBehaviour
             }
         }
     }
+
+
 
     //UTILITY METHODS:
     /// <summary>
