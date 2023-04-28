@@ -233,6 +233,7 @@ public class NetworkPlayer : MonoBehaviour
                     //PhotonNetwork.AutomaticallySyncScene = true;                    // Start syncing scene with other players
                     photonView.RPC("RPC_MakeVisible", RpcTarget.OthersBuffered);    //Show all remote players when entering locker room
                     UpdateAllRoomSettingsDisplays();
+                    SyncData();
                 }
             }
             else
