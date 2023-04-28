@@ -27,13 +27,6 @@ public class RoomListItem : MonoBehaviour
         UpdateText(roomInfo.Name + " - " + roomInfo.PlayerCount + "/" + roomInfo.MaxPlayers);
     }
 
-    // When the button is pressed
-    public void OnClick()
-    {
-        // Joins the room that was selected
-        NetworkManagerScript.instance.JoinRoom(currentRoomInfo.Name);
-    }
-
     public void OnSelect()
     {
         Debug.Log("Selecting " + text.text + "...");
