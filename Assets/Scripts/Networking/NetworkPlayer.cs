@@ -366,7 +366,7 @@ public class NetworkPlayer : MonoBehaviour
     public void SyncTeams()
     {
         if ((bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"] && photonView.Owner.CustomProperties["Color"] != null)
-            photonView.RPC("UpdateTeamDisplays", RpcTarget.All, photonView.Owner.NickName, (int)photonView.Owner.CustomProperties["Color"]); //Send data to every player on the network (including this one)
+            photonView.RPC("UpdateTeamDisplays", RpcTarget.All); //Send data to every player on the network (including this one)
     }
 
     /// <summary>
@@ -584,21 +584,19 @@ public class NetworkPlayer : MonoBehaviour
     [PunRPC]
     public void RPC_ResetColors(bool exclusiveColors, int [] newColorList)
     {
-        if (photonView.IsMine)
+        if (exclusiveColors)
         {
-            if (exclusiveColors)
+            for (int i = 0; i < newColorList.Length; i++)
             {
-                for (int i = 0; i < newColorList.Length; i++)
-                {
-                    Debug.Log(NetworkManagerScript.instance.GetPlayerList()[i].NickName + " Color: " + (ColorOptions)newColorList[i]);
+                Debug.Log(NetworkManagerScript.instance.GetPlayerList()[i].NickName + " Color: " + (ColorOptions)newColorList[i]);
+                Debug.Log("Photon Nickname: " + photonView.Owner.NickName);
 
-                    if (NetworkManagerScript.instance.GetPlayerList()[i] == photonView.Owner)
-                        ChangePlayerColorData(newColorList[i]);
-                }
+                if (NetworkManagerScript.instance.GetPlayerList()[i].NickName == photonView.Owner.NickName)
+                    ChangePlayerColorData(newColorList[i]);
             }
-
-            ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
         }
+
+        ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
     }
 
     public void ChangePlayerColorData(int colorOption)
@@ -637,7 +635,7 @@ public class NetworkPlayer : MonoBehaviour
     }
 
     [PunRPC]
-    public void UpdateTeamDisplays(string nickName, int color)
+    public void UpdateTeamDisplays()
     {
         Debug.Log("Updating Team Display...");
 
