@@ -29,7 +29,7 @@ public class NewGrapplerController : PlayerEquipment
 
     //Runtime Variables:
     internal Vector3 hookedHandPos; //Player hand position (relative to body) when hook lands on surface
-    internal bool locked = false,playerHooked=false;   //Stops player from releasing the grapple.
+    internal bool locked = false;   //Stops player from releasing the grapple.
 
     //EVENTS & COROUTINES:
     /// <summary>
@@ -101,7 +101,6 @@ public class NewGrapplerController : PlayerEquipment
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         locked = false;
-        playerHooked = false;
     }
 
     //INPUT METHODS:
@@ -171,7 +170,6 @@ public class NewGrapplerController : PlayerEquipment
     {
         audioSource.loop = false; //Make audiosource stop looping reel sound
         locked = false;
-        playerHooked = false;
         audioSource.Stop();       //Make sure audiosource stops playing reel sound
         if (settings.releaseSound != null) audioSource.PlayOneShot(settings.releaseSound); //Play sound effect
         SendHapticImpulse(settings.releaseHaptics);                                        //Play haptic impulse
@@ -183,7 +181,6 @@ public class NewGrapplerController : PlayerEquipment
     {
         if (settings.bounceSound != null) hook.audioSource.PlayOneShot(settings.bounceSound); //Play sound effect (on projectile)
         locked = false;
-        playerHooked=false;
         SendHapticImpulse(settings.releaseHaptics);                                           //Play haptic impulse
     }
 
@@ -241,7 +238,6 @@ public class NewGrapplerController : PlayerEquipment
         if (hook.state == HookProjectile.HookState.Retracting || hook.state == HookProjectile.HookState.Stowed) return; //Do not try to release hook after it has already been released
 
         //Release hook:
-        playerHooked = false;
         hook.Release(); //Indicate to hook that it is being released and needs to return to player
     }
     /// <summary>
@@ -256,6 +252,5 @@ public class NewGrapplerController : PlayerEquipment
     public void Unlock()
     {
         locked = false;
-        playerHooked = false;
     }
 }
