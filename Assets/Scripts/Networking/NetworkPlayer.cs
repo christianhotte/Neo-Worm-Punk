@@ -364,7 +364,7 @@ public class NetworkPlayer : MonoBehaviour
 
     public void SyncTeams()
     {
-        if ((bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"])
+        if ((bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"] && photonView.Owner.CustomProperties["Color"] != null)
             photonView.RPC("UpdateTeamDisplays", RpcTarget.All, photonView.Owner.NickName, (int)photonView.Owner.CustomProperties["Color"]); //Send data to every player on the network (including this one)
     }
 
@@ -531,26 +531,22 @@ public class NetworkPlayer : MonoBehaviour
         {
             Debug.Log("Exclusive Colors Needed. Creating Exclusive Colors...");
 
+            List<int> takenColors = new List<int>();
+
             for (int player = 0; player < NetworkManagerScript.instance.GetPlayerList().Length; player++)
             {
                 Player currentPlayer = NetworkManagerScript.instance.GetPlayerList()[player];
 
-                List<int> takenColors = new List<int>();
-
                 bool mustReplaceColor = false;
                 int currentNewColor = (int)currentPlayer.CustomProperties["Color"];
 
-                for (int i = player; i > 0; i--)
+                for (int i = 0; i < takenColors.Count; i++)
                 {
-                    Player otherPlayer = NetworkManagerScript.instance.GetPlayerList()[i - 1];
-
-                    Debug.Log("Checking " + otherPlayer.NickName + "'s Color: " + (ColorOptions)otherPlayer.CustomProperties["Color"]);
-                    takenColors.Add((int)otherPlayer.CustomProperties["Color"]);
-
-                    if ((int)otherPlayer.CustomProperties["Color"] == (int)currentPlayer.CustomProperties["Color"])
+                    if (takenColors[i] == (int)currentPlayer.CustomProperties["Color"])
                     {
-                        Debug.Log((ColorOptions)otherPlayer.CustomProperties["Color"] + " is taken.");
+                        Debug.Log((ColorOptions)takenColors[i] + " is taken.");
                         mustReplaceColor = true;
+                        break;
                     }
                 }
 
@@ -569,6 +565,7 @@ public class NetworkPlayer : MonoBehaviour
                         if (!takenColors.Contains(currentColor))
                         {
                             currentNewColor = currentColor;
+                            Debug.Log("Giving " + currentPlayer.NickName + "" + (ColorOptions)currentColor + "...");
                             break;
                         }
 
@@ -576,6 +573,7 @@ public class NetworkPlayer : MonoBehaviour
                     }
                 }
                 newColors[player] = currentNewColor;
+                takenColors.Add(currentNewColor);
             }
         }
 
