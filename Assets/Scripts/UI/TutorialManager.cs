@@ -68,6 +68,9 @@ public class TutorialManager : MonoBehaviour
                 targetGoal = 5;
                 PlayerController.instance.inverteboy.UpdateTutorialProgress("Shoot Five Targets.\n"+ targetsShot +" / " + targetGoal);
                 break;
+            default:
+                PlayerController.instance.inverteboy.UpdateTutorialProgress("");
+                break;
         }
     }
 

@@ -14,7 +14,7 @@ public class SpawnManager : MonoBehaviour
     public List<Transform> spawnPoints = new List<Transform>();
     [Tooltip("The place players temporarily go to when they die.")] public Transform deathZone;
     public float deathZoneRotSpeed;
-    public Transform[] spawnPoints6;
+    //public Transform[] spawnPoints6;
     private int lastSpawnIndex = -1;
 
     //Settings:
@@ -31,8 +31,6 @@ public class SpawnManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        // Shuffle the spawn points array to get random order
-        ShuffleArray(spawnPoints6);
     }
 
     private void Update()
@@ -63,7 +61,7 @@ public class SpawnManager : MonoBehaviour
     {
         // Find a new spawn point that hasn't been used recently
         int newSpawnIndex = GetNewSpawnIndex();
-        Transform newSpawnPoint = spawnPoints6[newSpawnIndex];
+        Transform newSpawnPoint = spawnPoints[newSpawnIndex];
 
         Debug.Log("Spawning player.");
 
@@ -77,7 +75,7 @@ public class SpawnManager : MonoBehaviour
 
     private int GetNewSpawnIndex()
     {
-        int newIndex = Random.Range(0, spawnPoints6.Length);
+        int newIndex = Random.Range(0, spawnPoints.Count);
 
         // If the new index is the same as the last one, get a new one
         if (newIndex == lastSpawnIndex)
