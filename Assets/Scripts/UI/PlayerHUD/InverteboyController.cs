@@ -299,7 +299,6 @@ public class InverteboyController : MonoBehaviour
         labelText.text = label;
         tutorialText.text = message;
 
-        Sprite currentTutorialSprite = tutorialImage.sprite;
         Sprite newTutorialSprite;
 
         if (diagramSprite != null)

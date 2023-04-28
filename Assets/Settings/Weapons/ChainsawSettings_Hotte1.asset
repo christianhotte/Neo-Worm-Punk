@@ -197,7 +197,7 @@ MonoBehaviour:
   grindEndSound: {fileID: 0}
   deflectIdleSound: {fileID: 8300000, guid: aec4a007ab0c8894aac2c485061c0388, type: 3}
   deflectSound: {fileID: 8300000, guid: 5343be21a73a12c46807db26cc025b29, type: 3}
-  KillSound: {fileID: 8300000, guid: 2838132868601b94ea0addbc4146fa2a, type: 3}
+  KillSound: {fileID: 8300000, guid: 6599fc8357c01074d8b761c882bc5612, type: 3}
   extendHaptics:
     amplitude: 1
     duration: 0.15
@@ -219,6 +219,15 @@ MonoBehaviour:
   activeHapticPulse:
     amplitude: 0.5
     duration: 0.045
+    behaviorCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  killHaptics:
+    amplitude: 0
+    duration: 0
     behaviorCurve:
       serializedVersion: 2
       m_Curve: []
