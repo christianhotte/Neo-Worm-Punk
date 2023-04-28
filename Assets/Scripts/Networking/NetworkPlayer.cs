@@ -60,7 +60,6 @@ public class NetworkPlayer : MonoBehaviour
     private SkinnedMeshRenderer bodyRenderer;                    //Renderer component for main player body/skin
     private TrailRenderer trail;                                 //Renderer for trail that makes players more visible to each other
     internal PlayerStats networkPlayerStats = new PlayerStats(); //The stats for the network player
-    internal Hashtable photonPlayerSettings;
     
     [Header("Material System:")]
     public Material[] altMaterials;
@@ -126,9 +125,6 @@ public class NetworkPlayer : MonoBehaviour
             PlayerController.photonView = photonView; //Give playerController a reference to local client photon view component
 
             //Local initialization:
-
-            photonPlayerSettings = new Hashtable();                       //Create new custom player settings
-            InitializePhotonPlayerSettings();
             PlayerController.instance.playerSetup.ApplyAllSettings();                                //Apply default settings to player
             SyncData();                                                                              //Sync settings between every version of this network player
             foreach (Renderer r in transform.GetComponentsInChildren<Renderer>()) r.enabled = false; //Local player should never be able to see their own NetworkPlayer
@@ -150,17 +146,6 @@ public class NetworkPlayer : MonoBehaviour
         SceneManager.sceneLoaded += OnSceneLoaded;     //Subscribe to scene load event (every NetworkPlayer should do this)
         SceneManager.sceneUnloaded += OnSceneUnloaded; //Subscribe to scene unload event (every NetworkPlayer should do this)
         DontDestroyOnLoad(gameObject);                 //Make sure network players are not destroyed when a new scene is loaded
-    }
-
-    /// <summary>
-    /// Initializes the player's photon player settings.
-    /// </summary>
-    private void InitializePhotonPlayerSettings()
-    {
-        photonPlayerSettings.Add("Color", PlayerPrefs.GetInt("PreferredColorOption"));
-        photonPlayerSettings.Add("IsReady", false);
-        photonPlayerSettings.Add("TubeID", -1);
-        PlayerController.photonView.Owner.SetCustomProperties(photonPlayerSettings);
     }
 
     void Start()
@@ -350,6 +335,9 @@ public class NetworkPlayer : MonoBehaviour
     {
         foreach (var display in FindObjectsOfType<RoomSettingsDisplay>())
             display.UpdateRoomSettingsDisplay();
+
+        if(ReadyUpManager.instance != null && ReadyUpManager.instance.localPlayerTube != null)
+            ReadyUpManager.instance.localPlayerTube.ShowTeamsDisplay((bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"]);
     }
 
     /// <summary>
@@ -372,6 +360,13 @@ public class NetworkPlayer : MonoBehaviour
         if (!(bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"])
             photonView.RPC("UpdateTakenColors", RpcTarget.All); //Send data to every player on the network (including this one)
     }
+
+    public void SyncTeams()
+    {
+        if ((bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"])
+            photonView.RPC("UpdateTeamDisplays", RpcTarget.All, photonView.Owner.NickName, (int)photonView.Owner.CustomProperties["Color"]); //Send data to every player on the network (including this one)
+    }
+
     /// <summary>
     /// Manages material event priority for this particular network player.
     /// </summary>
@@ -420,7 +415,7 @@ public class NetworkPlayer : MonoBehaviour
                 if (!materialsCombined) break;
             }
         }
-
+        
         //Set materials:
         SkinnedMeshRenderer targetRenderer = photonView.IsMine ? PlayerController.instance.bodyRenderer : bodyRenderer;
         targetRenderer.material = primaryMat;
@@ -432,7 +427,8 @@ public class NetworkPlayer : MonoBehaviour
             {
                 print("Setting player " + photonView.ViewID + " trail color to " + currentColor);
                 trail.material = origTrailMat;
-                trail.material.SetColor("Base Map", currentColor);
+                trail.startColor = currentColor;
+                trail.endColor = currentColor;
             }
         }
         else //System is using unique material
@@ -440,6 +436,8 @@ public class NetworkPlayer : MonoBehaviour
             if (!photonView.IsMine)
             {
                 trail.material = primaryMat;
+                trail.startColor = Color.white;
+                trail.endColor = Color.white;
             }
         }
     }
@@ -526,6 +524,7 @@ public class NetworkPlayer : MonoBehaviour
     {
         if (exclusiveColors)
         {
+            Debug.Log("Exclusive Colors Needed. Creating Exclusive Colors...");
             List<int> takenColors = new List<int>();
 
             bool mustReplaceColor = false;
@@ -599,6 +598,17 @@ public class NetworkPlayer : MonoBehaviour
     }
 
     [PunRPC]
+    public void UpdateTeamDisplays(string nickName, int color)
+    {
+        Debug.Log("Updating Team Display...");
+
+        if (ReadyUpManager.instance != null && ReadyUpManager.instance.localPlayerTube != null)
+        {
+            ReadyUpManager.instance.localPlayerTube.GetTeamsDisplay().UpdatePlayerTeams(nickName, color);
+        }
+    }
+
+    [PunRPC]
     public void LoadPlayerStats(string data)
     {
         //Initialization:
@@ -621,7 +631,9 @@ public class NetworkPlayer : MonoBehaviour
         //Apply settings:
         SetWormNicknameText(photonView.Owner.NickName);
         foreach (Material mat in bodyRenderer.materials) mat.color = currentColor; //Apply color to entire player body
-        trail.material.SetColor("Base Map", currentColor);
+        print("2Setting player " + photonView.ViewID + " trail color to " + currentColor);
+        trail.startColor = currentColor;
+        trail.endColor = currentColor;
 
         /*for (int x = 0; x < trail.colorGradient.colorKeys.Length; x++) //Iterate through color keys in trail gradient
         {
@@ -630,26 +642,6 @@ public class NetworkPlayer : MonoBehaviour
         }
         if (currentColor == Color.black) { trail.startColor = Color.white; trail.endColor = Color.white; }
         else { trail.startColor = currentColor; trail.endColor = currentColor; } //Set actual trail colors (just in case)*/
-    }
-
-    /// <summary>
-    /// Changes the NetworkPlayer's materials.
-    /// </summary>
-    /// <param name="newMaterial">The new NetworkPlayer materials.</param>
-    public void ChangeNetworkPlayerMaterial(Material newMaterial)
-    {
-        bodyRenderer.material = newMaterial;
-        trail.material = newMaterial;
-        if (newMaterial == altMaterials[0])
-        {
-            bodyRenderer.material.SetColor("_Color", PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]]);
-            //trail.material.SetColor("_Color", PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]]);
-            trail.material.SetColor("Base Map", currentColor);
-        }
-    }
-    public void ChangeNetworkPlayerMaterial(int matIndex)
-    {
-        ChangeNetworkPlayerMaterial(altMaterials[matIndex]);
     }
 
     /// <summary>
@@ -798,11 +790,6 @@ public class NetworkPlayer : MonoBehaviour
     public void RPC_ChangeVisibility()
     {
         print("why"); //This should never be called
-    }
-    [PunRPC]
-    public void RPC_ChangeMaterial(int materialIndex)
-    {
-        ChangeNetworkPlayerMaterial(altMaterials[materialIndex]);
     }
     /// <summary>
     /// Makes this player visible to the whole network and enables remote collisions (can also be used to clear their trail).
