@@ -448,7 +448,13 @@ public class PlayerController : MonoBehaviour
         //Weapon cleanup:
         foreach (NewGrapplerController hookShot in GetComponentsInChildren<NewGrapplerController>()) //Iterate through any hookshots player may have equipped
         {
-            if (hookShot.hook != null) hookShot.hook.Stow(); //Stow hook to make sure it doesn't get lost
+            if (hookShot.hook != null)
+            {
+                hookShot.hook.Release(); //Release the hook to avoid a bug :)
+                hookShot.hook.Stow();    //Stow hook to make sure it doesn't get lost
+            }
+                
+                
         }
 
         //Put player in limbo:
