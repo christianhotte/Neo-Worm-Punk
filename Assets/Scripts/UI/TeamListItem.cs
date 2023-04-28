@@ -59,9 +59,7 @@ public class TeamListItem : MonoBehaviour
                 numberOfTeamMembers++;
             }
         }
-
-        if (numberOfTeamMembers == 0)
-            gameObject.SetActive(false);
+        gameObject.SetActive(numberOfTeamMembers > 0);
     }
 
     private void ClearPlayerNames()
