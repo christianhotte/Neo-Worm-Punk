@@ -28,6 +28,9 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        if (PhotonNetwork.IsConnected && PhotonNetwork.IsMasterClient)
+            NetworkManagerScript.instance.SetMatchActive(false);
+
         StartCoroutine(MoveToSpawnPoint());
     }
 

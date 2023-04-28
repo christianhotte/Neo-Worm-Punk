@@ -13,6 +13,7 @@ public class LockerTubeController : MonoBehaviour
     [SerializeField, Tooltip("The spawn point for the player's name.")] private Transform playerNameSpawnPoint;
     [SerializeField, Tooltip("The prefab that displays the player's name.")] private GameObject playerNamePrefab;
     [SerializeField, Tooltip("The GameObject for the host settings.")] private GameObject hostSettings;
+    [SerializeField, Tooltip("The GameObject for the teams display.")] private GameObject teamsDisplay;
 
     //internal int tubeNumber;
     //public bool occupied = false;
@@ -252,6 +253,8 @@ public class LockerTubeController : MonoBehaviour
         }
     }
 
+    public void ShowTeamsDisplay(bool showTeams) => teamsDisplay.SetActive(showTeams);
+
     /// <summary>
     /// Shows the host settings in the tube.
     /// </summary>
@@ -260,6 +263,8 @@ public class LockerTubeController : MonoBehaviour
     {
         hostSettings.SetActive(showSettings);
     }
+
+    public TeamsDisplay GetTeamsDisplay() => teamsDisplay.GetComponent<TeamsDisplay>();
 
     public int GetTubeNumber()
     {
