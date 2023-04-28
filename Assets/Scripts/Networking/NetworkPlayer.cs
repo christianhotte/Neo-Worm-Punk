@@ -588,6 +588,8 @@ public class NetworkPlayer : MonoBehaviour
         {
             for (int i = 0; i < newColorList.Length; i++)
             {
+                Debug.Log(NetworkManagerScript.instance.GetPlayerList()[i].NickName + " Color: " + (ColorOptions)newColorList[i]);
+
                 if (NetworkManagerScript.instance.GetPlayerList()[i] == photonView.Owner)
                     ChangePlayerColorData(newColorList[i]);
             }
