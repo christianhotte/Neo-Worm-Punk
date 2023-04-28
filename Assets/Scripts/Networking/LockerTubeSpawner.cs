@@ -65,7 +65,7 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
             ReadyUpManager.instance.UpdateStatus(tubeID + 1);
             ReadyUpManager.instance.localPlayerTube.SpawnPlayerName(NetworkManagerScript.instance.GetLocalPlayerName());
             ReadyUpManager.instance.localPlayerTube.ShowTeamsDisplay((bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"]);
-            NetworkManagerScript.localNetworkPlayer.SyncTeams();
+            PlayerController.instance.ApplyAndSyncSettings();
 
             StartCoroutine(NetworkManagerScript.localNetworkPlayer.CheckExclusiveColors());
             if (PhotonNetwork.IsMasterClient)

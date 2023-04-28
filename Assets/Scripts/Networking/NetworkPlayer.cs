@@ -578,25 +578,29 @@ public class NetworkPlayer : MonoBehaviour
             }
         }
 
-        photonView.RPC("RPC_ResetColors", RpcTarget.All, exclusiveColors, newColors); //Send data to every player on the network (including this one)
+        foreach(var player in instances)
+            player.photonView.RPC("RPC_ResetColors", RpcTarget.All, exclusiveColors, newColors); //Send data to every player on the network (including this one)
     }
 
     [PunRPC]
     public void RPC_ResetColors(bool exclusiveColors, int [] newColorList)
     {
-        if (exclusiveColors)
+        if (photonView.IsMine)
         {
-            for (int i = 0; i < newColorList.Length; i++)
+            if (exclusiveColors)
             {
-                Debug.Log(NetworkManagerScript.instance.GetPlayerList()[i].NickName + " Color: " + (ColorOptions)newColorList[i]);
-                Debug.Log("Photon Nickname: " + NetworkManagerScript.localNetworkPlayer.photonView.Owner.NickName);
+                for (int i = 0; i < newColorList.Length; i++)
+                {
+                    Debug.Log(NetworkManagerScript.instance.GetPlayerList()[i].NickName + " Color: " + (ColorOptions)newColorList[i]);
+                    Debug.Log("Photon Nickname: " + photonView.Owner.NickName);
 
-                if (NetworkManagerScript.instance.GetPlayerList()[i].NickName == NetworkManagerScript.localNetworkPlayer.photonView.Owner.NickName)
-                    ChangePlayerColorData(newColorList[i]);
+                    if (NetworkManagerScript.instance.GetPlayerList()[i].NickName == photonView.Owner.NickName)
+                        ChangePlayerColorData(newColorList[i]);
+                }
             }
-        }
 
-        ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
+            ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
+        }
     }
 
     public void ChangePlayerColorData(int colorOption)
