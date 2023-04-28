@@ -124,7 +124,7 @@ public class HookProjectile : Projectile
                         newVelocity -= addVel;                                                                //Apply additional velocity (rotated based on player orientation)
                     }
                     //newVelocity += otherEffectsThatCanOccurInLevel
-                    if (controller.locked||controller.playerHooked)
+                    if (controller.locked)
                     {
                         newVelocity *= 2.5f;                                //Gives a boost to locked hook
                         controller.player.bodyRb.velocity = newVelocity; //Apply new velocity
@@ -147,6 +147,7 @@ public class HookProjectile : Projectile
                     if (Vector3.Angle(handDiff, hitDirection) > 90) newVelocity -= Vector3.Project(handDiff, hitDirection) * controller.settings.yankForce; //Apply additional velocity to player based on how much they are pulling their arm back
                     if (!punchWhipped) newVelocity -= Vector3.ProjectOnPlane(handDiff, hitDirection) * controller.settings.lateralManeuverForce;            //Apply additional velocity to player based on how much they are pulling their arm to the side
                     //newVelocity += otherEffectsThatCanOccurInLevel
+                    newVelocity *= 2.5f;
                     controller.player.bodyRb.velocity = newVelocity;                                                                                        //Apply new velocity
                 }
                 break;

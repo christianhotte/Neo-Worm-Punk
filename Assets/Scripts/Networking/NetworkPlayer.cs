@@ -423,22 +423,25 @@ public class NetworkPlayer : MonoBehaviour
         {
             currentColor = PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]];
             targetRenderer.material.SetColor("_Color", currentColor);
-            if (!photonView.IsMine)
+            /*if (!photonView.IsMine)
             {
-                print("Setting player " + photonView.ViewID + " trail color to " + currentColor);
-                trail.material = origTrailMat;
-                trail.startColor = currentColor;
-                trail.endColor = currentColor;
-            }
+                
+            }*/
+            print("Setting player " + photonView.ViewID + " trail color to " + currentColor);
+            trail.material = origTrailMat;
+            trail.startColor = currentColor;
+            trail.endColor = currentColor;
         }
         else //System is using unique material
         {
-            if (!photonView.IsMine)
+            /*if (!photonView.IsMine)
             {
-                trail.material = primaryMat;
-                trail.startColor = Color.white;
-                trail.endColor = Color.white;
-            }
+                
+            }*/
+            print("Setting player " + photonView.ViewID + " trail color to " + currentColor);
+            trail.material = primaryMat;
+            trail.startColor = currentColor;
+            trail.endColor = currentColor;
         }
     }
 
