@@ -95,31 +95,32 @@ public class InverteboyController : MonoBehaviour
         defaultTutorialSprite = tutorialImage.sprite;
 
         UpdateVolume();
-        SceneManager.sceneLoaded += OnSceneLoaded;
+        InitializeInverteboyScreens();
     }
 
-    public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    private void InitializeInverteboyScreens()
     {
-        if (scene.name == GameSettings.titleScreenScene)
+        if (SceneManager.GetActiveScene().name == GameSettings.titleScreenScene)
         {
             PlayMusic(mainMenuMusic);
         }
 
-        if (scene.name == GameSettings.roomScene)
+        if (SceneManager.GetActiveScene().name == GameSettings.roomScene)
         {
             PlayMusic(lobbyMusic);
             SwitchSecondaryCanvas(InverteboySecondaryScreens.ROOMLOG);
+            hideHologram = true;
 
         }
 
-        if (scene.name == GameSettings.arenaScene)
+        if (SceneManager.GetActiveScene().name == GameSettings.arenaScene)
         {
             PlayMusic(arenaMusic);
             SwitchMainCanvas(InverteboyMainScreens.ARENA);
             hideHologram = true;
         }
 
-        if(scene.name == GameSettings.tutorialScene)
+        if (SceneManager.GetActiveScene().name == GameSettings.tutorialScene)
         {
             SwitchMainCanvas(InverteboyMainScreens.MAIN);
             SwitchHologramCanvas(InverteboyHologramScreens.TUTORIAL);
@@ -158,7 +159,8 @@ public class InverteboyController : MonoBehaviour
             if(timeLookingAtInverteboy > lookBufferTime && !isOpen)
             {
                 OpenInverteboy(true);
-                OpenHologramMenu(true);
+                if(!hideHologram)
+                    OpenHologramMenu(true);
             }
 
             timeLookingAtInverteboy += Time.deltaTime;  //Increment timer
@@ -187,7 +189,8 @@ public class InverteboyController : MonoBehaviour
         if (forceOpen && !isOpen)
         {
             OpenInverteboy(true);
-            OpenHologramMenu(true);
+            if(!hideHologram)
+                OpenHologramMenu(true);
         }
     }
 
@@ -343,11 +346,9 @@ public class InverteboyController : MonoBehaviour
     {
         Canvas newCanvas = inverteboyMainCanvases[canvasIndex];
 
-        if (currentMainCanvas != null)
-            currentMainCanvas.enabled = false;
-
+        currentMainCanvas.enabled = false;
+        inverteboyMainCanvases[canvasIndex].enabled = true;
         currentMainCanvas = newCanvas;
-        currentMainCanvas.enabled = true;
     }
 
     /// <summary>
@@ -358,11 +359,9 @@ public class InverteboyController : MonoBehaviour
     {
         Canvas newCanvas = inverteboySecondaryCanvases[canvasIndex];
 
-        if (currentSecondaryCanvas != null)
-            currentSecondaryCanvas.enabled = false;
-
+        currentSecondaryCanvas.enabled = false;
         currentSecondaryCanvas = newCanvas;
-        currentSecondaryCanvas.enabled = true;
+        inverteboySecondaryCanvases[canvasIndex].enabled = true;
     }
 
     /// <summary>
@@ -373,11 +372,9 @@ public class InverteboyController : MonoBehaviour
     {
         Canvas newCanvas = inverteboyHologramCanvases[canvasIndex];
 
-        if (currentHologramCanvas != null)
-            currentHologramCanvas.enabled = false;
-
+        currentHologramCanvas.enabled = false;
         currentHologramCanvas = newCanvas;
-        currentHologramCanvas.enabled = true;
+        inverteboyHologramCanvases[canvasIndex].enabled = true;
     }
 
     /// <summary>
@@ -388,11 +385,9 @@ public class InverteboyController : MonoBehaviour
     {
         Canvas newCanvas = inverteboyMainCanvases[(int)canvasIndex];
 
-        if (currentMainCanvas != null)
-            currentMainCanvas.enabled = false;
-
+        currentMainCanvas.enabled = false;
         currentMainCanvas = newCanvas;
-        currentMainCanvas.enabled = true;
+        inverteboyMainCanvases[(int)canvasIndex].enabled = true;
     }
 
     /// <summary>
@@ -403,11 +398,9 @@ public class InverteboyController : MonoBehaviour
     {
         Canvas newCanvas = inverteboySecondaryCanvases[(int)canvasIndex];
 
-        if (currentSecondaryCanvas != null)
-            currentSecondaryCanvas.enabled = false;
-
+        currentSecondaryCanvas.enabled = false;
         currentSecondaryCanvas = newCanvas;
-        currentSecondaryCanvas.enabled = true;
+        inverteboySecondaryCanvases[(int)canvasIndex].enabled = true;
     }
 
     /// <summary>
@@ -418,11 +411,9 @@ public class InverteboyController : MonoBehaviour
     {
         Canvas newCanvas = inverteboyHologramCanvases[(int)canvasIndex];
 
-        if(currentHologramCanvas != null)
-            currentHologramCanvas.enabled = false;
-
+        currentHologramCanvas.enabled = false;
         currentHologramCanvas = newCanvas;
-        currentHologramCanvas.enabled = true;
+        inverteboyHologramCanvases[(int)canvasIndex].enabled = true;
     }
 
     /// <summary>
@@ -496,7 +487,6 @@ public class InverteboyController : MonoBehaviour
 
     private void OnDestroy()
     {
-        SceneManager.sceneLoaded -= OnSceneLoaded;
         StopMusic();
     }
 }
