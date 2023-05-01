@@ -61,6 +61,8 @@ public class UpgradeSpawner : MonoBehaviour
                 break;
         }
 
+        PlayerController.instance.combatHUD.AddToUpgradeInfo(powerType, waitTime);   //Adds the power up to the player's HUD
+
         yield return new WaitForSeconds(waitTime);
         currentPowerUp = PowerUp.PowerUpType.None;
     }
