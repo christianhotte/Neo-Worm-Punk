@@ -126,6 +126,9 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
 
     IEnumerator OnEveryoneReady()
     {
+        if (PhotonNetwork.IsMasterClient)
+            NetworkManagerScript.instance.SetMatchActive(true);
+
         float delayTime = 3;
         //countdown from 3,2,1,WORM!
         FindObjectOfType<Countdown>().StartCountdown((int)delayTime);                                                             //THIS NEEDS TO BE PUT IN BY PETER

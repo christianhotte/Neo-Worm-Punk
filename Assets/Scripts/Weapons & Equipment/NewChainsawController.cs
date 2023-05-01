@@ -59,6 +59,7 @@ public class NewChainsawController : PlayerEquipment
     private Vector3 wristOriginPos;    //Initial local (sheathed) position of wrist assembly
     private float bladeOriginSize;     //Initial length of blade extender
     private float bladeBackOriginSize; //Initial length of rear blade extender
+    private float afterKillCountdown;
 
     //RUNTIME METHODS:
     /// <summary>
@@ -97,10 +98,11 @@ public class NewChainsawController : PlayerEquipment
 
         //Update timers:
         timeInMode += Time.deltaTime; //Increment mode time tracker
+        if (afterKillCountdown > 0) afterKillCountdown = Mathf.Max(afterKillCountdown - Time.deltaTime, 0);
         if (mode == BladeMode.Extended || mode == BladeMode.Extending) //Blade is in extended mode
         {
             timeUntilPulse -= Time.deltaTime; //Increment pulse time tracker
-            if (timeUntilPulse <= 0) //It is time for the next haptic pulse
+            if (timeUntilPulse <= 0 && afterKillCountdown <= 0) //It is time for the next haptic pulse
             {
                 PlayerController.HapticData newPulse = settings.activeHapticPulse;                                                                  //Get values from settings for active pulse
                 newPulse.amplitude += Random.Range(-settings.activeHapticMagnitudeVariance, settings.activeHapticMagnitudeVariance);                //Add a little bit of random variation to the pulse
@@ -326,8 +328,10 @@ public class NewChainsawController : PlayerEquipment
                     else
                     {
                         hitPlayer.photonView.RPC("RPC_Hit", RpcTarget.AllBuffered, 100, PlayerController.photonView.ViewID, Vector3.zero, (int)DeathCause.CHAINSAW); //Hit target
-                        SendHapticImpulse(settings.extendHaptics);
+                        Debug.Log("ChainsawKill");
+                        SendHapticImpulse(settings.killHaptics);
                         PlayerController.instance.audioSource.PlayOneShot(settings.KillSound);
+                        afterKillCountdown = settings.killHaptics.duration;
                     }
                 }
             }
@@ -399,6 +403,10 @@ public class NewChainsawController : PlayerEquipment
                 if (hitPlayer != null && !hitPlayer.photonView.IsMine) //Player (other than self) has been hit by blade
                 {
                     hitPlayer.photonView.RPC("RPC_Hit", RpcTarget.AllBuffered, 3, PlayerController.photonView.ViewID, Vector3.zero, (int)DeathCause.CHAINSAW); //Hit target
+                    Debug.Log("DeflectingChainsawKill");
+                    SendHapticImpulse(settings.killHaptics);
+                    PlayerController.instance.audioSource.PlayOneShot(settings.KillSound);
+                    afterKillCountdown = settings.killHaptics.duration;
                 }
             }
         }
@@ -484,6 +492,11 @@ public class NewChainsawController : PlayerEquipment
                 newProjectile.photonView.RPC("RPC_Fire", RpcTarget.All, barrel.position, barrel.rotation, PlayerController.photonView.ViewID); //Initialize all projectiles simultaneously
             }
             audioSource.PlayOneShot(settings.deflectSound); //Play deflect sound
+
+            TutorialManager tutorialManager = FindObjectOfType<TutorialManager>();
+            if (tutorialManager != null && tutorialManager.GetCurrentTutorialSegment() == TutorialManager.Tutorial.PARRY)
+                tutorialManager.IncrementTutorialProgress();
+
             return true; //Indicate that projectile was deflected
         }
         else return false; //Indicate that projectile was not deflected

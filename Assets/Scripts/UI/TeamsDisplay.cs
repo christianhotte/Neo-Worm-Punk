@@ -1,41 +1,83 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
 public class TeamsDisplay : MonoBehaviour
 {
     [Header("Prefabs")]
     [SerializeField] private RectTransform teamColorDisplay;
-    [SerializeField] private RectTransform teamNameDisplay;
 
     [Header("Containers")]
     [SerializeField] private Transform teamColorContainer;
 
-    private Dictionary<int, string> playerTeams = new Dictionary<int, string>();
+    [SerializeField] private float animationDuration;
+    [SerializeField] private LeanTweenType animationEaseType;
 
-    // Start is called before the first frame update
-    void Start()
+    private LTDescr openingAnimation;
+
+    private List<TeamListItem> teamLists = new List<TeamListItem>();
+
+    private void Start()
     {
-        
+        if (PhotonNetwork.IsConnected)
+            StartCoroutine(SpawnTeamsAfterPlayerColorInit());
     }
 
-    public void InitializePlayerTeams()
+    private void OnEnable()
     {
-        foreach(var player in NetworkManagerScript.instance.GetPlayerList())
+        RefreshTeamLists();
+        OpenAnimation();
+    }
+
+    private void OnDisable()
+    {
+        LeanTween.cancel(openingAnimation.id);
+    }
+
+    private void OpenAnimation()
+    {
+        transform.localScale = Vector3.zero;
+        openingAnimation = LeanTween.scale(gameObject, new Vector3(0.01f, 0.01f, 0.01f), animationDuration).setEase(animationEaseType);
+    }
+
+    private IEnumerator SpawnTeamsAfterPlayerColorInit()
+    {
+        yield return new WaitUntil(() => NetworkManagerScript.localNetworkPlayer.photonView.Owner.CustomProperties["Color"] != null);
+        SpawnTeamNames();
+    }
+
+    private void SpawnTeamNames()
+    {
+        for(int i = 0; i < PlayerSettingsController.NumberOfPlayerColors(); i++)
         {
-            if (!playerTeams.ContainsValue(player.NickName))
-                playerTeams.Add((int)player.CustomProperties["Color"], player.NickName);
+            TeamListItem newTeam = Instantiate(teamColorDisplay, teamColorContainer).GetComponent<TeamListItem>();
+            newTeam.ChangeBackgroundColor(i);
+            newTeam.ChangeLabel(i);
+            teamLists.Add(newTeam);
+        }
+
+        RefreshTeamLists();
+    }
+
+    public void RefreshTeamLists()
+    {
+        for(int i = 0; i < teamLists.Count; i++)
+        {
+            GetPlayerTeams();
+            teamLists[i].RefreshPlayerList(GetPlayerTeams());
         }
     }
 
-    // Update is called once per frame
-    void Update()
+    public Dictionary<string, int> GetPlayerTeams()
     {
-        
-    }
+        Dictionary <string, int> playerTeams = new Dictionary<string, int>();
+        foreach(var player in NetworkManagerScript.instance.GetPlayerList())
+        {
+            if(player.CustomProperties["Color"] != null)
+                playerTeams.Add(player.NickName, (int)player.CustomProperties["Color"]);
+        }
 
-    public void UpdatePlayerTeams()
-    {
-
+        return playerTeams;
     }
 }

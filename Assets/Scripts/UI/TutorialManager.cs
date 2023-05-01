@@ -4,10 +4,12 @@ using UnityEngine;
 
 public class TutorialManager : MonoBehaviour
 {
-    public enum Tutorial { GUNS, TURN, MOVE, CHAINSAW, HOOKSHOT, PARRY }
+    public enum Tutorial { GUNS, TURN, MOVE, CHAINSAW, SPIN, HOOKSHOT, PARRY, SHOOT}
 
+    [SerializeField, Tooltip("The name of the tutorial character.")] private string tutorialCharacterName = "Spineless Benefactor";
     [SerializeField, Tooltip("The different tutorial segments.")] private TutorialSegment[] tutorialSegments;
     [SerializeField, Tooltip("The tutorial checkpoint locations.")] private Transform[] checkpoints;
+    [SerializeField, Tooltip("The parent that holds all of the hoop event triggers.")] private Transform hoopEventContainer;
 
     private Tutorial currentTutorialSegment;
     private Transform playerObject;
@@ -15,19 +17,35 @@ public class TutorialManager : MonoBehaviour
     //Progress variables
     private int targetsShot;
     private int targetGoal;
+
+    private int targetsLookedAt;
+    private int targetsLookedAtGoal;
+
+    private int hoopsEntered;
+    private int hoopsEnteredGoal;
+
+    private int timesParried;
+    private int parryGoal;
+
+    private int movingTargetsShot;
+    private int movingTargetsGoal;
+
     [SerializeField] Transform SpawnPoint;
+
+    private bool taskActive = false;
 
 
     private void Start()
     {
         playerObject = PlayerController.instance.xrOrigin.transform;
         DisplayEmptyText();
+        ShowHoopTriggers(false);
         Invoke("StartTutorial", 2f);
     }
 
     private void StartTutorial()
     {
-        PlayerController.instance.inverteboy.ShowInverteboyPopup("Spineless Benefactor");
+        PlayerController.instance.inverteboy.ShowInverteboyPopup(tutorialCharacterName);
         DisplayTutorial(Tutorial.GUNS);
     }
 
@@ -49,11 +67,18 @@ public class TutorialManager : MonoBehaviour
     /// <param name="tutorialSegment">The tutorial segment to show the information for.</param>
     public void DisplayTutorial(int tutorialSegment)
     {
-        PlayerController.instance.inverteboy.ShowInverteboyPopup("Spineless Benefactor");
+        PlayerController.instance.inverteboy.ShowInverteboyPopup(tutorialCharacterName);
         PlayerController.instance.inverteboy.Flash();
         PlayerController.instance.inverteboy.UpdateTutorialText(tutorialSegments[tutorialSegment].message, tutorialSegments[tutorialSegment].label, tutorialSegments[tutorialSegment].diagram);
         currentTutorialSegment = (Tutorial)tutorialSegment;
         ResetTutorialTask();
+    }
+
+    public void UpdateTutorialMessage(string newMessage, string newLabel = "")
+    {
+        PlayerController.instance.inverteboy.ShowInverteboyPopup(tutorialCharacterName);
+        PlayerController.instance.inverteboy.Flash();
+        PlayerController.instance.inverteboy.UpdateTutorialText(newMessage, newLabel, tutorialSegments[(int)currentTutorialSegment].diagram);
     }
 
     /// <summary>
@@ -67,6 +92,39 @@ public class TutorialManager : MonoBehaviour
                 targetsShot = 0;
                 targetGoal = 5;
                 PlayerController.instance.inverteboy.UpdateTutorialProgress("Shoot Five Targets.\n"+ targetsShot +" / " + targetGoal);
+                taskActive = true;
+                break;
+            case Tutorial.TURN:
+                targetsLookedAt = 0;
+                targetsLookedAtGoal = 2;
+                PlayerController.instance.inverteboy.UpdateTutorialProgress("Look At The Two Targets.\n" + targetsLookedAt + " / " + targetsLookedAtGoal);
+                taskActive = true;
+                break;
+            case Tutorial.CHAINSAW:
+                ShowHoopTriggers(true);
+                hoopsEntered = 0;
+                hoopsEnteredGoal = 5;
+                PlayerController.instance.inverteboy.UpdateTutorialProgress("Pass Through Five Of The Hoops.\n" + hoopsEntered + " / " + hoopsEnteredGoal);
+                taskActive = true;
+                break;
+            case Tutorial.SPIN:
+                DestroyAllHoopTriggers();
+                PlayerController.instance.inverteboy.UpdateTutorialProgress("");
+                break;
+            case Tutorial.PARRY:
+                timesParried = 0;
+                parryGoal = 3;
+                PlayerController.instance.inverteboy.UpdateTutorialProgress("Parry Three Times.\n" + timesParried + " / " + parryGoal);
+                taskActive = true;
+                break;
+            case Tutorial.SHOOT:
+                movingTargetsShot = 0;
+                movingTargetsGoal = 10;
+                PlayerController.instance.inverteboy.UpdateTutorialProgress("Shoot The Moving Targets Ten Times.\n" + movingTargetsShot + " / " + movingTargetsGoal);
+                taskActive = true;
+                break;
+            default:
+                PlayerController.instance.inverteboy.UpdateTutorialProgress("");
                 break;
         }
     }
@@ -75,6 +133,30 @@ public class TutorialManager : MonoBehaviour
     {
         SpawnPoint.position = checkpoints[checkpoint].position;
         SpawnPoint.rotation = checkpoints[checkpoint].rotation;
+    }
+
+    public void OnTargetLookedAt()
+    {
+        if (currentTutorialSegment == Tutorial.TURN)
+            IncrementTutorialProgress();
+    }
+
+    public void OnHoopEntered()
+    {
+        if (currentTutorialSegment == Tutorial.CHAINSAW)
+            IncrementTutorialProgress();
+    }
+
+    public void DestroyAllHoopTriggers()
+    {
+        foreach (Transform trans in hoopEventContainer)
+            Destroy(trans.gameObject);
+    }
+
+    public void ShowHoopTriggers(bool showTriggers)
+    {
+        foreach (Transform trans in hoopEventContainer)
+            trans.gameObject.SetActive(showTriggers);
     }
 
     /// <summary>
@@ -91,6 +173,34 @@ public class TutorialManager : MonoBehaviour
                 else
                     OnTaskComplete();
                 break;
+            case Tutorial.TURN:
+                targetsLookedAt++;
+                if (targetsLookedAt < targetsLookedAtGoal)
+                    PlayerController.instance.inverteboy.UpdateTutorialProgress("Look At The Two Targets.\n" + targetsLookedAt + " / " + targetsLookedAtGoal);
+                else
+                    OnTaskComplete();
+                break;
+            case Tutorial.CHAINSAW:
+                hoopsEntered++;
+                if (hoopsEntered < hoopsEnteredGoal)
+                    PlayerController.instance.inverteboy.UpdateTutorialProgress("Enter Five Of The Hoops Near You.\n" + hoopsEntered + " / " + hoopsEnteredGoal);
+                else
+                    OnTaskComplete();
+                break;
+            case Tutorial.PARRY:
+                timesParried++;
+                if (timesParried < parryGoal)
+                    PlayerController.instance.inverteboy.UpdateTutorialProgress("Parry Three Times.\n" + timesParried + " / " + parryGoal);
+                else
+                    OnTaskComplete();
+                break;
+            case Tutorial.SHOOT:
+                movingTargetsShot++;
+                if (movingTargetsShot < movingTargetsGoal)
+                    PlayerController.instance.inverteboy.UpdateTutorialProgress("Shoot The Moving Targets Ten Times.\n" + movingTargetsShot + " / " + movingTargetsGoal);
+                else
+                    OnTaskComplete();
+                break;
         }
     }
 
@@ -99,12 +209,28 @@ public class TutorialManager : MonoBehaviour
     /// </summary>
     private void OnTaskComplete()
     {
-        PlayerController.instance.inverteboy.UpdateTutorialProgress("Task Complete.");
-        switch (currentTutorialSegment)
+        if (taskActive)
         {
-            default:
-                //Task completed
-                break;
+            switch (currentTutorialSegment)
+            {
+                case Tutorial.SHOOT:
+                    //Task completed
+                    PlayerController.instance.inverteboy.UpdateTutorialProgress("Task Complete.");
+                    UpdateTutorialMessage("That's all from me, soldier. Enter the wormhole when you're done, and we'll see you in the battle arena.");
+                    break;
+                case Tutorial.CHAINSAW:
+                    DestroyAllHoopTriggers();
+                    PlayerController.instance.inverteboy.UpdateTutorialProgress("Task Complete.");
+                    UpdateTutorialMessage("Good job. Move onto the next section.");
+                    break;
+                default:
+                    //Task completed
+                    PlayerController.instance.inverteboy.UpdateTutorialProgress("Task Complete.");
+                    UpdateTutorialMessage("Good job. Move onto the next section.");
+                    break;
+            }
+
+            taskActive = false;
         }
     }
 
@@ -122,7 +248,7 @@ public class TutorialManager : MonoBehaviour
     public void ReturnToMenu()
     {
         //GameManager.Instance.LoadGame(GameSettings.titleScreenScene);
-        Debug.Log("Returning to Menu");
+        Debug.Log("Returning to Menu...");
         StartCoroutine(FadeRoutine());
     }
 

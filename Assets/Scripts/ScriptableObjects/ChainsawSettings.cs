@@ -68,6 +68,7 @@ public class ChainsawSettings : ScriptableObject
     [Tooltip("Haptic effect which plays when player extends their blade.")]                                            public PlayerController.HapticData extendHaptics;
     [Tooltip("Haptic effect which plays when player retracts their blade.")]                                           public PlayerController.HapticData retractHaptics;
     [Tooltip("Base properties of haptic pulses which are played continuously while blade is active.")]                 public PlayerController.HapticData activeHapticPulse;
+    [Tooltip("")]                 public PlayerController.HapticData killHaptics;
     [Tooltip("Maximum value of random decrease for pulse magnitude while chainsaw is active.")]                        public float activeHapticMagnitudeVariance;
     [Tooltip("While chainsaw is active, pulses will be separated by random time values between zero and this value.")] public float activeHapticFrequencyVariance;
 }
