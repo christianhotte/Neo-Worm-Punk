@@ -50,6 +50,7 @@ public class CombatHUDController : MonoBehaviour
     /// <param name="powerUpTime">The amount of time for the powerup.</param>
     public void AddToUpgradeInfo(PowerUp.PowerUpType powerUpType, float powerUpTime)
     {
+        Debug.Log("Adding Upgrade To Combat HUD Info...");
         UpgradeDisplay currentUpgrade = Instantiate(upgradeInfoPrefab, upgradeContainer);
         currentUpgrade.StartUpgradeTimer(powerUpType, powerUpTime);
     }

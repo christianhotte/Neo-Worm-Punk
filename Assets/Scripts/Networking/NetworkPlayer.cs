@@ -233,6 +233,7 @@ public class NetworkPlayer : MonoBehaviour
                     //PhotonNetwork.AutomaticallySyncScene = true;                    // Start syncing scene with other players
                     photonView.RPC("RPC_MakeVisible", RpcTarget.OthersBuffered);    //Show all remote players when entering locker room
                     UpdateAllRoomSettingsDisplays();
+                    SyncData();
                 }
             }
             else
@@ -349,6 +350,7 @@ public class NetworkPlayer : MonoBehaviour
         string characterData = PlayerSettingsController.Instance.CharDataToString();          //Encode data to a string so that it can be sent over the network
         photonView.RPC("LoadPlayerSettings", RpcTarget.AllBuffered, characterData); //Send data to every player on the network (including this one)
         SyncColors();
+        SyncTeams();
     }
 
     //COLOR MANAGEMENT:
@@ -364,7 +366,7 @@ public class NetworkPlayer : MonoBehaviour
     public void SyncTeams()
     {
         if ((bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"])
-            photonView.RPC("UpdateTeamDisplays", RpcTarget.All, photonView.Owner.NickName, (int)photonView.Owner.CustomProperties["Color"]); //Send data to every player on the network (including this one)
+            photonView.RPC("UpdateTeamDisplays", RpcTarget.All); //Send data to every player on the network (including this one)
     }
 
     /// <summary>
@@ -519,58 +521,94 @@ public class NetworkPlayer : MonoBehaviour
     public void UpdateExclusiveColors(bool exclusiveColors)
     {
         Debug.Log("Updating Exclusive Color System...");
-        photonView.RPC("RPC_UpdateExclusiveColors", RpcTarget.All, exclusiveColors); //Send data to every player on the network (including this one)
+        MasterUpdateExclusiveColors(exclusiveColors);
     }
 
-    [PunRPC]
-    public void RPC_UpdateExclusiveColors(bool exclusiveColors)
+    public void MasterUpdateExclusiveColors(bool exclusiveColors)
     {
+        int[] newColors = new int[NetworkManagerScript.instance.GetPlayerList().Length];
+
         if (exclusiveColors)
         {
             Debug.Log("Exclusive Colors Needed. Creating Exclusive Colors...");
+
             List<int> takenColors = new List<int>();
 
-            bool mustReplaceColor = false;
-
-            for (int i = NetworkManagerScript.instance.GetPlayerIndexFromList(); i > 0; i--)
+            for (int player = 0; player < NetworkManagerScript.instance.GetPlayerList().Length; player++)
             {
-                Player otherPlayer = NetworkManagerScript.instance.GetPlayerList()[i - 1];
+                Player currentPlayer = NetworkManagerScript.instance.GetPlayerList()[player];
 
-                Debug.Log("Checking " + otherPlayer.NickName + "'s Color: " + (ColorOptions)otherPlayer.CustomProperties["Color"]);
-                takenColors.Add((int)otherPlayer.CustomProperties["Color"]);
+                bool mustReplaceColor = false;
+                int currentNewColor = (int)currentPlayer.CustomProperties["Color"];
 
-                if ((int)otherPlayer.CustomProperties["Color"] == (int)photonView.Owner.CustomProperties["Color"])
+                for (int i = 0; i < takenColors.Count; i++)
                 {
-                    Debug.Log((ColorOptions)otherPlayer.CustomProperties["Color"] + " is taken.");
-                    mustReplaceColor = true;
-                }
-            }
-
-            //If the player must replace their color, change their color
-            if (mustReplaceColor)
-            {
-                int currentColor = (int)photonView.Owner.CustomProperties["Color"] + 1;
-
-                for (int i = 0; i < PlayerSettingsController.NumberOfPlayerColors(); i++)
-                {
-
-                    if(currentColor >= PlayerSettingsController.NumberOfPlayerColors())
-                        currentColor = 0;
-
-                    //If the taken color list does not contain the current color list, take it
-                    if (!takenColors.Contains(currentColor))
+                    if (takenColors[i] == (int)currentPlayer.CustomProperties["Color"])
                     {
-                        ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().ChangePlayerColor(i);
-                        SetNetworkPlayerProperties("Color", i);
+                        Debug.Log((ColorOptions)takenColors[i] + " is taken.");
+                        mustReplaceColor = true;
                         break;
                     }
-
-                    currentColor++;
                 }
+
+                //If the player must replace their color, change their color
+                if (mustReplaceColor)
+                {
+                    int currentColor = (int)photonView.Owner.CustomProperties["Color"] + 1;
+
+                    for (int i = 0; i < PlayerSettingsController.NumberOfPlayerColors(); i++)
+                    {
+
+                        if (currentColor >= PlayerSettingsController.NumberOfPlayerColors())
+                            currentColor = 0;
+
+                        //If the taken color list does not contain the current color list, take it
+                        if (!takenColors.Contains(currentColor))
+                        {
+                            currentNewColor = currentColor;
+                            Debug.Log("Giving " + currentPlayer.NickName + " " + (ColorOptions)currentColor + "...");
+                            break;
+                        }
+
+                        currentColor++;
+                    }
+                }
+                newColors[player] = currentNewColor;
+                takenColors.Add(currentNewColor);
             }
         }
 
-        ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
+        foreach(var player in instances)
+            player.photonView.RPC("RPC_ResetColors", RpcTarget.All, exclusiveColors, newColors); //Send data to every player on the network (including this one)
+    }
+
+    [PunRPC]
+    public void RPC_ResetColors(bool exclusiveColors, int [] newColorList)
+    {
+        if (photonView.IsMine)
+        {
+            if (exclusiveColors)
+            {
+                for (int i = 0; i < newColorList.Length; i++)
+                {
+                    Debug.Log(NetworkManagerScript.instance.GetPlayerList()[i].NickName + " Color: " + (ColorOptions)newColorList[i]);
+                    Debug.Log("Photon Nickname: " + photonView.Owner.NickName);
+
+                    if (NetworkManagerScript.instance.GetPlayerList()[i].NickName == photonView.Owner.NickName)
+                        ChangePlayerColorData(newColorList[i]);
+                }
+            }
+
+            ReadyUpManager.instance.localPlayerTube.GetComponentInChildren<PlayerColorChanger>().RefreshButtons();
+        }
+    }
+
+    public void ChangePlayerColorData(int colorOption)
+    {
+        Color newColor = PlayerSettingsController.ColorOptionsToColor((ColorOptions)colorOption);
+        PlayerSettingsController.Instance.charData.playerColor = newColor;   //Set the player color in the character data
+        SetNetworkPlayerProperties("Color", colorOption);
+        PlayerController.instance.ApplyAndSyncSettings();
     }
 
     /// <summary>
@@ -601,13 +639,13 @@ public class NetworkPlayer : MonoBehaviour
     }
 
     [PunRPC]
-    public void UpdateTeamDisplays(string nickName, int color)
+    public void UpdateTeamDisplays()
     {
         Debug.Log("Updating Team Display...");
 
         if (ReadyUpManager.instance != null && ReadyUpManager.instance.localPlayerTube != null)
         {
-            ReadyUpManager.instance.localPlayerTube.GetTeamsDisplay().UpdatePlayerTeams(nickName, color);
+            ReadyUpManager.instance.localPlayerTube.GetTeamsDisplay().RefreshTeamLists();
         }
     }
 
