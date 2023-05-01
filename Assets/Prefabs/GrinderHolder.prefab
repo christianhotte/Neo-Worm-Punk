@@ -454,6 +454,7 @@ Transform:
   - {fileID: 2005806255}
   - {fileID: 1976703497}
   - {fileID: 8962268624332954644}
+  - {fileID: 2286884817183746173}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -488,9 +489,11 @@ MonoBehaviour:
   rightDoorEnd: {fileID: 1976703496}
   Activated: 0
   Closed: 1
+  Enabled: 1
   doorSpeed: 0.05
   LevelTimePercent: 0
   GrindnerSound: {fileID: 0}
+  deathEffect: {fileID: 0}
 --- !u!82 &1669512392441537957
 AudioSource:
   m_ObjectHideFlags: 0
@@ -684,3 +687,66 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rotSpeed: 200
   grinder: 1
+  TurbineScript: {fileID: 0}
+--- !u!1001 &6771268678007628355
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 3271321792329311578}
+    m_Modifications:
+    - target: {fileID: 4775158535340624446, guid: e6bb826bd570919439135acf6e2605dc, type: 3}
+      propertyPath: m_RootOrder
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 4775158535340624446, guid: e6bb826bd570919439135acf6e2605dc, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4775158535340624446, guid: e6bb826bd570919439135acf6e2605dc, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 22.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4775158535340624446, guid: e6bb826bd570919439135acf6e2605dc, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4775158535340624446, guid: e6bb826bd570919439135acf6e2605dc, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 4775158535340624446, guid: e6bb826bd570919439135acf6e2605dc, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 4775158535340624446, guid: e6bb826bd570919439135acf6e2605dc, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4775158535340624446, guid: e6bb826bd570919439135acf6e2605dc, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4775158535340624446, guid: e6bb826bd570919439135acf6e2605dc, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: 4775158535340624446, guid: e6bb826bd570919439135acf6e2605dc, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4775158535340624446, guid: e6bb826bd570919439135acf6e2605dc, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7155132318065874736, guid: e6bb826bd570919439135acf6e2605dc, type: 3}
+      propertyPath: m_Name
+      value: BloodFOuntainTest
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: e6bb826bd570919439135acf6e2605dc, type: 3}
+--- !u!4 &2286884817183746173 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4775158535340624446, guid: e6bb826bd570919439135acf6e2605dc, type: 3}
+  m_PrefabInstance: {fileID: 6771268678007628355}
+  m_PrefabAsset: {fileID: 0}
