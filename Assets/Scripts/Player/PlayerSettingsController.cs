@@ -50,6 +50,31 @@ public class PlayerSettingsController : MonoBehaviour
         Color.white,
     };
 
+    public static string ColorToString(int colorOption)
+    {
+        switch (colorOption)
+        {
+            case (int)ColorOptions.PINK:
+                return "PINK";
+            case (int)ColorOptions.ORANGE:
+                return "ORANGE";
+            case (int)ColorOptions.YELLOW:
+                return "YELLOW";
+            case (int)ColorOptions.GREEN:
+                return "GREEN";
+            case (int)ColorOptions.CYAN:
+                return "CYAN";
+            case (int)ColorOptions.VIOLET:
+                return "VIOLET";
+            case (int)ColorOptions.RAZZMATAZZ:
+                return "RAZZMATAZZ";
+            case (int)ColorOptions.WHITE:
+                return "WHITE";
+            default:
+                return "DEFAULT";
+        }
+    }
+
     public static int NumberOfPlayerColors() => playerColors.Length;
 
     public static Color ColorOptionsToColor(ColorOptions colorOption)

@@ -43,6 +43,10 @@ public class GrabbableUI : MonoBehaviour
         inputActions.Disable();
     }
 
+    /// <summary>
+    /// Let the player know that this object is grabbable when entering the trigger.
+    /// </summary>
+    /// <param name="other">The object colliding with the trigger.</param>
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("PlayerHand") && !isGrabbable)
@@ -54,7 +58,11 @@ public class GrabbableUI : MonoBehaviour
         }
     }
 
-   private void OnTriggerStay(Collider other)
+    /// <summary>
+    /// While inside of the trigger, ensure that the collider knows that there is something that can grab it.
+    /// </summary>
+    /// <param name="other">The object colliding with the trigger.</param>
+    private void OnTriggerStay(Collider other)
     {
         if (other.CompareTag("PlayerHand") && followObject == null)
         {
@@ -63,6 +71,10 @@ public class GrabbableUI : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// If exiting the trigger and they are not grabbing the object, set as default and let the object know that it cannot be grabbed.
+    /// </summary>
+    /// <param name="other">The object colliding with the trigger.</param>
     private void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("PlayerHand") && isGrabbable && !isGrabbed)
@@ -72,6 +84,9 @@ public class GrabbableUI : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// The logic for when the object is grabbed. It is only called if the object has not been grabbed but can be.
+    /// </summary>
     public virtual void OnGrab()
     {
         if (isGrabbable && !isGrabbed)
@@ -83,6 +98,9 @@ public class GrabbableUI : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// The logic for when the object is released. It is only called when the object is already grabbed beforehand.
+    /// </summary>
     public virtual void OnRelease()
     {
         if (isGrabbed)
@@ -95,6 +113,10 @@ public class GrabbableUI : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets all of the materials of the object to a new material.
+    /// </summary>
+    /// <param name="newMat">The new material.</param>
     private void SetAllMaterials(Material newMat)
     {
         for (int i = 0; i < handleRenderers.Length; i++)
@@ -103,6 +125,9 @@ public class GrabbableUI : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets the default materials of the item.
+    /// </summary>
     private void SetDefaultMaterials()
     {
         for (int i = 0; i < handleRenderers.Length; i++)

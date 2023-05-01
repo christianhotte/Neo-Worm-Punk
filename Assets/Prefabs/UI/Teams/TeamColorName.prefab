@@ -38,7 +38,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 25, y: 40}
+  m_SizeDelta: {x: 45, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &13758727553948942
 MonoBehaviour:
@@ -92,7 +92,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 5}
+  m_SizeDelta: {x: 0, y: 14}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &3260206576436478008
 CanvasRenderer:
@@ -122,7 +122,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Team Name
+  m_text: This Is A Very Long Team Name
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9662503dff9ddbb4cbde104774fd96d7, type: 2}
   m_sharedMaterial: {fileID: -8786447031218050273, guid: 9662503dff9ddbb4cbde104774fd96d7, type: 2}
@@ -149,10 +149,10 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 3.25
-  m_fontSizeBase: 10
+  m_fontSize: 4
+  m_fontSizeBase: 4
   m_fontWeight: 400
-  m_enableAutoSizing: 1
+  m_enableAutoSizing: 0
   m_fontSizeMin: 1
   m_fontSizeMax: 4
   m_fontStyle: 0
@@ -202,6 +202,7 @@ GameObject:
   - component: {fileID: 2882361251485775733}
   - component: {fileID: 3451726108511687765}
   - component: {fileID: 5617110046697324030}
+  - component: {fileID: 262131635504828541}
   m_Layer: 5
   m_Name: NameList
   m_TagString: Untagged
@@ -226,8 +227,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -2.500001}
-  m_SizeDelta: {x: 0, y: -4.999998}
+  m_AnchoredPosition: {x: 0, y: -6.860001}
+  m_SizeDelta: {x: 0, y: -13.719998}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3451726108511687765
 CanvasRenderer:
@@ -263,6 +264,20 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &262131635504828541
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7255278257207989621}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3312d7739989d2b4e91e6319e9a96d76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Padding: {x: 0, y: 0, z: 0, w: 0}
+  m_Softness: {x: 0, y: 0}
 --- !u!1 &8147600349318624471
 GameObject:
   m_ObjectHideFlags: 0

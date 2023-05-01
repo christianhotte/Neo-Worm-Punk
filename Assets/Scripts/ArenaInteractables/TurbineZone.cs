@@ -64,6 +64,7 @@ public class TurbineZone : MonoBehaviour
                         if (grappler.locked == true)
                         {
                             grappler.locked = false;
+                            grappler.hook.Release();
                             grappler.hook.Stow();
                         }
                     }

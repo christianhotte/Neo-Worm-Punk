@@ -38,7 +38,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 150, y: 150}
+  m_SizeDelta: {x: 150, y: 186.6}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &1776154740757385527
 Canvas:
@@ -98,6 +98,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   teamColorDisplay: {fileID: 3987598979225679701, guid: 1eeb73295a549134495d2b74a70062cb, type: 3}
   teamColorContainer: {fileID: 2282184623863862189}
+  animationDuration: 0.5
+  animationEaseType: 27
 --- !u!1 &6673168395208745428
 GameObject:
   m_ObjectHideFlags: 0
@@ -132,8 +134,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -10.000001}
-  m_SizeDelta: {x: 0, y: -19.999998}
+  m_AnchoredPosition: {x: 0, y: -12.500002}
+  m_SizeDelta: {x: 0, y: -24.999996}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2576566519819948223
 MonoBehaviour:
@@ -152,11 +154,11 @@ MonoBehaviour:
     m_Right: 0
     m_Top: 0
     m_Bottom: 0
-  m_ChildAlignment: 4
+  m_ChildAlignment: 1
   m_StartCorner: 0
   m_StartAxis: 0
-  m_CellSize: {x: 25, y: 40}
-  m_Spacing: {x: 20, y: 5}
+  m_CellSize: {x: 45, y: 50}
+  m_Spacing: {x: 2, y: 2}
   m_Constraint: 1
   m_ConstraintCount: 3
 --- !u!1 &6710614448608769463
@@ -220,7 +222,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.8867924, g: 0.8867924, b: 0.8867924, a: 1}
+  m_Color: {r: 0.8867924, g: 0.8867924, b: 0.8867924, a: 0.5882353}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

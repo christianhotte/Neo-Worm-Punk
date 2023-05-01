@@ -204,7 +204,13 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     public void JoinRoom(string roomName)
     {
         // Joins the room on the network
-        PhotonNetwork.JoinRoom(roomName);
+        if (!PhotonNetwork.JoinRoom(roomName))
+        {
+            //Reload into the title screen scene for now if failed
+            PhotonNetwork.Disconnect();
+            Debug.Log("Returning To Main Menu...");
+            GameManager.Instance.LoadGame(GameSettings.titleScreenScene);
+        }
 
         mostRecentRoom = PhotonNetwork.CurrentRoom;
 
@@ -437,24 +443,26 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
     public override void OnJoinRoomFailed(short returnCode, string message)
     {
+        base.OnJoinRoomFailed(returnCode, message);
+
         Debug.LogError("Join Room Failed. Reason: " + message);
 
-/*        LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
+        /*        LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
 
-        //If there is a lobby in the scene, display an error message
-        if (lobbyUI != null)
-        {
-            lobbyUI.UpdateErrorMessage("Join Room Failed. Reason: " + message);
-            lobbyUI.SwitchMenu(LobbyMenuState.ERROR);
-        }*/
-
-        //Reload into the title screen scene for now
-        GameManager.Instance.LoadGame(GameSettings.titleScreenScene);
+                //If there is a lobby in the scene, display an error message
+                if (lobbyUI != null)
+                {
+                    lobbyUI.UpdateErrorMessage("Join Room Failed. Reason: " + message);
+                    lobbyUI.SwitchMenu(LobbyMenuState.ERROR);
+                }*/
     }
+
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
         base.OnPlayerEnteredRoom(newPlayer);
         Debug.Log(newPlayer.NickName + " has joined.");
+
+        PlayerController.instance.inverteboy.AddToRoomLog(newPlayer.NickName + " Joined The Game.");
 
         LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
 
@@ -464,9 +472,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             lobbyUI.UpdateRoomList();
         }
 
-        if (ReadyUpManager.instance != null)
-            ReadyUpManager.instance.UpdateReadyText();
-
         AdjustVoiceVolume();
     }
 
@@ -475,9 +480,12 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         base.OnPlayerLeftRoom(otherPlayer);
         Debug.Log(otherPlayer.NickName + " has left or disconnected.");
 
+        PlayerController.instance.inverteboy.AddToRoomLog(otherPlayer.NickName + " Left The Game.");
+
         // Raises an event on player left room.
         PhotonNetwork.RaiseEvent(1, otherPlayer.ActorNumber, RaiseEventOptions.Default, SendOptions.SendReliable);
         localNetworkPlayer.SyncColors();
+        localNetworkPlayer.SyncTeams();
 
         SetTubeOccupantStatus((int)otherPlayer.CustomProperties["TubeID"], false);
 
