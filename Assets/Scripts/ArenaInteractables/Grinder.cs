@@ -20,6 +20,7 @@ public class Grinder : MonoBehaviour
     private RoundManager roundManager;
     [Header("Effects:")]
     public ParticleSystem deathEffect;
+    public AudioClip deathSound;
 
     // Start is called before the first frame update
     void Awake()
@@ -72,7 +73,7 @@ public class Grinder : MonoBehaviour
     }
     public void PlayDeathEffect()
     {
-        if (deathEffect == null) return;
-        deathEffect.Play(true);
+        if (deathEffect != null) deathEffect.Play(true);
+        if (deathSound != null) GrinderAud.PlayOneShot(deathSound);
     }
 }
