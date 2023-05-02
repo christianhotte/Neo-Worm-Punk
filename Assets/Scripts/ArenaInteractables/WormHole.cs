@@ -43,7 +43,7 @@ public class WormHole : NetworkedArenaElement
             OpenExits.AddRange(FindObjectsOfType<WormHoleTrigger>());
             randRange = OpenExits.Count;
             int randomIndex = Random.Range(0, randRange);
-            IsUpgradeActive = (bool)PhotonNetwork.CurrentRoom.CustomProperties["UpgradesActive"];
+            if (PhotonNetwork.IsConnected) IsUpgradeActive = (bool)PhotonNetwork.CurrentRoom.CustomProperties["UpgradesActive"];
         }
     }
     void Update()
