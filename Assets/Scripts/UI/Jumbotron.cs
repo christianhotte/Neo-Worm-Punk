@@ -52,9 +52,6 @@ public class Jumbotron : MonoBehaviourPunCallbacks
         // Gets the timer from the Round Manager which is synced throughout the network.
         if (roundManager != null)
         {
-            string remainingTime = roundManager.GetTimeDisplay();
-            levelTimer.text = remainingTime;
-
             if (roundManager.GetTotalSecondsLeft() < 11.0f && roundManager.GetTotalSecondsLeft() > 0 && !cooldown && !finished)
             {
                 if (roundManager.GetTotalSecondsLeft() < 1.0f)

@@ -83,14 +83,12 @@ public class PowerUp : Targetable
             if (other.name == "XR Origin")
             {
                 UpgradeSpawner.primary.StartCoroutine(UpgradeSpawner.primary.DoPowerUp(powerType, roomPowerUpTime));
-                PlayerController.instance.combatHUD.AddToUpgradeInfo(powerType, roomPowerUpTime);   //Adds the power up to the player's HUD
                 this.gameObject.SetActive(false);
             }
         }
     }
     private void Delete()
     {
-        PlayerController.instance.combatHUD.AddToUpgradeInfo(powerType, roomPowerUpTime);   //Adds the power up to the player's HUD
         PhotonNetwork.Destroy(GetComponent<PhotonView>());
     }
 
