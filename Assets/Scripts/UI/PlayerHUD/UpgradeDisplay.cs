@@ -7,8 +7,18 @@ using TMPro;
 public class UpgradeDisplay : MonoBehaviour
 {
     [Header("Display Settings")]
+    [SerializeField, Tooltip("The image for the upgrade background.")] private Image backgroundImage;
     [SerializeField, Tooltip("The image for the upgrade icon.")] private Image upgradeImage;
     [SerializeField, Tooltip("The text for the timer.")] private TextMeshProUGUI timerText;
+    [Space(10)]
+
+    [Header("Icons")]
+    [SerializeField] private Sprite multiShotIcon;
+    [SerializeField] private Color multiShotColor;
+    [SerializeField] private Sprite heatVisionIcon;
+    [SerializeField] private Color heatVisionColor;
+    [SerializeField] private Sprite invincibilityIcon;
+    [SerializeField, Tooltip("The sprite for the rainbow background.")] private Sprite rainbowSprite;
     [Space(10)]
 
     [Header("Animation Settings")]
@@ -37,6 +47,13 @@ public class UpgradeDisplay : MonoBehaviour
     private LTDescr warningFlickerLeantween;
     private LTDescr finalFlickerLeantween;
 
+    private Sprite defaultBackgroundImageSprite;
+
+    private void Awake()
+    {
+        defaultBackgroundImageSprite = backgroundImage.sprite;
+    }
+
     private void OnEnable()
     {
         if (debugUpgrade)
@@ -54,8 +71,30 @@ public class UpgradeDisplay : MonoBehaviour
                 timeRemaining = upgradeTimer;
                 break;
         }
+        UpdateUpgradeDisplay(powerUpType);
         timerText.text = GetTimeDisplay();
         upgradeActive = true;
+    }
+
+    private void UpdateUpgradeDisplay(PowerUp.PowerUpType powerUpType)
+    {
+        switch (powerUpType)
+        {
+            case PowerUp.PowerUpType.MultiShot:
+                backgroundImage.sprite = defaultBackgroundImageSprite;
+                backgroundImage.color = multiShotColor;
+                upgradeImage.sprite = multiShotIcon;
+                break;
+            case PowerUp.PowerUpType.HeatVision:
+                backgroundImage.sprite = defaultBackgroundImageSprite;
+                backgroundImage.color = heatVisionColor;
+                upgradeImage.sprite = heatVisionIcon;
+                break;
+            case PowerUp.PowerUpType.Invulnerability:
+                backgroundImage.sprite = rainbowSprite;
+                upgradeImage.sprite = invincibilityIcon;
+                break;
+        }
     }
 
     // Update is called once per frame
