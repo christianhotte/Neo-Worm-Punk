@@ -77,6 +77,7 @@ public class SpectatorCamera : MonoBehaviour
                 firstPersonCamera.depth = 2;
                 thirdPersonCamera.depth = 1;
                 droneCamera.depth = 3;
+                droneCamera.transform.parent = null;
                 Cursor.visible = false;
                 Cursor.lockState = CursorLockMode.Confined;
                 //Cursor.lockState = CursorLockMode.Locked;
