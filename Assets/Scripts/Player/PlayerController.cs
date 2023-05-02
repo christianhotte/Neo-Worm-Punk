@@ -177,7 +177,6 @@ public class PlayerController : MonoBehaviour
         baseDrag = bodyRb.drag;                       //Store base drag value
 
         inCombat = true;
-        UpdateWeaponry();
 
         //Event subscription:
         inputMap.actionTriggered += OnInputTriggered; //Subscribe to generic input event
@@ -197,15 +196,8 @@ public class PlayerController : MonoBehaviour
         }
 
         //Hide equipment in menus:
-        if (GameManager.Instance.InMenu())
-        {
-            inMenu = true;
-            UpdateWeaponry();
-        }
-        else
-        {
-            inMenu = false;
-        }
+        inMenu = GameManager.Instance.InMenu();
+        UpdateWeaponry();
             
     }
     private void Update()
