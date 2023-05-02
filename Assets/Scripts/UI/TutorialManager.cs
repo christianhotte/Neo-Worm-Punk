@@ -172,40 +172,50 @@ public class TutorialManager : MonoBehaviour
                 if (targetsShot < targetGoal)
                     PlayerController.instance.inverteboy.UpdateTutorialProgress("Shoot Five Targets.\n" + targetsShot + " / " + targetGoal);
                 else
+                {
                     OnTaskComplete();
                     OnCompleteOpen(0);
+                }
                 break;
             case Tutorial.TURN:
                 targetsLookedAt++;
                 if (targetsLookedAt < targetsLookedAtGoal)
                     PlayerController.instance.inverteboy.UpdateTutorialProgress("Look At The Two Targets.\n" + targetsLookedAt + " / " + targetsLookedAtGoal);
                 else
+                {
                     OnTaskComplete();
                     OnCompleteOpen(1);
+                }
                 break;
             case Tutorial.CHAINSAW:
                 hoopsEntered++;
                 if (hoopsEntered < hoopsEnteredGoal)
                     PlayerController.instance.inverteboy.UpdateTutorialProgress("Enter Five Of The Hoops Near You.\n" + hoopsEntered + " / " + hoopsEnteredGoal);
                 else
+                {
                     OnTaskComplete();
                     OnCompleteOpen(2);
+                }
                 break;
             case Tutorial.PARRY:
                 timesParried++;
                 if (timesParried < parryGoal)
                     PlayerController.instance.inverteboy.UpdateTutorialProgress("Parry Three Times.\n" + timesParried + " / " + parryGoal);
                 else
+                {
                     OnTaskComplete();
                     OnCompleteOpen(3);
+                }
                 break;
             case Tutorial.SHOOT:
                 movingTargetsShot++;
                 if (movingTargetsShot < movingTargetsGoal)
                     PlayerController.instance.inverteboy.UpdateTutorialProgress("Shoot The Moving Targets Ten Times.\n" + movingTargetsShot + " / " + movingTargetsGoal);
                 else
+                {
                     OnTaskComplete();
                     OnCompleteOpen(4);
+                }
                 break;
         }
     }
@@ -242,7 +252,7 @@ public class TutorialManager : MonoBehaviour
 
     public void OnCompleteOpen(int animatorIndex)
     {
-        TaskDoors[animatorIndex].SetBool("Activated", true);
+        TaskDoors[animatorIndex].SetBool("Locked", false);
     }
 
     /// <summary>
