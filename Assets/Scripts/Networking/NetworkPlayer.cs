@@ -73,11 +73,11 @@ public class NetworkPlayer : MonoBehaviour
     private Transform leftHandTarget;  //True local position of player left hand
     private Transform rightHandTarget; //True local position of player right hand
     private Transform modelTarget;     //True local position of player model base
-    private Transform headRig;         //Networked transform which follows position of player head
+    private Transform originTarget;
+    internal Transform headRig;         //Networked transform which follows position of player head
     private Transform leftHandRig;     //Networked transform which follows position of player left hand
     private Transform rightHandRig;    //Networked transform which follows position of player right hand
     private Transform modelRig;        //Networked transform which follows position of player model
-    private Transform originTarget;
     internal Transform originRig;
 
     //Runtime Variables:
@@ -907,8 +907,18 @@ public class NetworkPlayer : MonoBehaviour
             }
         }
     }
-
-
+    [PunRPC]
+    public void RPC_TriggerEffect(int effectID)
+    {
+        switch (effectID)
+        {
+            case 0: //Grinder goo
+                if (Grinder.instance != null) Grinder.instance.PlayDeathEffect();
+                break;
+            default:
+                break;
+        }
+    }
 
     //UTILITY METHODS:
     /// <summary>
