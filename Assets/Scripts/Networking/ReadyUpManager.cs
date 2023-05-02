@@ -21,6 +21,8 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
     private int playersReady;
     internal LockerTubeController localPlayerTube;
 
+    private bool everyoneReady = false;
+
     private void Awake()
     {
         instance = this;
@@ -116,9 +118,8 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
             }
 
             // If all players are ready, load the game scene
-            if (forceLoadViaMasterClient || !GameManager.Instance.levelTransitionActive && (playersReady == playersInRoom && (playersInRoom >= MINIMUM_PLAYERS_NEEDED || GameSettings.debugMode)))
+            if (forceLoadViaMasterClient || !GameManager.Instance.levelTransitionActive && (playersReady == playersInRoom && (playersInRoom >= MINIMUM_PLAYERS_NEEDED || GameSettings.debugMode) && !everyoneReady))
             {
-
                 StartCoroutine(OnEveryoneReady());
             }
         }
@@ -126,12 +127,14 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
 
     IEnumerator OnEveryoneReady()
     {
+        everyoneReady = true;
+
         if (PhotonNetwork.IsMasterClient)
             NetworkManagerScript.instance.SetMatchActive(true);
 
         float delayTime = 3;
         //countdown from 3,2,1,WORM!
-        FindObjectOfType<Countdown>().StartCountdown((int)delayTime);                                                             //THIS NEEDS TO BE PUT IN BY PETER
+        FindObjectOfType<Countdown>().StartCountdown((int)delayTime);                                                             //THIS NEEDS TO BE PUT IN BY PETER (I put it in - Peter)
         yield return new WaitForSeconds(delayTime);
         //if someone cancels early in these zones, cancel coroutine?
 
@@ -164,6 +167,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
 
         NetworkManagerScript.instance.LoadSceneWithFade(GameSettings.arenaScene);
         //FINAL
+        everyoneReady = false;
     }
 
     /// <summary>
