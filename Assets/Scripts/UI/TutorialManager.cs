@@ -11,6 +11,8 @@ public class TutorialManager : MonoBehaviour
     [SerializeField, Tooltip("The animators that open when tasks are complete.")] private Animator[] TaskDoors;
     [SerializeField, Tooltip("The tutorial checkpoint locations.")] private Transform[] checkpoints;
     [SerializeField, Tooltip("The parent that holds all of the hoop event triggers.")] private Transform hoopEventContainer;
+    public GameObject Chainsaw;
+    public GameObject Hookshot;
 
     private Tutorial currentTutorialSegment;
     private Transform playerObject;
@@ -253,6 +255,16 @@ public class TutorialManager : MonoBehaviour
     public void OnCompleteOpen(int animatorIndex)
     {
         TaskDoors[animatorIndex].SetBool("Locked", false);
+    }
+
+    public void GetChainsaw()
+    {
+        Chainsaw.SetActive(true);
+    }
+
+    public void GetHookshot()
+    {
+        Hookshot.SetActive(true);
     }
 
     /// <summary>
