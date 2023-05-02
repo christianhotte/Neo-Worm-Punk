@@ -10,6 +10,7 @@ public class WormHoleTrigger : MonoBehaviour
     public GameObject light,WormHole,particle;
     public Transform wormholeEntrance;
     internal Animator holeAnim;
+    public Camera exitCam;
     // Start is called before the first frame update
     void Start()
     {
