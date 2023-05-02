@@ -142,6 +142,9 @@ public class SpectatorCamera : MonoBehaviour
         // If the drone camera is active.
         else if (droneCamera.depth == 3)
         {
+            // Scroll wheel increases/decreases the drone's move speed.
+            droneSpeed += scrollAmt * droneSpeed;
+
             // Move the drone spectator camera using WASD and E/Q keys to go up/down.
             float x = Input.GetAxis("Horizontal") * droneSpeed * Time.deltaTime;
             float z = Input.GetAxis("Vertical") * droneSpeed * Time.deltaTime;
