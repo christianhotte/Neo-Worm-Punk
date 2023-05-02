@@ -24,12 +24,12 @@ public class SpawnCannonController : MonoBehaviour
     [SerializeField, Tooltip("Position player XR origin is locked to while inside spawn cannon.")]                    private Transform playerLockPoint;
     [SerializeField, Tooltip("Rotating pod assembly which points in the direction player's head is facing.")]         private Transform gimbal;
     [SerializeField, Tooltip("Rotating lever assembly which contains levers used by the player to enter the match.")] private Transform pedestal;
+    [SerializeField, Tooltip("Levers which player has to push in order to launch.")]                                  private LeverController[] levers;
 
     //Runtime Variables:
     internal NetworkPlayer occupyingPlayer; //Player currently occupying this cannon (null if unoccupied)
     internal float timeUntilReady = 0;      //Time until spawn cannon is ready to fire again
     private Quaternion baseGimbalRot;       //Base rotation of gimbal assembly
-    private int leversPulled = 0;           //How many levers the occupying player currently has pulled
 
     //RUNTIME METHODS:
     private void Awake()
@@ -77,6 +77,11 @@ public class SpawnCannonController : MonoBehaviour
             targetRot = Quaternion.RotateTowards(baseGimbalRot, targetRot, maxAngle);                                             //Cap angle target
             newRot = Quaternion.Lerp(pedestal.rotation, targetRot, pedestalLerpRate * Time.deltaTime);                            //Lerp toward angle target
             pedestal.rotation = newRot;                                                                                           //Rotate pedestal to new rotation
+
+            //Check lever status:
+            int activeLevers = 0; //Initialize value for number of active levers
+            foreach (LeverController lever in levers) if (lever.hingeJointState == LeverController.HingeJointState.Max) activeLevers++; //Iterate through levers
+            if (activeLevers >= 2) DeployPlayer(); //Fire player if they are readied up
         }
 
         /*if (NetworkPlayer.instances.Count > 0)
@@ -161,8 +166,8 @@ public class SpawnCannonController : MonoBehaviour
         //Disable equipment:
         foreach (PlayerEquipment equipment in PlayerController.instance.attachedEquipment) //Iterate through all pieces of equipment attached to the player
         {
-            equipment.inputEnabled = false;               //Disable equipment input
-            if (equipment.holstered) equipment.Holster(); //Holster equipment
+            equipment.inputEnabled = false;                //Disable equipment input
+            if (!equipment.holstered) equipment.Holster(); //Holster equipment
         }
     }
     /// <summary>
@@ -185,6 +190,14 @@ public class SpawnCannonController : MonoBehaviour
         }
 
         //Lever cleanup:
-        leversPulled = 0; //Clear pulled lever tracker
+        foreach (LeverController lever in levers) //Iterate through levers in system
+        {
+            lever.GetLeverHandle().MoveToAngle(lever.GetMinimumAngle());
+            lever.GetLeverHandle().OnRelease();
+        }
+
+        //Cleanup:
+        PlayerController.instance.isDead = false; //Indicate that player is no longer dead
+        PlayerController.instance.MakeInvulnerable(PlayerController.instance.healthSettings.spawnInvincibilityTime);
     }
 }
