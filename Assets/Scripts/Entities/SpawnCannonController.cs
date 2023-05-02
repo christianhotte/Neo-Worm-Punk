@@ -12,21 +12,24 @@ public class SpawnCannonController : MonoBehaviour
     public const byte UpdateCannonStatusEventCode = 100;
 
     //Objects & Components:
-    [SerializeField] private int ID; //The ID number of this spawn cannon (assigned sequentially at runtime)
+    private int ID; //The ID number of this spawn cannon (assigned sequentially at runtime)
 
     //Settings:
     [Header("Settings:")]
     [SerializeField, Tooltip("Force with which player is launched from cannon when spawning.")]       private float launchForce;
     [SerializeField, Range(0, 90), Tooltip("Maximum angle which player can turn launch capsule to.")] private float maxAngle;
-    [SerializeField, Tooltip("Speed at which capsule rotates toward launch target.")]                 private float angleLerpRate;
+    [SerializeField, Tooltip("Speed at which capsule rotates toward launch target.")]                 private float gimbalLerpRate;
+    [SerializeField, Tooltip("Speed at which pedestal rotates toward launch target.")]                private float pedestalLerpRate;
     [Space()]
-    [SerializeField, Tooltip("Position player XR origin is locked to while inside spawn cannon.")]            private Transform playerLockPoint;
-    [SerializeField, Tooltip("Rotating pod assembly which points in the direction player's head is facing.")] private Transform gimbal;
+    [SerializeField, Tooltip("Position player XR origin is locked to while inside spawn cannon.")]                    private Transform playerLockPoint;
+    [SerializeField, Tooltip("Rotating pod assembly which points in the direction player's head is facing.")]         private Transform gimbal;
+    [SerializeField, Tooltip("Rotating lever assembly which contains levers used by the player to enter the match.")] private Transform pedestal;
 
     //Runtime Variables:
-    [SerializeField] public NetworkPlayer occupyingPlayer; //Player currently occupying this cannon (null if unoccupied)
+    internal NetworkPlayer occupyingPlayer; //Player currently occupying this cannon (null if unoccupied)
     internal float timeUntilReady = 0;      //Time until spawn cannon is ready to fire again
     private Quaternion baseGimbalRot;       //Base rotation of gimbal assembly
+    private int leversPulled = 0;           //How many levers the occupying player currently has pulled
 
     //RUNTIME METHODS:
     private void Awake()
@@ -60,11 +63,27 @@ public class SpawnCannonController : MonoBehaviour
         //Point in player direction:
         if (occupyingPlayer != null)
         {
+            //Update player position:
+            PlayerController.instance.bodyRb.MovePosition(playerLockPoint.position); //Move player to lockpoint position
+
+            //Rotate gimbal:
             Quaternion targetRot = Quaternion.LookRotation(occupyingPlayer.headRig.forward, Vector3.up);     //Get raw head target direction
             targetRot = Quaternion.RotateTowards(baseGimbalRot, targetRot, maxAngle);                        //Cap angle target
-            Quaternion newRot = Quaternion.Lerp(gimbal.rotation, targetRot, angleLerpRate * Time.deltaTime); //Lerp toward target for smooth motion
+            Quaternion newRot = Quaternion.Lerp(gimbal.rotation, targetRot, gimbalLerpRate * Time.deltaTime); //Lerp toward target for smooth motion
             gimbal.rotation = newRot;                                                                        //Move gimbal to new rotation
+
+            //Rotate pedestal:
+            targetRot = Quaternion.LookRotation(Vector3.ProjectOnPlane(occupyingPlayer.headRig.forward, Vector3.up), Vector3.up); //Get target head rotation projected onto horizontal plane
+            targetRot = Quaternion.RotateTowards(baseGimbalRot, targetRot, maxAngle);                                             //Cap angle target
+            newRot = Quaternion.Lerp(pedestal.rotation, targetRot, pedestalLerpRate * Time.deltaTime);                            //Lerp toward angle target
+            pedestal.rotation = newRot;                                                                                           //Rotate pedestal to new rotation
         }
+
+        /*if (NetworkPlayer.instances.Count > 0)
+        {
+            if (!PlayerController.instance.bodyRb.isKinematic) PutPlayerInCannon();
+            occupyingPlayer = NetworkPlayer.instances[0];
+        }*/
     }
 
     //NETWORKING:
@@ -133,12 +152,39 @@ public class SpawnCannonController : MonoBehaviour
     public void PutPlayerInCannon()
     {
         if (PhotonNetwork.IsConnected) UpdateCannonStatusEvent(PlayerController.photonView.ViewID); //Update all versions of this spawn cannon to indicate that this player has been loaded into it
+
+        //Move player:
+        PlayerController.instance.bodyRb.isKinematic = true;                     //Make it so that player cannot move
+        PlayerController.instance.bodyRb.MovePosition(playerLockPoint.position); //Move player to lockpoint position
+        PlayerController.instance.bodyRb.MoveRotation(playerLockPoint.rotation); //Move player to lockpoint rotation
+
+        //Disable equipment:
+        foreach (PlayerEquipment equipment in PlayerController.instance.attachedEquipment) //Iterate through all pieces of equipment attached to the player
+        {
+            equipment.inputEnabled = false;               //Disable equipment input
+            if (equipment.holstered) equipment.Holster(); //Holster equipment
+        }
     }
     /// <summary>
     /// Launches player from this spawn cannon.
     /// </summary>
     public void DeployPlayer()
     {
+        //Initialization:
         if (PhotonNetwork.IsConnected) UpdateCannonStatusEvent(); //Indicate that this cannon is now empty
+
+        //Launch:
+        PlayerController.instance.bodyRb.isKinematic = false;                                       //Enable player movement
+        PlayerController.instance.bodyRb.AddForce(gimbal.forward * launchForce, ForceMode.Impulse); //Apply launch force to player
+
+        //Enable equipment:
+        foreach (PlayerEquipment equipment in PlayerController.instance.attachedEquipment) //Iterate through all pieces of equipment attached to the player
+        {
+            equipment.inputEnabled = true;                     //Enable equipment input
+            if (equipment.holstered) equipment.Holster(false); //Un-holster equipment
+        }
+
+        //Lever cleanup:
+        leversPulled = 0; //Clear pulled lever tracker
     }
 }
