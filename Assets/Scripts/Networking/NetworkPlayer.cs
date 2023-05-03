@@ -907,18 +907,6 @@ public class NetworkPlayer : MonoBehaviour
             }
         }
     }
-    [PunRPC]
-    public void RPC_TriggerEffect(int effectID)
-    {
-        switch (effectID)
-        {
-            case 0: //Grinder goo
-                if (Grinder.instance != null) Grinder.instance.PlayDeathEffect();
-                break;
-            default:
-                break;
-        }
-    }
 
     //UTILITY METHODS:
     /// <summary>
