@@ -18,7 +18,6 @@ public class FindRoomController : MonoBehaviour
     private RoomListItem[] listedRooms;
 
     private int roomCount;
-    private string roomToConnectTo;
 
     private void OnEnable()
     {
@@ -99,13 +98,13 @@ public class FindRoomController : MonoBehaviour
     /// </summary>
     public void ConnectToRoom()
     {
-        NetworkManagerScript.instance.JoinRoom(roomToConnectTo);
+        NetworkManagerScript.instance.JoinRoom(FindObjectOfType<LobbyUIScript>().GetRoomToConnectTo());
     }
 
     public void SetRoomToConnectTo()
     {
         if (selectedRoom != null)
-            roomToConnectTo = selectedRoom.GetRoomListInfo().Name;
+            FindObjectOfType<LobbyUIScript>().SetRoomToConnectTo(selectedRoom.GetRoomListInfo().Name);
     }
 
     /// <summary>
