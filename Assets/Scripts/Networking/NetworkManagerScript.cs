@@ -117,7 +117,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     }
     void ConnectToServer()
     {
-        PhotonNetwork.EnableCloseConnection = true;
         PhotonNetwork.ConnectUsingSettings();
         Debug.Log("Trying To Connect To Server...");
     }
@@ -130,7 +129,9 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
     public void OnCreateRoom(string roomName, RoomOptions roomOptions = null, Hashtable customRoomSettings = null)
     {
-        if(roomOptions == null)
+        PhotonNetwork.EnableCloseConnection = true;
+
+        if (roomOptions == null)
         {
             roomOptions = new RoomOptions();
             roomOptions.IsVisible = true; // The player is able to see the room
