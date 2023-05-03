@@ -18,7 +18,8 @@ public class CombatHUDController : MonoBehaviour
     [SerializeField, Tooltip("The background of the speedometer.")] private Image speedometerBackground;
     [SerializeField, Tooltip("The container for the upgrade notifications.")] private Transform upgradeContainer;
     [SerializeField, Tooltip("The upgrade info prefab.")] private UpgradeDisplay upgradeInfoPrefab;
-    [SerializeField, Tooltip("The ammo text.")] private TextMeshProUGUI[] ammoText;
+    [SerializeField, Tooltip("The ammo indicators.")] private Transform[] ammoIndicators;
+    [SerializeField, Tooltip("The ammo pip prefab.")] private Image ammoPip;
 
     /// <summary>
     /// Changes the color of the helmet.
@@ -55,9 +56,26 @@ public class CombatHUDController : MonoBehaviour
         currentUpgrade.StartUpgradeTimer(powerUpType, powerUpTime);
     }
 
-    public void UpdateAmmoText(CustomEnums.Handedness handedness, int currentAmmo, int maxAmmo)
+    public void InitializeAmmoIndicators(CustomEnums.Handedness handedness, int ammoCount)
     {
-        ammoText[handedness == CustomEnums.Handedness.Left ? 0 : 1].text = currentAmmo + "/" + maxAmmo;
+        Transform currentAmmoIndicator = ammoIndicators[handedness == CustomEnums.Handedness.Left ? 0 : 1];
+
+        for (int i = 0; i < ammoCount; i++)
+            Instantiate(ammoPip, currentAmmoIndicator);
+    }
+
+    public void UpdateAmmoIndicator(CustomEnums.Handedness handedness, int currentAmmo)
+    {
+        Transform currentAmmoIndicator = ammoIndicators[handedness == CustomEnums.Handedness.Left ? 0 : 1];
+
+        foreach (Transform trans in currentAmmoIndicator)
+            trans.Find("AmmoIndicator").gameObject.SetActive(false);
+
+        for (int i = 0; i < currentAmmoIndicator.childCount; i++)
+        {
+            if(i < currentAmmo)
+                currentAmmoIndicator.GetChild(i).Find("AmmoIndicator").gameObject.SetActive(true);
+        }
     }
 
     /// <summary>
