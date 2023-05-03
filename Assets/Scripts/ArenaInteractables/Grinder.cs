@@ -35,7 +35,7 @@ public class Grinder : MonoBehaviour
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         //check to see if activated in room setting
-        Enabled = (bool)PhotonNetwork.CurrentRoom.CustomProperties["HazardsActive"];
+        if (PhotonNetwork.IsConnected) Enabled = (bool)PhotonNetwork.CurrentRoom.CustomProperties["HazardsActive"];
 
 
     }
