@@ -20,7 +20,7 @@ public class Leaderboards : MonoBehaviourPunCallbacks
     [SerializeField, Tooltip("How far apart each new line is (in Y units).")]                                     private float lineSeparation;
     [Range(0, 1), SerializeField, Tooltip("How light player colors are (increase for consistency/readability).")] private float playerColorGamma;
     [SerializeField, Tooltip("If true, system will reset player stats as they leave the scene.")]                 private bool clearStats = true;
-    
+
     //Runtime Vars:
     private bool showingLeaderboard; //True when leaderboard is enabled for the scene (only when players are coming back from combat)
     private GameObject screenObject;
@@ -72,6 +72,10 @@ public class Leaderboards : MonoBehaviourPunCallbacks
                 }
                 if (!rankedPlayers.Contains(player)) rankedPlayers.Add(player); //Add player in last if it doesn't outrank anyone
             }
+
+            // Gets the winner's spawn tube to display confetti after getting 1st place.
+            int winnerTubeID = (int)rankedPlayers[0].photonView.Owner.CustomProperties["TubeID"];
+            rankedPlayers[0].photonView.RPC("RPC_TriggerEffect", RpcTarget.All, 1);
 
             //Display lists:
             for (int x = 0; x < rankedPlayers.Count; x++) //Iterate through list of ranked players

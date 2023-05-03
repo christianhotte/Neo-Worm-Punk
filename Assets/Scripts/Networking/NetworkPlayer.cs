@@ -915,6 +915,9 @@ public class NetworkPlayer : MonoBehaviour
             case 0: //Grinder goo
                 if (Grinder.instance != null) Grinder.instance.PlayDeathEffect();
                 break;
+            case 1: // Confetti particle effect for 1st place winner
+                ReadyUpManager.instance.localPlayerTube.PlayConfettiInTube();
+                break;
             default:
                 break;
         }
