@@ -474,7 +474,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         PlayerController.instance.inverteboy.AddToRoomLog(newPlayer.NickName + " Joined The Game.");
 
         LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
-
         //Update room information
         if (lobbyUI != null)
         {
@@ -482,6 +481,9 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         }
 
         AdjustVoiceVolume();
+
+        foreach (var host in FindObjectsOfType<PlayerManagementController>())
+            host.UpdatePlayerList();
     }
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
@@ -500,6 +502,9 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
         if (ReadyUpManager.instance != null)
             ReadyUpManager.instance.UpdateReadyText();
+
+        foreach (var host in FindObjectsOfType<PlayerManagementController>())
+            host.UpdatePlayerList();
     }
 
     // This method is called when a custom event is received
