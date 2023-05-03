@@ -7,7 +7,8 @@ using UnityEngine.SceneManagement;
 public class WormHole : NetworkedArenaElement
 {
     public Transform holePos1, holePos2,wormZone,playerHead,wormZoneShifted;
-    public GameObject wormZoneParticles, wormZoneInstance, playerCam;
+    public GameObject wormZoneParticles, playerCam;
+    public static GameObject wormZoneInstance;
     public float waitTime,exitSpeed=30,wormZoneSpeed=5;
     internal bool locked = false, inZone = false, luckyProc = false;
     public bool randomExit = false;
@@ -155,7 +156,7 @@ public class WormHole : NetworkedArenaElement
         playerCam = PC.cam.gameObject;      //sets camera reference
         ActiveWormholes.Add(this);//Adds this to the static wormhole list
         wormZoneShifted = wormZone; //gives the shifted zone its starting point
-        wormZoneShifted.transform.position = new Vector3(wormZone.position.x + 100 * ActiveWormholes.Count,wormZone.position.y,wormZone.position.z);//moves the wormhole instance so each player has their own      
+      //  wormZoneShifted.transform.position = new Vector3(wormZone.position.x + 100 * ActiveWormholes.Count,wormZone.position.y,wormZone.position.z);//moves the wormhole instance so each player has their own      
         playerRB.useGravity = false;  //Turn off Gravity
         foreach (PlayerEquipment equipment in PlayerController.instance.attachedEquipment)
         {
@@ -185,7 +186,19 @@ public class WormHole : NetworkedArenaElement
         playerOBJ.transform.rotation = Quaternion.Euler(playerOBJ.transform.eulerAngles.x, playerOBJ.transform.eulerAngles.y - entryDiff, playerOBJ.transform.eulerAngles.z);
         float startRot = playerCam.transform.eulerAngles.y;//reference the starting rotation of the players camera
         playerRB.isKinematic = true;
-        wormZoneInstance =Instantiate(wormZoneParticles);//spawns the wormhole instance
+        if (wormZoneInstance == null)
+        {
+            if (FindObjectOfType<WormZone>() != null)
+            {
+                wormZoneInstance = FindObjectOfType<WormZone>().gameObject;
+            }
+            else
+            {
+                wormZoneInstance = Instantiate(wormZoneParticles);//spawns the wormhole instance
+            }
+            
+        }
+
         wormZoneInstance.transform.position = new Vector3(PC.cam.transform.position.x , PC.cam.transform.position.y, PC.cam.transform.position.z);//moves the wormhole into position
         wormZoneInstance.transform.eulerAngles = new Vector3(0, startRot, 0); // sets the wormhole to be aligned with your face
         wormZoneSpeed = 120;// The speed you fly through the wormholes at
@@ -219,7 +232,7 @@ public class WormHole : NetworkedArenaElement
         triggerScript.holeAnim.SetBool("Locked", true);
         triggerScript.particle.SetActive(false);
         ActiveWormholes.Remove(this);
-        Destroy(wormZoneInstance);
+        //Destroy(wormZoneInstance);
         // locked = false;   //Unlock the Womrhole circut
         StartCoroutine(TimedLock());
         triggerScript.StartCoroutine(triggerScript.TimedUnlock(6.0f));
