@@ -1,12 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Photon.Pun;
 using Unity.XR.CoreUtils;
 using UnityEngine.SceneManagement;
+using ExitGames.Client.Photon;
+using Photon.Realtime;
+using Photon.Pun;
 
 public class Grinder : MonoBehaviour
 {
+    public const byte PlayGrinderEffectEventCode = 101;
+    public enum GrinderEffect { Death }
+
     public static Grinder instance;
     private PlayerController hitPlayer;
     public GameObject leftDoorStart, rightDoorStart, leftDoorEnd, rightDoorEnd;
@@ -31,6 +36,15 @@ public class Grinder : MonoBehaviour
         PhotonView masterPV = PhotonView.Find(17);
         roundManager = masterPV.GetComponent<RoundManager>();
         SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+    private void OnEnable()
+    {
+        PhotonNetwork.NetworkingClient.EventReceived += OnEvent;
+    }
+
+    private void OnDisable()
+    {
+        PhotonNetwork.NetworkingClient.EventReceived -= OnEvent;
     }
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
@@ -62,14 +76,35 @@ public class Grinder : MonoBehaviour
             }
         }
     }
+    private void OnEvent(EventData photonEvent)
+    {
+        byte eventCode = photonEvent.Code; //Get event code
+        if (eventCode == PlayGrinderEffectEventCode) //UPDATE CANNON OCCUPATION STATUS
+        {
+            GrinderEffect effectType = (GrinderEffect)((object[])photonEvent.CustomData)[0];
+            switch (effectType)
+            {
+                case GrinderEffect.Death:
+                    PlayDeathEffect();
+                    break;
+                default: break;
+            }
+        }
+    }
     private void OnTriggerStay(Collider other)
     {
         if (other.name == "XR Origin" && Activated && Enabled)
         {
             netPlayer = PlayerController.photonView.GetComponent<NetworkPlayer>();
             netPlayer.photonView.RPC("RPC_Hit", RpcTarget.All, 100, netPlayer.photonView.ViewID, Vector3.zero, (int)DeathCause.TRAP);
-            netPlayer.photonView.RPC("RPC_TriggerEffect", RpcTarget.All, 0);
+            PlayGrinderEffectEvent(GrinderEffect.Death);
         }
+    }
+    private void PlayGrinderEffectEvent(GrinderEffect effect)
+    {
+        object[] content = new object[] { effect };                                                                 //Get object array containing identifyer for this spawnpoint and the player occupying it (or vacating it)
+        RaiseEventOptions raiseEventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.All };              //Indicate that this event is getting sent to every connected user
+        PhotonNetwork.RaiseEvent(PlayGrinderEffectEventCode, content, raiseEventOptions, SendOptions.SendReliable); //Raise event across network
     }
     public void PlayDeathEffect()
     {

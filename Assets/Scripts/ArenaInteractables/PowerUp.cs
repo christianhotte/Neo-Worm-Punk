@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using UnityEngine.SceneManagement;
+using ExitGames.Client.Photon;
+using Photon.Realtime;
 public class PowerUp : Targetable
 {
     public enum PowerUpType { None, MultiShot, HeatVision, InfiniShot, Invulnerability }
@@ -44,7 +46,6 @@ public class PowerUp : Targetable
 
         }
     }
-
     private void FixedUpdate()
     {
         if (photonView.IsMine && rb.drag > 0 && rb.velocity.magnitude < restingSpeed) rb.drag = 0;
@@ -89,7 +90,9 @@ public class PowerUp : Targetable
     }
     private void Delete()
     {
-        PhotonNetwork.Destroy(GetComponent<PhotonView>());
+        print("deleting powerup");
+        if (PhotonNetwork.IsConnected) PhotonNetwork.Destroy(GetComponent<PhotonView>());
+        else Destroy(gameObject);
     }
     public IEnumerator DeathSequence()
     {
@@ -98,9 +101,15 @@ public class PowerUp : Targetable
         if (deathEffect != null)
         {
             deathEffect.GetComponent<ParticleSystem>().Play();
+            Debug.Log("playing deaht effect");
         }
         yield return new WaitForSeconds(2.5f);
         Delete();
+    }
+
+    public void PlayDeathEffect()
+    {
+        Instantiate(deathEffect, this.transform.position,this.transform.rotation);
     }
     //RPC METHODS:
     [PunRPC]
@@ -112,7 +121,9 @@ public class PowerUp : Targetable
             // powerUpAud.PlayOneShot(powerUpHit);   THis is only client side
             if (currentHealth <= 0)
             {
-                StartCoroutine(DeathSequence());
+                RPC_Shatter();
+                if (PhotonNetwork.IsConnected) photonView.RPC("RPC_Shatter", RpcTarget.Others);
+                Delete();
             }
             else
             {
@@ -120,5 +131,11 @@ public class PowerUp : Targetable
                 rb.AddForce(hitForce, ForceMode.Impulse);
             }
         }
+    }
+    [PunRPC]
+    public void RPC_Shatter()
+    {
+        Debug.Log("playing effect from RPC");
+        Instantiate(deathEffect, transform.position, transform.rotation);
     }
 }

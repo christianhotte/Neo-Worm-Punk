@@ -14,6 +14,7 @@ public class LockerTubeController : MonoBehaviour
     [SerializeField, Tooltip("The prefab that displays the player's name.")] private GameObject playerNamePrefab;
     [SerializeField, Tooltip("The GameObject for the host settings.")] private GameObject hostSettings;
     [SerializeField, Tooltip("The GameObject for the teams display.")] private GameObject teamsDisplay;
+    [SerializeField] private ParticleSystem confettiEffect;
 
     //internal int tubeNumber;
     //public bool occupied = false;
@@ -107,6 +108,13 @@ public class LockerTubeController : MonoBehaviour
         moveMe.position = endPos;
         if(isMyLocalTube) { transform.position = endPos - spawnPointBias; }
     }
+
+    public void PlayConfettiInTube()
+    {
+        if (confettiEffect != null)
+            confettiEffect.Play();
+    }
+
     /*
     public IEnumerator MoveTubeToNextPosition(Vector3 endPos, float moveTime)
     {
