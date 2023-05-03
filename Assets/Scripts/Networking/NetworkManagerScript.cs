@@ -129,7 +129,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
     public void OnCreateRoom(string roomName, RoomOptions roomOptions = null, Hashtable customRoomSettings = null)
     {
-        PhotonNetwork.EnableCloseConnection = true;
 
         if (roomOptions == null)
         {

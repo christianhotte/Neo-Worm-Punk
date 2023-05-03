@@ -36,6 +36,10 @@ public class PlayerManagementController : MonoBehaviour
     /// <param name="kickPlayer">The current player to kick.</param>
     public void KickPlayer(Player kickPlayer)
     {
-        PhotonNetwork.CloseConnection(kickPlayer);
+        if (PhotonNetwork.IsMasterClient)
+        {
+            Debug.Log("Kicking " + kickPlayer.NickName + "...");
+            PhotonNetwork.CloseConnection(kickPlayer);
+        }
     }
 }
