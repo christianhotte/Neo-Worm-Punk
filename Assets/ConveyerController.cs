@@ -289,6 +289,12 @@ public class ConveyerController : MonoBehaviour
         }
     }
 
+    public void MovePlayerTo(int moveToBeltIndex)
+    {
+        conveyerBeltObjects[0].position = new Vector3(conveyerBeltObjects[0].position.x, 1.5f, conveyerBeltStopPositions[moveToBeltIndex].position.z);
+        conveyerBeltObjects[1].position = new Vector3(conveyerBeltObjects[1].position.x, conveyerBeltObjects[1].position.y, conveyerBeltStopPositions[moveToBeltIndex].position.z);
+    }
+
     public void CreateRoomOptionChosen()
     {
         createRoomOption = true;
