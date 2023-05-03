@@ -83,7 +83,7 @@ public class CreateRoomController : MonoBehaviour
             matchLengthLabel.text += (currentRoundLength / 60).ToString() + " minute" + (currentRoundLength / 60 > 1 ? "s" : "");
     }
 
-    private string[] wormSymbols = { "OO", "EE", "G", "S", "W", "U", "M" };
+    private string[] wormSymbols = { "OO", "EE", "G", "S", "W", "U", "M", "N" };
 
     /// <summary>
     /// Generates a random room code that is a set amount of letters long.

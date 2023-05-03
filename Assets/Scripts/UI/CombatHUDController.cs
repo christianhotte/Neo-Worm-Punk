@@ -60,6 +60,9 @@ public class CombatHUDController : MonoBehaviour
     {
         Transform currentAmmoIndicator = ammoIndicators[handedness == CustomEnums.Handedness.Left ? 0 : 1];
 
+        foreach (Transform trans in currentAmmoIndicator)
+            Destroy(trans.gameObject);
+
         for (int i = 0; i < ammoCount; i++)
             Instantiate(ammoPip, currentAmmoIndicator);
     }
