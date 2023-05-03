@@ -15,6 +15,7 @@ public class PowerUp : Targetable
     public float bounceForce = 100;
     private MeshRenderer thisModel;
     private int currentHealth;
+    public GameObject deathEffect,powerMesh;
     private AudioSource powerUpAud;
     public AudioClip powerUpHit;
     private PhotonView photonView;
@@ -32,7 +33,6 @@ public class PowerUp : Targetable
         if (PhotonNetwork.InRoom)
         {
             roomPowerUpTime = (float)PhotonNetwork.CurrentRoom.CustomProperties["UpgradeLength"];
-            Debug.Log("The Voices In My Head Tell Me The Power Up Time Is " + roomPowerUpTime);
 
             if (photonView.IsMine)
             {
@@ -91,7 +91,17 @@ public class PowerUp : Targetable
     {
         PhotonNetwork.Destroy(GetComponent<PhotonView>());
     }
-
+    public IEnumerator DeathSequence()
+    {
+        this.gameObject.GetComponent<Collider>().enabled = false;
+        powerMesh.SetActive(false);
+        if (deathEffect != null)
+        {
+            deathEffect.GetComponent<ParticleSystem>().Play();
+        }
+        yield return new WaitForSeconds(2.5f);
+        Delete();
+    }
     //RPC METHODS:
     [PunRPC]
     public void RPC_IsHit(int damage, Vector3 hitForce)
@@ -99,8 +109,11 @@ public class PowerUp : Targetable
         currentHealth -= damage;
         if (photonView.IsMine)
         {
-           // powerUpAud.PlayOneShot(powerUpHit);   THis is only client side
-            if (currentHealth <= 0) Delete();
+            // powerUpAud.PlayOneShot(powerUpHit);   THis is only client side
+            if (currentHealth <= 0)
+            {
+                StartCoroutine(DeathSequence());
+            }
             else
             {
                 rb.drag = airDrag;
