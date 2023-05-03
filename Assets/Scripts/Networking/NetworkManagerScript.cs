@@ -47,6 +47,9 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
     private Room mostRecentRoom;
 
+    private bool sceneLoadFailed = false;
+    private string currentErrorMessage;
+
     //RUNTIME METHODS:
     private void Awake()
     {
@@ -107,6 +110,11 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         if(scene.name == GameSettings.titleScreenScene)
         {
             SetNameOnStart();
+            if (sceneLoadFailed)
+            {
+                MovePlayerToOnlineErrorMessage();
+                sceneLoadFailed = false;
+            }
         }
     }
 
@@ -207,7 +215,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         // Joins the room on the network
         if (!PhotonNetwork.JoinRoom(roomName))
         {
-            ResetTitleScene();
+            ResetTitleScene("Join Room Failed. Reason: Room Does Not Exist.");
         }
 
         mostRecentRoom = PhotonNetwork.CurrentRoom;
@@ -397,13 +405,9 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         string errorMessage = "Room Creation Failed: " + message;
 
         LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
-
         //If there is a lobby in the scene, display an error message
         if (lobbyUI != null)
-        {
             lobbyUI.UpdateErrorMessage(errorMessage);
-            lobbyUI.SwitchMenu(LobbyMenuState.ERROR);
-        }
     }
     public override void OnJoinedRoom()
     {
@@ -446,25 +450,31 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     {
         base.OnJoinRoomFailed(returnCode, message);
 
-        Debug.LogError("Join Room Failed. Reason: " + message);
-        ResetTitleScene();
-
-        /*        LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
-
-                //If there is a lobby in the scene, display an error message
-                if (lobbyUI != null)
-                {
-                    lobbyUI.UpdateErrorMessage("Join Room Failed. Reason: " + message);
-                    lobbyUI.SwitchMenu(LobbyMenuState.ERROR);
-                }*/
+        Debug.LogError("Join Room Failed. Reason: " + message + ".");
+        ResetTitleScene("Join Room Failed. Reason: " + message + ".");
     }
 
-    private void ResetTitleScene()
+    private void ResetTitleScene(string errorMessage)
     {
         //Reload into the title screen scene for now if failed
-        PhotonNetwork.Disconnect();
+        sceneLoadFailed = true;
         Debug.Log("Returning To Main Menu...");
+        currentErrorMessage = errorMessage;
         GameManager.Instance.LoadGame(GameSettings.titleScreenScene);
+    }
+
+    private void MovePlayerToOnlineErrorMessage()
+    {
+        LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
+        //Update error information
+        if (lobbyUI != null)
+            lobbyUI.UpdateErrorMessage(currentErrorMessage);
+
+        ConveyerController conveyerController = FindObjectOfType<ConveyerController>();
+
+        //Move player to error information
+        if (conveyerController != null)
+            conveyerController.TeleportConveyer(2);
     }
 
     public override void OnPlayerEnteredRoom(Player newPlayer)

@@ -21,7 +21,7 @@ public class MenuStationController : MonoBehaviour
         public bool isMoving;
     }
 
-    private void Start()
+    private void Awake()
     {
         //setting up the temporary menu station positions
         menuStations = new Station[menuStationTransforms.Length];
