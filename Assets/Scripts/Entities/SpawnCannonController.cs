@@ -103,11 +103,13 @@ public class SpawnCannonController : MonoBehaviour
                 //BEGIN TUBE OCCUPATION:
                 if (playerID != 0) 
                 {
+                    print("Putting player " + playerID + " in cannon " + ID);
                     occupyingPlayer = PhotonNetwork.GetPhotonView(playerID).GetComponent<NetworkPlayer>(); //Get occupying player
                 }
                 //END TUBE OCCUPATION:
                 else 
                 {
+                    print("Ejecting player " + occupyingPlayer.photonView.ViewID + " from cannon " + ID);
                     occupyingPlayer = null; //Clear occupying player
                 }
             }
