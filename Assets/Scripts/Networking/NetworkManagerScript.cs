@@ -129,7 +129,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
     public void OnCreateRoom(string roomName, RoomOptions roomOptions = null, Hashtable customRoomSettings = null)
     {
-        if(roomOptions == null)
+
+        if (roomOptions == null)
         {
             roomOptions = new RoomOptions();
             roomOptions.IsVisible = true; // The player is able to see the room
@@ -206,10 +207,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         // Joins the room on the network
         if (!PhotonNetwork.JoinRoom(roomName))
         {
-            //Reload into the title screen scene for now if failed
-            PhotonNetwork.Disconnect();
-            Debug.Log("Returning To Main Menu...");
-            GameManager.Instance.LoadGame(GameSettings.titleScreenScene);
+            ResetTitleScene();
         }
 
         mostRecentRoom = PhotonNetwork.CurrentRoom;
@@ -449,6 +447,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         base.OnJoinRoomFailed(returnCode, message);
 
         Debug.LogError("Join Room Failed. Reason: " + message);
+        ResetTitleScene();
 
         /*        LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
 
@@ -460,6 +459,14 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
                 }*/
     }
 
+    private void ResetTitleScene()
+    {
+        //Reload into the title screen scene for now if failed
+        PhotonNetwork.Disconnect();
+        Debug.Log("Returning To Main Menu...");
+        GameManager.Instance.LoadGame(GameSettings.titleScreenScene);
+    }
+
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
         base.OnPlayerEnteredRoom(newPlayer);
@@ -468,7 +475,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         PlayerController.instance.inverteboy.AddToRoomLog(newPlayer.NickName + " Joined The Game.");
 
         LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
-
         //Update room information
         if (lobbyUI != null)
         {
@@ -476,6 +482,9 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         }
 
         AdjustVoiceVolume();
+
+        foreach (var host in FindObjectsOfType<PlayerManagementController>())
+            host.UpdatePlayerList();
     }
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
@@ -494,6 +503,9 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
         if (ReadyUpManager.instance != null)
             ReadyUpManager.instance.UpdateReadyText();
+
+        foreach (var host in FindObjectsOfType<PlayerManagementController>())
+            host.UpdatePlayerList();
     }
 
     // This method is called when a custom event is received
