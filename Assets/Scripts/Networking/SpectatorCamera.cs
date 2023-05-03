@@ -15,6 +15,12 @@ public class SpectatorCamera : MonoBehaviour
     [SerializeField] private float maxDistance = 10.0f; // The maximum distance from the player
     [SerializeField] private float minHeight = 1.0f; // The minimum height from the player
     [SerializeField] private float maxHeight = 5.0f; // The maximum height from the player
+    [SerializeField] private float droneSpeed = 12f;
+    [SerializeField] private float droneLookSpeed = 5f;
+    [SerializeField] float minDroneLookAngle = -60f;
+    [SerializeField] float maxDroneLookAngle = 60f;
+    private float yaw = 0f;
+    private float pitch = 0f;
     private float currentDistance; // The current distance from the player
     private float currentHeight; // The current height from the player
     private float currentRotationX; // The current rotation around the player on the X-axis
@@ -22,6 +28,7 @@ public class SpectatorCamera : MonoBehaviour
     private PlayerController demoPlayer;
     public Camera firstPersonCamera;
     public Camera thirdPersonCamera;
+    public Camera droneCamera;
 
     private float originFov;
 
@@ -46,25 +53,45 @@ public class SpectatorCamera : MonoBehaviour
         // Check if left mouse button is clicked
         if (Input.GetMouseButtonDown(0))
         {
-            // Changes priority of the cameras from first person to third person and vice versa.
-            if (firstPersonCamera.depth == 1 && thirdPersonCamera.depth == 2)
+            // Changes priority of the cameras from first person to third person and to drone camera.
+            if (firstPersonCamera.depth == 2 && thirdPersonCamera.depth == 1 && droneCamera.depth == 0)
             {
-                firstPersonCamera.depth = 2;
-                thirdPersonCamera.depth = 1;
+                firstPersonCamera.depth = 1;
+                thirdPersonCamera.depth = 2;
+                droneCamera.depth = -1;
                 //Cursor.visible = true;
                 Cursor.lockState = CursorLockMode.None;
             }
 
-            // Going from third person to first person.
-            else if (firstPersonCamera.depth == 2 && thirdPersonCamera.depth == 1)
+            // Going from drone camera to first person.
+            else if (firstPersonCamera.depth == 2 && thirdPersonCamera.depth == 1 && droneCamera.depth == 3)
             {
-                firstPersonCamera.depth = 1;
-                thirdPersonCamera.depth = 2;
+                firstPersonCamera.depth = 2;
+                thirdPersonCamera.depth = 1;
+                droneCamera.depth = 0;
+            }
+
+            // Going from third person to drone camera.
+            else if (firstPersonCamera.depth == 1 && thirdPersonCamera.depth == 2 && droneCamera.depth == -1)
+            {
+                firstPersonCamera.depth = 2;
+                thirdPersonCamera.depth = 1;
+                droneCamera.depth = 3;
+                droneCamera.transform.parent = null;
                 Cursor.visible = false;
                 Cursor.lockState = CursorLockMode.Confined;
                 //Cursor.lockState = CursorLockMode.Locked;
             }
+
+            // Going from third person to first person (Shouldn't be called)
+            else if (firstPersonCamera.depth == 1 && thirdPersonCamera.depth == 2 && droneCamera.depth == -1)
+            {
+                firstPersonCamera.depth = 2;
+                thirdPersonCamera.depth = 1;
+                droneCamera.depth = -2;
+            }
         }
+
         if (Input.GetMouseButtonDown(2))
         {
             if (firstPersonCamera.depth < thirdPersonCamera.depth)
@@ -87,9 +114,9 @@ public class SpectatorCamera : MonoBehaviour
             return;
         }
 
-        // Zoom in/out with scroll wheel
+        // Zoom in/out with scroll wheel while third person is active
         float scrollAmt = Input.GetAxis("Mouse ScrollWheel");
-        if (firstPersonCamera.depth < thirdPersonCamera.depth)
+        if (firstPersonCamera.depth < thirdPersonCamera.depth && droneCamera.depth < 1)
         {
             currentDistance -= scrollAmt * zoomSpeed;
             currentDistance = Mathf.Clamp(currentDistance, minDistance, maxDistance);
@@ -107,7 +134,46 @@ public class SpectatorCamera : MonoBehaviour
             // Set camera position and rotation
             transform.position = position;
             transform.rotation = rotation;
+
+            droneCamera.transform.position = thirdPersonCamera.transform.position;
+            droneCamera.transform.rotation = thirdPersonCamera.transform.rotation;
         }
+
+        // If the drone camera is active.
+        else if (droneCamera.depth == 3)
+        {
+            // Scroll wheel increases/decreases the drone's move speed.
+            droneSpeed += scrollAmt * droneSpeed;
+
+            // Move the drone spectator camera using WASD and E/Q keys to go up/down.
+            float x = Input.GetAxis("Horizontal") * droneSpeed * Time.deltaTime;
+            float z = Input.GetAxis("Vertical") * droneSpeed * Time.deltaTime;
+            float y = 0f;
+
+            // Moves the drone camera up when E is pressed.
+            if (Input.GetKey(KeyCode.E))
+            {
+                y = droneSpeed * Time.deltaTime;
+            }
+
+            // Moves the drone camera down when Q is pressed.
+            else if (Input.GetKey(KeyCode.Q))
+            {
+                y = -droneSpeed * Time.deltaTime;
+            }
+
+            // Moves the drone camera round.
+            droneCamera.transform.Translate(x, y, z, Space.Self);
+
+            // Rotate the camera based on mouse movement
+            yaw += Input.GetAxis("Mouse X") * droneLookSpeed;
+            pitch -= Input.GetAxis("Mouse Y") * droneLookSpeed;
+            pitch = Mathf.Clamp(pitch, minDroneLookAngle, maxDroneLookAngle);
+
+            droneCamera.transform.rotation = Quaternion.Euler(pitch, yaw, 0f);
+        }
+
+        // If the first person spectator camera is active.
         else
         {
             float currentFov = firstPersonCamera.fieldOfView;

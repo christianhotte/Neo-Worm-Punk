@@ -43,7 +43,7 @@ public class WormHole : NetworkedArenaElement
             OpenExits.AddRange(FindObjectsOfType<WormHoleTrigger>());
             randRange = OpenExits.Count;
             int randomIndex = Random.Range(0, randRange);
-            IsUpgradeActive = (bool)PhotonNetwork.CurrentRoom.CustomProperties["UpgradesActive"];
+            if (PhotonNetwork.IsConnected) IsUpgradeActive = (bool)PhotonNetwork.CurrentRoom.CustomProperties["UpgradesActive"];
         }
     }
     void Update()
@@ -144,6 +144,7 @@ public class WormHole : NetworkedArenaElement
             triggerScript = OpenExits[randomIndex];
             exitPos = triggerScript.transform;
         }
+        triggerScript.exitCam.gameObject.SetActive(true);
         startHole.holeAnim.SetBool("Locked", true);
         startHole.particle.SetActive(false);
         startHole.locked = true;
@@ -214,6 +215,7 @@ public class WormHole : NetworkedArenaElement
         inZone = false;
         yield return new WaitForSeconds(0.2f);  //Wait for the player to get clear of the wormhole
         lastEntry = startHole;
+        triggerScript.exitCam.gameObject.SetActive(false);
         triggerScript.holeAnim.SetBool("Locked", true);
         triggerScript.particle.SetActive(false);
         ActiveWormholes.Remove(this);

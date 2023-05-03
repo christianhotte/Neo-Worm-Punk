@@ -376,6 +376,9 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     {
         foreach(var jumbotron in FindObjectsOfType<Jumbotron>())
             jumbotron.AddToDeathInfoBoard(killerName, victimName, deathCause);
+
+        foreach (var killFeed in FindObjectsOfType<GlobalKillFeedScreen>())
+            killFeed.AddToKillFeed(killerName, victimName, deathCause);
     }
 
     public override void OnCreatedRoom()

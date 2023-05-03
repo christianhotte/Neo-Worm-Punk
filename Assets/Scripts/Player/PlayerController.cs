@@ -59,7 +59,7 @@ public class PlayerController : MonoBehaviour
     [Tooltip("Transform which left-handed primary weapon snaps to when holstered.")]  public Transform leftHolster;
     [Tooltip("Transform which right-handed primary weapon snaps to when holstered.")] public Transform rightHolster;
     [Header("Settings:")]
-    [SerializeField, Tooltip("Settings determining player health properties.")] private HealthSettings healthSettings;
+    [Tooltip("Settings determining player health properties.")] public HealthSettings healthSettings;
     [Space()]
     [SerializeField, Tooltip("How far player head can get from body before it is sent back to center.")]                private float maxHeadDistance;
     [SerializeField, Tooltip("Amount by which to move torso down (allows player to collapse more naturally).")]         private float torsoVerticalOffset = 10f;
@@ -100,36 +100,11 @@ public class PlayerController : MonoBehaviour
     public int MaxHealth { get { return healthSettings.defaultHealth; } }
 
     //Events & Coroutines:
-    /// <summary>
-    /// Controls functions which occur while player is dying.
-    /// </summary>
-    /// <returns></returns>
-    public IEnumerator DeathSequence()
-    {
-        yield return new WaitForSeconds(healthSettings.deathTime); //Wait for designated number of seconds in death zone
-        if (GetComponentInChildren<NewGrapplerController>() != null)
-        {
-            GetComponentInChildren<NewGrapplerController>().locked = false;
-        }
-        if (SpawnManager.current != null && useSpawnPoint) //Spawn manager is present in scene
-        {
-            /*Transform spawnpoint = SpawnManager.current.GetRandomSpawnPoint();                    //Get spawnpoint from spawnpoint manager
-            xrOrigin.transform.position = spawnpoint.position;                                    //Move spawned player to target position
-            xrOrigin.transform.eulerAngles = Vector3.Project(spawnpoint.eulerAngles, Vector3.up); //Rotate player to designated spawnpoint rotation*/
-            SpawnManager.current.Respawn(xrOrigin.gameObject);
-        }
-        foreach (PlayerEquipment equipment in attachedEquipment) equipment.inputEnabled = true; //Re-enable equipment input
-        bodyRb.isKinematic = false; //Re-enable player physics
-
-        if (PhotonNetwork.IsConnected) photonView.RPC("RPC_MakeVisible", RpcTarget.Others); //Unhide trailrenderers for all other players
-        isDead = false;                                      //Indicate that player is no longer dead
-        CenterCamera();                                      //Center camera (this is worth doing during any major transition)
-    }
     public IEnumerator InitialSpawnSequence()
     {
-        timeUntilVulnerable = healthSettings.spawnInvincibilityTime;
+        yield return new WaitUntil(() => SpawnCannonController.sceneSpawns.Count > 0);
         yield return new WaitUntil(() => photonView != null);
-        MakeInvulnerable(timeUntilVulnerable);
+        SpawnCannonController.Respawn();
     }
 
     //RUNTIME METHODS:
@@ -457,16 +432,13 @@ public class PlayerController : MonoBehaviour
         bodyRb.isKinematic = true;                                                       //Disable body physics
 
         //Cleanup:
-        isDead = true; //Indicate that this player is dead
-        xrOrigin.transform.position = SpawnManager.current.deathZone.position; //Move player to death zone
-        xrOrigin.transform.rotation = Quaternion.identity;                     //Zero out player rotation
-        MakeInvulnerable(healthSettings.spawnInvincibilityTime + healthSettings.deathTime);
-        StartCoroutine(DeathSequence());                                       //Begin death sequence
+        if (SpawnCannonController.sceneSpawns.Count > 0) SpawnCannonController.Respawn();
+        isDead = true;                                                         //Indicate that this player is dead
+        CenterCamera();                                                        //Center camera (this is worth doing during any major transition)
         currentHealth = healthSettings.defaultHealth;                          //Reset to max health
         UpdateHealthIndicators();
         healthVolume.weight = 0;                                               //Reset health volume weight
         timeUntilRegen = 0;                                                    //Reset regen timer
-        UnHolsterAll();
         print("Local player has been killed!");
     }
     private void MakeNotWiggly()
