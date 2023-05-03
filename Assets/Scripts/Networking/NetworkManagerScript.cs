@@ -117,6 +117,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     }
     void ConnectToServer()
     {
+        PhotonNetwork.EnableCloseConnection = true;
         PhotonNetwork.ConnectUsingSettings();
         Debug.Log("Trying To Connect To Server...");
     }
