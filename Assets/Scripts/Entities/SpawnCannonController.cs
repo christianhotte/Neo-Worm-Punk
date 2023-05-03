@@ -16,6 +16,7 @@ public class SpawnCannonController : MonoBehaviour
 
     //Settings:
     [Header("Settings:")]
+    [SerializeField, Tooltip("")] private float spawnWaitTime = 3;
     [SerializeField, Tooltip("Force with which player is launched from cannon when spawning.")]       private float launchForce;
     [SerializeField, Range(0, 90), Tooltip("Maximum angle which player can turn launch capsule to.")] private float maxAngle;
     [SerializeField, Tooltip("Speed at which capsule rotates toward launch target.")]                 private float gimbalLerpRate;
@@ -24,13 +25,11 @@ public class SpawnCannonController : MonoBehaviour
     [SerializeField, Tooltip("Position player XR origin is locked to while inside spawn cannon.")]                    private Transform playerLockPoint;
     [SerializeField, Tooltip("Rotating pod assembly which points in the direction player's head is facing.")]         private Transform gimbal;
     [SerializeField, Tooltip("Rotating lever assembly which contains levers used by the player to enter the match.")] private Transform pedestal;
-    [SerializeField, Tooltip("Levers which player has to push in order to launch.")]                                  private PhysicalButtonController[] levers;
 
     //Runtime Variables:
-    internal NetworkPlayer occupyingPlayer; //Player currently occupying this cannon (null if unoccupied)
-    internal float timeUntilReady = 0;      //Time until spawn cannon is ready to fire again
+    [SerializeField] internal NetworkPlayer occupyingPlayer; //Player currently occupying this cannon (null if unoccupied)
+    internal float timeUntilReady = 0;      //Time until spawn cannon is ready to fire
     private Quaternion baseGimbalRot;       //Base rotation of gimbal assembly
-    private int buttonsPressed = 0;
 
     //RUNTIME METHODS:
     private void Awake()
@@ -78,6 +77,9 @@ public class SpawnCannonController : MonoBehaviour
             targetRot = Quaternion.RotateTowards(baseGimbalRot, targetRot, maxAngle);                                             //Cap angle target
             newRot = Quaternion.Lerp(pedestal.rotation, targetRot, pedestalLerpRate * Time.deltaTime);                            //Lerp toward angle target
             pedestal.rotation = newRot;                                                                                           //Rotate pedestal to new rotation
+
+            //Launch player:
+            if (timeUntilReady == 0) DeployPlayer();
         }
 
         /*if (NetworkPlayer.instances.Count > 0)
@@ -85,11 +87,6 @@ public class SpawnCannonController : MonoBehaviour
             if (!PlayerController.instance.bodyRb.isKinematic) PutPlayerInCannon();
             occupyingPlayer = NetworkPlayer.instances[0];
         }*/
-    }
-    public void OnButtonPressed()
-    {
-        buttonsPressed++;
-        if (buttonsPressed >= 2) DeployPlayer();
     }
 
     //NETWORKING:
@@ -158,6 +155,7 @@ public class SpawnCannonController : MonoBehaviour
     public void PutPlayerInCannon()
     {
         if (PhotonNetwork.IsConnected) UpdateCannonStatusEvent(PlayerController.photonView.ViewID); //Update all versions of this spawn cannon to indicate that this player has been loaded into it
+        timeUntilReady = spawnWaitTime;
 
         //Move player:
         PlayerController.instance.bodyRb.isKinematic = true;                     //Make it so that player cannot move
@@ -169,13 +167,6 @@ public class SpawnCannonController : MonoBehaviour
         {
             equipment.inputEnabled = false;                //Disable equipment input
             if (!equipment.holstered) equipment.Holster(); //Holster equipment
-        }
-
-        //Set up buttons:
-        foreach (PhysicalButtonController button in levers)
-        {
-            button.LockButton(false);
-            button.EnableButton(true);
         }
     }
     /// <summary>
