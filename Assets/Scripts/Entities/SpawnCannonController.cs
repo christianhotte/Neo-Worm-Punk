@@ -24,12 +24,13 @@ public class SpawnCannonController : MonoBehaviour
     [SerializeField, Tooltip("Position player XR origin is locked to while inside spawn cannon.")]                    private Transform playerLockPoint;
     [SerializeField, Tooltip("Rotating pod assembly which points in the direction player's head is facing.")]         private Transform gimbal;
     [SerializeField, Tooltip("Rotating lever assembly which contains levers used by the player to enter the match.")] private Transform pedestal;
-    [SerializeField, Tooltip("Levers which player has to push in order to launch.")]                                  private LeverController[] levers;
+    [SerializeField, Tooltip("Levers which player has to push in order to launch.")]                                  private PhysicalButtonController[] levers;
 
     //Runtime Variables:
     internal NetworkPlayer occupyingPlayer; //Player currently occupying this cannon (null if unoccupied)
     internal float timeUntilReady = 0;      //Time until spawn cannon is ready to fire again
     private Quaternion baseGimbalRot;       //Base rotation of gimbal assembly
+    private int buttonsPressed = 0;
 
     //RUNTIME METHODS:
     private void Awake()
@@ -77,11 +78,6 @@ public class SpawnCannonController : MonoBehaviour
             targetRot = Quaternion.RotateTowards(baseGimbalRot, targetRot, maxAngle);                                             //Cap angle target
             newRot = Quaternion.Lerp(pedestal.rotation, targetRot, pedestalLerpRate * Time.deltaTime);                            //Lerp toward angle target
             pedestal.rotation = newRot;                                                                                           //Rotate pedestal to new rotation
-
-            //Check lever status:
-            int activeLevers = 0; //Initialize value for number of active levers
-            foreach (LeverController lever in levers) if (lever.hingeJointState == LeverController.HingeJointState.Max) activeLevers++; //Iterate through levers
-            if (activeLevers >= 2) DeployPlayer(); //Fire player if they are readied up
         }
 
         /*if (NetworkPlayer.instances.Count > 0)
@@ -89,6 +85,11 @@ public class SpawnCannonController : MonoBehaviour
             if (!PlayerController.instance.bodyRb.isKinematic) PutPlayerInCannon();
             occupyingPlayer = NetworkPlayer.instances[0];
         }*/
+    }
+    public void OnButtonPressed()
+    {
+        buttonsPressed++;
+        if (buttonsPressed >= 2) DeployPlayer();
     }
 
     //NETWORKING:
@@ -169,6 +170,13 @@ public class SpawnCannonController : MonoBehaviour
             equipment.inputEnabled = false;                //Disable equipment input
             if (!equipment.holstered) equipment.Holster(); //Holster equipment
         }
+
+        //Set up buttons:
+        foreach (PhysicalButtonController button in levers)
+        {
+            button.LockButton(false);
+            button.EnableButton(true);
+        }
     }
     /// <summary>
     /// Launches player from this spawn cannon.
@@ -187,13 +195,6 @@ public class SpawnCannonController : MonoBehaviour
         {
             equipment.inputEnabled = true;                     //Enable equipment input
             if (equipment.holstered) equipment.Holster(false); //Un-holster equipment
-        }
-
-        //Lever cleanup:
-        foreach (LeverController lever in levers) //Iterate through levers in system
-        {
-            lever.GetLeverHandle().MoveToAngle(lever.GetMinimumAngle());
-            lever.GetLeverHandle().OnRelease();
         }
 
         //Cleanup:
