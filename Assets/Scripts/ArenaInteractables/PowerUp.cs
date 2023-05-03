@@ -7,7 +7,6 @@ using ExitGames.Client.Photon;
 using Photon.Realtime;
 public class PowerUp : Targetable
 {
-    public const byte PlayPowerUpDestroyedEffectEventCode = 102;
     public enum PowerUpType { None, MultiShot, HeatVision, InfiniShot, Invulnerability }
 
     public PowerUpType powerType;
@@ -45,24 +44,6 @@ public class PowerUp : Targetable
                 rb.drag = 5;
             }
 
-        }
-    }
-    private void OnEnable()
-    {
-        PhotonNetwork.NetworkingClient.EventReceived += OnEvent;
-    }
-
-    private void OnDisable()
-    {
-        PhotonNetwork.NetworkingClient.EventReceived -= OnEvent;
-    }
-
-    private void OnEvent(EventData photonEvent)
-    {
-        byte eventCode = photonEvent.Code; //Get event code
-        if (eventCode == PlayPowerUpDestroyedEffectEventCode) 
-        {
-            PlayDeathEffect();
         }
     }
     private void FixedUpdate()
@@ -109,6 +90,7 @@ public class PowerUp : Targetable
     }
     private void Delete()
     {
+        print("deleting powerup");
         if (PhotonNetwork.IsConnected) PhotonNetwork.Destroy(GetComponent<PhotonView>());
         else Destroy(gameObject);
     }
@@ -139,8 +121,8 @@ public class PowerUp : Targetable
             // powerUpAud.PlayOneShot(powerUpHit);   THis is only client side
             if (currentHealth <= 0)
             {
-                if (PhotonNetwork.IsConnected) photonView.RPC("RPC_Shatter", RpcTarget.All);
-                else RPC_Shatter();
+                RPC_Shatter();
+                if (PhotonNetwork.IsConnected) photonView.RPC("RPC_Shatter", RpcTarget.Others);
                 Delete();
             }
             else
@@ -153,6 +135,7 @@ public class PowerUp : Targetable
     [PunRPC]
     public void RPC_Shatter()
     {
-        Instantiate(deathEffect, this.transform.position, this.transform.rotation);
+        Debug.Log("playing effect from RPC");
+        Instantiate(deathEffect, transform.position, transform.rotation);
     }
 }
