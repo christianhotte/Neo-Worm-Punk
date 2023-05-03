@@ -23,6 +23,7 @@ public class ConveyerController : MonoBehaviour
     private bool createRoomOption;
     private bool yeetNotYetNoob = false;
     private bool tutorialOption = false;
+    private bool sandboxOption = false;
 
 
 
@@ -272,6 +273,10 @@ public class ConveyerController : MonoBehaviour
         {
             GameManager.Instance.LoadGame(GameSettings.tutorialScene);
         }
+        else if (sandboxOption)
+        {
+            GameManager.Instance.LoadGame(GameSettings.arenaScene);
+        }
         else if (createRoomOption)
         {
             Debug.Log("You SHOULD be creating and joining a room right now");
@@ -284,10 +289,17 @@ public class ConveyerController : MonoBehaviour
         }
     }
 
+    public void MovePlayerTo(int moveToBeltIndex)
+    {
+        conveyerBeltObjects[0].position = new Vector3(conveyerBeltObjects[0].position.x, 1.5f, conveyerBeltStopPositions[moveToBeltIndex].position.z);
+        conveyerBeltObjects[1].position = new Vector3(conveyerBeltObjects[1].position.x, conveyerBeltObjects[1].position.y, conveyerBeltStopPositions[moveToBeltIndex].position.z);
+    }
+
     public void CreateRoomOptionChosen()
     {
         createRoomOption = true;
         tutorialOption = false;
+        sandboxOption = false;
     }
 
     public void JoinRoomOptionChosen()
@@ -295,11 +307,17 @@ public class ConveyerController : MonoBehaviour
         findRoomControllerRef.SetRoomToConnectTo();
         createRoomOption = false;
         tutorialOption = false;
+        sandboxOption = false;
     }
 
     public void TutorialOptionChosen()
     {
         tutorialOption = true;
+    }
+
+    public void SandboxOptionChosen()
+    {
+        sandboxOption = true;
     }
 
     /// <summary>

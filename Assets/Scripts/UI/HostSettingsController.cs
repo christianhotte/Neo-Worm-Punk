@@ -85,7 +85,7 @@ public class HostSettingsController : MonoBehaviour
         if (!isInitialized)
         {
             //Moves the handle to either the top or the bottom, depending on whether the room is public or not
-            roomTypeController.GetLeverHandle().MoveToAngle(roomTypeController, GetRoom().IsVisible ? roomTypeController.GetMinimumAngle() : roomTypeController.GetMaximumAngle());
+            roomTypeController.GetLeverHandle().MoveToAngle(GetRoom().IsVisible ? roomTypeController.GetMinimumAngle() : roomTypeController.GetMaximumAngle());
 
             //Moves the dial to the index of the match lengths array that the custom room setting is equal to
             matchDial.ResetDial();
