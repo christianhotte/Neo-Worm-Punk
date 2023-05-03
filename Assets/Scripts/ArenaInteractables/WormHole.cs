@@ -156,7 +156,7 @@ public class WormHole : NetworkedArenaElement
         playerCam = PC.cam.gameObject;      //sets camera reference
         ActiveWormholes.Add(this);//Adds this to the static wormhole list
         wormZoneShifted = wormZone; //gives the shifted zone its starting point
-        wormZoneShifted.transform.position = new Vector3(wormZone.position.x + 100 * ActiveWormholes.Count,wormZone.position.y,wormZone.position.z);//moves the wormhole instance so each player has their own      
+      //  wormZoneShifted.transform.position = new Vector3(wormZone.position.x + 100 * ActiveWormholes.Count,wormZone.position.y,wormZone.position.z);//moves the wormhole instance so each player has their own      
         playerRB.useGravity = false;  //Turn off Gravity
         foreach (PlayerEquipment equipment in PlayerController.instance.attachedEquipment)
         {
