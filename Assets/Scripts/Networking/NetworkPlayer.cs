@@ -908,6 +908,19 @@ public class NetworkPlayer : MonoBehaviour
         }
     }
 
+    [PunRPC]
+    public void RPC_TriggerEffect(int effectID)
+    {
+        switch (effectID)
+        {
+            case 1: // Confetti particle effect for 1st place winner
+                ReadyUpManager.instance.localPlayerTube.PlayConfettiInTube();
+                break;
+            default:
+                break;
+        }
+    }
+
     //UTILITY METHODS:
     /// <summary>
     /// Matches the target's position and orientation to those of the reference.
