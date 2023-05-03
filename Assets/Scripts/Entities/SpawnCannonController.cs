@@ -57,9 +57,6 @@ public class SpawnCannonController : MonoBehaviour
     }
     private void Update()
     {
-        //Update timers:
-        if (timeUntilReady > 0) timeUntilReady = Mathf.Max(timeUntilReady - Time.deltaTime, 0); //Decrease time counter until it hits zero
-
         //Point in player direction:
         if (occupyingPlayer != null)
         {
@@ -79,7 +76,11 @@ public class SpawnCannonController : MonoBehaviour
             pedestal.rotation = newRot;                                                                                           //Rotate pedestal to new rotation
 
             //Launch player:
-            if (timeUntilReady == 0) DeployPlayer();
+            if (occupyingPlayer.photonView.IsMine || !PhotonNetwork.IsConnected)
+            {
+                if (timeUntilReady > 0) timeUntilReady = Mathf.Max(timeUntilReady - Time.deltaTime, 0); //Decrease time counter until it hits zero
+                else DeployPlayer();
+            }
         }
 
         /*if (NetworkPlayer.instances.Count > 0)
