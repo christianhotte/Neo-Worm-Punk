@@ -26,7 +26,7 @@ public static class GameSettings
     public static string titleScreenScene = "DavidMenuScene";
     public static string roomScene = "NetworkLockerRoom";
     public static string arenaScene = "DM_0.17_Arena";
-    public static string tutorialScene = "Tutorial";
+    public static string tutorialScene = "TutorialFinal";
 
     public static float defaultMasterSound = 0.5f;
     public static float defaultMusicSound = 0.5f;

@@ -426,13 +426,13 @@ public class PlayerController : MonoBehaviour
 
         //Put player in limbo:
         if (PhotonNetwork.IsConnected) photonView.RPC("RPC_MakeInvisible", RpcTarget.Others);                           //Hide trailrenderers for all other players
-        bodyRb.velocity = Vector3.zero;                                                  //Reset player velocity
+        if (SpawnCannonController.sceneSpawns.Count > 0)
+            bodyRb.velocity = Vector3.zero;                                                  //Reset player velocity
         CenterCamera();                                                                  //Center camera (this is worth doing during any major transition)
         foreach (PlayerEquipment equipment in attachedEquipment) equipment.Shutdown(-1); //Stow and disable all equipment on player
         bodyRb.isKinematic = true;                                                       //Disable body physics
 
         //Cleanup:
-        if (SpawnCannonController.sceneSpawns.Count > 0) SpawnCannonController.Respawn();
         isDead = true;                                                         //Indicate that this player is dead
         CenterCamera();                                                        //Center camera (this is worth doing during any major transition)
         currentHealth = healthSettings.defaultHealth;                          //Reset to max health
@@ -440,6 +440,9 @@ public class PlayerController : MonoBehaviour
         healthVolume.weight = 0;                                               //Reset health volume weight
         timeUntilRegen = 0;                                                    //Reset regen timer
         print("Local player has been killed!");
+        if (SpawnCannonController.sceneSpawns.Count > 0) SpawnCannonController.Respawn();
+        if(SpawnManager.current != null)
+            SpawnManager.current.Respawn(xrOrigin.gameObject);
     }
     private void MakeNotWiggly()
     {
