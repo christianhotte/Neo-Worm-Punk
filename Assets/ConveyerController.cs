@@ -321,7 +321,7 @@ public class ConveyerController : MonoBehaviour
     }
 
     /// <summary>
-    /// Persona5 sucks. Yes this is a direct attack on Peter. Yes I'm joking
+    /// Persona5 sucks. Yes this is a direct attack on Peter. Yes I'm joking. Period.
     /// </summary>
     private void DisplayBeltMove()
     {
