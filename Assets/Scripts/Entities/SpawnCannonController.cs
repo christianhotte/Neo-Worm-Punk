@@ -104,11 +104,13 @@ public class SpawnCannonController : MonoBehaviour
                 //BEGIN TUBE OCCUPATION:
                 if (playerID != 0) 
                 {
+                    print("Putting player " + playerID + " in cannon " + ID);
                     occupyingPlayer = PhotonNetwork.GetPhotonView(playerID).GetComponent<NetworkPlayer>(); //Get occupying player
                 }
                 //END TUBE OCCUPATION:
                 else 
                 {
+                    print("Ejecting player " + occupyingPlayer.photonView.ViewID + " from cannon " + ID);
                     occupyingPlayer = null; //Clear occupying player
                 }
             }
@@ -155,13 +157,15 @@ public class SpawnCannonController : MonoBehaviour
     /// </summary>
     public void PutPlayerInCannon()
     {
-        if (PhotonNetwork.IsConnected) UpdateCannonStatusEvent(PlayerController.photonView.ViewID); //Update all versions of this spawn cannon to indicate that this player has been loaded into it
+        //if (PhotonNetwork.IsConnected) UpdateCannonStatusEvent(PlayerController.photonView.ViewID); //Update all versions of this spawn cannon to indicate that this player has been loaded into it
+        occupyingPlayer = PlayerController.photonView.GetComponent<NetworkPlayer>();
         timeUntilReady = spawnWaitTime;
 
         //Move player:
         PlayerController.instance.bodyRb.isKinematic = true;                     //Make it so that player cannot move
         PlayerController.instance.bodyRb.MovePosition(playerLockPoint.position); //Move player to lockpoint position
         PlayerController.instance.bodyRb.MoveRotation(playerLockPoint.rotation); //Move player to lockpoint rotation
+        PlayerController.photonView.RPC("RPC_MakeVisible", RpcTarget.Others);    //Clear trail
 
         //Disable equipment:
         foreach (PlayerEquipment equipment in PlayerController.instance.attachedEquipment) //Iterate through all pieces of equipment attached to the player
@@ -176,7 +180,8 @@ public class SpawnCannonController : MonoBehaviour
     public void DeployPlayer()
     {
         //Initialization:
-        if (PhotonNetwork.IsConnected) UpdateCannonStatusEvent(); //Indicate that this cannon is now empty
+        //if (PhotonNetwork.IsConnected) UpdateCannonStatusEvent(); //Indicate that this cannon is now empty
+        occupyingPlayer = null;
 
         //Launch:
         PlayerController.instance.bodyRb.isKinematic = false;                                       //Enable player movement
@@ -190,7 +195,7 @@ public class SpawnCannonController : MonoBehaviour
         }
 
         //Cleanup:
-        PlayerController.instance.isDead = false; //Indicate that player is no longer dead
+        //PlayerController.instance.isDead = false; //Indicate that player is no longer dead
         PlayerController.instance.MakeInvulnerable(PlayerController.instance.healthSettings.spawnInvincibilityTime);
     }
 }
