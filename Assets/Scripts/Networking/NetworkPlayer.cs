@@ -68,6 +68,8 @@ public class NetworkPlayer : MonoBehaviour
     public GameObject bulletHitEffect;
     public GameObject bulletKillEffect;
     public GameObject chainsawKillEffect;
+    [Header("General Settings:")]
+    public float trailResetSpeed;
 
     private Transform headTarget;      //True local position of player head
     private Transform leftHandTarget;  //True local position of player left hand
@@ -79,6 +81,7 @@ public class NetworkPlayer : MonoBehaviour
     private Transform rightHandRig;    //Networked transform which follows position of player right hand
     private Transform modelRig;        //Networked transform which follows position of player model
     internal Transform originRig;
+    private Vector3 prevPos;
 
     //Runtime Variables:
     /// <summary>
@@ -203,6 +206,7 @@ public class NetworkPlayer : MonoBehaviour
             if (GameManager.Instance.InMenu()) trail.enabled = false;
             else trail.enabled = true;
         }
+        if (trailResetSpeed > 0) { trailResetSpeed = 0; trail.Clear(); }
     }
     private void OnDestroy()
     {
@@ -915,7 +919,7 @@ public class NetworkPlayer : MonoBehaviour
         switch (effectID)
         {
             case 1: // Confetti particle effect for 1st place winner
-                ReadyUpManager.instance.localPlayerTube.PlayConfettiInTube();
+                if (photonView.IsMine) ReadyUpManager.instance.localPlayerTube.PlayConfettiInTube();
                 break;
             default:
                 break;
