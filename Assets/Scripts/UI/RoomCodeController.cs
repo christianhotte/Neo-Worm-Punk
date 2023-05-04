@@ -4,7 +4,6 @@ using UnityEngine;
 using TMPro;
 public class RoomCodeController : MonoBehaviour
 {
-    [SerializeField, Tooltip("The conveyor controller.")] private ConveyerController conveyerController;
     [SerializeField, Tooltip("The displayed room code text.")] private TextMeshProUGUI roomCodeText;
     [SerializeField, Tooltip("The join room error message text.")] private TextMeshProUGUI errorMessageText;
 
@@ -68,7 +67,7 @@ public class RoomCodeController : MonoBehaviour
                 validRoomCode += segment;
 
             FindObjectOfType<LobbyUIScript>().SetRoomToConnectTo(validRoomCode);
-            conveyerController.MoveConveyer(7);
+            FindObjectOfType<LobbyUIScript>().GetPlayerConveyorBelt().MoveConveyer(7);
             errorMessageText.text = "";
         }
         else

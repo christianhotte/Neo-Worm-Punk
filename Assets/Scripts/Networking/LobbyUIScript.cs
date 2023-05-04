@@ -12,6 +12,7 @@ public enum LobbyMenuState { LOADING, NICKNAME, START, TUTORIALS, ONLINE, HOST, 
 public class LobbyUIScript : MonoBehaviour
 {
 
+    [SerializeField] private ConveyerController playerConveyorController;
     [SerializeField, Tooltip("The list of menus in the lobby.")] private GameObject[] menus;
     private GameObject currentMenu;
 
@@ -347,4 +348,6 @@ public class LobbyUIScript : MonoBehaviour
     {
         PhotonNetwork.LoadLevel(4);
     }
+
+    public ConveyerController GetPlayerConveyorBelt() => playerConveyorController;
 }

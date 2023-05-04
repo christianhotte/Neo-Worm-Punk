@@ -8,7 +8,7 @@ public class ConveyerController : MonoBehaviour
     [SerializeField, Tooltip("teehee this is a fake tooltip bet you'll never find this Hotte")] private Transform[] conveyerBeltStopPositions;
     [SerializeField, Tooltip("All of the objects on the conveyer belt")] private Transform[] conveyerBeltObjects;
     [SerializeField, Tooltip("How much time it takes for objects to get from conveyerbelt stop positions")] private float transportTime;
-    [SerializeField, Tooltip("Refference to MenuStationController")] private MenuStationController menuStationControllerRef;
+    [SerializeField, Tooltip("Reference to MenuStationController")] private MenuStationController menuStationControllerRef;
     [SerializeField, Tooltip("Indicates whether or not this is the player's conveyerbelt")] private bool isPlayerBelt;
 
     [Header("PLAYER Conveyer")]
@@ -100,7 +100,10 @@ public class ConveyerController : MonoBehaviour
 
         //only do if this is the player's belt
         if (isPlayerBelt)
+        {
             menuStationControllerRef.DeactivateAllOtherStations(nextBeltPositions[0]); //retract all menu ui that is down except for the next one
+            menuStationControllerRef.ActivateStation(nextBeltPositions[0]);
+        }
 
         //make arrays to store starting + ending positions
         Vector3[] startPositions = new Vector3[conveyerBeltObjects.Length];
@@ -115,8 +118,6 @@ public class ConveyerController : MonoBehaviour
 
         for (int i = 0; i < conveyerBeltObjects.Length; i++)
             conveyerBeltObjects[i].position = endPositions[i];
-
-        menuStationControllerRef.ActivateStation(nextBeltPositions[0]);
 
         conveyerBeltIsMoving = false;
     }
