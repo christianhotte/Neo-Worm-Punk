@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.XR;
 using UnityEngine.Events;
 
@@ -15,6 +16,9 @@ public class PhysicalToggleController : MonoBehaviour
     [SerializeField, Tooltip("The angle of the toggle when it is off.")] private float toggleOffAngle;
     [SerializeField, Tooltip("If true, locks the button in place after pressing the button.")] private bool lockOnPress;
     [SerializeField, Tooltip("If true, the player can press the button to perform an action.")] private bool isInteractable = true;
+
+    [SerializeField, Tooltip("The image for the on label.")] private Image onLabelImage;
+    [SerializeField, Tooltip("The image for the off label.")] private Image offLabelImage;
 
     [SerializeField, Tooltip("The cooldown for pressing the toggle.")] private float toggleCooldown;
 
@@ -42,6 +46,7 @@ public class PhysicalToggleController : MonoBehaviour
     private void Start()
     {
         UpdateToggleAngle();
+        UpdateLabel();
         isPressed = false;
     }
 
@@ -113,6 +118,7 @@ public class PhysicalToggleController : MonoBehaviour
             isOn = !isOn;
 
             UpdateToggleAngle();
+            UpdateLabel();
 
             if (onPressedSoundEffect != null)
                 GetComponent<AudioSource>().PlayOneShot(onPressedSoundEffect, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
@@ -139,16 +145,6 @@ public class PhysicalToggleController : MonoBehaviour
     }
 
     /// <summary>
-    /// Updates the toggle variable manually and updates the angle.
-    /// </summary>
-    /// <param name="toggleOn">The new state of the toggle.</param>
-    private void UpdateToggle(bool toggleOn)
-    {
-        isOn = toggleOn;
-        UpdateToggleAngle();
-    }
-
-    /// <summary>
     /// Updates the angle of the toggle based on whether the toggle is on or off.
     /// </summary>
     private void UpdateToggleAngle()
@@ -157,6 +153,12 @@ public class PhysicalToggleController : MonoBehaviour
             toggleTransform.localEulerAngles = new Vector3(toggleOnAngle, 0f, 0f);
         else
             toggleTransform.localEulerAngles = new Vector3(toggleOffAngle, 0f, 0f);
+    }
+
+    private void UpdateLabel()
+    {
+        onLabelImage.color = new Color(onLabelImage.color.r, onLabelImage.color.g, onLabelImage.color.b, isOn ? 1 : 0);
+        offLabelImage.color = new Color(offLabelImage.color.r, offLabelImage.color.g, offLabelImage.color.b, isOn ? 0 : 1);
     }
 
     /// <summary>
@@ -179,5 +181,6 @@ public class PhysicalToggleController : MonoBehaviour
     {
         isOn = newIsOn;
         UpdateToggleAngle();
+        UpdateLabel();
     }
 }

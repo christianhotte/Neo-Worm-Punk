@@ -178,9 +178,9 @@ public class NewShotgunController : PlayerEquipment
             {
                 if (equipment.TryGetComponent(out NewShotgunController other) && other != this) otherGun = other; //Try to get other shotgun controller
             }
-        }
 
-        PlayerController.instance.combatHUD.InitializeAmmoIndicators(handedness, gunSettings.maxLoadedShots);
+            PlayerController.instance.combatHUD.InitializeAmmoIndicators(handedness, gunSettings.maxLoadedShots);
+        }
     }
     private protected override void Update()
     {
