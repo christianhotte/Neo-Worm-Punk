@@ -912,13 +912,16 @@ public class NetworkPlayer : MonoBehaviour
     [PunRPC]
     public void RPC_TriggerEffect(int effectID)
     {
-        switch (effectID)
+        if (photonView.IsMine)
         {
-            case 1: // Confetti particle effect for 1st place winner
-                ReadyUpManager.instance.localPlayerTube.PlayConfettiInTube();
-                break;
-            default:
-                break;
+            switch (effectID)
+            {
+                case 1: // Confetti particle effect for 1st place winner
+                    ReadyUpManager.instance.localPlayerTube.PlayConfettiInTube();
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
