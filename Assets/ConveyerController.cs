@@ -50,7 +50,7 @@ public class ConveyerController : MonoBehaviour
                 */
             }
             //make the belt move automatically and start somewhat randomly
-            InvokeRepeating("DisplayBeltMove", Random.Range(0.5f, 3f), transportTime * 1.5f);
+            InvokeRepeating("DisplayBeltMove", Random.Range(0.5f, 6f), transportTime * 1.5f);
         }
         else
         {
