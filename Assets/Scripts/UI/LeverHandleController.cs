@@ -5,13 +5,12 @@ using UnityEngine;
 
 public class LeverHandleController : GrabbableUI
 {
-    private LeverController leverController;
+    [SerializeField] private LeverController leverController;
     private Vector3 startingVector;
 
     protected override void Awake()
     {
         base.Awake();
-        leverController = GetComponentInParent<LeverController>();
         startingVector = leverController.transform.up;
         Debug.DrawRay(leverController.transform.position, leverController.transform.up * 10, Color.red, 20);
     }
@@ -47,18 +46,18 @@ public class LeverHandleController : GrabbableUI
             else
             {
                 if (localAngle > 0)
-                    MoveToAngle(leverController, leverController.GetMaximumAngle());
+                    MoveToAngle(leverController.GetMaximumAngle());
                 else
-                    MoveToAngle(leverController, leverController.GetMinimumAngle());
+                    MoveToAngle(leverController.GetMinimumAngle());
             }
         }
     }
 
     private void ClampLever() => transform.localRotation = Quaternion.Euler(Mathf.Clamp(GetAngle(), leverController.GetMinimumAngle(), leverController.GetMaximumAngle()), 0, 0);
 
-    public void MoveToAngle(LeverController lever, float newAngle)
+    public void MoveToAngle(float newAngle)
     {
-        transform.localRotation = Quaternion.Euler(Mathf.Clamp(newAngle, lever.GetMinimumAngle(), lever.GetMaximumAngle()), 0, 0);
+        transform.localRotation = Quaternion.Euler(Mathf.Clamp(newAngle, leverController.GetMinimumAngle(), leverController.GetMaximumAngle()), 0, 0);
     }
 
     public float GetAngle() => (transform.localEulerAngles.x > 180) ? transform.localEulerAngles.x - 360 : transform.localEulerAngles.x;

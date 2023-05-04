@@ -23,6 +23,7 @@ public class ConveyerController : MonoBehaviour
     private bool createRoomOption;
     private bool yeetNotYetNoob = false;
     private bool tutorialOption = false;
+    private bool sandboxOption = false;
 
 
 
@@ -88,6 +89,36 @@ public class ConveyerController : MonoBehaviour
         if (!conveyerBeltIsMoving) { StartCoroutine(MovingConveyerBelt(nextBeltPositions)); }
         //safety
         conveyerBeltIsMoving = true;
+        lubbyUIScriptRef.UpdateErrorMessage("");
+    }
+
+    public void TeleportConveyer(int nextBeltPosition)
+    {
+        int[] nextBeltPositions = new int[conveyerBeltObjects.Length];
+        for (int i = 0; i < conveyerBeltObjects.Length; i++)
+            nextBeltPositions[i] = nextBeltPosition;
+
+        //only do if this is the player's belt
+        if (isPlayerBelt)
+            menuStationControllerRef.DeactivateAllOtherStations(nextBeltPositions[0]); //retract all menu ui that is down except for the next one
+
+        //make arrays to store starting + ending positions
+        Vector3[] startPositions = new Vector3[conveyerBeltObjects.Length];
+        Vector3[] endPositions = new Vector3[conveyerBeltObjects.Length];
+
+        //assign the arrays wit the correct starting and ending positions
+        for (int i = 0; i < conveyerBeltObjects.Length; i++)
+        {
+            startPositions[i] = conveyerBeltObjects[i].position;
+            endPositions[i] = new Vector3(conveyerBeltObjects[i].position.x, conveyerBeltObjects[i].position.y, conveyerBeltStopPositions[nextBeltPositions[i]].position.z);
+        }
+
+        for (int i = 0; i < conveyerBeltObjects.Length; i++)
+            conveyerBeltObjects[i].position = endPositions[i];
+
+        menuStationControllerRef.ActivateStation(nextBeltPositions[0]);
+
+        conveyerBeltIsMoving = false;
     }
 
     /// <summary>
@@ -272,6 +303,10 @@ public class ConveyerController : MonoBehaviour
         {
             GameManager.Instance.LoadGame(GameSettings.tutorialScene);
         }
+        else if (sandboxOption)
+        {
+            GameManager.Instance.LoadGame(GameSettings.arenaScene);
+        }
         else if (createRoomOption)
         {
             Debug.Log("You SHOULD be creating and joining a room right now");
@@ -288,6 +323,7 @@ public class ConveyerController : MonoBehaviour
     {
         createRoomOption = true;
         tutorialOption = false;
+        sandboxOption = false;
     }
 
     public void JoinRoomOptionChosen()
@@ -295,11 +331,17 @@ public class ConveyerController : MonoBehaviour
         findRoomControllerRef.SetRoomToConnectTo();
         createRoomOption = false;
         tutorialOption = false;
+        sandboxOption = false;
     }
 
     public void TutorialOptionChosen()
     {
         tutorialOption = true;
+    }
+
+    public void SandboxOptionChosen()
+    {
+        sandboxOption = true;
     }
 
     /// <summary>

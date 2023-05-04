@@ -36,6 +36,8 @@ public class LobbyUIScript : MonoBehaviour
 
     private int currentAdjective, currentNoun;
 
+    private string roomToConnectTo;
+
     private void Start()
     {
         currentMenu = menus[(int)LobbyMenuState.START];     //Sets the first menu as the starting menu
@@ -208,12 +210,19 @@ public class LobbyUIScript : MonoBehaviour
         OpenLoadingScreen("Creating Room...");
         NetworkManagerScript.instance.OnCreateRoom(createRoom.GenerateRoomCode(), createRoom.GetRoomOptions(), createRoom.GetCustomRoomSettings());
     }
-    public void JoinRoom(string roomName)
+    public void JoinRoom()
     {
         //OpenMenu("loading");
         OpenLoadingScreen("Joining Room...");
-        NetworkManagerScript.instance.JoinRoom(roomName);
+        NetworkManagerScript.instance.JoinRoom(roomToConnectTo);
     }
+
+    public void SetRoomToConnectTo(string roomName)
+    {
+        roomToConnectTo = roomName;
+    }
+
+    public string GetRoomToConnectTo() => roomToConnectTo;
 
     public void LeaveRoom()
     {

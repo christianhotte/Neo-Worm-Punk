@@ -178,9 +178,9 @@ public class NewShotgunController : PlayerEquipment
             {
                 if (equipment.TryGetComponent(out NewShotgunController other) && other != this) otherGun = other; //Try to get other shotgun controller
             }
-        }
 
-        PlayerController.instance.combatHUD.UpdateAmmoText(handedness, loadedShots, gunSettings.maxLoadedShots);
+            PlayerController.instance.combatHUD.InitializeAmmoIndicators(handedness, gunSettings.maxLoadedShots);
+        }
     }
     private protected override void Update()
     {
@@ -444,7 +444,7 @@ public class NewShotgunController : PlayerEquipment
             if (currentBarrelIndex >= barrels.Length) currentBarrelIndex = 0; //Overflow barrel index if relevant
         }
         if (!(UpgradeSpawner.primary != null && UpgradeSpawner.primary.currentPowerUp == PowerUp.PowerUpType.InfiniShot)) loadedShots = Mathf.Max(loadedShots - 1, 0); //Spend one shot (floor at zero)
-        PlayerController.instance.combatHUD.UpdateAmmoText(handedness, loadedShots, gunSettings.maxLoadedShots);
+        PlayerController.instance.combatHUD.UpdateAmmoIndicator(handedness, loadedShots);
         return spawnedProjectiles.ToArray(); //Return reference to the master script of the projectile(s) spawned
     }
     /// <summary>
@@ -500,7 +500,7 @@ public class NewShotgunController : PlayerEquipment
         breachOpenTime = 0;                                                                //Reset breach open time tracker
         breachOpen = false;                                                                //Indicate that breach is now closed
 
-        PlayerController.instance.combatHUD.UpdateAmmoText(handedness, loadedShots, gunSettings.maxLoadedShots);
+        PlayerController.instance.combatHUD.UpdateAmmoIndicator(handedness, loadedShots);
     }
     /// <summary>
     /// Fully reloads weapon to max ammo capacity.
@@ -512,7 +512,7 @@ public class NewShotgunController : PlayerEquipment
         loadedShots = gunSettings.maxLoadedShots; //Reset shot counter to maximum
 
         if(!breachOpen)
-            PlayerController.instance.combatHUD.UpdateAmmoText(handedness, loadedShots, gunSettings.maxLoadedShots);
+            PlayerController.instance.combatHUD.UpdateAmmoIndicator(handedness, loadedShots);
     }
     /// <summary>
     /// Called whenever player tries to fire weapon but weapon cannot be fired for some reason.

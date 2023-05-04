@@ -55,7 +55,7 @@ public class LeverController : MonoBehaviour
     private void OnEnable()
     {
         if (startingAngle != 0)
-            handle.MoveToAngle(this, startingAngle);
+            handle.MoveToAngle(startingAngle);
 
         currentMoveTimer = waitUntilAutoMoveTimer;
     }
@@ -74,7 +74,7 @@ public class LeverController : MonoBehaviour
         if  (debugActivate)
         {
             debugActivate = false;
-            handle.MoveToAngle(this, maximumAngle);
+            handle.MoveToAngle(maximumAngle);
         }
 
         //If there is an active level transition, don't do anything
@@ -98,7 +98,7 @@ public class LeverController : MonoBehaviour
                     handle.SendHapticsFeedback(0.5f, 0.2f);
 
                     //Move the hinge to the upper limit
-                    handle.MoveToAngle(this, minimumAngle);
+                    handle.MoveToAngle(minimumAngle);
 
                     if (onClickSoundEffect != null)
                         GetComponent<AudioSource>().PlayOneShot(onClickSoundEffect, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
@@ -121,7 +121,7 @@ public class LeverController : MonoBehaviour
                     handle.SendHapticsFeedback(0.5f, 0.2f);
 
                     //Move the hinge to the lower limit
-                    handle.MoveToAngle(this, maximumAngle);
+                    handle.MoveToAngle(maximumAngle);
 
                     if (onClickSoundEffect != null)
                         GetComponent<AudioSource>().PlayOneShot(onClickSoundEffect, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
@@ -204,13 +204,13 @@ public class LeverController : MonoBehaviour
         {
             float t = timeElapsed / snapMovementSpeed;
 
-            handle.MoveToAngle(this, Mathf.Lerp(handle.GetAngle(), newPos, t));
+            handle.MoveToAngle(Mathf.Lerp(handle.GetAngle(), newPos, t));
 
             timeElapsed += Time.deltaTime;
             yield return null;
         }
 
-        handle.MoveToAngle(this, newPos);
+        handle.MoveToAngle(newPos);
         leverAutomaticallyMoving = false;
     }
 

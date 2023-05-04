@@ -47,6 +47,9 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
     private Room mostRecentRoom;
 
+    private bool sceneLoadFailed = false;
+    private string currentErrorMessage;
+
     //RUNTIME METHODS:
     private void Awake()
     {
@@ -107,6 +110,11 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         if(scene.name == GameSettings.titleScreenScene)
         {
             SetNameOnStart();
+            if (sceneLoadFailed)
+            {
+                MovePlayerToOnlineErrorMessage();
+                sceneLoadFailed = false;
+            }
         }
     }
 
@@ -129,7 +137,8 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
     public void OnCreateRoom(string roomName, RoomOptions roomOptions = null, Hashtable customRoomSettings = null)
     {
-        if(roomOptions == null)
+
+        if (roomOptions == null)
         {
             roomOptions = new RoomOptions();
             roomOptions.IsVisible = true; // The player is able to see the room
@@ -206,10 +215,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         // Joins the room on the network
         if (!PhotonNetwork.JoinRoom(roomName))
         {
-            //Reload into the title screen scene for now if failed
-            PhotonNetwork.Disconnect();
-            Debug.Log("Returning To Main Menu...");
-            GameManager.Instance.LoadGame(GameSettings.titleScreenScene);
+            ResetTitleScene("Join Room Failed. Reason: Room Does Not Exist.");
         }
 
         mostRecentRoom = PhotonNetwork.CurrentRoom;
@@ -376,6 +382,9 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     {
         foreach(var jumbotron in FindObjectsOfType<Jumbotron>())
             jumbotron.AddToDeathInfoBoard(killerName, victimName, deathCause);
+
+        foreach (var killFeed in FindObjectsOfType<GlobalKillFeedScreen>())
+            killFeed.AddToKillFeed(killerName, victimName, deathCause);
     }
 
     public override void OnCreatedRoom()
@@ -396,13 +405,9 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         string errorMessage = "Room Creation Failed: " + message;
 
         LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
-
         //If there is a lobby in the scene, display an error message
         if (lobbyUI != null)
-        {
             lobbyUI.UpdateErrorMessage(errorMessage);
-            lobbyUI.SwitchMenu(LobbyMenuState.ERROR);
-        }
     }
     public override void OnJoinedRoom()
     {
@@ -445,16 +450,31 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     {
         base.OnJoinRoomFailed(returnCode, message);
 
-        Debug.LogError("Join Room Failed. Reason: " + message);
+        Debug.LogError("Join Room Failed. Reason: " + message + ".");
+        ResetTitleScene("Join Room Failed. Reason: " + message + ".");
+    }
 
-        /*        LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
+    private void ResetTitleScene(string errorMessage)
+    {
+        //Reload into the title screen scene for now if failed
+        sceneLoadFailed = true;
+        Debug.Log("Returning To Main Menu...");
+        currentErrorMessage = errorMessage;
+        GameManager.Instance.LoadGame(GameSettings.titleScreenScene);
+    }
 
-                //If there is a lobby in the scene, display an error message
-                if (lobbyUI != null)
-                {
-                    lobbyUI.UpdateErrorMessage("Join Room Failed. Reason: " + message);
-                    lobbyUI.SwitchMenu(LobbyMenuState.ERROR);
-                }*/
+    private void MovePlayerToOnlineErrorMessage()
+    {
+        LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
+        //Update error information
+        if (lobbyUI != null)
+            lobbyUI.UpdateErrorMessage(currentErrorMessage);
+
+        ConveyerController conveyerController = FindObjectOfType<ConveyerController>();
+
+        //Move player to error information
+        if (conveyerController != null)
+            conveyerController.TeleportConveyer(2);
     }
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
@@ -465,7 +485,6 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         PlayerController.instance.inverteboy.AddToRoomLog(newPlayer.NickName + " Joined The Game.");
 
         LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
-
         //Update room information
         if (lobbyUI != null)
         {
@@ -473,6 +492,9 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         }
 
         AdjustVoiceVolume();
+
+        foreach (var host in FindObjectsOfType<PlayerManagementController>())
+            host.UpdatePlayerList();
     }
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
@@ -491,6 +513,9 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
         if (ReadyUpManager.instance != null)
             ReadyUpManager.instance.UpdateReadyText();
+
+        foreach (var host in FindObjectsOfType<PlayerManagementController>())
+            host.UpdatePlayerList();
     }
 
     // This method is called when a custom event is received
