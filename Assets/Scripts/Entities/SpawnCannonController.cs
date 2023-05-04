@@ -157,7 +157,8 @@ public class SpawnCannonController : MonoBehaviour
     /// </summary>
     public void PutPlayerInCannon()
     {
-        if (PhotonNetwork.IsConnected) UpdateCannonStatusEvent(PlayerController.photonView.ViewID); //Update all versions of this spawn cannon to indicate that this player has been loaded into it
+        //if (PhotonNetwork.IsConnected) UpdateCannonStatusEvent(PlayerController.photonView.ViewID); //Update all versions of this spawn cannon to indicate that this player has been loaded into it
+        occupyingPlayer = PlayerController.photonView.GetComponent<NetworkPlayer>();
         timeUntilReady = spawnWaitTime;
 
         //Move player:
@@ -178,7 +179,8 @@ public class SpawnCannonController : MonoBehaviour
     public void DeployPlayer()
     {
         //Initialization:
-        if (PhotonNetwork.IsConnected) UpdateCannonStatusEvent(); //Indicate that this cannon is now empty
+        //if (PhotonNetwork.IsConnected) UpdateCannonStatusEvent(); //Indicate that this cannon is now empty
+        occupyingPlayer = null;
 
         //Launch:
         PlayerController.instance.bodyRb.isKinematic = false;                                       //Enable player movement
