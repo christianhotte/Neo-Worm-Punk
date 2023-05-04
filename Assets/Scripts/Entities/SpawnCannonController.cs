@@ -194,7 +194,7 @@ public class SpawnCannonController : MonoBehaviour
         }
 
         //Cleanup:
-        //PlayerController.instance.isDead = false; //Indicate that player is no longer dead
+        PlayerController.instance.isDead = false; //Indicate that player is no longer dead
         PlayerController.instance.MakeInvulnerable(PlayerController.instance.healthSettings.spawnInvincibilityTime);
     }
 }
