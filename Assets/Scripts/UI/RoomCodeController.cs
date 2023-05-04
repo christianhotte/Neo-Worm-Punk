@@ -62,7 +62,12 @@ public class RoomCodeController : MonoBehaviour
     {
         if (IsRoomCodeValid())
         {
-            FindObjectOfType<LobbyUIScript>().SetRoomToConnectTo(roomCodeText.text);
+            string validRoomCode = "";
+
+            foreach (var segment in roomCodeSegments)
+                validRoomCode += segment;
+
+            FindObjectOfType<LobbyUIScript>().SetRoomToConnectTo(validRoomCode);
             conveyerController.MoveConveyer(7);
             errorMessageText.text = "";
         }
