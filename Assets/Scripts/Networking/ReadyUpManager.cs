@@ -134,15 +134,14 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
 
         float delayTime = 3;
         //countdown from 3,2,1,WORM!
-        FindObjectOfType<Countdown>().StartCountdown((int)delayTime);                                                             //THIS NEEDS TO BE PUT IN BY PETER (I put it in - Peter)
+        FindObjectOfType<Countdown>().StartCountdown((int)delayTime);           //THIS NEEDS TO BE PUT IN BY PETER (I put it in - Peter)
         yield return new WaitForSeconds(delayTime);
-        //if someone cancels early in these zones, cancel coroutine?
 
-        delayTime = 2;
+        delayTime = 1.5f;
         //call all tubes to the center
         localPlayerTube.PlayerToReadyPosition(delayTime);
         //wait for equivilent time
-        yield return new WaitForSeconds(delayTime + 0.5f);
+        yield return new WaitForSeconds(delayTime + 1f);
 
         delayTime = 4;
         //call all tubes up

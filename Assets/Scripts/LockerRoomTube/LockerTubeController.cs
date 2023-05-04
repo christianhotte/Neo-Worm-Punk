@@ -54,12 +54,12 @@ public class LockerTubeController : MonoBehaviour
     private void Update()
     {
         //if I have a player to track and this is not the local players' tube
-        if (myPlayerObject != null && !isMyLocalTube) { transform.position = Vector3.Lerp(transform.position, myPlayerObject.position - spawnPointBias, Time.deltaTime * 8); }
+        if (myPlayerObject != null && !isMyLocalTube) { transform.position = Vector3.Lerp(transform.position, myPlayerObject.position - spawnPointBias, Time.deltaTime * 6); }
     }
 
     public void PlayerToLobbyPosition()
     {
-        StartCoroutine(MovePlayerToNextPosition(myPlayerObject, playerCheckpoints[1], 8));
+        StartCoroutine(MovePlayerToNextPosition(myPlayerObject, playerCheckpoints[1], 4));
     }
 
     public void TubeToBeginningPosition()
