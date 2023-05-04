@@ -69,7 +69,7 @@ public class NetworkPlayer : MonoBehaviour
     public GameObject bulletKillEffect;
     public GameObject chainsawKillEffect;
     [Header("General Settings:")]
-    public float trailResetSpeed;
+    public float trailResetLength;
 
     private Transform headTarget;      //True local position of player head
     private Transform leftHandTarget;  //True local position of player left hand
@@ -81,7 +81,6 @@ public class NetworkPlayer : MonoBehaviour
     private Transform rightHandRig;    //Networked transform which follows position of player right hand
     private Transform modelRig;        //Networked transform which follows position of player model
     internal Transform originRig;
-    private Vector3 prevPos;
 
     //Runtime Variables:
     /// <summary>
@@ -204,9 +203,20 @@ public class NetworkPlayer : MonoBehaviour
         if (!photonView.IsMine)
         {
             if (GameManager.Instance.InMenu()) trail.enabled = false;
-            else trail.enabled = true;
+            else
+            {
+                trail.enabled = true;
+                if (PhotonNetwork.IsConnected) photonView.RPC("RPC_MakeInvisible", RpcTarget.Others); //Hide trailrenderers for all other players
+
+                
+            }
         }
-        if (trailResetSpeed > 0) { trailResetSpeed = 0; trail.Clear(); }
+        if (trail.positionCount > 1)
+        {
+            float sqrTrailLength = Vector3.SqrMagnitude(trail.GetPosition(0) - trail.GetPosition(1));
+            print("SqrTrailLength = " + sqrTrailLength);
+            if (sqrTrailLength > trailResetLength * trailResetLength) { trail.Clear(); print("Trailcleared"); }
+        }
     }
     private void OnDestroy()
     {
