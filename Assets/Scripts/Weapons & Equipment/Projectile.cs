@@ -109,6 +109,7 @@ public class Projectile : MonoBehaviourPunCallbacks
             {
                 //Eliminate non-viable targets:
                 Transform potentialTarget = potentialTargets[x];                   //Get reference to current target
+                if (potentialTarget == null) continue;                             //Skip potential targets if they are null
                 Vector3 targetSep = potentialTarget.position - transform.position; //Get distance and direction from projectile to target
                 float targetDist = targetSep.magnitude;                            //Distance from projectile to target
                 float targetAngle = Vector3.Angle(targetSep, transform.forward);   //Get angle between target direction and projectile movement direction
