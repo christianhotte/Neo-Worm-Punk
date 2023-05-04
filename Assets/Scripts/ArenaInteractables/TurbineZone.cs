@@ -21,7 +21,12 @@ public class TurbineZone : MonoBehaviour
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         //check to see if activated in room setting
-        Enabled = (bool)PhotonNetwork.CurrentRoom.CustomProperties["HazardsActive"];
+        if (PhotonNetwork.IsConnected)
+        {
+            Enabled = (bool)PhotonNetwork.CurrentRoom.CustomProperties["HazardsActive"];
+        }
+        else
+            Enabled = false;
     }
         // Update is called once per frame
         void FixedUpdate()
