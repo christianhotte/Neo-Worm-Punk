@@ -231,6 +231,7 @@ public class NetworkPlayer : MonoBehaviour
                 else if (scene.name == NetworkManagerScript.instance.roomScene)
                 {
                     //PhotonNetwork.AutomaticallySyncScene = true;                    // Start syncing scene with other players
+                    PhotonNetwork.EnableCloseConnection = true;
                     photonView.RPC("RPC_MakeVisible", RpcTarget.OthersBuffered);    //Show all remote players when entering locker room
                     UpdateAllRoomSettingsDisplays();
                     SyncData();

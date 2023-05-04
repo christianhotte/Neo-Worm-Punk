@@ -5,13 +5,12 @@ using UnityEngine;
 
 public class LeverHandleController : GrabbableUI
 {
-    private LeverController leverController;
+    [SerializeField] private LeverController leverController;
     private Vector3 startingVector;
 
     protected override void Awake()
     {
         base.Awake();
-        leverController = GetComponentInParent<LeverController>();
         startingVector = leverController.transform.up;
         Debug.DrawRay(leverController.transform.position, leverController.transform.up * 10, Color.red, 20);
     }

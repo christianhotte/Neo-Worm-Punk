@@ -13,11 +13,14 @@ public class RoomListItem : MonoBehaviour
     private RoomInfo currentRoomInfo;
     [SerializeField] private Image listImage;
     [SerializeField] private Color selectedRoomColor = new Color(1, 0, 0, 1);
+    [SerializeField] private Color selectedRoomTextColor = new Color(1, 0, 0, 1);
     private Color defaultColor;
+    private Color defaultTextColor;
 
     private void Start()
     {
-        defaultColor = Color.white;
+        defaultColor = listImage.color;
+        defaultTextColor = text.color;
     }
 
     // Sets the text to the name of the room
@@ -31,12 +34,14 @@ public class RoomListItem : MonoBehaviour
     {
         Debug.Log("Selecting " + text.text + "...");
         listImage.color = selectedRoomColor;
+        text.color = selectedRoomTextColor;
     }
 
     public void OnDeselect()
     {
         Debug.Log("Deselecting " + text.text + "...");
         listImage.color = defaultColor;
+        text.color = defaultTextColor;
     }
 
     public void UpdateText(string roomText)
