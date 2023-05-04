@@ -165,6 +165,7 @@ public class SpawnCannonController : MonoBehaviour
         PlayerController.instance.bodyRb.isKinematic = true;                     //Make it so that player cannot move
         PlayerController.instance.bodyRb.MovePosition(playerLockPoint.position); //Move player to lockpoint position
         PlayerController.instance.bodyRb.MoveRotation(playerLockPoint.rotation); //Move player to lockpoint rotation
+        PlayerController.photonView.RPC("RPC_MakeVisible", RpcTarget.Others);    //Clear trail
 
         //Disable equipment:
         foreach (PlayerEquipment equipment in PlayerController.instance.attachedEquipment) //Iterate through all pieces of equipment attached to the player
@@ -194,7 +195,7 @@ public class SpawnCannonController : MonoBehaviour
         }
 
         //Cleanup:
-        PlayerController.instance.isDead = false; //Indicate that player is no longer dead
+        //PlayerController.instance.isDead = false; //Indicate that player is no longer dead
         PlayerController.instance.MakeInvulnerable(PlayerController.instance.healthSettings.spawnInvincibilityTime);
     }
 }

@@ -435,7 +435,7 @@ public class PlayerController : MonoBehaviour
             SpawnCannonController.Respawn();
             foreach (PlayerEquipment equipment in attachedEquipment) equipment.Shutdown(-1); //Stow and disable all equipment on player
             bodyRb.isKinematic = true;                                                       //Disable body physics
-            isDead = true;
+            //isDead = true;
         }
         else
         {
