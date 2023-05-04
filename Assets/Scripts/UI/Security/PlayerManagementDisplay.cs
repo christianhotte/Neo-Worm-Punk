@@ -7,6 +7,9 @@ using Photon.Realtime;
 public class PlayerManagementDisplay : MonoBehaviour
 {
     [SerializeField, Tooltip("The text for the player name.")] private TextMeshProUGUI playerNameText;
+    [SerializeField, Tooltip("The confirm player kick text.")] private TextMeshProUGUI confirmPlayerKickText;
+    [SerializeField] private GameObject kickPlayerDisplay;
+    [SerializeField] private GameObject confirmKickPlayerDisplay;
 
     private PlayerManagementController playerManagementController;
     private Player currentPlayerData;
@@ -20,10 +23,18 @@ public class PlayerManagementDisplay : MonoBehaviour
     {
         currentPlayerData = playerData;
         playerNameText.text = playerData.NickName;
+        confirmPlayerKickText.text = "Are You Sure You Want To Kick " + playerData.NickName + "?";
+    }
+
+    public void ShowConfirmScreen(bool showConfirm)
+    {
+        kickPlayerDisplay.SetActive(!showConfirm);
+        confirmKickPlayerDisplay.SetActive(showConfirm);
     }
 
     public void KickPlayer()
     {
         playerManagementController.KickPlayer(currentPlayerData);
+        ShowConfirmScreen(false);
     }
 }
