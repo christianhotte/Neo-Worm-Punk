@@ -80,6 +80,15 @@ public class RoundManager : MonoBehaviourPunCallbacks, IPunObservable
         timeRemaining = syncedTimeRemaining;
     }
 
+    public void ForceEndRound()
+    {
+        if(PhotonNetwork.IsMasterClient)
+            photonView.RPC("RPC_EndRound", RpcTarget.All);
+    }
+
+    [PunRPC]
+    public void RPC_EndRound() => EndRound();
+
     public string GetTimeDisplay() => GetMinutes() + ":" + GetSeconds();
     public string GetMinutes() => Mathf.FloorToInt(timeRemaining / 60f < 0 ? 0 : timeRemaining / 60f).ToString();
     public string GetSeconds() => Mathf.FloorToInt(timeRemaining % 60f < 0 ? 0 : timeRemaining % 60f).ToString("00");
