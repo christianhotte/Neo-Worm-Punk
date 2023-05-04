@@ -468,13 +468,10 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
         //Update error information
         if (lobbyUI != null)
+        {
             lobbyUI.UpdateErrorMessage(currentErrorMessage);
-
-        ConveyerController conveyerController = FindObjectOfType<ConveyerController>();
-
-        //Move player to error information
-        if (conveyerController != null)
-            conveyerController.TeleportConveyer(2);
+            lobbyUI.GetPlayerConveyorBelt().TeleportConveyer(2);
+        }
     }
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
