@@ -1,17 +1,27 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
 public class GlobalKillFeedScreen : MonoBehaviour
 {
+    [SerializeField, Tooltip("The background for the kill feed when not connected to the network.")] private RectTransform notConnectedBackground;
+    [SerializeField, Tooltip("The background for the kill feed items.")] private RectTransform killFeedBackground;
     [SerializeField, Tooltip("The kill feed death information prefab.")] private DeathInfo deathInfoPrefab;
     [SerializeField, Tooltip("The container for the information that displays the player stats information.")] private Transform deathInfoContainer;
     [SerializeField, Tooltip("The maximum amount of kills to show on the board.")] private int maxDeathsShown = 6;
+    [Space(10)]
 
     [Header("Debug Options:")]
     [SerializeField] private bool debugAddToFeed;
 
     private List<DeathInfo> killFeedList = new List<DeathInfo>();
+
+    private void Awake()
+    {
+        notConnectedBackground.gameObject.SetActive(!PhotonNetwork.IsConnected);
+        killFeedBackground.gameObject.SetActive(PhotonNetwork.IsConnected);
+    }
 
     /// <summary>
     /// Add information to the death board and display it.
