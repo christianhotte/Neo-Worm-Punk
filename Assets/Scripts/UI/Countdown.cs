@@ -7,10 +7,11 @@ using TMPro;
 public class Countdown : MonoBehaviour
 {
     
-    [SerializeField] private GameObject roomSettings;
+    [SerializeField] private GameObject hideCanvas;
     [SerializeField] private GameObject countdownContainer;
     [SerializeField] private TextMeshProUGUI countdownText;
-    [SerializeField] private string roundStartMessage = "Worm!";
+    [SerializeField] private string countdownEndMessage = "Worm!";
+    [SerializeField] private bool hideEndMessage;
 
     [SerializeField] private float entranceDuration;
     [SerializeField] private AnimationCurve entranceEaseType;
@@ -27,7 +28,9 @@ public class Countdown : MonoBehaviour
 
     private IEnumerator CountdownSequence(int seconds)
     {
-        roomSettings.SetActive(false);
+        if(hideCanvas != null)
+            hideCanvas.SetActive(false);
+
         countdownContainer.SetActive(true);
 
         for(int i = seconds; i > 0 && !cancelCountdown; i--)
@@ -50,7 +53,9 @@ public class Countdown : MonoBehaviour
 
         if (cancelCountdown)
         {
-            roomSettings.SetActive(true);
+            if (hideCanvas != null)
+                hideCanvas.SetActive(true);
+
             countdownContainer.SetActive(false);
 
             if (entranceTween != null)
@@ -61,9 +66,17 @@ public class Countdown : MonoBehaviour
         }
         else
         {
-            countdownText.text = roundStartMessage;
-            entranceTween = LeanTween.scale(countdownContainer, Vector3.one, entranceDuration).setEase(entranceEaseType);
+            countdownText.text = countdownEndMessage;
+
+            countdownContainer.transform.localScale = Vector3.zero;
+            entranceTween = LeanTween.scale(countdownContainer, Vector3.one, entranceDuration).setEase(entranceEaseType).setOnComplete(OnEndMessage);
         }
+    }
+
+    private void OnEndMessage()
+    {
+        if (hideEndMessage)
+            exitTween = LeanTween.scale(countdownContainer, Vector3.zero, exitDuration).setEase(exitEaseType).setOnComplete(() => countdownContainer.SetActive(false));
     }
 
     public void CancelCountdown() => cancelCountdown = true;
