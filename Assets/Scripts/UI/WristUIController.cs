@@ -90,6 +90,7 @@ public class WristUIController : MonoBehaviour
         else
         {
             leaveRoomButton.SetActive(false);
+            endRoundEarlyButton.SetActive(false);
             quitToMainButton.SetActive(SceneManager.GetActiveScene().name != GameSettings.titleScreenScene);
         }
     }
