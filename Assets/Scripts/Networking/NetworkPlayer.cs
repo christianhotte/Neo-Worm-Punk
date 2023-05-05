@@ -60,14 +60,16 @@ public class NetworkPlayer : MonoBehaviour
     private SkinnedMeshRenderer bodyRenderer;                    //Renderer component for main player body/skin
     private TrailRenderer trail;                                 //Renderer for trail that makes players more visible to each other
     internal PlayerStats networkPlayerStats = new PlayerStats(); //The stats for the network player
-    
+
     [Header("Material System:")]
+    public Material deflectMat;
     public Material[] altMaterials;
     public MatChangeCombo[] matCombos;
     [Header("Damage Effects:")]
     public GameObject bulletHitEffect;
     public GameObject bulletKillEffect;
     public GameObject chainsawKillEffect;
+    public GameObject deflectEffect;
     [Header("General Settings:")]
     public float trailResetLength;
 
@@ -95,6 +97,7 @@ public class NetworkPlayer : MonoBehaviour
 
     private TextMeshProUGUI wormName;
     private Material origTrailMat;
+    private bool deflecting = false;
 
     //RUNTIME METHODS:
     private void Awake()
@@ -207,15 +210,7 @@ public class NetworkPlayer : MonoBehaviour
             {
                 trail.enabled = true;
                 if (PhotonNetwork.IsConnected) photonView.RPC("RPC_MakeInvisible", RpcTarget.Others); //Hide trailrenderers for all other players
-
-                
             }
-        }
-        if (trail.positionCount > 1)
-        {
-            float sqrTrailLength = Vector3.SqrMagnitude(trail.GetPosition(0) - trail.GetPosition(1));
-            print("SqrTrailLength = " + sqrTrailLength);
-            if (sqrTrailLength > trailResetLength * trailResetLength) { trail.Clear(); print("Trailcleared"); }
         }
     }
     private void OnDestroy()
@@ -265,6 +260,7 @@ public class NetworkPlayer : MonoBehaviour
     public void OnSceneUnloaded(Scene scene)
     {
         matChangeEvents.Clear();
+        deflecting = false;
         ReCalculateMaterialEvents();
     }
 
@@ -432,6 +428,10 @@ public class NetworkPlayer : MonoBehaviour
                 if (!materialsCombined) break;
             }
         }
+        else if (deflecting)
+        {
+            primaryMat = deflectMat;
+        }
         
         //Set materials:
         SkinnedMeshRenderer targetRenderer = photonView.IsMine ? PlayerController.instance.bodyRenderer : bodyRenderer;
@@ -451,6 +451,11 @@ public class NetworkPlayer : MonoBehaviour
         }
         else //System is using unique material
         {
+            if (primaryMat == deflectMat)
+            {
+                currentColor = PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]];
+                targetRenderer.material.SetColor("_Color", currentColor);
+            }
             /*if (!photonView.IsMine)
             {
                 
@@ -870,6 +875,23 @@ public class NetworkPlayer : MonoBehaviour
     public void RPC_Tether(int targetId)
     {
 
+    }
+    [PunRPC]
+    public void RPC_Deflect(int data)
+    {
+        switch (data)
+        {
+            case 0: //Effect spawn call
+                Instantiate(deflectEffect, trail.transform.position, trail.transform.rotation);
+                break;
+            case 1:
+                deflecting = true;
+                break;
+            case 2:
+                deflecting = false;
+                break;
+        }
+        if (data > 0) ReCalculateMaterialEvents();
     }
 
     [PunRPC]

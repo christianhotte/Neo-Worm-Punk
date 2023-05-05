@@ -135,6 +135,7 @@ public class NewChainsawController : PlayerEquipment
                 timeInMode = 0;             //Reset mode time tracker
                 deflectTime = 0;            //Always fully reset deflect time tracker
                 deflectDeactivated = true;
+                if (PhotonNetwork.IsConnected) PlayerController.photonView.RPC("RPC_Deflect", RpcTarget.All, 2);
             }
         }
         if (grinding) grindTime += Time.deltaTime; //Update grind time tracker
@@ -162,6 +163,7 @@ public class NewChainsawController : PlayerEquipment
             timeInMode = 0;                                    //Reset mode time tracker
             jawParticles.gameObject.SetActive(false);
             grindParticles.gameObject.SetActive(false);
+            if (PhotonNetwork.IsConnected) PlayerController.photonView.RPC("RPC_Deflect", RpcTarget.All, 2);
 
             //Grinding disengagement:
             if (grinding) //Player is currently grinding on a surface
@@ -180,6 +182,7 @@ public class NewChainsawController : PlayerEquipment
             timeInMode = 0;                            //Reset mode time tracker
             audioSource.PlayOneShot(settings.deflectIdleSound);
             jawParticles.gameObject.SetActive(false);
+            if (PhotonNetwork.IsConnected) PlayerController.photonView.RPC("RPC_Deflect", RpcTarget.All, 1);
 
             //Grinding disengagement:
             if (grinding) //Player is currently grinding on a surface
@@ -194,6 +197,9 @@ public class NewChainsawController : PlayerEquipment
             prevMode = mode;            //Record previous blade mode
             mode = BladeMode.Extending; //Indicate that blade is no longer in deflect mode
             timeInMode = 0;             //Reset mode time tracker
+
+            //End deflect effect:
+            if (PhotonNetwork.IsConnected) PlayerController.photonView.RPC("RPC_Deflect", RpcTarget.All, 2);
         }
 
         //Blade movement:
@@ -293,7 +299,7 @@ public class NewChainsawController : PlayerEquipment
 
                 //Particles:
                 grindParticles.transform.position = Vector3.MoveTowards(hitInfo.point, wristPivot.position, settings.sparkGap);
-                grindParticles.transform.rotation = Quaternion.LookRotation(hitInfo.normal);
+                grindParticles.transform.rotation = Quaternion.LookRotation(-wristPivot.right, hitInfo.normal);
 
                 //Sweet spot attraction:
                 if (settings.grindGlueForce > 0)
@@ -513,6 +519,7 @@ public class NewChainsawController : PlayerEquipment
                 newProjectile.photonView.RPC("RPC_Fire", RpcTarget.All, barrel.position, barrel.rotation, PlayerController.photonView.ViewID); //Initialize all projectiles simultaneously
             }
             audioSource.PlayOneShot(settings.deflectSound); //Play deflect sound
+            if (PhotonNetwork.IsConnected) PlayerController.photonView.RPC("RPC_Deflect", RpcTarget.All, 0);
 
             TutorialManager tutorialManager = FindObjectOfType<TutorialManager>();
             if (tutorialManager != null && tutorialManager.GetCurrentTutorialSegment() == TutorialManager.Tutorial.PARRY)
