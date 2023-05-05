@@ -280,7 +280,7 @@ public class ConveyerController : MonoBehaviour
             if (!yeetNotYetNoob && timeElapsed > 1.0f)
             {
                 yeetNotYetNoob = true;
-                StartCoroutine(FadeToBlackAndGoToNextScene());
+                StartCoroutine(FadeToBlackAndGoToNextScene(0.5f));
             }
 
             //advance time
@@ -290,14 +290,17 @@ public class ConveyerController : MonoBehaviour
         }
     }
 
-    private IEnumerator FadeToBlackAndGoToNextScene()
+    private IEnumerator FadeToBlackAndGoToNextScene(float loadDelay)
     {
         yeetNotYetNoob = true;
 
         conveyerBeltObjects[0].GetComponentInChildren<FadeScreen>().FadeOut();
 
+        if (PlayerController.instance.hudScreen.activeInHierarchy)
+            PlayerController.instance.HideHUD(0.5f);
+
         yield return new WaitForSeconds(conveyerBeltObjects[0].GetComponentInChildren<FadeScreen>().GetFadeDuration());
-        yield return null;
+        yield return new WaitForSeconds(loadDelay);
 
         //join or create room based on which one works
         if(tutorialOption)

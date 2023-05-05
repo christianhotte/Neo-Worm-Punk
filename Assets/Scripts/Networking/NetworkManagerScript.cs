@@ -710,18 +710,21 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
     public void LoadSceneWithFade(string sceneName)
     {
-        StartCoroutine(FadeLevelRoutine(sceneName));
+        StartCoroutine(FadeLevelRoutine(sceneName, 0.5f));
     }
 
-    private IEnumerator FadeLevelRoutine(string sceneName)
+    private IEnumerator FadeLevelRoutine(string sceneName, float loadDelay)
     {
         GameManager.Instance.levelTransitionActive = true;
 
         FadeScreen playerScreenFader = PlayerController.instance.GetComponentInChildren<FadeScreen>();
         playerScreenFader.FadeOut();
 
+        if(PlayerController.instance.hudScreen.activeInHierarchy)
+            PlayerController.instance.HideHUD(0.5f);
+
         yield return new WaitForSeconds(playerScreenFader.GetFadeDuration());
-        yield return null;
+        yield return new WaitForSeconds(loadDelay);
 
         PhotonNetwork.LoadLevel(sceneName);
 

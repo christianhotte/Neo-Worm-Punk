@@ -4,7 +4,7 @@ using UnityEngine;
 
 public static class GameSettings
 {
-    public static bool debugMode = true;
+    public static bool debugMode = false;
 
     public static bool toggleTest = false;
     public static float testDialValue = 0f;
@@ -22,8 +22,10 @@ public static class GameSettings
     public static bool upgradesActiveDefault = true;
     public static bool hazardsActiveDefault = true;
     public static bool teamModeDefault = false;
+    public static bool fatherFigure = false;
 
     public static string titleScreenScene = "DavidMenuScene";
+    public static string creditsScene = "DavidMenuScene";
     public static string roomScene = "NetworkLockerRoom";
     public static string arenaScene = "DM_0.17_Arena";
     public static string tutorialScene = "TutorialFinal";
@@ -53,5 +55,20 @@ public static class GameSettings
         }
 
         return -1;
+    }
+
+    /// <summary>
+    /// This function will never be run or it will break the game. It's just a funni.
+    /// </summary>
+    public static void GetTheMilk()
+    {
+        if (fatherFigure)
+        {
+            fatherFigure = false;
+            while (!fatherFigure)
+            {
+                Debug.LogError("He isn't back from the grocery store yet.");
+            }
+        }
     }
 }

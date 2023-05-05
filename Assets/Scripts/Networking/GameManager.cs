@@ -70,6 +70,8 @@ public class GameManager : MonoBehaviour
         {
             case "Init":
                 return true;
+            case "StartScene":
+                return true;
             case "MainMenu":
                 return true;
             case "NetworkLockerRoom":
