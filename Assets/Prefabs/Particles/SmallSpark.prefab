@@ -25,9 +25,9 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2733803651049063028}
-  m_LocalRotation: {x: -0.30198386, y: -0.05394987, z: 0.09083932, w: 0.9474405}
+  m_LocalRotation: {x: 0.30198023, y: 0.05394805, z: -0.09084433, w: -0.9474413}
   m_LocalPosition: {x: -6868.567, y: 1.336, z: 2.872}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2733803651457195370}
@@ -51,7 +51,7 @@ ParticleSystem:
   emitterVelocityMode: 0
   looping: 1
   prewarm: 0
-  playOnAwake: 1
+  playOnAwake: 0
   useUnscaledTime: 0
   autoRandomSeed: 1
   startDelay:
@@ -858,8 +858,8 @@ ParticleSystem:
           inWeight: 0.33333334
           outWeight: 0.33333334
         - serializedVersion: 3
-          time: 0.7307154
-          value: 0.5898876
+          time: 0.7284266
+          value: 0.5223217
           inSlope: 0.21497026
           outSlope: 0.21497026
           tangentMode: 0
@@ -867,8 +867,8 @@ ParticleSystem:
           inWeight: 0.33333334
           outWeight: 0.33333334
         - serializedVersion: 3
-          time: 1
-          value: 1
+          time: 0.9266052
+          value: 0
           inSlope: 6.0568724
           outSlope: 6.0568724
           tangentMode: 0
@@ -3607,7 +3607,7 @@ ParticleSystem:
       emitter: {fileID: 2733803651457195372}
       type: 2
       properties: 0
-      emitProbability: 1
+      emitProbability: 0.1
   LightsModule:
     enabled: 0
     ratio: 0
@@ -4633,7 +4633,7 @@ ParticleSystem:
   emitterVelocityMode: 0
   looping: 0
   prewarm: 0
-  playOnAwake: 1
+  playOnAwake: 0
   useUnscaledTime: 0
   autoRandomSeed: 1
   startDelay:
