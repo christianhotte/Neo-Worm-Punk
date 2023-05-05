@@ -58,6 +58,7 @@ public class PlayerController : MonoBehaviour
     [Header("Components:")]
     [Tooltip("Transform which left-handed primary weapon snaps to when holstered.")]  public Transform leftHolster;
     [Tooltip("Transform which right-handed primary weapon snaps to when holstered.")] public Transform rightHolster;
+    [Tooltip("HUD Screen.")] public GameObject hudScreen;
     [Header("Settings:")]
     [Tooltip("Settings determining player health properties.")] public HealthSettings healthSettings;
     [Space()]
@@ -503,6 +504,12 @@ public class PlayerController : MonoBehaviour
         else if (hand == CustomEnums.Handedness.Right) role = InputDeviceRole.RightHanded; //Use right hand if indicated
         SendHapticImpulse(role, amplitude, duration);                                      //Pass to actual haptic method
     }
+
+    public void HideHUD(float duration)
+    {
+        LeanTween.scale(hudScreen, Vector3.one * 3f, duration).setEase(LeanTweenType.easeInExpo);
+    }
+
     public bool InCombat() => inCombat;
     public bool InMenu() => inMenu;
     public void SetCombat(bool combat)
