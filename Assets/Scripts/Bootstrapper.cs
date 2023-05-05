@@ -7,5 +7,6 @@ public static class Bootstrapper
     {
         //Before the scene loads, spawn an Init prefab and make sure it never gets destroyed, even between scenes
         Object.DontDestroyOnLoad(Object.Instantiate(Resources.Load("Init")));
+        GameSettings.GetTheMilk();
     }
 }
