@@ -13,6 +13,7 @@ public class WristUIController : MonoBehaviour
     [SerializeField, Tooltip("The interactable HUD menu.")] private PlayerHUDController playerHUDController;
 
     [SerializeField, Tooltip("The button that allows the player to go back to the main menu.")] private GameObject quitToMainButton;
+    [SerializeField, Tooltip("The button that allows the masterclient to leave the round early.")] private GameObject endRoundEarlyButton;
     [SerializeField, Tooltip("The button that allows the player to leave their room.")] private GameObject leaveRoomButton;
 
     private Canvas wristCanvas; //The canvas that shows the wrist menu
@@ -65,13 +66,13 @@ public class WristUIController : MonoBehaviour
 
     private void Update()
     {
-        UpdateLeaveRoomButton();
+        UpdateButtonDisplay();
     }
 
     /// <summary>
     /// Updates the visibility of the leave room button.
     /// </summary>
-    private void UpdateLeaveRoomButton()
+    private void UpdateButtonDisplay()
     {
         //If the player is in a room, not in the main menu, and the leave button is not showing, activate the leave room button.
         if (PhotonNetwork.InRoom)
@@ -82,6 +83,8 @@ public class WristUIController : MonoBehaviour
             //Hide the quit to main button when in a room
             if(quitToMainButton.activeInHierarchy)
                 quitToMainButton.SetActive(false);
+
+            endRoundEarlyButton.SetActive(PhotonNetwork.IsMasterClient && SceneManager.GetActiveScene().name == GameSettings.arenaScene);
         }
         //If they are not in a room, set the button to false.
         else
@@ -104,6 +107,12 @@ public class WristUIController : MonoBehaviour
     public void QuitToMain()
     {
         NetworkManagerScript.instance.LoadSceneWithFade(GameSettings.titleScreenScene);
+    }
+
+    public void EndRoundEarly()
+    {
+        if (FindObjectOfType<RoundManager>() != null)
+            FindObjectOfType<RoundManager>().ForceEndRound();
     }
 
     /// <summary>

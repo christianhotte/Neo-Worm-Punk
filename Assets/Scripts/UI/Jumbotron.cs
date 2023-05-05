@@ -8,20 +8,26 @@ using Photon.Pun;
 public class Jumbotron : MonoBehaviourPunCallbacks
 {
     public static Jumbotron primary;
+    [SerializeField, Tooltip("The background for the Jumbotron when not connected to the network.")] private RectTransform notConnectedBackground;
+    [SerializeField, Tooltip("The background for the Jumbotron items.")] private RectTransform jumbotronBackground;
 
     [SerializeField] private TextMeshProUGUI levelTimer;
     [SerializeField, Tooltip("The container for the information that displays the player stats information.")] private Transform deathInfoContainer;
     [SerializeField, Tooltip("The death information prefab.")] private DeathInfo deathInfoPrefab;
     [SerializeField, Tooltip("The most recent kill text.")] private TextMeshProUGUI mostRecentDeathText;
-    private AudioSource jumboAud;
-    private bool cooldown = false,finished=false;
     public AudioClip oonge, bees,beeees, bwarp,eer,jaigh,krah,oo,rro,yert;
+
+    private AudioSource jumboAud;
+    private bool cooldown = false, finished = false;
+
     private RoundManager roundManager;
 
     private void Awake()
     {
         primary = this;
         jumboAud = primary.GetComponent<AudioSource>();
+        notConnectedBackground.gameObject.SetActive(!PhotonNetwork.IsConnected);
+        jumbotronBackground.gameObject.SetActive(PhotonNetwork.IsConnected);
     }
 
     private void Start()

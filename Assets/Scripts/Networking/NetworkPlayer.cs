@@ -68,6 +68,8 @@ public class NetworkPlayer : MonoBehaviour
     public GameObject bulletHitEffect;
     public GameObject bulletKillEffect;
     public GameObject chainsawKillEffect;
+    [Header("General Settings:")]
+    public float trailResetLength;
 
     private Transform headTarget;      //True local position of player head
     private Transform leftHandTarget;  //True local position of player left hand
@@ -201,7 +203,19 @@ public class NetworkPlayer : MonoBehaviour
         if (!photonView.IsMine)
         {
             if (GameManager.Instance.InMenu()) trail.enabled = false;
-            else trail.enabled = true;
+            else
+            {
+                trail.enabled = true;
+                if (PhotonNetwork.IsConnected) photonView.RPC("RPC_MakeInvisible", RpcTarget.Others); //Hide trailrenderers for all other players
+
+                
+            }
+        }
+        if (trail.positionCount > 1)
+        {
+            float sqrTrailLength = Vector3.SqrMagnitude(trail.GetPosition(0) - trail.GetPosition(1));
+            print("SqrTrailLength = " + sqrTrailLength);
+            if (sqrTrailLength > trailResetLength * trailResetLength) { trail.Clear(); print("Trailcleared"); }
         }
     }
     private void OnDestroy()
@@ -231,6 +245,7 @@ public class NetworkPlayer : MonoBehaviour
                 else if (scene.name == NetworkManagerScript.instance.roomScene)
                 {
                     //PhotonNetwork.AutomaticallySyncScene = true;                    // Start syncing scene with other players
+                    PhotonNetwork.EnableCloseConnection = true;
                     photonView.RPC("RPC_MakeVisible", RpcTarget.OthersBuffered);    //Show all remote players when entering locker room
                     UpdateAllRoomSettingsDisplays();
                     SyncData();
@@ -907,13 +922,14 @@ public class NetworkPlayer : MonoBehaviour
             }
         }
     }
+
     [PunRPC]
     public void RPC_TriggerEffect(int effectID)
     {
         switch (effectID)
         {
-            case 0: //Grinder goo
-                if (Grinder.instance != null) Grinder.instance.PlayDeathEffect();
+            case 1: // Confetti particle effect for 1st place winner
+                if (photonView.IsMine) ReadyUpManager.instance.localPlayerTube.PlayConfettiInTube();
                 break;
             default:
                 break;

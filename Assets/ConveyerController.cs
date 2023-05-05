@@ -8,7 +8,7 @@ public class ConveyerController : MonoBehaviour
     [SerializeField, Tooltip("teehee this is a fake tooltip bet you'll never find this Hotte")] private Transform[] conveyerBeltStopPositions;
     [SerializeField, Tooltip("All of the objects on the conveyer belt")] private Transform[] conveyerBeltObjects;
     [SerializeField, Tooltip("How much time it takes for objects to get from conveyerbelt stop positions")] private float transportTime;
-    [SerializeField, Tooltip("Refference to MenuStationController")] private MenuStationController menuStationControllerRef;
+    [SerializeField, Tooltip("Reference to MenuStationController")] private MenuStationController menuStationControllerRef;
     [SerializeField, Tooltip("Indicates whether or not this is the player's conveyerbelt")] private bool isPlayerBelt;
 
     [Header("PLAYER Conveyer")]
@@ -23,6 +23,7 @@ public class ConveyerController : MonoBehaviour
     private bool createRoomOption;
     private bool yeetNotYetNoob = false;
     private bool tutorialOption = false;
+    private bool sandboxOption = false;
 
 
 
@@ -49,7 +50,7 @@ public class ConveyerController : MonoBehaviour
                 */
             }
             //make the belt move automatically and start somewhat randomly
-            InvokeRepeating("DisplayBeltMove", Random.Range(0.5f, 3f), transportTime * 1.5f);
+            InvokeRepeating("DisplayBeltMove", Random.Range(0.5f, 6f), transportTime * 1.5f);
         }
         else
         {
@@ -88,6 +89,37 @@ public class ConveyerController : MonoBehaviour
         if (!conveyerBeltIsMoving) { StartCoroutine(MovingConveyerBelt(nextBeltPositions)); }
         //safety
         conveyerBeltIsMoving = true;
+        lubbyUIScriptRef.UpdateErrorMessage("");
+    }
+
+    public void TeleportConveyer(int nextBeltPosition)
+    {
+        int[] nextBeltPositions = new int[conveyerBeltObjects.Length];
+        for (int i = 0; i < conveyerBeltObjects.Length; i++)
+            nextBeltPositions[i] = nextBeltPosition;
+
+        //only do if this is the player's belt
+        if (isPlayerBelt)
+        {
+            menuStationControllerRef.DeactivateAllOtherStations(nextBeltPositions[0]); //retract all menu ui that is down except for the next one
+            menuStationControllerRef.ActivateStation(nextBeltPositions[0]);
+        }
+
+        //make arrays to store starting + ending positions
+        Vector3[] startPositions = new Vector3[conveyerBeltObjects.Length];
+        Vector3[] endPositions = new Vector3[conveyerBeltObjects.Length];
+
+        //assign the arrays wit the correct starting and ending positions
+        for (int i = 0; i < conveyerBeltObjects.Length; i++)
+        {
+            startPositions[i] = conveyerBeltObjects[i].position;
+            endPositions[i] = new Vector3(conveyerBeltObjects[i].position.x, conveyerBeltObjects[i].position.y, conveyerBeltStopPositions[nextBeltPositions[i]].position.z);
+        }
+
+        for (int i = 0; i < conveyerBeltObjects.Length; i++)
+            conveyerBeltObjects[i].position = endPositions[i];
+
+        conveyerBeltIsMoving = false;
     }
 
     /// <summary>
@@ -272,6 +304,10 @@ public class ConveyerController : MonoBehaviour
         {
             GameManager.Instance.LoadGame(GameSettings.tutorialScene);
         }
+        else if (sandboxOption)
+        {
+            GameManager.Instance.LoadGame(GameSettings.arenaScene);
+        }
         else if (createRoomOption)
         {
             Debug.Log("You SHOULD be creating and joining a room right now");
@@ -288,6 +324,7 @@ public class ConveyerController : MonoBehaviour
     {
         createRoomOption = true;
         tutorialOption = false;
+        sandboxOption = false;
     }
 
     public void JoinRoomOptionChosen()
@@ -295,6 +332,7 @@ public class ConveyerController : MonoBehaviour
         findRoomControllerRef.SetRoomToConnectTo();
         createRoomOption = false;
         tutorialOption = false;
+        sandboxOption = false;
     }
 
     public void TutorialOptionChosen()
@@ -302,8 +340,13 @@ public class ConveyerController : MonoBehaviour
         tutorialOption = true;
     }
 
+    public void SandboxOptionChosen()
+    {
+        sandboxOption = true;
+    }
+
     /// <summary>
-    /// Persona5 sucks. Yes this is a direct attack on Peter. Yes I'm joking
+    /// Persona5 sucks. Yes this is a direct attack on Peter. Yes I'm joking. Period.
     /// </summary>
     private void DisplayBeltMove()
     {

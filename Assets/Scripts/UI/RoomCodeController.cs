@@ -5,6 +5,10 @@ using TMPro;
 public class RoomCodeController : MonoBehaviour
 {
     [SerializeField, Tooltip("The displayed room code text.")] private TextMeshProUGUI roomCodeText;
+    [SerializeField, Tooltip("The join room error message text.")] private TextMeshProUGUI errorMessageText;
+
+    private int currentRoomCodeLength = 0;
+    private List<string> roomCodeSegments = new List<string>();
 
     private void OnEnable()
     {
@@ -18,8 +22,12 @@ public class RoomCodeController : MonoBehaviour
     public void AddToRoomCode(string newString)
     {
         //If the room code length has not been reached, add to the room code
-        if(roomCodeText.text.Length < GameSettings.roomCodeLength)
-            roomCodeText.text += newString;
+        if(currentRoomCodeLength < GameSettings.roomCodeLength)
+        {
+            roomCodeText.text += newString + (currentRoomCodeLength == GameSettings.roomCodeLength - 1? "" : " ");
+            roomCodeSegments.Add(newString);
+            currentRoomCodeLength++;
+        }
     }
 
     /// <summary>
@@ -29,7 +37,11 @@ public class RoomCodeController : MonoBehaviour
     {
         //If the room code is not empty, remove the last character in the string
         if(roomCodeText.text != string.Empty)
-            roomCodeText.text = roomCodeText.text.Substring(0, roomCodeText.text.Length - 1);
+        {
+            roomCodeText.text = roomCodeText.text.Substring(0, roomCodeText.text.Length - ((currentRoomCodeLength == GameSettings.roomCodeLength)? roomCodeSegments[roomCodeSegments.Count - 1].Length: roomCodeSegments[roomCodeSegments.Count - 1].Length + 1));
+            roomCodeSegments.RemoveAt(roomCodeSegments.Count - 1);
+            currentRoomCodeLength--;
+        }
     }
 
     /// <summary>
@@ -38,6 +50,8 @@ public class RoomCodeController : MonoBehaviour
     public void Clear()
     {
         roomCodeText.text = "";
+        currentRoomCodeLength = 0;
+        roomCodeSegments.Clear();
     }
 
     /// <summary>
@@ -45,6 +59,25 @@ public class RoomCodeController : MonoBehaviour
     /// </summary>
     public void TryToJoinRoom()
     {
-        NetworkManagerScript.instance.JoinRoom(roomCodeText.text);
+        if (IsRoomCodeValid())
+        {
+            string validRoomCode = "";
+
+            foreach (var segment in roomCodeSegments)
+                validRoomCode += segment;
+
+            FindObjectOfType<LobbyUIScript>().SetRoomToConnectTo(validRoomCode);
+            FindObjectOfType<LobbyUIScript>().GetPlayerConveyorBelt().MoveConveyer(7);
+            errorMessageText.text = "";
+        }
+        else
+        {
+            if (currentRoomCodeLength == 0)
+                errorMessageText.text = "Error: You Must Enter In A Room Code.";
+            else
+                errorMessageText.text = "Error: Room Code Invalid. It Must Be " + GameSettings.roomCodeLength + " Segments Long.";
+        }
     }
+
+    public bool IsRoomCodeValid() => !(currentRoomCodeLength < GameSettings.roomCodeLength);
 }

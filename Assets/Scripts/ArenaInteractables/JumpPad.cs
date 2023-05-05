@@ -12,6 +12,9 @@ public class JumpPad : MonoBehaviour
     internal AudioSource jumpPadAudio;
     public AudioClip jumpPadSound;
     private float maxDist = 0.5f;
+    //[SerializeField, Tooltip("The arrow halo effect that needs to scroll")] public MeshRenderer haloMesh;
+    private float offset;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -29,8 +32,14 @@ public class JumpPad : MonoBehaviour
             changeYPos *= -1;   //changes the directions of movement
         }
         jumpDirection.Translate(new Vector3(0, changeYPos, 0)); //moves the middle jump section
-        
+
+        //offset += (Time.deltaTime * 0.5f) / 10.0f;
+        //haloMesh.material.SetTextureOffset("_MainTex", new Vector2(offset, 0));
+        //haloMesh.material.SetTextureOffset
     }
+
+
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.TryGetComponent(out XROrigin playerOrigin))

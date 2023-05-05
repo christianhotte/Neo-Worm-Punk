@@ -10,6 +10,8 @@ using System.Linq;
 public class LeaderboardDisplay : MonoBehaviour
 {
     [SerializeField, Tooltip("The leaderboard item prefab.")] private LeaderboardItem leaderboardItemPrefab;
+    [SerializeField, Tooltip("The background for the leaderboard when not connected to the network.")] private RectTransform notConnectedBackground;
+    [SerializeField, Tooltip("The background for the leaderboard items.")] private RectTransform leaderboardBackground;
     [SerializeField, Tooltip("The container for the leaderboard items.")] private RectTransform leaderboardContainer;
     [SerializeField, Tooltip("The spacing between each leaderboard item.")] private float spacing;
     [SerializeField, Tooltip("The speed that the leaderboard items move when updating.")] private float itemMoveSpeed;
@@ -18,14 +20,22 @@ public class LeaderboardDisplay : MonoBehaviour
     private float leaderBoardHeight;
     private List<LeaderboardItem> leaderBoardList = new List<LeaderboardItem>();
 
+    private bool teamLeaderboard;
+
+
     private void Awake()
     {
+        notConnectedBackground.gameObject.SetActive(!PhotonNetwork.IsConnected);
+        leaderboardBackground.gameObject.SetActive(PhotonNetwork.IsConnected);
         leaderBoardHeight = leaderboardItemPrefab.GetComponent<RectTransform>().sizeDelta.y;
     }
 
     private void Start()
     {
-        InitializeLeaderboard();
+        if (PhotonNetwork.IsConnected)
+        {
+            InitializeLeaderboard();
+        }
     }
 
     /// <summary>

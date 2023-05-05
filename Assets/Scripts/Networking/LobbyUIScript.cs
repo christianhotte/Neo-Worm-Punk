@@ -12,6 +12,7 @@ public enum LobbyMenuState { LOADING, NICKNAME, START, TUTORIALS, ONLINE, HOST, 
 public class LobbyUIScript : MonoBehaviour
 {
 
+    [SerializeField] private ConveyerController playerConveyorController;
     [SerializeField, Tooltip("The list of menus in the lobby.")] private GameObject[] menus;
     private GameObject currentMenu;
 
@@ -35,6 +36,8 @@ public class LobbyUIScript : MonoBehaviour
     private List<PlayerListItem> playerListItems = new List<PlayerListItem>();
 
     private int currentAdjective, currentNoun;
+
+    private string roomToConnectTo;
 
     private void Start()
     {
@@ -208,12 +211,19 @@ public class LobbyUIScript : MonoBehaviour
         OpenLoadingScreen("Creating Room...");
         NetworkManagerScript.instance.OnCreateRoom(createRoom.GenerateRoomCode(), createRoom.GetRoomOptions(), createRoom.GetCustomRoomSettings());
     }
-    public void JoinRoom(string roomName)
+    public void JoinRoom()
     {
         //OpenMenu("loading");
         OpenLoadingScreen("Joining Room...");
-        NetworkManagerScript.instance.JoinRoom(roomName);
+        NetworkManagerScript.instance.JoinRoom(roomToConnectTo);
     }
+
+    public void SetRoomToConnectTo(string roomName)
+    {
+        roomToConnectTo = roomName;
+    }
+
+    public string GetRoomToConnectTo() => roomToConnectTo;
 
     public void LeaveRoom()
     {
@@ -338,4 +348,6 @@ public class LobbyUIScript : MonoBehaviour
     {
         PhotonNetwork.LoadLevel(4);
     }
+
+    public ConveyerController GetPlayerConveyorBelt() => playerConveyorController;
 }
