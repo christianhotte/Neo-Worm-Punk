@@ -145,8 +145,11 @@ public class NewChainsawController : PlayerEquipment
         if (grinding) grindTime += Time.deltaTime; //Update grind time tracker
 
         //Move deflect needle:
-        float newAngle = Mathf.Lerp(settings.deflectNeedleRange.x, settings.deflectNeedleRange.y, deflectTime / settings.deflectTime);
-        deflectChargeNeedle.localEulerAngles = Vector3.up * newAngle;
+        if (deflectChargeNeedle != null && !inStasis)
+        {
+            float newAngle = Mathf.Lerp(settings.deflectNeedleRange.x, settings.deflectNeedleRange.y, deflectTime / settings.deflectTime);
+            deflectChargeNeedle.localEulerAngles = Vector3.up * newAngle;
+        }
 
         //Extend/Retract blade:
         if (mode == BladeMode.Sheathed && gripValue >= settings.triggerThresholds.y) //Grip has been squeezed enough to activate the chainsaw
