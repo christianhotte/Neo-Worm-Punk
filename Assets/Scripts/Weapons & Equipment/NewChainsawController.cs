@@ -293,7 +293,7 @@ public class NewChainsawController : PlayerEquipment
 
                 //Particles:
                 grindParticles.transform.position = Vector3.MoveTowards(hitInfo.point, wristPivot.position, settings.sparkGap);
-                grindParticles.transform.rotation = Quaternion.LookRotation(hitInfo.normal);
+                grindParticles.transform.rotation = Quaternion.LookRotation(-wristPivot.right, hitInfo.normal);
 
                 //Sweet spot attraction:
                 if (settings.grindGlueForce > 0)
