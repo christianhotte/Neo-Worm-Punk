@@ -160,6 +160,7 @@ public class SpawnCannonController : MonoBehaviour
         //if (PhotonNetwork.IsConnected) UpdateCannonStatusEvent(PlayerController.photonView.ViewID); //Update all versions of this spawn cannon to indicate that this player has been loaded into it
         occupyingPlayer = PlayerController.photonView.GetComponent<NetworkPlayer>();
         timeUntilReady = spawnWaitTime;
+        PlayerController.instance.combatHUD.StartHUDCountdown(Mathf.RoundToInt(timeUntilReady));
         print("Loading local player into cannon " + ID);
 
         //Move player:

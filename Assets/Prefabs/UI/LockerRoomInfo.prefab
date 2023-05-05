@@ -436,10 +436,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8819c26ca57137145aefd3c48fc1d18e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  roomSettings: {fileID: 1423715396779090924}
+  hideCanvas: {fileID: 1423715396779090924}
   countdownContainer: {fileID: 2548420101370795261}
   countdownText: {fileID: 4421005360883543638}
-  roundStartMessage: Worm!
+  countdownEndMessage: Worm!
+  hideEndMessage: 0
   entranceDuration: 0.3
   entranceEaseType:
     serializedVersion: 2
@@ -648,7 +649,7 @@ GameObject:
   - component: {fileID: 4170404662296052463}
   m_Layer: 5
   m_Name: LockerRoomInfo
-  m_TagString: Untagged
+  m_TagString: LockerRoomInfo
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
