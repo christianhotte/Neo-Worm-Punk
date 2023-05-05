@@ -20,6 +20,7 @@ public class CombatHUDController : MonoBehaviour
     [SerializeField, Tooltip("The upgrade info prefab.")] private UpgradeDisplay upgradeInfoPrefab;
     [SerializeField, Tooltip("The ammo indicators.")] private Transform[] ammoIndicators;
     [SerializeField, Tooltip("The ammo pip prefab.")] private Image ammoPip;
+    [SerializeField, Tooltip("The game combat countdown.")] private Countdown playerCountdown;
 
     /// <summary>
     /// Changes the color of the helmet.
@@ -112,6 +113,15 @@ public class CombatHUDController : MonoBehaviour
     {
         //After a delay, fade out the death info canvas and then destroy it.
         LeanTween.delayedCall(waitDelay, () => LeanTween.alphaCanvas(deathInfoGameObject.GetComponent<CanvasGroup>(), 0f, endAnimationDelay).setDestroyOnComplete(true));
+    }
+
+    /// <summary>
+    /// Starts the countdown on the HUD.
+    /// </summary>
+    /// <param name="seconds">The seconds to display on the HUD.</param>
+    public void StartHUDCountdown(int seconds)
+    {
+        playerCountdown.StartCountdown(seconds);
     }
 
     public void EnableCombatHUD(bool enableCombatHUD) => combatInfoTransform.SetActive(enableCombatHUD);

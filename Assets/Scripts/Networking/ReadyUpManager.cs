@@ -134,7 +134,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
 
         float delayTime = 3;
         //countdown from 3,2,1,WORM!
-        FindObjectOfType<Countdown>().StartCountdown((int)delayTime);           //THIS NEEDS TO BE PUT IN BY PETER (I put it in - Peter)
+        GameObject.FindGameObjectWithTag("LockerRoomInfo").GetComponentInChildren<Countdown>().StartCountdown((int)delayTime);           //THIS NEEDS TO BE PUT IN BY PETER (I put it in - Peter)
         yield return new WaitForSeconds(delayTime);
 
         delayTime = 1.5f;
