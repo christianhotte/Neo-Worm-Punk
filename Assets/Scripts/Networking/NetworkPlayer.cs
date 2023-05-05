@@ -207,15 +207,7 @@ public class NetworkPlayer : MonoBehaviour
             {
                 trail.enabled = true;
                 if (PhotonNetwork.IsConnected) photonView.RPC("RPC_MakeInvisible", RpcTarget.Others); //Hide trailrenderers for all other players
-
-                
             }
-        }
-        if (trail.positionCount > 1)
-        {
-            float sqrTrailLength = Vector3.SqrMagnitude(trail.GetPosition(0) - trail.GetPosition(1));
-            print("SqrTrailLength = " + sqrTrailLength);
-            if (sqrTrailLength > trailResetLength * trailResetLength) { trail.Clear(); print("Trailcleared"); }
         }
     }
     private void OnDestroy()
