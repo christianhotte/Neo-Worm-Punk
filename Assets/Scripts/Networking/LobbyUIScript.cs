@@ -191,6 +191,12 @@ public class LobbyUIScript : MonoBehaviour
     {
         NetworkManagerScript.instance.UpdateFunnyWords(!NetworkManagerScript.instance.IsUsingFunnyWords());
         UpdateFunnyText();
+
+        if (NetworkManagerScript.instance.IsUsingFunnyWords())
+        {
+            if (!AchievementListener.Instance.IsAchievementUnlocked(5))
+                AchievementListener.Instance.UnlockAchievement(5);
+        }
     }
 
     private void UpdateFunnyText()

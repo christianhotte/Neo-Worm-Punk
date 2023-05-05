@@ -550,6 +550,13 @@ public class NewChainsawController : PlayerEquipment
             if (tutorialManager != null && tutorialManager.GetCurrentTutorialSegment() == TutorialManager.Tutorial.PARRY)
                 tutorialManager.IncrementTutorialProgress();
 
+            //If the player deflects during a match, unlock an achievement
+            if (PhotonNetwork.InRoom)
+            {
+                if (!AchievementListener.Instance.IsAchievementUnlocked(1))
+                    AchievementListener.Instance.UnlockAchievement(1);
+            }
+
             return true; //Indicate that projectile was deflected
         }
         else return false; //Indicate that projectile was not deflected

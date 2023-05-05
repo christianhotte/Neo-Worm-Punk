@@ -735,7 +735,22 @@ public class NetworkPlayer : MonoBehaviour
                 networkPlayerStats.numOfDeaths++;                                               //Increment death counter
                 networkPlayerStats.killStreak = 0;                                               //Reset kill streak counter
                 networkPlayerStats.deathStreak++;                                               //Increment death streak counter
+
+                //If the player gets a death streak of 10, unlock an achievement
+                if(networkPlayerStats.deathStreak == 10)
+                {
+                    if (!AchievementListener.Instance.IsAchievementUnlocked(3))
+                        AchievementListener.Instance.UnlockAchievement(3);
+                }
+
                 PlayerPrefs.SetInt("LifetimeDeaths", PlayerPrefs.GetInt("LifetimeDeaths") + 1); //Add to the lifetime deaths counter 
+
+                if(PlayerPrefs.GetInt("LifetimeDeaths") == 250)
+                {
+                    if (!AchievementListener.Instance.IsAchievementUnlocked(9))
+                        AchievementListener.Instance.UnlockAchievement(9);
+                }
+
                 if (PlayerPrefs.GetInt("HighestDeathStreak") < networkPlayerStats.deathStreak)
                     PlayerPrefs.SetInt("HighestDeathStreak", networkPlayerStats.deathStreak); //Add to the highest death streak counter if applicable
                 PlayerController.instance.combatHUD.UpdatePlayerStats(networkPlayerStats);
@@ -827,7 +842,19 @@ public class NetworkPlayer : MonoBehaviour
             networkPlayerStats.numOfKills++;
             networkPlayerStats.killStreak++;
             networkPlayerStats.deathStreak = 0;
+
+            //If the player has not gotten a kill before, unlock the achievement
+            if (!AchievementListener.Instance.IsAchievementUnlocked(0))
+                AchievementListener.Instance.UnlockAchievement(0);
+
             PlayerPrefs.SetInt("LifetimeKills", PlayerPrefs.GetInt("LifetimeKills") + 1); //Add to the lifetime kills counter 
+
+            if (PlayerPrefs.GetInt("LifetimeKills") == 250)
+            {
+                if (!AchievementListener.Instance.IsAchievementUnlocked(8))
+                    AchievementListener.Instance.UnlockAchievement(8);
+            }
+
             if (PlayerPrefs.GetInt("BestStreak") < networkPlayerStats.killStreak)
                 PlayerPrefs.SetInt("BestStreak", networkPlayerStats.killStreak); //Add to the best kill streak counter if applicable
             print(PhotonNetwork.LocalPlayer.NickName + " killed enemy with index " + enemyID);

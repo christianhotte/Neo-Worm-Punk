@@ -56,13 +56,13 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         //Initialize:
         if (instance == null) { instance = this; } else Destroy(gameObject); //Singleton-ize this script instance
 
-        SetNameOnStart();
-
         //Get objects & components:
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
     void Start()
     {
+        SetNameOnStart();
+
         // Subscribes event handlers
         PhotonNetwork.AddCallbackTarget(this);
 
@@ -682,6 +682,12 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         if (playWormSound)
         {
             //Plays the sound of the worm's nickname when setting it
+        }
+
+        if(currentName == "Moist Hole")
+        {
+            if (!AchievementListener.Instance.IsAchievementUnlocked(6))
+                AchievementListener.Instance.UnlockAchievement(6);
         }
     }
 
