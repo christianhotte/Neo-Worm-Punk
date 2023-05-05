@@ -151,6 +151,11 @@ public class NewChainsawController : PlayerEquipment
             mode = BladeMode.Extending;                       //Indicate that blade is now extending
             timeInMode = 0;                                   //Reset mode time tracker
             timeUntilPulse = settings.extendHaptics.duration; //Set pulse timer to begin pulsing as soon as extend haptics have finished
+
+            //Play sound:
+            audioSource.clip = settings.runningSound;
+            audioSource.loop = true;
+            audioSource.Play();
         }
         else if ((mode == BladeMode.Extended || mode == BladeMode.Deflecting) && gripValue < settings.triggerThresholds.x) //Grip has been released enough to re-sheath the chainsaw (always check in case of early release)
         {
