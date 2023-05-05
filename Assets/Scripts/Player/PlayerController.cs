@@ -410,7 +410,7 @@ public class PlayerController : MonoBehaviour
         if (isDead) return; //Do not allow dead players to be killed
 
         //Effects:
-        audioSource.PlayOneShot(healthSettings.deathSound != null ? healthSettings.deathSound : (AudioClip)Resources.Load("Sounds/Temp_Death_Sound"), PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play death sound
+        audioSource.PlayOneShot(healthSettings.deathSound, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound)); //Play death sound
         
         //Weapon cleanup:
         foreach (NewGrapplerController hookShot in GetComponentsInChildren<NewGrapplerController>()) //Iterate through any hookshots player may have equipped
@@ -420,8 +420,10 @@ public class PlayerController : MonoBehaviour
                 hookShot.hook.Release(); //Release the hook to avoid a bug :)
                 hookShot.hook.Stow();    //Stow hook to make sure it doesn't get lost
             }
-                
-                
+        }
+        foreach (NewChainsawController chainsaw in GetComponentsInChildren<NewChainsawController>())
+        {
+            chainsaw.audioSource.Stop(); //Make sure chainsaw is not making sounds after death
         }
 
         //Put player in limbo:
