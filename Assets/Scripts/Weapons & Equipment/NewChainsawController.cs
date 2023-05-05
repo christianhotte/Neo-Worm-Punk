@@ -31,6 +31,7 @@ public class NewChainsawController : PlayerEquipment
     [SerializeField, Tooltip("Position chainsaw fires deflected projectiles out of.")]                                                           private Transform barrel;
     [Space()]
     [SerializeField, Tooltip("")] private ParticleSystem jawParticles;
+    [SerializeField, Tooltip("")] private ParticleSystem grindParticles;
 
     private Transform hand;             //Real position of player hand used by this equipment
     private PlayerEquipment handWeapon; //Player weapon held in the same hand as this chainsaw
@@ -160,6 +161,7 @@ public class NewChainsawController : PlayerEquipment
             mode = BladeMode.Retracting;                       //Indicate that blade is now retracting
             timeInMode = 0;                                    //Reset mode time tracker
             jawParticles.gameObject.SetActive(false);
+            grindParticles.gameObject.SetActive(false);
 
             //Grinding disengagement:
             if (grinding) //Player is currently grinding on a surface
@@ -285,7 +287,13 @@ public class NewChainsawController : PlayerEquipment
                 if (!grinding) //Player was not previously grinding
                 {
                     if (otherHandGrapple != null && otherHandGrapple.hook != null && otherHandGrapple.hook.state != HookProjectile.HookState.Stowed) otherHandGrapple.hook.Release();
+                    grindParticles.gameObject.SetActive(true);
+                    grindParticles.Play();
                 }
+
+                //Particles:
+                grindParticles.transform.position = Vector3.MoveTowards(hitInfo.point, wristPivot.position, settings.sparkGap);
+                grindParticles.transform.rotation = Quaternion.LookRotation(hitInfo.normal);
 
                 //Sweet spot attraction:
                 if (settings.grindGlueForce > 0)
@@ -319,6 +327,7 @@ public class NewChainsawController : PlayerEquipment
                 //Grind ending:
                 grinding = false; //Indicate that grind is no longer occurring
                 grindTime = 0;    //Reset grind time tracker
+                grindParticles.gameObject.SetActive(false);
             }
 
             //Player killing:
@@ -460,7 +469,9 @@ public class NewChainsawController : PlayerEquipment
         gripValue = 0;                   //Clear grip input (chainsaw will begin sheathing)
         triggerValue = 0;                //Clear trigger input
         if (mode != BladeMode.Sheathed) mode = BladeMode.Retracting; //Skip grinding disengagement mode
+
         jawParticles.gameObject.SetActive(false);
+        grindParticles.gameObject.SetActive(false);
     }
 
     //UTILITY METHODS:

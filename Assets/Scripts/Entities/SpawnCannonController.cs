@@ -160,6 +160,7 @@ public class SpawnCannonController : MonoBehaviour
         //if (PhotonNetwork.IsConnected) UpdateCannonStatusEvent(PlayerController.photonView.ViewID); //Update all versions of this spawn cannon to indicate that this player has been loaded into it
         occupyingPlayer = PlayerController.photonView.GetComponent<NetworkPlayer>();
         timeUntilReady = spawnWaitTime;
+        print("Loading local player into cannon " + ID);
 
         //Move player:
         PlayerController.instance.bodyRb.isKinematic = true;                     //Make it so that player cannot move
@@ -181,6 +182,8 @@ public class SpawnCannonController : MonoBehaviour
         //Initialization:
         //if (PhotonNetwork.IsConnected) UpdateCannonStatusEvent(); //Indicate that this cannon is now empty
         occupyingPlayer = null;
+        if (PhotonNetwork.IsConnected) PlayerController.photonView.RPC("RPC_MakeVisible", RpcTarget.Others); //Hide trailrenderers for all other players
+        print("Deploying local player into cannon " + ID);
 
         //Launch:
         PlayerController.instance.bodyRb.isKinematic = false;                                       //Enable player movement
