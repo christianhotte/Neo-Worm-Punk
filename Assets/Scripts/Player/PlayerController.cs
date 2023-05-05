@@ -443,11 +443,11 @@ public class PlayerController : MonoBehaviour
         }
 
         //Cleanup:
-        CenterCamera();                                                        //Center camera (this is worth doing during any major transition)
-        currentHealth = healthSettings.defaultHealth;                          //Reset to max health
+        CenterCamera();                               //Center camera (this is worth doing during any major transition)
+        currentHealth = healthSettings.defaultHealth; //Reset to max health
         UpdateHealthIndicators();
-        healthVolume.weight = 0;                                               //Reset health volume weight
-        timeUntilRegen = 0;                                                    //Reset regen timer
+        healthVolume.weight = 0;                      //Reset health volume weight
+        timeUntilRegen = 0;                           //Reset regen timer
         print("Local player has been killed!");
     }
     private void MakeNotWiggly()

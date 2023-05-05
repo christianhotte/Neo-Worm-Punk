@@ -18,6 +18,7 @@ public class ChainsawSettings : ScriptableObject
     [Tooltip("Effective width of blade hitbox (should be more or less the actual size of the real blade.")]                public float bladeWidth;
     [Min(0), Tooltip("Force applied to player away from surface when disengaging from grind.")]                            public float disengageForce;
     [Range(0, 90), Tooltip("Force applied to player away from surface when disengaging from grind.")]                      public float maxGrindAngle;
+    [Min(0), Tooltip("")]                                                                                                  public float sparkGap = 0.1f;
     [Header("Animation:")]
     [Min(0), Tooltip("Amount by which blade is pulled back as player squeezes the trigger.")]      public float bladePreRetractDistance;
     [Tooltip("Curve describing motion of pre-retraction, evaluated based on trigger pull value.")] public AnimationCurve bladePreRetractCurve;

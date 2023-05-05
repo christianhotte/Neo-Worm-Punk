@@ -263,7 +263,6 @@ MonoBehaviour:
   playerHead: {fileID: 0}
   wormZoneShifted: {fileID: 0}
   wormZoneParticles: {fileID: 5120769077581133618, guid: 4f62d637fc7968845b5980a817dd33ac, type: 3}
-  wormZoneInstance: {fileID: 0}
   playerCam: {fileID: 0}
   waitTime: 2
   exitSpeed: 30
@@ -632,7 +631,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2820660123233351220}
   - component: {fileID: 4894510920251554289}
-  - component: {fileID: 7927043591202869383}
   - component: {fileID: 4008123199611235928}
   m_Layer: 22
   m_Name: Camera
@@ -681,7 +679,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 140
+  field of view: 60
   orthographic: 0
   orthographic size: 5
   m_Depth: 0
@@ -699,14 +697,6 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
---- !u!81 &7927043591202869383
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3624976997180694213}
-  m_Enabled: 1
 --- !u!114 &4008123199611235928
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -833,7 +823,6 @@ GameObject:
   m_Component:
   - component: {fileID: 8312897356322862213}
   - component: {fileID: 5585104337276705294}
-  - component: {fileID: 2439570593327942757}
   - component: {fileID: 2640967555835619343}
   m_Layer: 22
   m_Name: Camera (1)
@@ -882,7 +871,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 140
+  field of view: 60
   orthographic: 0
   orthographic size: 5
   m_Depth: 0
@@ -900,14 +889,6 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
---- !u!81 &2439570593327942757
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6791815242306329886}
-  m_Enabled: 1
 --- !u!114 &2640967555835619343
 MonoBehaviour:
   m_ObjectHideFlags: 0

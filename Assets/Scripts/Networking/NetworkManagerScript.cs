@@ -468,13 +468,10 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
         //Update error information
         if (lobbyUI != null)
+        {
             lobbyUI.UpdateErrorMessage(currentErrorMessage);
-
-        ConveyerController conveyerController = FindObjectOfType<ConveyerController>();
-
-        //Move player to error information
-        if (conveyerController != null)
-            conveyerController.TeleportConveyer(2);
+            lobbyUI.GetPlayerConveyorBelt().TeleportConveyer(2);
+        }
     }
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
@@ -595,13 +592,20 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
     {
         Debug.Log("Disconnected from server for reason " + cause.ToString());
 
-        LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
+        switch (cause)
+        {
+            case DisconnectCause.DisconnectByServerLogic:
+                Debug.Log("You have been kicked from the server.");
+                break;
+        }
+
+/*        LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
 
         //If there is a lobby in the scene, go back to the starting menu
         if (lobbyUI != null)
         {
             lobbyUI.SwitchMenu(LobbyMenuState.START);
-        }
+        }*/
     }
 
     // When the master client leaves the room, we transfer object ownership to new master client.
