@@ -406,11 +406,7 @@ public class NetworkPlayer : MonoBehaviour
 
         //Check for combos:
         Material primaryMat = altMaterials[0];
-        if (deflecting)
-        {
-            primaryMat = deflectMat;
-        }
-        else if (primaryEvent != null)
+        if (primaryEvent != null)
         {
             print("Primary event identified");
             primaryMat = primaryEvent.targetMat;
@@ -440,11 +436,15 @@ public class NetworkPlayer : MonoBehaviour
                 if (!materialsCombined) break;
             }
         }
+        else if (deflecting)
+        {
+            primaryMat = deflectMat;
+        }
         
         //Set materials:
         SkinnedMeshRenderer targetRenderer = photonView.IsMine ? PlayerController.instance.bodyRenderer : bodyRenderer;
         targetRenderer.material = primaryMat;
-        if (primaryMat == altMaterials[0] || primaryMat == deflectMat)
+        if (primaryMat == altMaterials[0])
         {
             currentColor = PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]];
             targetRenderer.material.SetColor("_Color", currentColor);
@@ -459,6 +459,11 @@ public class NetworkPlayer : MonoBehaviour
         }
         else //System is using unique material
         {
+            if (primaryMat == deflectMat)
+            {
+                currentColor = PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]];
+                targetRenderer.material.SetColor("_Color", currentColor);
+            }
             /*if (!photonView.IsMine)
             {
                 
