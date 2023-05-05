@@ -151,6 +151,11 @@ public class NewChainsawController : PlayerEquipment
             mode = BladeMode.Extending;                       //Indicate that blade is now extending
             timeInMode = 0;                                   //Reset mode time tracker
             timeUntilPulse = settings.extendHaptics.duration; //Set pulse timer to begin pulsing as soon as extend haptics have finished
+
+            //Play sound:
+            audioSource.clip = settings.runningSound;
+            audioSource.loop = true;
+            audioSource.Play();
         }
         else if ((mode == BladeMode.Extended || mode == BladeMode.Deflecting) && gripValue < settings.triggerThresholds.x) //Grip has been released enough to re-sheath the chainsaw (always check in case of early release)
         {
@@ -180,9 +185,13 @@ public class NewChainsawController : PlayerEquipment
             mode = BladeMode.Deflecting;               //Indicate that blade is now deflecting
             wrist.localRotation = Quaternion.identity; //Reset local rotation of the wrist
             timeInMode = 0;                            //Reset mode time tracker
-            audioSource.PlayOneShot(settings.deflectIdleSound);
             jawParticles.gameObject.SetActive(false);
             if (PhotonNetwork.IsConnected) PlayerController.photonView.RPC("RPC_Deflect", RpcTarget.All, 1);
+
+            //Play sound:
+            audioSource.clip = settings.deflectIdleSound;
+            audioSource.loop = true;
+            audioSource.Play();
 
             //Grinding disengagement:
             if (grinding) //Player is currently grinding on a surface
@@ -197,6 +206,11 @@ public class NewChainsawController : PlayerEquipment
             prevMode = mode;            //Record previous blade mode
             mode = BladeMode.Extending; //Indicate that blade is no longer in deflect mode
             timeInMode = 0;             //Reset mode time tracker
+
+            //Play sound:
+            audioSource.clip = settings.runningSound;
+            audioSource.loop = true;
+            audioSource.Play();
 
             //End deflect effect:
             if (PhotonNetwork.IsConnected) PlayerController.photonView.RPC("RPC_Deflect", RpcTarget.All, 2);

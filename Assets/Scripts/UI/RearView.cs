@@ -67,7 +67,7 @@ public class RearView : MonoBehaviour
 
                     //Dot scale:
                     float distInterp = Mathf.InverseLerp(sqrMaxDist, 0, sqrPlayerDist);
-                    print(distInterp);
+                    //print(distInterp);
                     float sclValue = Mathf.Lerp(0.075f, maxDotScale, distInterp);
                     playerDots[x].localScale = Vector3.one * sclValue;
                     //float playerDist = Vector3.Distance(playerCam.position, otherPlayer.GetComponentInChildren<Targetable>().targetPoint.position);
