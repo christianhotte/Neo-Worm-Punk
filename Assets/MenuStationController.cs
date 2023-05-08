@@ -35,8 +35,10 @@ public class MenuStationController : MonoBehaviour
                 menuStations[i].inactivePosition = menuStations[i].stationTransform.position;
                 menuStations[i].isActive = false;
                 menuStations[i].isMoving = false;
+                menuStations[i].stationTransform.gameObject.SetActive(false);
             }
         }
+        menuStations[0].stationTransform.gameObject.SetActive(true);
         menuStations[0].isActive = true;
         menuStations[0].stationTransform.position += new Vector3(0, -6, 0);
         menuStations[0].inactivePosition += new Vector3(0, -12, 0);
