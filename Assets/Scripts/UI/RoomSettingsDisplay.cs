@@ -21,6 +21,11 @@ public class RoomSettingsDisplay : MonoBehaviour
     {
         string roomType = "Room Type: " + (GetRoom().IsVisible ? "Public" : "Private");
 
+        roomSettingsText.text = roomType + "\n" + RoomSettingsToText();
+    }
+
+    private string RoomSettingsToText()
+    {
         string matchLength = "Match Length: ";
         int currentRoundLength = (int)GetRoom().CustomProperties["RoundLength"];
         if (currentRoundLength < 60)
@@ -29,7 +34,7 @@ public class RoomSettingsDisplay : MonoBehaviour
             matchLength += (currentRoundLength / 60).ToString() + " minute" + (currentRoundLength / 60 > 1 ? "s" : "");
 
         string playerHP = "Player HP: " + ((int)GetRoom().CustomProperties["PlayerHP"]).ToString();
-        string teamsMode = "Teams Mode: " + ((bool)GetRoom().CustomProperties["TeamMode"]? "On" : "Off");
+        string teamsMode = "Teams Mode: " + ((bool)GetRoom().CustomProperties["TeamMode"] ? "On" : "Off");
         string hazardsActive = "Hazards Active: " + ((bool)GetRoom().CustomProperties["HazardsActive"] ? "On" : "Off");
         string upgradesActive = "Upgrades Active: " + ((bool)GetRoom().CustomProperties["UpgradesActive"] ? "On" : "Off");
         string upgradeFrequency = "Upgrade Frequency: ";
@@ -62,7 +67,7 @@ public class RoomSettingsDisplay : MonoBehaviour
                 break;
         }
 
-        roomSettingsText.text = roomType + "\n" + matchLength + "\n" + playerHP + "\n" + teamsMode + "\n" + hazardsActive + "\n" + upgradesActive + (((bool)GetRoom().CustomProperties["UpgradesActive"])? ("\n" + upgradeFrequency).ToString(): "") + (((bool)GetRoom().CustomProperties["UpgradesActive"]) ? ("\n" + upgradeLength).ToString() : "");
+        return matchLength + "\n" + playerHP + "\n" + teamsMode + "\n" + hazardsActive + "\n" + upgradesActive + (((bool)GetRoom().CustomProperties["UpgradesActive"]) ? ("\n" + upgradeFrequency).ToString() : "") + (((bool)GetRoom().CustomProperties["UpgradesActive"]) ? ("\n" + upgradeLength).ToString() : "");
     }
 
     public Room GetRoom() => PhotonNetwork.CurrentRoom;
