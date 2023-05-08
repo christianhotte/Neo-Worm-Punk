@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1144693671366421991}
+  - component: {fileID: 2106447410}
   m_Layer: 0
   m_Name: BIG_DOOR
   m_TagString: Untagged
@@ -34,6 +35,25 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2106447410
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8114740977008929644}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fca6589f6e35b7049bf0d86ae024bc35, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  doors:
+  - {fileID: 7386085611608078471}
+  - {fileID: 8479510554396718789}
+  openDoorPos:
+  - {x: 2.1, y: 0, z: 0}
+  - {x: -2.1, y: -0.6351857, z: -0.004599094}
+  OpenCloseTime: 0
 --- !u!1001 &6992433010158641004
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -151,9 +171,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7211995840468803609, guid: 2bd93eda220e9da49903b910c0e693be, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 2bd93eda220e9da49903b910c0e693be, type: 3}
       propertyPath: m_Name
       value: Big_Door_Frame
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 2bd93eda220e9da49903b910c0e693be, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
       objectReference: {fileID: 0}
     - target: {fileID: 6687127406038151534, guid: 2bd93eda220e9da49903b910c0e693be, type: 3}
       propertyPath: m_Materials.Array.data[0]

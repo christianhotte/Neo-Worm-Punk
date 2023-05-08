@@ -24,6 +24,7 @@ public class ConveyerController : MonoBehaviour
     private bool yeetNotYetNoob = false;
     private bool tutorialOption = false;
     private bool sandboxOption = false;
+    private float saveTransportTime;
 
 
 
@@ -32,6 +33,7 @@ public class ConveyerController : MonoBehaviour
     /// </summary>
     private void Start()
     {
+        saveTransportTime = transportTime;
         //if this is not the conveyerbelt start repeatedely calling the conveyerbelt to move
         newConveyerObjectPositions = new int[conveyerBeltObjects.Length];
 
@@ -129,6 +131,8 @@ public class ConveyerController : MonoBehaviour
     /// <returns></returns>
     private IEnumerator MovingConveyerBelt(int[] nextBeltPositions)
     {
+       
+
         //safety first folks
         conveyerBeltIsMoving = true;
 
@@ -137,6 +141,11 @@ public class ConveyerController : MonoBehaviour
         {
             //retract all menu ui that is down except for the next one
             menuStationControllerRef.DeactivateAllOtherStations(nextBeltPositions[0]);
+            //if going through credits slow down the process
+            if(nextBeltPositions[0] == 0 && Mathf.Abs(conveyerBeltObjects[0].localPosition.z + 100) < 30)
+            {
+                transportTime = 12f;
+            }
         }
 
         //time for menuUI to start retracting
@@ -196,6 +205,7 @@ public class ConveyerController : MonoBehaviour
             yield return null;
         }
 
+        transportTime = saveTransportTime;
         //sall gud to call this coroutine again :)
         conveyerBeltIsMoving = false;
     }
