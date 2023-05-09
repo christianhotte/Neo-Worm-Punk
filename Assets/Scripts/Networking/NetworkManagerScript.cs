@@ -109,6 +109,11 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
         if(scene.name == GameSettings.titleScreenScene)
         {
+            if (PlayerPrefs.GetInt("FirstRun") == 0 && !GameSettings.debugMode)
+            {
+                MovePlayerToCredits();
+            }
+
             SetNameOnStart();
             if (sceneLoadFailed)
             {
@@ -472,6 +477,15 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             lobbyUI.UpdateErrorMessage(currentErrorMessage);
             lobbyUI.GetPlayerConveyorBelt().TeleportConveyer(2);
         }
+    }
+
+    private void MovePlayerToCredits()
+    {
+        LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
+        if (lobbyUI != null)
+            lobbyUI.GetPlayerConveyorBelt().TeleportConveyer(8);
+
+        PlayerPrefs.SetInt("FirstRun", 1);
     }
 
     public override void OnPlayerEnteredRoom(Player newPlayer)

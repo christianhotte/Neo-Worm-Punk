@@ -28,7 +28,6 @@ public static class GameSettings
     public static bool fatherFigure = false;
 
     public static string titleScreenScene = "DavidMenuScene";
-    public static string creditsScene = "DavidMenuScene";
     public static string roomScene = "NetworkLockerRoom";
     public static string arenaScene = "DM_0.17_Arena";
     public static string tutorialScene = "TutorialFinal";

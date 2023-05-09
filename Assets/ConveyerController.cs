@@ -17,6 +17,9 @@ public class ConveyerController : MonoBehaviour
     [SerializeField, Tooltip("Ref to the lobbyUI controller")] private LobbyUIScript lubbyUIScriptRef;
     [SerializeField, Tooltip("Ref to the FindRoomUI controller")] private FindRoomController findRoomControllerRef;
 
+    [Header("Doors")]
+    [SerializeField, Tooltip("The door that separates the credits from the name area.")] private BigDoorController creditsDoor;
+
     private bool conveyerBeltIsMoving = false;
     private int[] newConveyerObjectPositions;
     private bool changingHereBoi = false;
@@ -33,7 +36,7 @@ public class ConveyerController : MonoBehaviour
     /// </summary>
     private void Start()
     {
-        saveTransportTime = transportTime;
+        saveTransportTime = 1f;
         //if this is not the conveyerbelt start repeatedely calling the conveyerbelt to move
         newConveyerObjectPositions = new int[conveyerBeltObjects.Length];
 
@@ -122,6 +125,14 @@ public class ConveyerController : MonoBehaviour
             conveyerBeltObjects[i].position = endPositions[i];
 
         conveyerBeltIsMoving = false;
+
+        //If the player is teleported to the credits, move them immediately back to the starting area
+        if (isPlayerBelt && nextBeltPosition == 8 && creditsDoor != null)
+        {
+            transportTime = 12f;
+            MoveConveyer(0);
+            creditsDoor.EnableDoors(10);
+        }
     }
 
     /// <summary>
@@ -131,8 +142,6 @@ public class ConveyerController : MonoBehaviour
     /// <returns></returns>
     private IEnumerator MovingConveyerBelt(int[] nextBeltPositions)
     {
-       
-
         //safety first folks
         conveyerBeltIsMoving = true;
 
@@ -141,11 +150,6 @@ public class ConveyerController : MonoBehaviour
         {
             //retract all menu ui that is down except for the next one
             menuStationControllerRef.DeactivateAllOtherStations(nextBeltPositions[0]);
-            //if going through credits slow down the process
-            if(nextBeltPositions[0] == 0 && Mathf.Abs(conveyerBeltObjects[0].localPosition.z + 100) < 30)
-            {
-                transportTime = 12f;
-            }
         }
 
         //time for menuUI to start retracting
@@ -208,6 +212,14 @@ public class ConveyerController : MonoBehaviour
         transportTime = saveTransportTime;
         //sall gud to call this coroutine again :)
         conveyerBeltIsMoving = false;
+
+        //If the player has moved to the credits section, move them immediately back to the starting area
+        if (isPlayerBelt && nextBeltPositions[0] == 8 && creditsDoor != null)
+        {
+            MoveConveyer(0);
+            creditsDoor.EnableDoors(10);
+            transportTime = 12f;
+        }
     }
 
     private IEnumerator TransitionToNewSceneSequence()
