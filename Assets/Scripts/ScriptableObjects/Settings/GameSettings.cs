@@ -4,12 +4,13 @@ using UnityEngine;
 
 public static class GameSettings
 {
-    public static bool debugMode = true;
+    public static bool debugMode = false;
 
     public static bool toggleTest = false;
     public static float testDialValue = 0f;
     public static float testSliderValue = 0f;
 
+    public static string presetsDirectoryPath = Application.streamingAssetsPath + "/Presets";
     public static int maxPresetFiles = 3;
 
     //Default Room Settings

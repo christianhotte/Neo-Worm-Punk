@@ -200,8 +200,7 @@ public class HostSettingsController : MonoBehaviour
     public string[] GetPresetFiles()
     {
         //Get every file within the Presets folder
-        string path = Application.streamingAssetsPath + "/Presets";
-        string[] files = Directory.GetFiles(path);
+        string[] files = Directory.GetFiles(GameSettings.presetsDirectoryPath);
 
         List<string> validFiles = new List<string>();
 
@@ -491,8 +490,8 @@ public class HostSettingsController : MonoBehaviour
         }
 
         //Saving the preset data to a file and storing it on a folder
-        Debug.Log("Saving Preset_" + fileNumber.ToString("00") + ".json to " + Application.streamingAssetsPath + "/ Presets");
-        File.WriteAllText(Application.streamingAssetsPath + "/Presets/Preset_" + fileNumber.ToString("00") + ".json", settingsData);
+        Debug.Log("Saving Preset_" + fileNumber.ToString("00") + ".json to " + GameSettings.presetsDirectoryPath);
+        File.WriteAllText(GameSettings.presetsDirectoryPath + "/Preset_" + fileNumber.ToString("00") + ".json", settingsData);
         WriteToPresetLog("Preset_" + fileNumber.ToString("00") + " Successfully Created.");
 
         ShowPresetData();
