@@ -54,7 +54,9 @@ public class HostSettingsController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI presetsDataText;
     [SerializeField] private GameObject loadPresetButton;
     [SerializeField] private Transform gameModeCapsuleSpawner;
+    [SerializeField] private Transform presetCapsuleSpawner;
     [SerializeField] private GameObject capsulePrefab;
+    [SerializeField] private PresetSettings presetCapsulePrefab;
 
     private bool isInitialized = false; //Checks to see if the current room settings are initialized on the room settings UI
     private GameMode currentGameMode = GameMode.TimeAttack;
@@ -62,6 +64,7 @@ public class HostSettingsController : MonoBehaviour
 
     private GamePreset currentSettings;
     private GamePreset displayedPreset;
+    private string currentPresetName;
 
     private void Awake()
     {
@@ -127,6 +130,7 @@ public class HostSettingsController : MonoBehaviour
 
     private void ShowPresetData()
     {
+        GetPresetFiles();
         int fileNumber = 1;
         string fileName = Application.streamingAssetsPath + "/Presets/Preset_" + fileNumber.ToString("00") + ".json";
         if (File.Exists(fileName))
@@ -134,13 +138,24 @@ public class HostSettingsController : MonoBehaviour
             string fileData = File.ReadAllText(fileName);
             displayedPreset = JsonUtility.FromJson<GamePreset>(fileData);
 
-            presetsDataText.text = "Preset_" + fileNumber.ToString("00") + "\n" + displayedPreset.ToString();
+            currentPresetName = "Preset " + fileNumber;
+            presetsDataText.text = currentPresetName + "\n" + displayedPreset.ToString();
             loadPresetButton.SetActive(true);
         }
         else
         {
             presetsDataText.text = "No Presets Found.";
             loadPresetButton.SetActive(false);
+        }
+    }
+
+    public void GetPresetFiles()
+    {
+        string path = Application.streamingAssetsPath + "/Presets";
+        string[] files = Directory.GetFiles(path);
+        foreach(var file in files)
+        {
+            Debug.Log("File: " + file);
         }
     }
 
@@ -332,8 +347,19 @@ public class HostSettingsController : MonoBehaviour
         foreach (var capsule in FindObjectsOfType<SettingsCapsule>())
             Destroy(capsule.gameObject);
 
-        GameObject newGameMode = Instantiate(capsulePrefab, gameModeCapsuleSpawner.transform.position, Quaternion.identity);
+        GameObject newGameMode = Instantiate(capsulePrefab, gameModeCapsuleSpawner.position, Quaternion.identity);
         newGameMode.GetComponent<SettingsCapsule>().SetGameMode((GameMode)gameMode);
+    }
+
+    public void SpawnPresetCapsule()
+    {
+        //Destroys any other existing preset capsule
+        foreach (var capsule in FindObjectsOfType<PresetSettings>())
+            Destroy(capsule.gameObject);
+
+        PresetSettings newPreset = Instantiate(presetCapsulePrefab, presetCapsuleSpawner.position, Quaternion.identity);
+        newPreset.SetPresetData(displayedPreset);
+        newPreset.UpdatePresetLabelText(currentPresetName);
     }
 
     public void SetGameMode(GameObject gameModeCapsule, bool isUnlocked)
@@ -341,6 +367,11 @@ public class HostSettingsController : MonoBehaviour
         GameMode currentGameMode = gameModeCapsule.GetComponent<SettingsCapsule>().GetGameMode();
         gameModeLabel.text = "Game Mode: " + GameModeDisplay.DisplayGameMode(currentGameMode);
         SwitchGameModePanel(currentGameMode);
+    }
+
+    public void SetPreset(GameObject presetCapsule, bool isUnlocked)
+    {
+        LoadPreset(presetCapsule.GetComponent<PresetSettings>().GetPresetData());
     }
 
     public void SwitchGameModePanel(GameMode newGameMode)
@@ -373,11 +404,6 @@ public class HostSettingsController : MonoBehaviour
 
         File.WriteAllText(Application.streamingAssetsPath + "/Presets/Preset_" + fileNumber.ToString("00") + ".json", settingsData);
         ShowPresetData();
-    }
-
-    public void SetPreset(GameObject gameModeCapsule, bool isUnlocked)
-    {
-
     }
 
     public void SetPreset()

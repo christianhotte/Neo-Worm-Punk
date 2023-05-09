@@ -747,7 +747,9 @@ MonoBehaviour:
   presetsDataText: {fileID: 54404947166679756}
   loadPresetButton: {fileID: 3364441929701848141}
   gameModeCapsuleSpawner: {fileID: 6649995927416970106}
+  presetCapsuleSpawner: {fileID: 7263717864637655716}
   capsulePrefab: {fileID: 5311509775168717043, guid: 99a7eadbb62a21c43b48871b9ed27285, type: 3}
+  presetCapsulePrefab: {fileID: -4851280101312202021, guid: 37b94fae4f293e7419168813764bacc6, type: 3}
 --- !u!1 &3714520849001230829
 GameObject:
   m_ObjectHideFlags: 0
@@ -1790,7 +1792,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &3738950559428172167
 Transform:
   m_ObjectHideFlags: 0
@@ -1960,7 +1962,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a53fb4175ce672946a699f104b9c91cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  keyToUnlock: {fileID: 5311509775168717043, guid: 99a7eadbb62a21c43b48871b9ed27285, type: 3}
+  keyToUnlock: {fileID: 5311509775168717043, guid: 37b94fae4f293e7419168813764bacc6, type: 3}
   OnUnlocked:
     m_PersistentCalls:
       m_Calls: []
@@ -2911,7 +2913,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1745685444765053023, guid: 274b4f7e9a1b54846a7947bdbc83169b, type: 3}
       propertyPath: onPressed.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: SetPreset
+      value: SpawnPresetCapsule
       objectReference: {fileID: 0}
     - target: {fileID: 1745685444765053023, guid: 274b4f7e9a1b54846a7947bdbc83169b, type: 3}
       propertyPath: onPressed.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
