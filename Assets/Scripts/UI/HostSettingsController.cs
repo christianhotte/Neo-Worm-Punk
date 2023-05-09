@@ -53,10 +53,16 @@ public class HostSettingsController : MonoBehaviour
     [SerializeField] private LockController presetsArea;
     [SerializeField] private TextMeshProUGUI presetsDataText;
     [SerializeField] private GameObject loadPresetButton;
+    [SerializeField] private GameObject deletePresetButton;
+    [SerializeField] private GameObject prevPresetButton;
+    [SerializeField] private GameObject nextPresetButton;
     [SerializeField] private Transform gameModeCapsuleSpawner;
     [SerializeField] private Transform presetCapsuleSpawner;
     [SerializeField] private GameObject capsulePrefab;
     [SerializeField] private PresetSettings presetCapsulePrefab;
+    [SerializeField] private TextMeshProUGUI presetLogText;
+    [SerializeField] private Color presetLogColor;
+    [SerializeField] private Color presetErrorColor;
 
     private bool isInitialized = false; //Checks to see if the current room settings are initialized on the room settings UI
     private GameMode currentGameMode = GameMode.TimeAttack;
@@ -128,35 +134,62 @@ public class HostSettingsController : MonoBehaviour
         }
     }
 
+    private int currentFileNumber;
+
     private void ShowPresetData()
     {
-        GetPresetFiles();
-        int fileNumber = 1;
-        string fileName = Application.streamingAssetsPath + "/Presets/Preset_" + fileNumber.ToString("00") + ".json";
-        if (File.Exists(fileName))
+        string [] files = GetPresetFiles();
+
+        if (files.Length > 0)
         {
+            currentFileNumber = Math.Clamp(currentFileNumber, 0, files.Length - 1);
+            string fileName = files[currentFileNumber];
+
+            prevPresetButton.SetActive(currentFileNumber > 0);
+            nextPresetButton.SetActive(currentFileNumber < files.Length - 1);
+
             string fileData = File.ReadAllText(fileName);
             displayedPreset = JsonUtility.FromJson<GamePreset>(fileData);
 
-            currentPresetName = "Preset " + fileNumber;
-            presetsDataText.text = currentPresetName + "\n" + displayedPreset.ToString();
+            currentPresetName = Path.GetFileNameWithoutExtension(fileName);
+
+            presetsDataText.text = "<size=3>" + currentPresetName + "</size>\n\n" + displayedPreset.ToString();
             loadPresetButton.SetActive(true);
+            deletePresetButton.SetActive(true);
         }
         else
         {
-            presetsDataText.text = "No Presets Found.";
+            currentFileNumber = 0;
+
+            presetsDataText.text = "<size=6>No Presets Found.</size>";
             loadPresetButton.SetActive(false);
+            deletePresetButton.SetActive(false);
+            prevPresetButton.SetActive(false);
+            nextPresetButton.SetActive(false);
         }
     }
 
-    public void GetPresetFiles()
+    public void UpdatePresetData(int increment)
+    {
+        currentFileNumber += increment;
+        WriteToPresetLog("");
+        ShowPresetData();
+    }
+
+    public string[] GetPresetFiles()
     {
         string path = Application.streamingAssetsPath + "/Presets";
         string[] files = Directory.GetFiles(path);
+
+        List<string> validFiles = new List<string>();
+
         foreach(var file in files)
         {
-            Debug.Log("File: " + file);
+            if (file.Contains(".json") && !file.Contains(".meta"))
+                validFiles.Add(file);
         }
+
+        return validFiles.ToArray();
     }
 
     /// <summary>
@@ -387,7 +420,13 @@ public class HostSettingsController : MonoBehaviour
     {
         string settingsData = JsonUtility.ToJson(currentSettings);
 
-        string[] files = Directory.GetFiles(Application.streamingAssetsPath + "/Presets");
+        string[] files = GetPresetFiles();
+
+        if(files.Length >= GameSettings.maxPresetFiles)
+        {
+            WriteToPresetLog("Error: Maximum Preset Files Reached. Delete An Existing Preset Before Saving.", true);
+            return;
+        }
 
         int fileNumber = 1;
         
@@ -401,8 +440,22 @@ public class HostSettingsController : MonoBehaviour
         }
 
         Debug.Log("Saving Preset_" + fileNumber.ToString("00") + ".json to " + Application.streamingAssetsPath + "/ Presets");
+        WriteToPresetLog("Preset_" + fileNumber.ToString("00") + " Successfully Created.");
 
         File.WriteAllText(Application.streamingAssetsPath + "/Presets/Preset_" + fileNumber.ToString("00") + ".json", settingsData);
+        ShowPresetData();
+    }
+
+    public void DeletePreset()
+    {
+        string[] files = GetPresetFiles();
+
+        if (File.Exists(files[currentFileNumber]))
+        {
+            File.Delete(files[currentFileNumber]);
+            WriteToPresetLog(Path.GetFileNameWithoutExtension(files[currentFileNumber]) + " Successfully Deleted.");
+        }
+
         ShowPresetData();
     }
 
@@ -458,6 +511,16 @@ public class HostSettingsController : MonoBehaviour
         NetworkManagerScript.localNetworkPlayer.UpdateExclusiveColors(!(bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"]);
 
         currentSettings = newPreset;
+    }
+
+    private void WriteToPresetLog(string message, bool isError = false)
+    {
+        if (isError)
+            presetLogText.color = presetErrorColor;
+        else
+            presetLogText.color = presetLogColor;
+
+        presetLogText.text = message;
     }
 
     private Room GetRoom() => PhotonNetwork.CurrentRoom;
