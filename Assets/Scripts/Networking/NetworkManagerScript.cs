@@ -790,13 +790,13 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
     public void OccupyNextAvailableTube()
     {
-        DebugDisplayRoomOccupancy();
-
         for (int i = 0; i < GetTubeOccupancy().Length; i++)
         {
             if (!GetTubeOccupancy()[i])
             {
-                Debug.Log("Assigning " + GetLocalPlayerName() + " to Tube #" + (i + 1).ToString());
+                if(GameSettings.debugMode)
+                    Debug.Log("Assigning " + GetLocalPlayerName() + " to Tube #" + (i + 1).ToString());
+
                 localNetworkPlayer.SetNetworkPlayerProperties("TubeID", i);
                 SetTubeOccupantStatus(i, true);
                 break;

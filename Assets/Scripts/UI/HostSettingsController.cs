@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using System.IO;
 using UnityEngine;
 using TMPro;
 using Photon.Pun;
@@ -50,12 +51,26 @@ public class HostSettingsController : MonoBehaviour
     [SerializeField] private GameObject[] gameModePanels;
     [SerializeField] private LockController gameModeArea;
     [SerializeField] private LockController presetsArea;
+    [SerializeField] private TextMeshProUGUI presetsDataText;
+    [SerializeField] private GameObject loadPresetButton;
+    [SerializeField] private GameObject deletePresetButton;
+    [SerializeField] private GameObject prevPresetButton;
+    [SerializeField] private GameObject nextPresetButton;
     [SerializeField] private Transform gameModeCapsuleSpawner;
+    [SerializeField] private Transform presetCapsuleSpawner;
     [SerializeField] private GameObject capsulePrefab;
+    [SerializeField] private PresetSettings presetCapsulePrefab;
+    [SerializeField] private TextMeshProUGUI presetLogText;
+    [SerializeField] private Color presetLogColor;
+    [SerializeField] private Color presetErrorColor;
 
     private bool isInitialized = false; //Checks to see if the current room settings are initialized on the room settings UI
     private GameMode currentGameMode = GameMode.TimeAttack;
     private GameObject currentGameModePanel;
+
+    private GamePreset currentSettings;
+    private GamePreset displayedPreset;
+    private string currentPresetName;
 
     private void Awake()
     {
@@ -111,9 +126,70 @@ public class HostSettingsController : MonoBehaviour
             UpdateUpgradeLengthLabel();
 
             NetworkManagerScript.localNetworkPlayer.UpdateRoomSettingsDisplay();
+            currentSettings = new GamePreset();
+
+            ShowPresetData();
 
             isInitialized = true;
         }
+    }
+
+    private int currentFileNumber;
+
+    private void ShowPresetData()
+    {
+        string [] files = GetPresetFiles();
+
+        if (files.Length > 0)
+        {
+            currentFileNumber = Math.Clamp(currentFileNumber, 0, files.Length - 1);
+            string fileName = files[currentFileNumber];
+
+            prevPresetButton.SetActive(currentFileNumber > 0);
+            nextPresetButton.SetActive(currentFileNumber < files.Length - 1);
+
+            string fileData = File.ReadAllText(fileName);
+            displayedPreset = JsonUtility.FromJson<GamePreset>(fileData);
+
+            currentPresetName = Path.GetFileNameWithoutExtension(fileName);
+
+            presetsDataText.text = "<size=3>" + currentPresetName + "</size>\n\n" + displayedPreset.ToString();
+            loadPresetButton.SetActive(true);
+            deletePresetButton.SetActive(true);
+        }
+        else
+        {
+            currentFileNumber = 0;
+
+            presetsDataText.text = "<size=6>No Presets Found.</size>";
+            loadPresetButton.SetActive(false);
+            deletePresetButton.SetActive(false);
+            prevPresetButton.SetActive(false);
+            nextPresetButton.SetActive(false);
+        }
+    }
+
+    public void UpdatePresetData(int increment)
+    {
+        currentFileNumber += increment;
+        WriteToPresetLog("");
+        ShowPresetData();
+    }
+
+    public string[] GetPresetFiles()
+    {
+        string path = Application.streamingAssetsPath + "/Presets";
+        string[] files = Directory.GetFiles(path);
+
+        List<string> validFiles = new List<string>();
+
+        foreach(var file in files)
+        {
+            if (file.Contains(".json") && !file.Contains(".meta"))
+                validFiles.Add(file);
+        }
+
+        return validFiles.ToArray();
     }
 
     /// <summary>
@@ -135,7 +211,8 @@ public class HostSettingsController : MonoBehaviour
         //Debug.Log("Match Length: " + currentMatchLength);
         //Debug.Log("Match Index: " + Mathf.RoundToInt(currentMatchLength));
         //Debug.Log("Setting Match Length To " + GameSettings.matchLengths[Mathf.RoundToInt(currentMatchLength)]);
-        UpdateRoomSetting("RoundLength", GameSettings.matchLengths[Mathf.RoundToInt(currentMatchLength)]);
+        currentSettings.roundLength = GameSettings.matchLengths[Mathf.RoundToInt(currentMatchLength)];
+        UpdateRoomSetting("RoundLength", currentSettings.roundLength);
         UpdateMatchLengthLabel();
         NetworkManagerScript.localNetworkPlayer.UpdateRoomSettingsDisplay();
     }
@@ -146,6 +223,7 @@ public class HostSettingsController : MonoBehaviour
     /// <param name="playerHealth">The number of HP the player should have.</param>
     public void UpdatePlayerHealth(float playerHealth)
     {
+        currentSettings.playerHP = Mathf.RoundToInt(playerHealth);
         UpdateRoomSetting("PlayerHP", Mathf.RoundToInt(playerHealth));
         UpdatePlayerHPLabel();
         NetworkManagerScript.localNetworkPlayer.UpdateRoomSettingsDisplay();
@@ -157,6 +235,7 @@ public class HostSettingsController : MonoBehaviour
     /// <param name="teamsModeActive">If true, teams are active. If false, teams are not active.</param>
     public void ToggleTeamsMode(bool teamsModeActive)
     {
+        currentSettings.teamMode = teamsModeActive;
         UpdateRoomSetting("TeamMode", teamsModeActive);
         NetworkManagerScript.localNetworkPlayer.UpdateRoomSettingsDisplay();
         NetworkManagerScript.localNetworkPlayer.UpdateExclusiveColors(!(bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"]);
@@ -168,6 +247,7 @@ public class HostSettingsController : MonoBehaviour
     /// <param name="hazardsActive">If true, upgrades are active. If false, upgrades are not active.</param>
     public void ToggleHazardsActive(bool hazardsActive)
     {
+        currentSettings.hazardsActive = hazardsActive;
         UpdateRoomSetting("HazardsActive", hazardsActive);
         NetworkManagerScript.localNetworkPlayer.UpdateRoomSettingsDisplay();
     }
@@ -178,6 +258,7 @@ public class HostSettingsController : MonoBehaviour
     /// <param name="upgradesActive">If true, upgrades are active. If false, upgrades are not active.</param>
     public void ToggleUpgradesActive(bool upgradesActive)
     {
+        currentSettings.upgradesActive = upgradesActive;
         UpdateRoomSetting("UpgradesActive", upgradesActive);
 
         upgradeFrequencySlider.gameObject.SetActive((bool)GetRoom().CustomProperties["UpgradesActive"]);
@@ -192,7 +273,8 @@ public class HostSettingsController : MonoBehaviour
     /// <param name="upgradeFreq">The frequency of the upgrades spawning.</param>
     public void UpdateUpgradeFrequency(float upgradeFreq)
     {
-        UpdateRoomSetting("UpgradeFrequency", GameSettings.upgradeFrequencies[Mathf.RoundToInt(upgradeFreq)]);
+        currentSettings.upgradeFrequency = GameSettings.upgradeFrequencies[Mathf.RoundToInt(upgradeFreq)];
+        UpdateRoomSetting("UpgradeFrequency", currentSettings.upgradeFrequency);
         UpdateUpgradeFrequencyLabel();
         NetworkManagerScript.localNetworkPlayer.UpdateRoomSettingsDisplay();
     }
@@ -203,7 +285,8 @@ public class HostSettingsController : MonoBehaviour
     /// <param name="upgradeLen">The length of the upgrade.</param>
     public void UpdateUpgradeLength(float upgradeLen)
     {
-        UpdateRoomSetting("UpgradeLength", GameSettings.upgradeLengths[Mathf.RoundToInt(upgradeLen)]);
+        currentSettings.upgradeLength = GameSettings.upgradeLengths[Mathf.RoundToInt(upgradeLen)];
+        UpdateRoomSetting("UpgradeLength", currentSettings.upgradeLength);
         UpdateUpgradeLengthLabel();
         NetworkManagerScript.localNetworkPlayer.UpdateRoomSettingsDisplay();
     }
@@ -297,8 +380,19 @@ public class HostSettingsController : MonoBehaviour
         foreach (var capsule in FindObjectsOfType<SettingsCapsule>())
             Destroy(capsule.gameObject);
 
-        GameObject newGameMode = Instantiate(capsulePrefab, gameModeCapsuleSpawner.transform.position, Quaternion.identity);
+        GameObject newGameMode = Instantiate(capsulePrefab, gameModeCapsuleSpawner.position, Quaternion.identity);
         newGameMode.GetComponent<SettingsCapsule>().SetGameMode((GameMode)gameMode);
+    }
+
+    public void SpawnPresetCapsule()
+    {
+        //Destroys any other existing preset capsule
+        foreach (var capsule in FindObjectsOfType<PresetSettings>())
+            Destroy(capsule.gameObject);
+
+        PresetSettings newPreset = Instantiate(presetCapsulePrefab, presetCapsuleSpawner.position, Quaternion.identity);
+        newPreset.SetPresetData(displayedPreset);
+        newPreset.UpdatePresetLabelText(currentPresetName);
     }
 
     public void SetGameMode(GameObject gameModeCapsule, bool isUnlocked)
@@ -306,6 +400,11 @@ public class HostSettingsController : MonoBehaviour
         GameMode currentGameMode = gameModeCapsule.GetComponent<SettingsCapsule>().GetGameMode();
         gameModeLabel.text = "Game Mode: " + GameModeDisplay.DisplayGameMode(currentGameMode);
         SwitchGameModePanel(currentGameMode);
+    }
+
+    public void SetPreset(GameObject presetCapsule, bool isUnlocked)
+    {
+        LoadPreset(presetCapsule.GetComponent<PresetSettings>().GetPresetData());
     }
 
     public void SwitchGameModePanel(GameMode newGameMode)
@@ -317,10 +416,192 @@ public class HostSettingsController : MonoBehaviour
         currentGameModePanel = newGameModePanel;
     }
 
-    public void SetPreset(GameObject gameModeCapsule, bool isUnlocked)
+    public void SavePreset()
     {
+        string settingsData = JsonUtility.ToJson(currentSettings);
 
+        string[] files = GetPresetFiles();
+
+        if(files.Length >= GameSettings.maxPresetFiles)
+        {
+            WriteToPresetLog("Error: Maximum Preset Files Reached. Delete An Existing Preset Before Saving.", true);
+            return;
+        }
+
+        int fileNumber = 1;
+        
+        foreach(var file in files)
+        {
+            string fileEnd = fileNumber.ToString("00");
+            if (!file.Contains(fileEnd))
+                break;
+            else
+                fileNumber++;
+        }
+
+        Debug.Log("Saving Preset_" + fileNumber.ToString("00") + ".json to " + Application.streamingAssetsPath + "/ Presets");
+        WriteToPresetLog("Preset_" + fileNumber.ToString("00") + " Successfully Created.");
+
+        File.WriteAllText(Application.streamingAssetsPath + "/Presets/Preset_" + fileNumber.ToString("00") + ".json", settingsData);
+        ShowPresetData();
+    }
+
+    public void DeletePreset()
+    {
+        string[] files = GetPresetFiles();
+
+        if (File.Exists(files[currentFileNumber]))
+        {
+            File.Delete(files[currentFileNumber]);
+            WriteToPresetLog(Path.GetFileNameWithoutExtension(files[currentFileNumber]) + " Successfully Deleted.");
+        }
+
+        ShowPresetData();
+    }
+
+    public void SetPreset()
+    {
+        if(displayedPreset != null)
+            LoadPreset(displayedPreset);
+    }
+
+    /// <summary>
+    /// Sets the room settings based on the preset values given.
+    /// </summary>
+    /// <param name="newPreset">The preset data.</param>
+    private void LoadPreset(GamePreset newPreset)
+    {
+        UpdateRoomSetting("RoundLength", newPreset.roundLength);
+        UpdateMatchLengthLabel();
+
+        UpdateRoomSetting("PlayerHP", newPreset.playerHP);
+        UpdatePlayerHPLabel();
+
+        UpdateRoomSetting("HazardsActive", newPreset.hazardsActive);
+
+        UpdateRoomSetting("UpgradesActive", newPreset.upgradesActive);
+        upgradeFrequencySlider.gameObject.SetActive((bool)GetRoom().CustomProperties["UpgradesActive"]);
+        upgradeLengthSlider.gameObject.SetActive((bool)GetRoom().CustomProperties["UpgradesActive"]);
+
+        UpdateRoomSetting("UpgradeFrequency", newPreset.upgradeFrequency);
+        UpdateUpgradeFrequencyLabel();
+
+        UpdateRoomSetting("UpgradeLength", currentSettings.upgradeLength);
+        UpdateUpgradeLengthLabel();
+
+        UpdateRoomSetting("TeamMode", newPreset.teamMode);
+
+        //Moves the dial to the index of the match lengths array that the custom room setting is equal to
+        matchDial.ResetDial();
+        matchDial.MoveDial(Array.IndexOf(GameSettings.matchLengths, (int)GetRoom().CustomProperties["RoundLength"]));
+
+        //Moves the slider to the HP value
+        HPSlider.MoveToValue((int)GetRoom().CustomProperties["PlayerHP"]);
+
+        teamsModeToggle.ForceToggle((bool)GetRoom().CustomProperties["TeamMode"]);
+        hazardsToggle.ForceToggle((bool)GetRoom().CustomProperties["HazardsActive"]);
+        upgradesToggle.ForceToggle((bool)GetRoom().CustomProperties["UpgradesActive"]);
+
+        upgradeFrequencySlider.MoveToValue(GameSettings.UpgradeFrequencyToInt((float)GetRoom().CustomProperties["UpgradeFrequency"]));
+        upgradeLengthSlider.MoveToValue(GameSettings.UpgradeLengthToInt((float)GetRoom().CustomProperties["UpgradeLength"]));
+        upgradeFrequencySlider.gameObject.SetActive((bool)GetRoom().CustomProperties["UpgradesActive"]);
+        upgradeLengthSlider.gameObject.SetActive((bool)GetRoom().CustomProperties["UpgradesActive"]);
+
+        NetworkManagerScript.localNetworkPlayer.UpdateRoomSettingsDisplay();
+        NetworkManagerScript.localNetworkPlayer.UpdateExclusiveColors(!(bool)PhotonNetwork.CurrentRoom.CustomProperties["TeamMode"]);
+
+        currentSettings = newPreset;
+    }
+
+    private void WriteToPresetLog(string message, bool isError = false)
+    {
+        if (isError)
+            presetLogText.color = presetErrorColor;
+        else
+            presetLogText.color = presetLogColor;
+
+        presetLogText.text = message;
     }
 
     private Room GetRoom() => PhotonNetwork.CurrentRoom;
+}
+
+[System.Serializable]
+public class GamePreset
+{
+    public int roundLength;
+    public int playerHP;
+    public bool hazardsActive;
+    public bool upgradesActive;
+    public float upgradeFrequency;
+    public float upgradeLength;
+    public bool teamMode;
+
+    public GamePreset()
+    {
+        roundLength = GameSettings.defaultMatchLength;
+        playerHP = GameSettings.HPDefault;
+        hazardsActive = GameSettings.hazardsActiveDefault;
+        upgradesActive = GameSettings.upgradesActiveDefault;
+        upgradeFrequency = GameSettings.defaultUpgradeFrequency;
+        upgradeLength = GameSettings.defaultUpgradeLength;
+        teamMode = GameSettings.teamModeDefault;
+    }
+
+    public GamePreset(int roundLength, int playerHP, bool hazardsActive, bool upgradesActive, float upgradeFrequency, float upgradeLength, bool teamMode)
+    {
+        this.roundLength = roundLength;
+        this.playerHP = playerHP;
+        this.hazardsActive = hazardsActive;
+        this.upgradesActive = upgradesActive;
+        this.upgradeFrequency = upgradeFrequency;
+        this.upgradeLength = upgradeLength;
+        this.teamMode = teamMode;
+    }
+
+    public override string ToString()
+    {
+        string matchLength = "Match Length: ";
+        int currentRoundLength = roundLength;
+        if (currentRoundLength < 60)
+            matchLength += currentRoundLength.ToString() + " second" + (currentRoundLength > 1 ? "s" : "");
+        else
+            matchLength += (currentRoundLength / 60).ToString() + " minute" + (currentRoundLength / 60 > 1 ? "s" : "");
+
+        string playerHP = "Player HP: " + this.playerHP.ToString();
+        string teamsMode = "Teams Mode: " + (teamMode ? "On" : "Off");
+        string hazardsActive = "Hazards Active: " + (this.hazardsActive ? "On" : "Off");
+        string upgradesActive = "Upgrades Active: " + (this.upgradesActive ? "On" : "Off");
+        string upgradeFrequency = "Upgrade Frequency: ";
+
+        switch (GameSettings.UpgradeFrequencyToInt(this.upgradeFrequency))
+        {
+            case 0:
+                upgradeFrequency += "Low";
+                break;
+            case 1:
+                upgradeFrequency += "Medium";
+                break;
+            case 2:
+                upgradeFrequency += "High";
+                break;
+        }
+
+        string upgradeLength = "Upgrade Length: ";
+
+        switch (GameSettings.UpgradeLengthToInt(this.upgradeLength))
+        {
+            case 0:
+                upgradeLength += "Short";
+                break;
+            case 1:
+                upgradeLength += "Medium";
+                break;
+            case 2:
+                upgradeLength += "Long";
+                break;
+        }
+
+        return matchLength + "\n" + playerHP + "\n" + teamsMode + "\n" + hazardsActive + "\n" + upgradesActive + (this.upgradesActive ? ("\n" + upgradeFrequency).ToString() : "") + (this.upgradesActive ? ("\n" + upgradeLength).ToString() : "");
+    }
 }

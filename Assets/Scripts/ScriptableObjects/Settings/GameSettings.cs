@@ -10,6 +10,8 @@ public static class GameSettings
     public static float testDialValue = 0f;
     public static float testSliderValue = 0f;
 
+    public static int maxPresetFiles = 3;
+
     //Default Room Settings
     public static int[] matchLengths = { 60, 120, 180, 300, 420, 600 };
     public static int roomCodeLength = 5;
