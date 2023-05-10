@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.0013008739, g: 0.00056444854, b: 0.00011067907, a: 1}
+  m_IndirectSpecularColor: {r: 0.0013090009, g: 0.00054443453, b: 0.00004491004, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -736,6 +736,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: db6583f3cf301d64592568451c14b5b8, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: d304aa21942627348848cd4edd12ef92, type: 2}
     - target: {fileID: 919132149155446097, guid: db6583f3cf301d64592568451c14b5b8, type: 3}
       propertyPath: m_Name
       value: Big Tube Middle (4)
@@ -810,6 +814,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 8bcdd3dcabd40364ba48836f3f1dc6d5, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 3db70ea4b7eb9ec40a8f126e832f59fe, type: 2}
     - target: {fileID: 919132149155446097, guid: 8bcdd3dcabd40364ba48836f3f1dc6d5, type: 3}
       propertyPath: m_Name
       value: Crate
@@ -1393,6 +1401,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: db6583f3cf301d64592568451c14b5b8, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: d623b79893533f54c8a95578d69718f9, type: 2}
     - target: {fileID: 919132149155446097, guid: db6583f3cf301d64592568451c14b5b8, type: 3}
       propertyPath: m_Name
       value: Big Tube Middle
@@ -6297,6 +6309,104 @@ MonoBehaviour:
     GameObject: {fileID: 0}
     MeshFilter: {fileID: 0}
     MeshRenderer: {fileID: 0}
+--- !u!1 &370940522
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 370940523}
+  - component: {fileID: 370940526}
+  - component: {fileID: 370940525}
+  - component: {fileID: 370940524}
+  m_Layer: 0
+  m_Name: Cylinder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 2147483647
+  m_IsActive: 1
+--- !u!4 &370940523
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 370940522}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 6.527003, y: -1.50089, z: -4.681002}
+  m_LocalScale: {x: 5.083495, y: 1.7571099, z: 5.083495}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1695261980}
+  m_RootOrder: 38
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!136 &370940524
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 370940522}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.5000001
+  m_Height: 2
+  m_Direction: 1
+  m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
+--- !u!23 &370940525
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 370940522}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 6607f72581568a6458f8e6425b32df42, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &370940526
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 370940522}
+  m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1001 &372457129
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6610,6 +6720,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 5fd743c69acb0a14a827848f3bdcfb8e, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: d623b79893533f54c8a95578d69718f9, type: 2}
     - target: {fileID: 919132149155446097, guid: 5fd743c69acb0a14a827848f3bdcfb8e, type: 3}
       propertyPath: m_Name
       value: Test Small Wall Pipe 3D Model (Merged)
@@ -6659,6 +6773,7 @@ Transform:
   - {fileID: 877080500}
   - {fileID: 1762089705}
   - {fileID: 1321288351}
+  - {fileID: 1971379242}
   m_Father: {fileID: 0}
   m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -7786,7 +7901,7 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: d2bb3f2d632b5b144b2962d5161f8bd5, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 8bbcc57249b00834b9c568fb91299194, type: 2}
+      objectReference: {fileID: 2100000, guid: 3db70ea4b7eb9ec40a8f126e832f59fe, type: 2}
     - target: {fileID: 919132149155446097, guid: d2bb3f2d632b5b144b2962d5161f8bd5, type: 3}
       propertyPath: m_Name
       value: HangingWires (1)
@@ -10615,6 +10730,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 8bcdd3dcabd40364ba48836f3f1dc6d5, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 3db70ea4b7eb9ec40a8f126e832f59fe, type: 2}
     - target: {fileID: 919132149155446097, guid: 8bcdd3dcabd40364ba48836f3f1dc6d5, type: 3}
       propertyPath: m_Name
       value: Crate (1)
@@ -10878,6 +10997,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 5fd743c69acb0a14a827848f3bdcfb8e, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: d623b79893533f54c8a95578d69718f9, type: 2}
     - target: {fileID: 919132149155446097, guid: 5fd743c69acb0a14a827848f3bdcfb8e, type: 3}
       propertyPath: m_Name
       value: Test Small Wall Pipe 3D Model (Merged) (3)
@@ -11112,6 +11235,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: db6583f3cf301d64592568451c14b5b8, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: d623b79893533f54c8a95578d69718f9, type: 2}
     - target: {fileID: 919132149155446097, guid: db6583f3cf301d64592568451c14b5b8, type: 3}
       propertyPath: m_Name
       value: Big Tube Middle (2)
@@ -11269,9 +11396,9 @@ Light:
   serializedVersion: 10
   m_Type: 0
   m_Shape: 0
-  m_Color: {r: 1, g: 0.6823937, b: 0.36477983, a: 1}
-  m_Intensity: 152.5
-  m_Range: 11.27
+  m_Color: {r: 1, g: 0.36470592, b: 0.4290435, a: 1}
+  m_Intensity: 50
+  m_Range: 11.470014
   m_SpotAngle: 153.60127
   m_InnerSpotAngle: 118.67843
   m_CookieSize: 10
@@ -13114,7 +13241,7 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: d2bb3f2d632b5b144b2962d5161f8bd5, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 8bbcc57249b00834b9c568fb91299194, type: 2}
+      objectReference: {fileID: 2100000, guid: 3db70ea4b7eb9ec40a8f126e832f59fe, type: 2}
     - target: {fileID: 919132149155446097, guid: d2bb3f2d632b5b144b2962d5161f8bd5, type: 3}
       propertyPath: m_Name
       value: HangingWires
@@ -13189,6 +13316,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: ade4e0e446e67204a8acddf43a97efb3, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: d623b79893533f54c8a95578d69718f9, type: 2}
     - target: {fileID: 919132149155446097, guid: ade4e0e446e67204a8acddf43a97efb3, type: 3}
       propertyPath: m_Name
       value: Big Tube Bottom
@@ -14258,6 +14389,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: db6583f3cf301d64592568451c14b5b8, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: d623b79893533f54c8a95578d69718f9, type: 2}
     - target: {fileID: 919132149155446097, guid: db6583f3cf301d64592568451c14b5b8, type: 3}
       propertyPath: m_Name
       value: Big Tube Middle (1)
@@ -14498,6 +14633,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 8bcdd3dcabd40364ba48836f3f1dc6d5, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 3db70ea4b7eb9ec40a8f126e832f59fe, type: 2}
     - target: {fileID: 919132149155446097, guid: 8bcdd3dcabd40364ba48836f3f1dc6d5, type: 3}
       propertyPath: m_Name
       value: Crate (2)
@@ -15096,7 +15235,7 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: ce857c4745840ee4498a4a4c8c23356a, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: c23c352f28c92f749b95859aa2402497, type: 2}
+      objectReference: {fileID: 2100000, guid: d623b79893533f54c8a95578d69718f9, type: 2}
     - target: {fileID: 919132149155446097, guid: ce857c4745840ee4498a4a4c8c23356a, type: 3}
       propertyPath: m_Name
       value: JumpPadTestModel
@@ -16894,6 +17033,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: d190f9679650e67469b09e5b4dd11589, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: fe69991d836c54a4a8fed4ec1f032f5c, type: 2}
     - target: {fileID: 919132149155446097, guid: d190f9679650e67469b09e5b4dd11589, type: 3}
       propertyPath: m_Name
       value: WormBox
@@ -16979,7 +17122,7 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: ce857c4745840ee4498a4a4c8c23356a, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: c23c352f28c92f749b95859aa2402497, type: 2}
+      objectReference: {fileID: 2100000, guid: d623b79893533f54c8a95578d69718f9, type: 2}
     - target: {fileID: 919132149155446097, guid: ce857c4745840ee4498a4a4c8c23356a, type: 3}
       propertyPath: m_Name
       value: JumpPadTestModel (1)
@@ -17058,6 +17201,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 5fd743c69acb0a14a827848f3bdcfb8e, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: d623b79893533f54c8a95578d69718f9, type: 2}
     - target: {fileID: 919132149155446097, guid: 5fd743c69acb0a14a827848f3bdcfb8e, type: 3}
       propertyPath: m_Name
       value: Test Small Wall Pipe 3D Model (Merged) (2)
@@ -17308,7 +17455,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1321288350}
   m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 9.686334, z: 0.00000032023596}
+  m_LocalPosition: {x: 0.2727299, y: 8.7228565, z: 0.6989531}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -17348,7 +17495,7 @@ Light:
   m_Shape: 0
   m_Color: {r: 1, g: 0.6823937, b: 0.36477983, a: 1}
   m_Intensity: 862.5
-  m_Range: 5.8346863
+  m_Range: 4.319214
   m_SpotAngle: 153.60127
   m_InnerSpotAngle: 118.67843
   m_CookieSize: 10
@@ -17389,7 +17536,7 @@ Light:
   m_Lightmapping: 2
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 1, y: 1}
-  m_BounceIntensity: 1.4
+  m_BounceIntensity: 0
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 1.976e-42, z: 1.02e-43, w: 0}
@@ -18859,6 +19006,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 11ba1b7d3bb75cd479f9a4e34ad54c0d, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: d304aa21942627348848cd4edd12ef92, type: 2}
     - target: {fileID: 919132149155446097, guid: 11ba1b7d3bb75cd479f9a4e34ad54c0d, type: 3}
       propertyPath: m_Name
       value: Test Air Vent 3D Model (Merged)
@@ -18964,6 +19115,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: db6583f3cf301d64592568451c14b5b8, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: d623b79893533f54c8a95578d69718f9, type: 2}
     - target: {fileID: 919132149155446097, guid: db6583f3cf301d64592568451c14b5b8, type: 3}
       propertyPath: m_Name
       value: Big Tube Middle (3)
@@ -20534,6 +20689,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 11ba1b7d3bb75cd479f9a4e34ad54c0d, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: d304aa21942627348848cd4edd12ef92, type: 2}
     - target: {fileID: 919132149155446097, guid: 11ba1b7d3bb75cd479f9a4e34ad54c0d, type: 3}
       propertyPath: m_Name
       value: Test Air Vent 3D Model (Merged) (1)
@@ -22216,7 +22375,7 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: d2bb3f2d632b5b144b2962d5161f8bd5, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 8bbcc57249b00834b9c568fb91299194, type: 2}
+      objectReference: {fileID: 2100000, guid: 3db70ea4b7eb9ec40a8f126e832f59fe, type: 2}
     - target: {fileID: 919132149155446097, guid: d2bb3f2d632b5b144b2962d5161f8bd5, type: 3}
       propertyPath: m_Name
       value: HangingWires (2)
@@ -22277,8 +22436,8 @@ Light:
   m_Type: 0
   m_Shape: 0
   m_Color: {r: 1, g: 0.07917471, b: 0, a: 1}
-  m_Intensity: 200000
-  m_Range: 155.14485
+  m_Intensity: 250000
+  m_Range: 148.4922
   m_SpotAngle: 42.639553
   m_InnerSpotAngle: 40.998745
   m_CookieSize: 10
@@ -22537,6 +22696,7 @@ Transform:
   - {fileID: 262041598}
   - {fileID: 7374721604932738787}
   - {fileID: 180821031}
+  - {fileID: 370940523}
   m_Father: {fileID: 0}
   m_RootOrder: 17
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -22630,7 +22790,7 @@ GameObject:
   - component: {fileID: 1762089706}
   - component: {fileID: 1762089707}
   m_Layer: 0
-  m_Name: OverallRoomLight
+  m_Name: OverallRoomLightBAKED
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -22663,7 +22823,7 @@ Light:
   m_Type: 2
   m_Shape: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 16
+  m_Intensity: 8
   m_Range: 14
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -22705,7 +22865,7 @@ Light:
   m_Lightmapping: 2
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 1, y: 1}
-  m_BounceIntensity: 6
+  m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: -8.646135e-29}
@@ -26491,6 +26651,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: d190f9679650e67469b09e5b4dd11589, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: fe69991d836c54a4a8fed4ec1f032f5c, type: 2}
     - target: {fileID: 919132149155446097, guid: d190f9679650e67469b09e5b4dd11589, type: 3}
       propertyPath: m_Name
       value: WormBox (2)
@@ -26565,6 +26729,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: d190f9679650e67469b09e5b4dd11589, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: fe69991d836c54a4a8fed4ec1f032f5c, type: 2}
     - target: {fileID: 919132149155446097, guid: d190f9679650e67469b09e5b4dd11589, type: 3}
       propertyPath: m_Name
       value: WormBox (1)
@@ -26822,6 +26990,121 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 14
   m_LocalEulerAnglesHint: {x: 0, y: 29.6, z: 0}
+--- !u!1 &1971379241
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1971379242}
+  - component: {fileID: 1971379244}
+  - component: {fileID: 1971379243}
+  m_Layer: 0
+  m_Name: OverallRoomLightBAKEDTWO
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1971379242
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1971379241}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 3, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 405246395}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1971379243
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1971379241}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Version: 1
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_LightLayerMask: 1
+  m_CustomShadowLayers: 0
+  m_ShadowLayerMask: 1
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+--- !u!108 &1971379244
+Light:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1971379241}
+  m_Enabled: 1
+  serializedVersion: 10
+  m_Type: 2
+  m_Shape: 0
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Intensity: 1
+  m_Range: 14
+  m_SpotAngle: 30
+  m_InnerSpotAngle: 21.80208
+  m_CookieSize: 10
+  m_Shadows:
+    m_Type: 0
+    m_Resolution: -1
+    m_CustomResolution: -1
+    m_Strength: 1
+    m_Bias: 0.05
+    m_NormalBias: 0.4
+    m_NearPlane: 0.2
+    m_CullingMatrixOverride:
+      e00: 1
+      e01: 0
+      e02: 0
+      e03: 0
+      e10: 0
+      e11: 1
+      e12: 0
+      e13: 0
+      e20: 0
+      e21: 0
+      e22: 1
+      e23: 0
+      e30: 0
+      e31: 0
+      e32: 0
+      e33: 1
+    m_UseCullingMatrixOverride: 0
+  m_Cookie: {fileID: 0}
+  m_DrawHalo: 0
+  m_Flare: {fileID: 0}
+  m_RenderMode: 0
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RenderingLayerMask: 1
+  m_Lightmapping: 2
+  m_LightShadowCasterMode: 0
+  m_AreaSize: {x: 1, y: 1}
+  m_BounceIntensity: 0
+  m_ColorTemperature: 6570
+  m_UseColorTemperature: 0
+  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: -8.646135e-29}
+  m_UseBoundingSphereOverride: 0
+  m_UseViewFrustumForShadowCasterCull: 1
+  m_ShadowRadius: 0
+  m_ShadowAngle: 0
 --- !u!1 &1978216344
 GameObject:
   m_ObjectHideFlags: 0
