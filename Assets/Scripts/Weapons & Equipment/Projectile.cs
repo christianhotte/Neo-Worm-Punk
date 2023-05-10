@@ -109,10 +109,21 @@ public class Projectile : MonoBehaviourPunCallbacks
             {
                 //Eliminate non-viable targets:
                 Transform potentialTarget = potentialTargets[x];                   //Get reference to current target
-                //if (potentialTarget == null) continue;                             //Skip potential targets if they are null
-                Vector3 targetSep = potentialTarget.position - transform.position; //Get distance and direction from projectile to target
-                float targetDist = targetSep.magnitude;                            //Distance from projectile to target
-                float targetAngle = Vector3.Angle(targetSep, transform.forward);   //Get angle between target direction and projectile movement direction
+                bool noTargetAvailable = false;
+                if (potentialTarget == null) noTargetAvailable = true;                             //Skip potential targets if they are null
+
+                //Initializing targeting variables:
+                Vector3 targetSep;
+                float targetDist = 0f;
+                float targetAngle = 0f;
+
+                if (noTargetAvailable)
+                {
+                    targetSep = potentialTarget.position - transform.position; //Get distance and direction from projectile to target
+                    targetDist = targetSep.magnitude;                            //Distance from projectile to target
+                    targetAngle = Vector3.Angle(targetSep, transform.forward);   //Get angle between target direction and projectile movement direction
+                }
+
                 if (targetAngle > settings.targetDesignationAngle.y || potentialTarget == null)               //Angle to potential target is so steep that projectile will likely never hit
                 {
                     potentialTargets.RemoveAt(x); //Remove this target from list of potential targets
@@ -519,6 +530,12 @@ public class Projectile : MonoBehaviourPunCallbacks
     public void RPC_AcquireTarget(int targetViewID)
     {
         PhotonView targetView = PhotonNetwork.GetPhotonView(targetViewID);                                                        //Get photonView from ID
+        if (targetView == null)
+        {
+            print("Target photon view not available.");
+            return;
+        }
+
         if (!targetView.TryGetComponent(out Targetable targetable)) targetable = targetView.GetComponentInChildren<Targetable>(); //Get targetable script from photonView
         if (targetable != null) //Target has been successfully acquired
         {
