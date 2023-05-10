@@ -59,6 +59,7 @@ public class InverteboyController : MonoBehaviour
     [SerializeField, Tooltip("The number of flashes.")] private int flashNumber;
 
     [Header("Music")]
+    [SerializeField, Tooltip("Start screen music.")] private AudioClip startScreenMusic;
     [SerializeField, Tooltip("Main menu music.")] private AudioClip mainMenuMusic;
     [SerializeField, Tooltip("Lobby music.")] private AudioClip lobbyMusic;
     [SerializeField, Tooltip("Arens music.")] private AudioClip arenaMusic;
@@ -100,6 +101,11 @@ public class InverteboyController : MonoBehaviour
 
     private void InitializeInverteboyScreens()
     {
+        if (SceneManager.GetActiveScene().name == GameSettings.startScene)
+        {
+            PlayMusic(startScreenMusic);
+        }
+
         if (SceneManager.GetActiveScene().name == GameSettings.titleScreenScene)
         {
             PlayMusic(mainMenuMusic);
@@ -134,8 +140,11 @@ public class InverteboyController : MonoBehaviour
     /// <param name="audioClip">The audio clip to play.</param>
     public void PlayMusic(AudioClip audioClip)
     {
-        audioSource.clip = audioClip;
-        audioSource.Play();
+        if(audioClip != null)
+        {
+            audioSource.clip = audioClip;
+            audioSource.Play();
+        }
     }
 
     /// <summary>

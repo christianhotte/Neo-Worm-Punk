@@ -6,6 +6,9 @@ public class AchievementListener : MonoBehaviour
 {
     [SerializeField, Tooltip("The list of achievements in the game.")] private AchievementItem[] achievementList;
     [SerializeField, Tooltip("The achievement prefab.")] private GameObject achievementPrefab;
+    [SerializeField] private bool debugClearAchievements;
+
+    private List<int> hiddenAchievements = new List<int>();
 
     public static AchievementListener Instance;
 
@@ -25,8 +28,11 @@ public class AchievementListener : MonoBehaviour
             if(PlayerPrefs.GetInt("Achievement" + i) == 1)
             {
                 achievementList[i].isUnlocked = true;
-                if(achievementList[i].isHidden)
+                if (achievementList[i].isHidden)
+                {
+                    hiddenAchievements.Add(i);
                     achievementList[i].isHidden = false;
+                }
             }
         }
     }
@@ -42,6 +48,27 @@ public class AchievementListener : MonoBehaviour
         achievementList[index].isUnlocked = true;
         if (achievementList[index].isHidden)
             achievementList[index].isHidden = false;
+    }
+
+    private void Update()
+    {
+        if (debugClearAchievements)
+        {
+            debugClearAchievements = false;
+            ClearAchievements();
+        }
+    }
+
+    public void ClearAchievements()
+    {
+        for (int i = 0; i < achievementList.Length; i++)
+        {
+            PlayerPrefs.SetInt("Achievement" + i, 0);
+            achievementList[i].isUnlocked = false;
+        }
+
+        foreach (var achievement in hiddenAchievements)
+            achievementList[achievement].isHidden = true;
     }
 
     public bool IsAchievementUnlocked(int index) => PlayerPrefs.GetInt("Achievement" + index) == 1;
