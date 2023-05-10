@@ -518,6 +518,26 @@ public class PlayerController : MonoBehaviour
         newAchievement.transform.Find("Background").Find("AchievementName").GetComponentInChildren<TextMeshProUGUI>().text = achievement.name;
     }
 
+    /// <summary>
+    /// Fades out the player screen and then fades it back in again.
+    /// </summary>
+    /// <param name="delay">The delay in seconds between the fade out sequence and the fade in sequence.</param>
+    public void FadeOutInPlayer(float delay)
+    {
+        StartCoroutine(FadeRoutine(delay));
+    }
+
+    private IEnumerator FadeRoutine(float delay)
+    {
+        FadeScreen playerScreenFader = GetComponentInChildren<FadeScreen>();
+        playerScreenFader.FadeOut();
+
+        yield return new WaitForSeconds(playerScreenFader.GetFadeDuration());
+        yield return new WaitForSeconds(delay);
+
+        playerScreenFader.FadeIn();
+    }
+
     public bool InCombat() => inCombat;
     public bool InMenu() => inMenu;
     public void SetCombat(bool combat)
