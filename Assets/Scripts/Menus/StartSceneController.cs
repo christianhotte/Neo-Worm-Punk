@@ -4,9 +4,12 @@ using UnityEngine;
 
 public class StartSceneController : MonoBehaviour
 {
+    [SerializeField, Tooltip("The Wormpunk SFX.")] private AudioClip wormPunkSFX;
+
     public void StartGame()
     {
-        NetworkManagerScript.instance.LoadSceneWithFade(PlayerPrefs.GetInt("FirstRun") == 0? GameSettings.creditsScene: GameSettings.titleScreenScene);
+        PlayerController.instance.inverteboy.PlayOneShotSound(wormPunkSFX);
+        NetworkManagerScript.instance.LoadSceneWithFade(GameSettings.titleScreenScene);
     }
 
     public void QuitGame()

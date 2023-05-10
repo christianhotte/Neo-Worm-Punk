@@ -138,6 +138,15 @@ public class InverteboyController : MonoBehaviour
         audioSource.Play();
     }
 
+    /// <summary>
+    /// Plays a sound from the Inverteboy.
+    /// </summary>
+    /// <param name="audioClip">The audio clip to play.</param>
+    public void PlayOneShotSound(AudioClip audioClip)
+    {
+        audioSource.PlayOneShot(audioClip, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
+    }
+
     private void Update()
     {
         Vector3 boyDirection = transform.position - PlayerController.instance.cam.transform.position;
