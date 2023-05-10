@@ -120,6 +120,11 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
                 MovePlayerToOnlineErrorMessage();
                 sceneLoadFailed = false;
             }
+
+            LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
+            //If there is a lobby in the scene, update the room list
+            if (lobbyUI != null)
+                lobbyUI.UpdateLobbyList(roomDictionary.Values.ToList());
         }
     }
 

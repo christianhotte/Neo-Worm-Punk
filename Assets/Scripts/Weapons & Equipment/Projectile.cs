@@ -117,7 +117,7 @@ public class Projectile : MonoBehaviourPunCallbacks
                 float targetDist = 0f;
                 float targetAngle = 0f;
 
-                if (noTargetAvailable)
+                if (!noTargetAvailable)
                 {
                     targetSep = potentialTarget.position - transform.position; //Get distance and direction from projectile to target
                     targetDist = targetSep.magnitude;                            //Distance from projectile to target
