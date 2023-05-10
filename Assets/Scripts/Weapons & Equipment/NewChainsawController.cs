@@ -29,6 +29,7 @@ public class NewChainsawController : PlayerEquipment
     [SerializeField, Tooltip("Invisible transform which indicates the extent to which blade tracks for grinding and hitting players.")]          private Transform bladeEnd;
     [SerializeField, Tooltip("")]                                                                                                                private Transform bladeBackTip;
     [SerializeField, Tooltip("Position chainsaw fires deflected projectiles out of.")]                                                           private Transform barrel;
+    [SerializeField, Tooltip("")]                                                                                                                private Transform deflectChargeNeedle;
     [Space()]
     [SerializeField, Tooltip("")] private ParticleSystem jawParticles;
     [SerializeField, Tooltip("")] private ParticleSystem grindParticles;
@@ -136,9 +137,19 @@ public class NewChainsawController : PlayerEquipment
                 deflectTime = 0;            //Always fully reset deflect time tracker
                 deflectDeactivated = true;
                 if (PhotonNetwork.IsConnected) PlayerController.photonView.RPC("RPC_Deflect", RpcTarget.All, 2);
+                audioSource.clip = settings.runningSound;
+                audioSource.loop = true;
+                audioSource.Play();
             }
         }
         if (grinding) grindTime += Time.deltaTime; //Update grind time tracker
+
+        //Move deflect needle:
+        if (deflectChargeNeedle != null && !inStasis)
+        {
+            float newAngle = Mathf.Lerp(settings.deflectNeedleRange.x, settings.deflectNeedleRange.y, deflectTime / settings.deflectTime);
+            deflectChargeNeedle.localEulerAngles = Vector3.up * newAngle;
+        }
 
         //Extend/Retract blade:
         if (mode == BladeMode.Sheathed && gripValue >= settings.triggerThresholds.y) //Grip has been squeezed enough to activate the chainsaw
@@ -178,16 +189,20 @@ public class NewChainsawController : PlayerEquipment
                 grindTime = 0;                                                                            //Reset grind time tracker
             }
         }
-        else if ((mode == BladeMode.Extended || mode == BladeMode.Extending) && triggerValue >= settings.triggerThresholds.y && deflectTime == settings.deflectTime && !deflectDeactivated) //Activate deflect mode when player squeezes the trigger
+        else if ((mode == BladeMode.Extended || mode == BladeMode.Extending) && triggerValue >= settings.triggerThresholds.y && deflectTime > 0 && !deflectDeactivated) //Activate deflect mode when player squeezes the trigger
         {
             //Switch mode:
             prevMode = mode;                           //Record previous blade mode
             mode = BladeMode.Deflecting;               //Indicate that blade is now deflecting
             wrist.localRotation = Quaternion.identity; //Reset local rotation of the wrist
             timeInMode = 0;                            //Reset mode time tracker
-            audioSource.PlayOneShot(settings.deflectIdleSound);
             jawParticles.gameObject.SetActive(false);
             if (PhotonNetwork.IsConnected) PlayerController.photonView.RPC("RPC_Deflect", RpcTarget.All, 1);
+
+            //Play sound:
+            audioSource.clip = settings.deflectIdleSound;
+            audioSource.loop = true;
+            audioSource.Play();
 
             //Grinding disengagement:
             if (grinding) //Player is currently grinding on a surface
@@ -202,6 +217,11 @@ public class NewChainsawController : PlayerEquipment
             prevMode = mode;            //Record previous blade mode
             mode = BladeMode.Extending; //Indicate that blade is no longer in deflect mode
             timeInMode = 0;             //Reset mode time tracker
+
+            //Play sound:
+            audioSource.clip = settings.runningSound;
+            audioSource.loop = true;
+            audioSource.Play();
 
             //End deflect effect:
             if (PhotonNetwork.IsConnected) PlayerController.photonView.RPC("RPC_Deflect", RpcTarget.All, 2);
