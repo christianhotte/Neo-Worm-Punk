@@ -56,13 +56,13 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         //Initialize:
         if (instance == null) { instance = this; } else Destroy(gameObject); //Singleton-ize this script instance
 
-        SetNameOnStart();
-
         //Get objects & components:
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
     void Start()
     {
+        SetNameOnStart();
+
         // Subscribes event handlers
         PhotonNetwork.AddCallbackTarget(this);
 
@@ -109,12 +109,22 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
         if(scene.name == GameSettings.titleScreenScene)
         {
+            if (PlayerPrefs.GetInt("FirstRun") == 0 && !GameSettings.debugMode)
+            {
+                MovePlayerToCredits();
+            }
+
             SetNameOnStart();
             if (sceneLoadFailed)
             {
                 MovePlayerToOnlineErrorMessage();
                 sceneLoadFailed = false;
             }
+
+            LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
+            //If there is a lobby in the scene, update the room list
+            if (lobbyUI != null)
+                lobbyUI.UpdateLobbyList(roomDictionary.Values.ToList());
         }
     }
 
@@ -474,6 +484,15 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         }
     }
 
+    private void MovePlayerToCredits()
+    {
+        LobbyUIScript lobbyUI = FindObjectOfType<LobbyUIScript>();
+        if (lobbyUI != null)
+            lobbyUI.GetPlayerConveyorBelt().TeleportConveyer(8);
+
+        PlayerPrefs.SetInt("FirstRun", 1);
+    }
+
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
         base.OnPlayerEnteredRoom(newPlayer);
@@ -683,6 +702,12 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         {
             //Plays the sound of the worm's nickname when setting it
         }
+
+        if(currentName == "Moist Hole")
+        {
+            if (!AchievementListener.Instance.IsAchievementUnlocked(6))
+                AchievementListener.Instance.UnlockAchievement(6);
+        }
     }
 
     //UTILITY METHODS:
@@ -708,9 +733,9 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         return playerNameList;
     }
 
-    public void LoadSceneWithFade(string sceneName)
+    public void LoadSceneWithFade(string sceneName, float duration = 0.5f)
     {
-        StartCoroutine(FadeLevelRoutine(sceneName, 0.5f));
+        StartCoroutine(FadeLevelRoutine(sceneName, duration));
     }
 
     private IEnumerator FadeLevelRoutine(string sceneName, float loadDelay)
@@ -784,13 +809,13 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
 
     public void OccupyNextAvailableTube()
     {
-        DebugDisplayRoomOccupancy();
-
         for (int i = 0; i < GetTubeOccupancy().Length; i++)
         {
             if (!GetTubeOccupancy()[i])
             {
-                Debug.Log("Assigning " + GetLocalPlayerName() + " to Tube #" + (i + 1).ToString());
+                if(GameSettings.debugMode)
+                    Debug.Log("Assigning " + GetLocalPlayerName() + " to Tube #" + (i + 1).ToString());
+
                 localNetworkPlayer.SetNetworkPlayerProperties("TubeID", i);
                 SetTubeOccupantStatus(i, true);
                 break;

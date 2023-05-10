@@ -30,6 +30,7 @@ public class LobbyUIScript : MonoBehaviour
 
     [Header("Individual Menu Managers")]
     [SerializeField, Tooltip("The Create Room controller.")] private CreateRoomController createRoom;
+    [SerializeField, Tooltip("The Find Room controller.")] private FindRoomController findRoom;
 
     //Runtime Variables
     private List<string> playerList = new List<string>();
@@ -191,6 +192,12 @@ public class LobbyUIScript : MonoBehaviour
     {
         NetworkManagerScript.instance.UpdateFunnyWords(!NetworkManagerScript.instance.IsUsingFunnyWords());
         UpdateFunnyText();
+
+        if (NetworkManagerScript.instance.IsUsingFunnyWords())
+        {
+            if (!AchievementListener.Instance.IsAchievementUnlocked(5))
+                AchievementListener.Instance.UnlockAchievement(5);
+        }
     }
 
     private void UpdateFunnyText()
@@ -232,10 +239,7 @@ public class LobbyUIScript : MonoBehaviour
 
     public void UpdateLobbyList(List<RoomInfo> roomListInfo)
     {
-        //Refresh the find room menu's list of rooms
-        FindRoomController findRoomController = FindObjectOfType<FindRoomController>();
-
-        if(findRoomController != null)
+        if (findRoom != null)
         {
             // We clear the list every time we update.
             foreach (Transform trans in roomListContent)
@@ -264,12 +268,16 @@ public class LobbyUIScript : MonoBehaviour
                     GameObject newRoom = Instantiate(roomListItemPrefab, roomListContent);
                     newRoom.GetComponent<RoomListItem>().SetUp(roomListInfo[i]);
                     newRoom.name = newRoom.GetComponent<RoomListItem>().GetRoomListInfo().Name;
-                    newRoom.GetComponent<RectTransform>().anchoredPosition = new Vector3(newRoom.GetComponent<RectTransform>().anchoredPosition.x, findRoomController.GetArrowYPos() + (findRoomController.GetArrowYPos() * roomCount));
+                    newRoom.GetComponent<RectTransform>().anchoredPosition = new Vector3(newRoom.GetComponent<RectTransform>().anchoredPosition.x, findRoom.GetArrowYPos() + (findRoom.GetArrowYPos() * roomCount));
                     roomCount++;
                 }
             }
 
-            findRoomController.RefreshRoomListItems(roomCount);
+            findRoom.RefreshRoomListItems(roomCount);
+        }
+        else
+        {
+            Debug.Log("No Find Room System Found.");
         }
     }
 

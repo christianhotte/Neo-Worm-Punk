@@ -21,7 +21,8 @@ public class PlayerSetup : MonoBehaviour
     /// <param name="newColor">The color given to the player.</param>
     public void SetColor(Color newColor)
     {
-        Debug.Log("Setting Player Color To " + newColor.ToString() + " ...");
+        if(GameSettings.debugMode)
+            Debug.Log("Setting Player Color To " + newColor.ToString() + " ...");
 
         //Change color of player body:
         foreach(Material mat in PlayerController.instance.bodyRenderer.materials) mat.SetColor("_Color", newColor); //Set every material in player body to new color

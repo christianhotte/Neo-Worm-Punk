@@ -11,6 +11,7 @@ using UnityEngine.SceneManagement;
 using RootMotion.FinalIK;
 using UnityEngine.Events;
 using UnityEngine.Rendering;
+using TMPro;
 
 /// <summary>
 /// Manages overall player stats and abilities.
@@ -59,6 +60,7 @@ public class PlayerController : MonoBehaviour
     [Tooltip("Transform which left-handed primary weapon snaps to when holstered.")]  public Transform leftHolster;
     [Tooltip("Transform which right-handed primary weapon snaps to when holstered.")] public Transform rightHolster;
     [Tooltip("HUD Screen.")] public GameObject hudScreen;
+    [SerializeField, Tooltip("The achievement popup container.")] private Transform achievementPopupContainer;
     [Header("Settings:")]
     [Tooltip("Settings determining player health properties.")] public HealthSettings healthSettings;
     [Space()]
@@ -508,6 +510,32 @@ public class PlayerController : MonoBehaviour
     public void HideHUD(float duration)
     {
         LeanTween.scale(hudScreen, Vector3.one * 3f, duration).setEase(LeanTweenType.easeInExpo);
+    }
+
+    public void AddAchievementPopup(AchievementItem achievement)
+    {
+        GameObject newAchievement = Instantiate(AchievementListener.Instance.GetAchievementPrefab(), achievementPopupContainer);
+        newAchievement.transform.Find("Background").Find("AchievementName").GetComponentInChildren<TextMeshProUGUI>().text = achievement.name;
+    }
+
+    /// <summary>
+    /// Fades out the player screen and then fades it back in again.
+    /// </summary>
+    /// <param name="delay">The delay in seconds between the fade out sequence and the fade in sequence.</param>
+    public void FadeOutInPlayer(float delay)
+    {
+        StartCoroutine(FadeRoutine(delay));
+    }
+
+    private IEnumerator FadeRoutine(float delay)
+    {
+        FadeScreen playerScreenFader = GetComponentInChildren<FadeScreen>();
+        playerScreenFader.FadeOut();
+
+        yield return new WaitForSeconds(playerScreenFader.GetFadeDuration());
+        yield return new WaitForSeconds(delay);
+
+        playerScreenFader.FadeIn();
     }
 
     public bool InCombat() => inCombat;

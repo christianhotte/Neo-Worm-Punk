@@ -235,6 +235,8 @@ public class TutorialManager : MonoBehaviour
                     //Task completed
                     PlayerController.instance.inverteboy.UpdateTutorialProgress("Task Complete.");
                     UpdateTutorialMessage("That's all from me, soldier. Enter the wormhole when you're done, and we'll see you in the battle arena.");
+                    if (!AchievementListener.Instance.IsAchievementUnlocked(4))
+                        AchievementListener.Instance.UnlockAchievement(4);
                     break;
                 case Tutorial.CHAINSAW:
                     DestroyAllHoopTriggers();

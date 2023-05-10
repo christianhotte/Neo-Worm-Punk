@@ -17,6 +17,9 @@ public class ConveyerController : MonoBehaviour
     [SerializeField, Tooltip("Ref to the lobbyUI controller")] private LobbyUIScript lubbyUIScriptRef;
     [SerializeField, Tooltip("Ref to the FindRoomUI controller")] private FindRoomController findRoomControllerRef;
 
+    [Header("Doors")]
+    [SerializeField, Tooltip("The door that separates the credits from the name area.")] private BigDoorController creditsDoor;
+
     private bool conveyerBeltIsMoving = false;
     private int[] newConveyerObjectPositions;
     private bool changingHereBoi = false;
@@ -24,6 +27,7 @@ public class ConveyerController : MonoBehaviour
     private bool yeetNotYetNoob = false;
     private bool tutorialOption = false;
     private bool sandboxOption = false;
+    private float saveTransportTime;
 
 
 
@@ -32,6 +36,7 @@ public class ConveyerController : MonoBehaviour
     /// </summary>
     private void Start()
     {
+        saveTransportTime = 1f;
         //if this is not the conveyerbelt start repeatedely calling the conveyerbelt to move
         newConveyerObjectPositions = new int[conveyerBeltObjects.Length];
 
@@ -120,6 +125,14 @@ public class ConveyerController : MonoBehaviour
             conveyerBeltObjects[i].position = endPositions[i];
 
         conveyerBeltIsMoving = false;
+
+        //If the player is teleported to the credits, move them immediately back to the starting area
+        if (isPlayerBelt && nextBeltPosition == 8 && creditsDoor != null)
+        {
+            transportTime = 12f;
+            MoveConveyer(0);
+            creditsDoor.EnableDoors(10);
+        }
     }
 
     /// <summary>
@@ -196,8 +209,17 @@ public class ConveyerController : MonoBehaviour
             yield return null;
         }
 
+        transportTime = saveTransportTime;
         //sall gud to call this coroutine again :)
         conveyerBeltIsMoving = false;
+
+        //If the player has moved to the credits section, move them immediately back to the starting area
+        if (isPlayerBelt && nextBeltPositions[0] == 8 && creditsDoor != null)
+        {
+            MoveConveyer(0);
+            creditsDoor.EnableDoors(10);
+            transportTime = 12f;
+        }
     }
 
     private IEnumerator TransitionToNewSceneSequence()

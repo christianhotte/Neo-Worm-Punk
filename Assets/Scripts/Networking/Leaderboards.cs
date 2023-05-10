@@ -62,6 +62,16 @@ public class Leaderboards : MonoBehaviourPunCallbacks
                 float currentK = stats.numOfKills;             //Get KD of current player
                 float currentD = stats.numOfDeaths;
 
+                //If the local player has not killed anyone, unlock the pacifist achievement if they have not unlocked it already
+                if (player == NetworkManagerScript.localNetworkPlayer && currentK == 0)
+                {
+                    if (NetworkManagerScript.localNetworkPlayer.networkPlayerStats.numOfKills == 0)
+                    {
+                        if (!AchievementListener.Instance.IsAchievementUnlocked(2))
+                            AchievementListener.Instance.UnlockAchievement(2);
+                    }
+                }
+
                 //Rank against competitors:
                 for (int x = 0; x < rankedPlayers.Count; x++) //Iterate through ranked player list
                 {

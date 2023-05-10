@@ -27,13 +27,18 @@ public class MenuStationController : MonoBehaviour
         menuStations = new Station[menuStationTransforms.Length];
         for (int i = 0; i < menuStations.Length; i++)
         {
-            menuStations[i].stationTransform = menuStationTransforms[i];
-            menuStations[i].activePosition = menuStationTransforms[i].position;
-            menuStations[i].stationTransform.position += new Vector3(0, 6, 0);
-            menuStations[i].inactivePosition = menuStations[i].stationTransform.position;
-            menuStations[i].isActive = false;
-            menuStations[i].isMoving = false;
+            if(i != 7)
+            {
+                menuStations[i].stationTransform = menuStationTransforms[i];
+                menuStations[i].activePosition = menuStationTransforms[i].position;
+                menuStations[i].stationTransform.position += new Vector3(0, 6, 0);
+                menuStations[i].inactivePosition = menuStations[i].stationTransform.position;
+                menuStations[i].isActive = false;
+                menuStations[i].isMoving = false;
+                menuStations[i].stationTransform.gameObject.SetActive(false);
+            }
         }
+        menuStations[0].stationTransform.gameObject.SetActive(true);
         menuStations[0].isActive = true;
         menuStations[0].stationTransform.position += new Vector3(0, -6, 0);
         menuStations[0].inactivePosition += new Vector3(0, -12, 0);
@@ -52,6 +57,7 @@ public class MenuStationController : MonoBehaviour
     private IEnumerator ActivatingStation(int menuStationIndex)
     {
         menuStations[menuStationIndex].isMoving = true;
+        menuStations[menuStationIndex].stationTransform.gameObject.SetActive(true);
 
         //TEMPORARY________________________________________________________________________________________________________________________________________________________________________
         //menuStations[menuStationIndex].stationTransform.position = menuStations[menuStationIndex].activePosition;
@@ -91,7 +97,6 @@ public class MenuStationController : MonoBehaviour
 
         menuStations[menuStationIndex].isActive = true;
         menuStations[menuStationIndex].isMoving = false;
-
     }
 
 
@@ -146,7 +151,7 @@ public class MenuStationController : MonoBehaviour
 
 
 
-
+        menuStations[menuStationIndex].stationTransform.gameObject.SetActive(false);
         menuStations[menuStationIndex].isActive = false;
         menuStations[menuStationIndex].isMoving = false;
     }
