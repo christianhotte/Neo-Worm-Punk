@@ -318,10 +318,10 @@ public class NetworkPlayer : MonoBehaviour
     }
 
     [PunRPC]
-    public void RPC_UpdateLeaderboard(string playerName, int deaths, int kills, int streak)
+    public void RPC_UpdateLeaderboard(string killerName, string victimName, int streak)
     {
         foreach (var leaderboard in FindObjectsOfType<LeaderboardDisplay>())
-            leaderboard.UpdatePlayerStats(playerName, deaths, kills, streak);
+            leaderboard.UpdatePlayerStats(killerName, victimName, streak);
     }
 
     [PunRPC]
@@ -756,7 +756,7 @@ public class NetworkPlayer : MonoBehaviour
                 PlayerController.instance.combatHUD.UpdatePlayerStats(networkPlayerStats);
                 SyncStats();
                 AddToKillBoard(PhotonNetwork.GetPhotonView(enemyID).Owner.NickName, PhotonNetwork.LocalPlayer.NickName, (DeathCause)deathCause);
-                photonView.RPC("RPC_UpdateLeaderboard", RpcTarget.All, PhotonNetwork.LocalPlayer.NickName, networkPlayerStats.numOfDeaths, networkPlayerStats.numOfKills, networkPlayerStats.killStreak);
+                photonView.RPC("RPC_UpdateLeaderboard", RpcTarget.All, PhotonNetwork.GetPhotonView(enemyID).Owner.NickName, PhotonNetwork.LocalPlayer.NickName, GetOtherNetworkPlayer(PhotonNetwork.GetPhotonView(enemyID)).networkPlayerStats.killStreak);
                 if (enemyID != photonView.ViewID) PhotonNetwork.GetPhotonView(enemyID).RPC("RPC_KilledEnemy", RpcTarget.AllBuffered, photonView.ViewID, deathCause);
 
                 //If the player dies from a trap, give them an achievement
@@ -932,7 +932,6 @@ public class NetworkPlayer : MonoBehaviour
             PlayerController.instance.combatHUD.UpdatePlayerStats(networkPlayerStats);
             SyncStats();
             PlayerController.instance.combatHUD.AddToDeathInfoBoard(PhotonNetwork.LocalPlayer.NickName, PhotonNetwork.GetPhotonView(enemyID).Owner.NickName, (DeathCause)deathCause);
-            photonView.RPC("RPC_UpdateLeaderboard", RpcTarget.All, PhotonNetwork.LocalPlayer.NickName, networkPlayerStats.numOfDeaths, networkPlayerStats.numOfKills, networkPlayerStats.killStreak);
         }
     }
 

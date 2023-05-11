@@ -65,26 +65,27 @@ public class LeaderboardDisplay : MonoBehaviour
     /// <summary>
     /// Updates the player's kills on the leaderboard.
     /// </summary>
-    /// <param name="playerName">The player's name to search for in the list.</param>
-    /// <param name="deaths">The new number of deaths for the player.</param>
-    /// <param name="kills">The new number of deaths for the player.</param>
-    /// <param name="streak">The new streak number for the player.</param>
-    public void UpdatePlayerStats(string playerName, int deaths, int kills, int streak)
+    /// <param name="killerName">The killer's name to search for in the list.</param>
+    /// <param name="victimName">The victim's name to search for in the list.</param>
+    /// <param name="killStreak">The new streak number for the killer.</param>
+    public void UpdatePlayerStats(string killerName, string victimName, int killStreak)
     {
         foreach(var player in leaderBoardList)
         {
-            if(player.GetWormName() == playerName)
+            //If the current worm name is the killer's name and they did not kill themselves
+            if(player.GetWormName() == killerName && killerName != victimName)
             {
-                if(kills != player.GetKills())
-                    player.UpdateKills(kills, streak);
+                player.UpdateKills(player.GetKills() + 1, killStreak);
+            }
 
-                else if(deaths != player.GetDeaths())
-                    player.UpdateDeaths(deaths);
-
-                SortLeaderboard();  //Sort the leaderboard
-                break;
+            //If the current worm name is the victim's name
+            if (player.GetWormName() == victimName)
+            {
+                player.UpdateDeaths(player.GetDeaths() + 1);
             }
         }
+
+        SortLeaderboard();  //Sort the leaderboard
     }
 
     /// <summary>
@@ -118,7 +119,10 @@ public class LeaderboardDisplay : MonoBehaviour
             //Always give the first leaderboard item the first rank
             else
                 leaderBoardList[i].UpdateRank(rank);
+        }
 
+        for (int i = 0; i < leaderBoardList.Count; i++)
+        {
             //If the leaderboard position is not in the right position, move it smoothly to the right position
             if (leaderBoardList[i].GetComponent<RectTransform>().anchoredPosition.y != GetPosition(i))
                 LeanTween.moveY(leaderBoardList[i].GetComponent<RectTransform>(), GetPosition(i), itemMoveSpeed).setEase(easeType);
