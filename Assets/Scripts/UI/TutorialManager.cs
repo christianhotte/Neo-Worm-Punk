@@ -48,6 +48,7 @@ public class TutorialManager : MonoBehaviour
 
     private void StartTutorial()
     {
+        PlayerController.instance.inverteboy.StartTutorialTimer();
         PlayerController.instance.inverteboy.ShowInverteboyPopup(tutorialCharacterName);
         DisplayTutorial(Tutorial.GUNS);
     }
@@ -235,8 +236,7 @@ public class TutorialManager : MonoBehaviour
                     //Task completed
                     PlayerController.instance.inverteboy.UpdateTutorialProgress("Task Complete.");
                     UpdateTutorialMessage("That's all from me, soldier. Enter the wormhole when you're done, and we'll see you in the battle arena.");
-                    if (!AchievementListener.Instance.IsAchievementUnlocked(4))
-                        AchievementListener.Instance.UnlockAchievement(4);
+                    CompleteTutorial();
                     break;
                 case Tutorial.CHAINSAW:
                     DestroyAllHoopTriggers();
@@ -252,6 +252,17 @@ public class TutorialManager : MonoBehaviour
 
             taskActive = false;
         }
+    }
+
+    /// <summary>
+    /// Completes the tutorial by checking for an achievement and stopping the tutorial timer.
+    /// </summary>
+    public void CompleteTutorial()
+    {
+        if (!AchievementListener.Instance.IsAchievementUnlocked(4))
+            AchievementListener.Instance.UnlockAchievement(4);
+
+        PlayerController.instance.inverteboy.StopTutorialTimer();
     }
 
     public void OnCompleteOpen(int animatorIndex)

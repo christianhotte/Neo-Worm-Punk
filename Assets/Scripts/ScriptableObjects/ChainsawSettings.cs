@@ -73,4 +73,5 @@ public class ChainsawSettings : ScriptableObject
     [Tooltip("")]                 public PlayerController.HapticData killHaptics;
     [Tooltip("Maximum value of random decrease for pulse magnitude while chainsaw is active.")]                        public float activeHapticMagnitudeVariance;
     [Tooltip("While chainsaw is active, pulses will be separated by random time values between zero and this value.")] public float activeHapticFrequencyVariance;
+    [Tooltip("the buffer in seconds between deflects that determines whether a deflect is rapid or not.")] public float rapidDeflectCooldown = 0.35f;
 }
