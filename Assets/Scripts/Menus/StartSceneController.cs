@@ -9,7 +9,7 @@ public class StartSceneController : MonoBehaviour
     public void StartGame()
     {
         PlayerController.instance.inverteboy.PlayOneShotSound(wormPunkSFX);
-        NetworkManagerScript.instance.LoadSceneWithFade(GameSettings.titleScreenScene);
+        NetworkManagerScript.instance.LoadSceneWithFade(GameSettings.titleScreenScene, 1.5f);
     }
 
     public void QuitGame()

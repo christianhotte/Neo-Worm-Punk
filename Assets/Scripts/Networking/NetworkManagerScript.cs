@@ -733,9 +733,9 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
         return playerNameList;
     }
 
-    public void LoadSceneWithFade(string sceneName)
+    public void LoadSceneWithFade(string sceneName, float duration = 0.5f)
     {
-        StartCoroutine(FadeLevelRoutine(sceneName, 0.5f));
+        StartCoroutine(FadeLevelRoutine(sceneName, duration));
     }
 
     private IEnumerator FadeLevelRoutine(string sceneName, float loadDelay)

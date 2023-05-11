@@ -209,7 +209,7 @@ public class NetworkPlayer : MonoBehaviour
             else
             {
                 trail.enabled = true;
-                if (PhotonNetwork.IsConnected) photonView.RPC("RPC_MakeInvisible", RpcTarget.Others); //Hide trailrenderers for all other players
+                //if (PhotonNetwork.IsConnected) photonView.RPC("RPC_MakeInvisible", RpcTarget.Others); //Hide trailrenderers for all other players
             }
         }
     }
