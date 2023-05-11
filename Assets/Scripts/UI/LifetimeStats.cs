@@ -23,7 +23,7 @@ public class LifetimeStats : MonoBehaviour
             "Deaths:\t\t\t\t\t" + PlayerPrefs.GetInt("LifetimeDeaths") + "\n" +
             "Best Kill Streak:\t\t\t\t" + PlayerPrefs.GetInt("BestStreak") + "\n" +
             "Highest Death Streak:\t\t\t" + PlayerPrefs.GetInt("HighestDeathStreak") + "\n" +
-            "Best Tutorial Completion Time:\t" + (PlayerPrefs.GetFloat("BestTutorialTime") == 0f ? "N/A" : DisplayTutorialCompletionTime());
+            "Best Tutorial Time:\t\t\t" + (PlayerPrefs.GetFloat("BestTutorialTime") == 0f ? "N/A" : DisplayTutorialCompletionTime());
         lifetimeStats.text = stats;
     }
 
