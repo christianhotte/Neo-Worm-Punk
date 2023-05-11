@@ -46,6 +46,7 @@ MonoBehaviour:
   bladeWidth: 0.17
   disengageForce: 27
   maxGrindAngle: 70
+  sparkGap: 0.1
   bladePreRetractDistance: 0.08
   bladePreRetractCurve:
     serializedVersion: 2
@@ -150,7 +151,7 @@ MonoBehaviour:
   maxWristAngle: 80
   wristLerpRate: 7.7
   wristRotReturnRate: 400
-  deflectTime: 3
+  deflectTime: 2
   deflectTransTime: 0.07
   deflectRadius: 0.5
   deflectRotRate: 1900
@@ -183,6 +184,7 @@ MonoBehaviour:
   deflectCooldownRate: 0.8
   deflectionAngle: 60
   minimumDeflectTime: 0.3
+  deflectNeedleRange: {x: -107, y: 107}
   reverseGripAngle: 105
   reverseGripLerpRate: 7
   reverseGripReturnRate: 500
@@ -190,12 +192,12 @@ MonoBehaviour:
   triggerThresholds: {x: 0.39169136, y: 0.64985144}
   swingSpeedRange: {x: 0.5, y: 2}
   extendSound: {fileID: 8300000, guid: f7a515930a8dc6741a608db1e42a190c, type: 3}
-  runningSound: {fileID: 0}
+  runningSound: {fileID: 8300000, guid: 4d3cbd5c2c58f1742b71455d47851698, type: 3}
   sheathSound: {fileID: 8300000, guid: ba699daa1a77ff547b65b08e06538eca, type: 3}
   grindBeginSound: {fileID: 0}
   grindingSound: {fileID: 0}
   grindEndSound: {fileID: 0}
-  deflectIdleSound: {fileID: 8300000, guid: aec4a007ab0c8894aac2c485061c0388, type: 3}
+  deflectIdleSound: {fileID: 8300000, guid: 7dc227e23813b0b4b8b10704457cbb0e, type: 3}
   deflectSound: {fileID: 8300000, guid: 5343be21a73a12c46807db26cc025b29, type: 3}
   KillSound: {fileID: 8300000, guid: 6599fc8357c01074d8b761c882bc5612, type: 3}
   extendHaptics:

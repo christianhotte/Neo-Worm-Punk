@@ -60,14 +60,16 @@ public class NetworkPlayer : MonoBehaviour
     private SkinnedMeshRenderer bodyRenderer;                    //Renderer component for main player body/skin
     private TrailRenderer trail;                                 //Renderer for trail that makes players more visible to each other
     internal PlayerStats networkPlayerStats = new PlayerStats(); //The stats for the network player
-    
+
     [Header("Material System:")]
+    public Material deflectMat;
     public Material[] altMaterials;
     public MatChangeCombo[] matCombos;
     [Header("Damage Effects:")]
     public GameObject bulletHitEffect;
     public GameObject bulletKillEffect;
     public GameObject chainsawKillEffect;
+    public GameObject deflectEffect;
     [Header("General Settings:")]
     public float trailResetLength;
 
@@ -95,6 +97,7 @@ public class NetworkPlayer : MonoBehaviour
 
     private TextMeshProUGUI wormName;
     private Material origTrailMat;
+    private bool deflecting = false;
 
     //RUNTIME METHODS:
     private void Awake()
@@ -206,16 +209,8 @@ public class NetworkPlayer : MonoBehaviour
             else
             {
                 trail.enabled = true;
-                if (PhotonNetwork.IsConnected) photonView.RPC("RPC_MakeInvisible", RpcTarget.Others); //Hide trailrenderers for all other players
-
-                
+                //if (PhotonNetwork.IsConnected) photonView.RPC("RPC_MakeInvisible", RpcTarget.Others); //Hide trailrenderers for all other players
             }
-        }
-        if (trail.positionCount > 1)
-        {
-            float sqrTrailLength = Vector3.SqrMagnitude(trail.GetPosition(0) - trail.GetPosition(1));
-            print("SqrTrailLength = " + sqrTrailLength);
-            if (sqrTrailLength > trailResetLength * trailResetLength) { trail.Clear(); print("Trailcleared"); }
         }
     }
     private void OnDestroy()
@@ -265,6 +260,7 @@ public class NetworkPlayer : MonoBehaviour
     public void OnSceneUnloaded(Scene scene)
     {
         matChangeEvents.Clear();
+        deflecting = false;
         ReCalculateMaterialEvents();
     }
 
@@ -322,10 +318,10 @@ public class NetworkPlayer : MonoBehaviour
     }
 
     [PunRPC]
-    public void RPC_UpdateLeaderboard(string playerName, int deaths, int kills, int streak)
+    public void RPC_UpdateLeaderboard(string killerName, string victimName, int streak)
     {
         foreach (var leaderboard in FindObjectsOfType<LeaderboardDisplay>())
-            leaderboard.UpdatePlayerStats(playerName, deaths, kills, streak);
+            leaderboard.UpdatePlayerStats(killerName, victimName, streak);
     }
 
     [PunRPC]
@@ -432,6 +428,10 @@ public class NetworkPlayer : MonoBehaviour
                 if (!materialsCombined) break;
             }
         }
+        else if (deflecting)
+        {
+            primaryMat = deflectMat;
+        }
         
         //Set materials:
         SkinnedMeshRenderer targetRenderer = photonView.IsMine ? PlayerController.instance.bodyRenderer : bodyRenderer;
@@ -451,6 +451,11 @@ public class NetworkPlayer : MonoBehaviour
         }
         else //System is using unique material
         {
+            if (primaryMat == deflectMat)
+            {
+                currentColor = PlayerSettingsController.playerColors[(int)photonView.Owner.CustomProperties["Color"]];
+                targetRenderer.material.SetColor("_Color", currentColor);
+            }
             /*if (!photonView.IsMine)
             {
                 
@@ -730,14 +735,36 @@ public class NetworkPlayer : MonoBehaviour
                 networkPlayerStats.numOfDeaths++;                                               //Increment death counter
                 networkPlayerStats.killStreak = 0;                                               //Reset kill streak counter
                 networkPlayerStats.deathStreak++;                                               //Increment death streak counter
+
+                //If the player gets a death streak of 10, unlock an achievement
+                if(networkPlayerStats.deathStreak == 10)
+                {
+                    if (!AchievementListener.Instance.IsAchievementUnlocked(3))
+                        AchievementListener.Instance.UnlockAchievement(3);
+                }
+
                 PlayerPrefs.SetInt("LifetimeDeaths", PlayerPrefs.GetInt("LifetimeDeaths") + 1); //Add to the lifetime deaths counter 
+
+                if(PlayerPrefs.GetInt("LifetimeDeaths") == 250)
+                {
+                    if (!AchievementListener.Instance.IsAchievementUnlocked(9))
+                        AchievementListener.Instance.UnlockAchievement(9);
+                }
+
                 if (PlayerPrefs.GetInt("HighestDeathStreak") < networkPlayerStats.deathStreak)
                     PlayerPrefs.SetInt("HighestDeathStreak", networkPlayerStats.deathStreak); //Add to the highest death streak counter if applicable
                 PlayerController.instance.combatHUD.UpdatePlayerStats(networkPlayerStats);
                 SyncStats();
                 AddToKillBoard(PhotonNetwork.GetPhotonView(enemyID).Owner.NickName, PhotonNetwork.LocalPlayer.NickName, (DeathCause)deathCause);
-                photonView.RPC("RPC_UpdateLeaderboard", RpcTarget.All, PhotonNetwork.LocalPlayer.NickName, networkPlayerStats.numOfDeaths, networkPlayerStats.numOfKills, networkPlayerStats.killStreak);
+                photonView.RPC("RPC_UpdateLeaderboard", RpcTarget.All, PhotonNetwork.GetPhotonView(enemyID).Owner.NickName, PhotonNetwork.LocalPlayer.NickName, GetOtherNetworkPlayer(PhotonNetwork.GetPhotonView(enemyID)).networkPlayerStats.killStreak);
                 if (enemyID != photonView.ViewID) PhotonNetwork.GetPhotonView(enemyID).RPC("RPC_KilledEnemy", RpcTarget.AllBuffered, photonView.ViewID, deathCause);
+
+                //If the player dies from a trap, give them an achievement
+                if(deathCause == (int)DeathCause.TRAP)
+                {
+                    if (!AchievementListener.Instance.IsAchievementUnlocked(10))
+                        AchievementListener.Instance.UnlockAchievement(10);
+                }
             }
 
             //Effects:
@@ -822,15 +849,104 @@ public class NetworkPlayer : MonoBehaviour
             networkPlayerStats.numOfKills++;
             networkPlayerStats.killStreak++;
             networkPlayerStats.deathStreak = 0;
+
+            //If the player has not gotten a kill before, unlock the achievement
+            if (!AchievementListener.Instance.IsAchievementUnlocked(0))
+                AchievementListener.Instance.UnlockAchievement(0);
+
             PlayerPrefs.SetInt("LifetimeKills", PlayerPrefs.GetInt("LifetimeKills") + 1); //Add to the lifetime kills counter 
+
+            //Achievements based on match kills
+            switch (networkPlayerStats.numOfKills)
+            {
+                case 25:
+                    if (!AchievementListener.Instance.IsAchievementUnlocked(17))
+                        AchievementListener.Instance.UnlockAchievement(17);
+                    break;
+                case 40:
+                    if (!AchievementListener.Instance.IsAchievementUnlocked(18))
+                        AchievementListener.Instance.UnlockAchievement(18);
+                    break;
+            }
+
+            //Achievements based on lifetime kills
+            switch (PlayerPrefs.GetInt("LifetimeKills"))
+            {
+                case 25:
+                    if (!AchievementListener.Instance.IsAchievementUnlocked(12))
+                        AchievementListener.Instance.UnlockAchievement(12);
+                    break;
+                case 100:
+                    if (!AchievementListener.Instance.IsAchievementUnlocked(13))
+                        AchievementListener.Instance.UnlockAchievement(13);
+                    break;
+                case 250:
+                    if (!AchievementListener.Instance.IsAchievementUnlocked(8))
+                        AchievementListener.Instance.UnlockAchievement(8);
+                    break;
+            }
+
+            //Achievements based on kill streaks
+            switch (networkPlayerStats.killStreak)
+            {
+                case 5:
+                    if (!AchievementListener.Instance.IsAchievementUnlocked(14))
+                        AchievementListener.Instance.UnlockAchievement(14);
+                    break;
+                case 10:
+                    if (!AchievementListener.Instance.IsAchievementUnlocked(15))
+                        AchievementListener.Instance.UnlockAchievement(15);
+                    break;
+                case 15:
+                    if (!AchievementListener.Instance.IsAchievementUnlocked(16))
+                        AchievementListener.Instance.UnlockAchievement(16);
+                    break;
+            }
+
+            NetworkPlayer otherNetworkPlayer = GetOtherNetworkPlayer(PhotonNetwork.GetPhotonView(enemyID));
+
+            //If the other network player's trail position count is 0, that means that they were killed while stationary
+            if (otherNetworkPlayer.trail.positionCount == 0)
+            {
+                if (!AchievementListener.Instance.IsAchievementUnlocked(11))
+                    AchievementListener.Instance.UnlockAchievement(11);
+            }
+
+            //If the cause of death is a chainsaw kill, unlock an achievement
+            if (deathCause == (int)DeathCause.CHAINSAW)
+            {
+                if (!AchievementListener.Instance.IsAchievementUnlocked(19))
+                    AchievementListener.Instance.UnlockAchievement(19);
+            }
+
+            //If the other network player is deflecting when they are killed, unlock an achievement
+            if (otherNetworkPlayer.deflecting)
+            {
+                if (!AchievementListener.Instance.IsAchievementUnlocked(20))
+                    AchievementListener.Instance.UnlockAchievement(20);
+            }
+
             if (PlayerPrefs.GetInt("BestStreak") < networkPlayerStats.killStreak)
                 PlayerPrefs.SetInt("BestStreak", networkPlayerStats.killStreak); //Add to the best kill streak counter if applicable
             print(PhotonNetwork.LocalPlayer.NickName + " killed enemy with index " + enemyID);
             PlayerController.instance.combatHUD.UpdatePlayerStats(networkPlayerStats);
             SyncStats();
             PlayerController.instance.combatHUD.AddToDeathInfoBoard(PhotonNetwork.LocalPlayer.NickName, PhotonNetwork.GetPhotonView(enemyID).Owner.NickName, (DeathCause)deathCause);
-            photonView.RPC("RPC_UpdateLeaderboard", RpcTarget.All, PhotonNetwork.LocalPlayer.NickName, networkPlayerStats.numOfDeaths, networkPlayerStats.numOfKills, networkPlayerStats.killStreak);
         }
+    }
+
+    /// <summary>
+    /// Gets the NetworkPlayer object based from a photonView.
+    /// </summary>
+    /// <param name="photonView">The Photon View of the player being searched for.</param>
+    /// <returns></returns>
+    private NetworkPlayer GetOtherNetworkPlayer(PhotonView photonView)
+    {
+        foreach (var player in instances)
+            if (player.photonView == photonView)
+                return player;
+
+        return null;
     }
 
     /// <summary>
@@ -870,6 +986,23 @@ public class NetworkPlayer : MonoBehaviour
     public void RPC_Tether(int targetId)
     {
 
+    }
+    [PunRPC]
+    public void RPC_Deflect(int data)
+    {
+        switch (data)
+        {
+            case 0: //Effect spawn call
+                Instantiate(deflectEffect, trail.transform.position, trail.transform.rotation);
+                break;
+            case 1:
+                deflecting = true;
+                break;
+            case 2:
+                deflecting = false;
+                break;
+        }
+        if (data > 0) ReCalculateMaterialEvents();
     }
 
     [PunRPC]

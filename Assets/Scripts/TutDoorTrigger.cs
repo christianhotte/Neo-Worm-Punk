@@ -13,6 +13,7 @@ public class TutDoorTrigger : MonoBehaviour
         //If the trigger collides with the player, raise the tube door
         if (other.CompareTag("Player"))
         {
+            print("Closing Door");
             DoorUpperAnimator.SetBool("Activated", true);
             DoorLowerAnimator.SetBool("Activated", true);
             StartCoroutine(WaitTime());

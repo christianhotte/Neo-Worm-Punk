@@ -22,7 +22,7 @@ public class PlayerEquipment : MonoBehaviour
     private Transform handAnchorMover;           //If this equipment is on a player hand, this transform is used to move the rig when reacting to events such as recoil
 
     private protected Rigidbody rb;            //Rigidbody component attached to this script's gameobject
-    private protected AudioSource audioSource; //Audio source component for playing sounds made by this equipment
+    internal AudioSource audioSource;          //Audio source component for playing sounds made by this equipment
     private protected ConfigurableJoint joint; //Physical joint connecting this weapon to the player
 
     //Settings:

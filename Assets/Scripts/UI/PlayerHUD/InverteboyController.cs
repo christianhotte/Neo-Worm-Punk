@@ -42,6 +42,10 @@ public class InverteboyController : MonoBehaviour
     [SerializeField, Tooltip("The tutorial text.")] private TextMeshProUGUI tutorialText;
     [SerializeField, Tooltip("The tutorial progress text.")] private TextMeshProUGUI tutorialProgressText;
     [SerializeField, Tooltip("The tutorial diagram image.")] private Image tutorialImage;
+    [SerializeField, Tooltip("The tutorial stopwatch text.")] private TextMeshProUGUI tutorialStopwatch;
+    [SerializeField, Tooltip("The tutorial stopwatch flash color.")] private Color tutorialFlashColor;
+    [SerializeField, Tooltip("The speed of the tutorial stopwatch flash.")] private float tutorialFlashSpeed = 0.3f;
+    [SerializeField, Tooltip("The number of tutorial stopwatch flashes.")] private int tutorialFlashNumber = 5;
     [Space(10)]
     [SerializeField, Tooltip("The speed that the diagram image shrinks.")] private float shrinkImageDuration;
     [SerializeField, Tooltip("The animation curve for the diagram shrink image animation.")] private LeanTweenType diagramShrinkEaseType;
@@ -59,6 +63,7 @@ public class InverteboyController : MonoBehaviour
     [SerializeField, Tooltip("The number of flashes.")] private int flashNumber;
 
     [Header("Music")]
+    [SerializeField, Tooltip("Start screen music.")] private AudioClip startScreenMusic;
     [SerializeField, Tooltip("Main menu music.")] private AudioClip mainMenuMusic;
     [SerializeField, Tooltip("Lobby music.")] private AudioClip lobbyMusic;
     [SerializeField, Tooltip("Arens music.")] private AudioClip arenaMusic;
@@ -82,6 +87,9 @@ public class InverteboyController : MonoBehaviour
     private IEnumerator flashAnimation;
 
     private Sprite defaultTutorialSprite;
+    private float tutorialTime;
+    private bool tutorialTimerActive = false;
+    private Color tutorialStopwatchColor;
 
     private void Awake()
     {
@@ -93,6 +101,7 @@ public class InverteboyController : MonoBehaviour
         ShowHologram(false);
 
         defaultTutorialSprite = tutorialImage.sprite;
+        tutorialStopwatchColor = tutorialStopwatch.color;
 
         UpdateVolume();
         InitializeInverteboyScreens();
@@ -100,6 +109,11 @@ public class InverteboyController : MonoBehaviour
 
     private void InitializeInverteboyScreens()
     {
+        if (SceneManager.GetActiveScene().name == GameSettings.startScene)
+        {
+            PlayMusic(startScreenMusic);
+        }
+
         if (SceneManager.GetActiveScene().name == GameSettings.titleScreenScene)
         {
             PlayMusic(mainMenuMusic);
@@ -134,8 +148,20 @@ public class InverteboyController : MonoBehaviour
     /// <param name="audioClip">The audio clip to play.</param>
     public void PlayMusic(AudioClip audioClip)
     {
-        audioSource.clip = audioClip;
-        audioSource.Play();
+        if(audioClip != null)
+        {
+            audioSource.clip = audioClip;
+            audioSource.Play();
+        }
+    }
+
+    /// <summary>
+    /// Plays a sound from the Inverteboy.
+    /// </summary>
+    /// <param name="audioClip">The audio clip to play.</param>
+    public void PlayOneShotSound(AudioClip audioClip)
+    {
+        audioSource.PlayOneShot(audioClip, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
     }
 
     private void Update()
@@ -145,6 +171,7 @@ public class InverteboyController : MonoBehaviour
         float boyDistance = Vector3.Distance(transform.position, PlayerController.instance.cam.transform.position);
 
         InverteboyLookCheck(boyDistance, boyAngle);
+        UpdateTutorialTimer();
     }
 
     private void InverteboyLookCheck(float distance, float angle)
@@ -336,6 +363,53 @@ public class InverteboyController : MonoBehaviour
     public void UpdateTutorialProgress(string progressText)
     {
         tutorialProgressText.text = progressText;
+    }
+
+    public void StartTutorialTimer()
+    {
+        tutorialTimerActive = true;
+    }
+
+    public void StopTutorialTimer()
+    {
+        tutorialTimerActive = false;
+        StartCoroutine(FlashTutorialTimer(tutorialFlashNumber, tutorialFlashSpeed));
+
+        //Check to see if the time recorded is the best tutorial time so far. If so, record it
+        if(PlayerPrefs.GetFloat("BestTutorialTime") == 0 || PlayerPrefs.GetFloat("BestTutorialTime") > tutorialTime)
+            PlayerPrefs.SetFloat("BestTutorialTime", tutorialTime);
+
+        //If the player has completed the tutorial in less than a certain amount of time, give them an achievement
+        if (tutorialTime < 60)
+        {
+            if (!AchievementListener.Instance.IsAchievementUnlocked(27))
+                AchievementListener.Instance.UnlockAchievement(27);
+        }
+    }
+
+    /// <summary>
+    /// Update the tutorial stopwatch timer when the timer is active.
+    /// </summary>
+    private void UpdateTutorialTimer()
+    {
+        if (tutorialTimerActive)
+        {
+            tutorialTime += Time.deltaTime; //Increment timer
+            string minutes = Mathf.FloorToInt(tutorialTime / 60f < 0 ? 0 : tutorialTime / 60f).ToString();
+            string seconds = Mathf.FloorToInt(tutorialTime % 60f < 0 ? 0 : tutorialTime % 60f).ToString("00");
+            string centiseconds = Mathf.FloorToInt((tutorialTime * 100f) % 100f < 0 ? 0: (tutorialTime * 100f) % 100f).ToString("00");
+
+            tutorialStopwatch.text = minutes + ":" + seconds + ":<size=4>" + centiseconds + "</size>";
+        }
+    }
+
+    private IEnumerator FlashTutorialTimer(int numberOfFlashes, float speed)
+    {
+        for(int i = 0; i < numberOfFlashes; i++)
+        {
+            tutorialStopwatch.color = (tutorialStopwatch.color == tutorialStopwatchColor) ? tutorialFlashColor : tutorialStopwatchColor;
+            yield return new WaitForSeconds(speed);
+        }
     }
 
     /// <summary>

@@ -808,6 +808,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   leftHolster: {fileID: 5847821605411582915}
   rightHolster: {fileID: 6969702267778132902}
+  hudScreen: {fileID: 5611874144853847606}
+  achievementPopupContainer: {fileID: 5181690408597905092}
   healthSettings: {fileID: 11400000, guid: 6d24db3effe67fb47a10bfaa9621390b, type: 2}
   maxHeadDistance: 0
   torsoVerticalOffset: 2
@@ -2486,7 +2488,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1664008231364775837}
   - component: {fileID: 5411883116474705223}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Worm_avatar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5351,7 +5353,7 @@ MonoBehaviour:
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
+  m_RenderPostProcessing: 1
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0
@@ -7042,6 +7044,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6500810002819420461, guid: 80b40ad3b752ff3418b274b0a83344bb, type: 3}
   m_PrefabInstance: {fileID: 7810923104349132579}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &5611874144853847606 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2415223390880758037, guid: 80b40ad3b752ff3418b274b0a83344bb, type: 3}
+  m_PrefabInstance: {fileID: 7810923104349132579}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &7895472446733852836
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7255,6 +7262,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!224 &5181690408597905092 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 3777497746310746936, guid: a596de2923f37e646bf387758b4d9151, type: 3}
+  m_PrefabInstance: {fileID: 8324149468516978172}
+  m_PrefabAsset: {fileID: 0}
 --- !u!224 &6377759491034355074 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3100459658843560062, guid: a596de2923f37e646bf387758b4d9151, type: 3}

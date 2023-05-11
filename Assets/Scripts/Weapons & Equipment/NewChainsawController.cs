@@ -29,6 +29,7 @@ public class NewChainsawController : PlayerEquipment
     [SerializeField, Tooltip("Invisible transform which indicates the extent to which blade tracks for grinding and hitting players.")]          private Transform bladeEnd;
     [SerializeField, Tooltip("")]                                                                                                                private Transform bladeBackTip;
     [SerializeField, Tooltip("Position chainsaw fires deflected projectiles out of.")]                                                           private Transform barrel;
+    [SerializeField, Tooltip("")]                                                                                                                private Transform deflectChargeNeedle;
     [Space()]
     [SerializeField, Tooltip("")] private ParticleSystem jawParticles;
     [SerializeField, Tooltip("")] private ParticleSystem grindParticles;
@@ -63,6 +64,10 @@ public class NewChainsawController : PlayerEquipment
     private float bladeOriginSize;     //Initial length of blade extender
     private float bladeBackOriginSize; //Initial length of rear blade extender
     private float afterKillCountdown;
+
+    private int currentRapidDeflects;
+    private float currentDeflectCooldown;
+    private bool rapidDeflectCheckActive;
 
     //RUNTIME METHODS:
     /// <summary>
@@ -135,9 +140,35 @@ public class NewChainsawController : PlayerEquipment
                 timeInMode = 0;             //Reset mode time tracker
                 deflectTime = 0;            //Always fully reset deflect time tracker
                 deflectDeactivated = true;
+                if (PhotonNetwork.IsConnected) PlayerController.photonView.RPC("RPC_Deflect", RpcTarget.All, 2);
+                audioSource.clip = settings.runningSound;
+                audioSource.loop = true;
+                audioSource.Play();
             }
         }
         if (grinding) grindTime += Time.deltaTime; //Update grind time tracker
+
+        //If the rapid deflect check is active
+        if (rapidDeflectCheckActive)
+        {
+            if(currentDeflectCooldown > settings.rapidDeflectCooldown)
+            {
+                rapidDeflectCheckActive = false;
+                currentDeflectCooldown = 0;
+                currentRapidDeflects = 0;
+            }
+            else
+            {
+                currentDeflectCooldown += Time.deltaTime;
+            }
+        }
+
+        //Move deflect needle:
+        if (deflectChargeNeedle != null && !inStasis)
+        {
+            float newAngle = Mathf.Lerp(settings.deflectNeedleRange.x, settings.deflectNeedleRange.y, deflectTime / settings.deflectTime);
+            deflectChargeNeedle.localEulerAngles = Vector3.up * newAngle;
+        }
 
         //Extend/Retract blade:
         if (mode == BladeMode.Sheathed && gripValue >= settings.triggerThresholds.y) //Grip has been squeezed enough to activate the chainsaw
@@ -150,6 +181,11 @@ public class NewChainsawController : PlayerEquipment
             mode = BladeMode.Extending;                       //Indicate that blade is now extending
             timeInMode = 0;                                   //Reset mode time tracker
             timeUntilPulse = settings.extendHaptics.duration; //Set pulse timer to begin pulsing as soon as extend haptics have finished
+
+            //Play sound:
+            audioSource.clip = settings.runningSound;
+            audioSource.loop = true;
+            audioSource.Play();
         }
         else if ((mode == BladeMode.Extended || mode == BladeMode.Deflecting) && gripValue < settings.triggerThresholds.x) //Grip has been released enough to re-sheath the chainsaw (always check in case of early release)
         {
@@ -162,6 +198,7 @@ public class NewChainsawController : PlayerEquipment
             timeInMode = 0;                                    //Reset mode time tracker
             jawParticles.gameObject.SetActive(false);
             grindParticles.gameObject.SetActive(false);
+            if (PhotonNetwork.IsConnected) PlayerController.photonView.RPC("RPC_Deflect", RpcTarget.All, 2);
 
             //Grinding disengagement:
             if (grinding) //Player is currently grinding on a surface
@@ -171,15 +208,20 @@ public class NewChainsawController : PlayerEquipment
                 grindTime = 0;                                                                            //Reset grind time tracker
             }
         }
-        else if ((mode == BladeMode.Extended || mode == BladeMode.Extending) && triggerValue >= settings.triggerThresholds.y && deflectTime == settings.deflectTime && !deflectDeactivated) //Activate deflect mode when player squeezes the trigger
+        else if ((mode == BladeMode.Extended || mode == BladeMode.Extending) && triggerValue >= settings.triggerThresholds.y && deflectTime > 0 && !deflectDeactivated) //Activate deflect mode when player squeezes the trigger
         {
             //Switch mode:
             prevMode = mode;                           //Record previous blade mode
             mode = BladeMode.Deflecting;               //Indicate that blade is now deflecting
             wrist.localRotation = Quaternion.identity; //Reset local rotation of the wrist
             timeInMode = 0;                            //Reset mode time tracker
-            audioSource.PlayOneShot(settings.deflectIdleSound);
             jawParticles.gameObject.SetActive(false);
+            if (PhotonNetwork.IsConnected) PlayerController.photonView.RPC("RPC_Deflect", RpcTarget.All, 1);
+
+            //Play sound:
+            audioSource.clip = settings.deflectIdleSound;
+            audioSource.loop = true;
+            audioSource.Play();
 
             //Grinding disengagement:
             if (grinding) //Player is currently grinding on a surface
@@ -194,6 +236,14 @@ public class NewChainsawController : PlayerEquipment
             prevMode = mode;            //Record previous blade mode
             mode = BladeMode.Extending; //Indicate that blade is no longer in deflect mode
             timeInMode = 0;             //Reset mode time tracker
+
+            //Play sound:
+            audioSource.clip = settings.runningSound;
+            audioSource.loop = true;
+            audioSource.Play();
+
+            //End deflect effect:
+            if (PhotonNetwork.IsConnected) PlayerController.photonView.RPC("RPC_Deflect", RpcTarget.All, 2);
         }
 
         //Blade movement:
@@ -429,10 +479,12 @@ public class NewChainsawController : PlayerEquipment
             }
         }
     }
+    
     private protected override void FixedUpdate()
     {
         base.FixedUpdate(); //Call base equipment update method
     }
+
     private protected override void InputActionTriggered(InputAction.CallbackContext context)
     {
         //Determine input target:
@@ -513,10 +565,37 @@ public class NewChainsawController : PlayerEquipment
                 newProjectile.photonView.RPC("RPC_Fire", RpcTarget.All, barrel.position, barrel.rotation, PlayerController.photonView.ViewID); //Initialize all projectiles simultaneously
             }
             audioSource.PlayOneShot(settings.deflectSound); //Play deflect sound
+            if (PhotonNetwork.IsConnected) PlayerController.photonView.RPC("RPC_Deflect", RpcTarget.All, 0);
 
             TutorialManager tutorialManager = FindObjectOfType<TutorialManager>();
             if (tutorialManager != null && tutorialManager.GetCurrentTutorialSegment() == TutorialManager.Tutorial.PARRY)
                 tutorialManager.IncrementTutorialProgress();
+
+            //If the player deflects during a match, unlock an achievement
+            if (PhotonNetwork.InRoom)
+            {
+                if (!AchievementListener.Instance.IsAchievementUnlocked(1))
+                    AchievementListener.Instance.UnlockAchievement(1);
+
+                NetworkManagerScript.localNetworkPlayer.networkPlayerStats.successfulDeflects++;
+
+                rapidDeflectCheckActive = true;
+                currentRapidDeflects++;
+
+                //If the player has deflected 5 projectiles in a rapid succession, unlock an achievement
+                if(currentRapidDeflects == 5)
+                {
+                    if (!AchievementListener.Instance.IsAchievementUnlocked(22))
+                        AchievementListener.Instance.UnlockAchievement(22);
+                }
+
+                //If the player has successfully deflected 22 times in a match, unlock an achievement
+                if (NetworkManagerScript.localNetworkPlayer.networkPlayerStats.successfulDeflects == 22)
+                {
+                    if (!AchievementListener.Instance.IsAchievementUnlocked(21))
+                        AchievementListener.Instance.UnlockAchievement(21);
+                }
+            }
 
             return true; //Indicate that projectile was deflected
         }

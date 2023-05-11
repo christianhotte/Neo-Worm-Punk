@@ -28,9 +28,6 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (PhotonNetwork.IsConnected && PhotonNetwork.IsMasterClient)
-            NetworkManagerScript.instance.SetMatchActive(false);
-
         StartCoroutine(MoveToSpawnPoint());
     }
 
@@ -69,7 +66,10 @@ public class LockerTubeSpawner : MonoBehaviourPunCallbacks
 
             StartCoroutine(NetworkManagerScript.localNetworkPlayer.CheckExclusiveColors());
             if (PhotonNetwork.IsMasterClient)
+            {
                 ReadyUpManager.instance.localPlayerTube.ShowHostSettings(true); //Show the settings if the player being moved is the master client
+                NetworkManagerScript.instance.SetMatchActive(false);            //Set match active to false
+            }
         }
     }
 

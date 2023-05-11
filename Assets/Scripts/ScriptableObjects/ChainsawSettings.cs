@@ -45,6 +45,7 @@ public class ChainsawSettings : ScriptableObject
     [Min(0), Tooltip("How many seconds of deflect time player recovers per second of not deflecting.")] public float deflectCooldownRate;
     [Range(0, 180), Tooltip("Maximum tolerated angle at which projectiles can be deflected.")]          public float deflectionAngle = 90;
     [Min(0), Tooltip("Maximum tolerated angle at which projectiles can be deflected.")]                 public float minimumDeflectTime = 0.3f;
+    [Tooltip("")]                                                                                       public Vector2 deflectNeedleRange;
     [Space()]
     [Range(0, 180), Tooltip("Angle blade turns to when set to reverse mode.")]                          public float reverseGripAngle;
     [Min(0), Tooltip("How rapidly blade moves to and from reverse grip position.")]                     public float reverseGripLerpRate;
@@ -72,4 +73,5 @@ public class ChainsawSettings : ScriptableObject
     [Tooltip("")]                 public PlayerController.HapticData killHaptics;
     [Tooltip("Maximum value of random decrease for pulse magnitude while chainsaw is active.")]                        public float activeHapticMagnitudeVariance;
     [Tooltip("While chainsaw is active, pulses will be separated by random time values between zero and this value.")] public float activeHapticFrequencyVariance;
+    [Tooltip("the buffer in seconds between deflects that determines whether a deflect is rapid or not.")] public float rapidDeflectCooldown = 0.35f;
 }

@@ -30,6 +30,9 @@ public class FunnyScreen : MonoBehaviour
             {
                 offlineBackground.SetActive(false);
                 funnyBackground.SetActive(true);
+
+                if (!AchievementListener.Instance.IsAchievementUnlocked(7))
+                    AchievementListener.Instance.UnlockAchievement(7);
             }
         }
     }

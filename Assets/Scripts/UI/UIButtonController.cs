@@ -16,6 +16,7 @@ public class UIButtonController : MonoBehaviour
     [SerializeField, Tooltip("The color of the button when pressed while disabled.")] private Color disabledColor = new Color(0, 0, 0, 0);
 
     [SerializeField, Tooltip("The time it takes for the button to fully press.")] private float buttonPressSeconds = 0.5f;
+    [SerializeField, Tooltip("The time it takes for the button to be able to be pressed after being enabled.")] private float onEnableDelay = 0.2f;
 
     [SerializeField, Tooltip("The sound that plays when the button is pressed successfully.")] private AudioClip onPressedSoundEffect;
     [SerializeField, Tooltip("The sound that plays when the button is pressed but is disabled.")] private AudioClip onDisabledSoundEffect;
@@ -28,16 +29,21 @@ public class UIButtonController : MonoBehaviour
     private Image buttonImage;  //The image of the button
     private Color defaultColor;
 
+    private float currentEnableDelay;
+    private bool enableDelayActive;
+
     private void Awake()
     {
         buttonImage = GetComponent<Image>();
         defaultColor = buttonImage.color;
         isPressing = false;
+        enableDelayActive = true;
     }
 
     private void OnEnable()
     {
         ChangeButtonColor(defaultColor, false);
+        enableDelayActive = true;
     }
 
     private void OnDisable()
@@ -50,7 +56,7 @@ public class UIButtonController : MonoBehaviour
         if (other.CompareTag("PlayerHand"))
         {
             //If the button is interactable, not currently being pressed, and is not locked, press the button
-            if (isInteractable && !isPressing && !isDisabled)
+            if (isInteractable && !isPressing && !isDisabled && !enableDelayActive)
             {
                 PressButton(false);
             }
@@ -59,6 +65,20 @@ public class UIButtonController : MonoBehaviour
             {
                 PressButton(true);
             }
+        }
+    }
+
+    private void Update()
+    {
+        if (enableDelayActive)
+        {
+            if(currentEnableDelay > onEnableDelay)
+            {
+                enableDelayActive = false;
+                currentEnableDelay = 0f;
+            }
+            else
+                currentEnableDelay += Time.deltaTime;
         }
     }
 
@@ -109,7 +129,7 @@ public class UIButtonController : MonoBehaviour
                 GetComponent<AudioSource>().PlayOneShot(onPressedSoundEffect, PlayerPrefs.GetFloat("SFXVolume", GameSettings.defaultSFXSound) * PlayerPrefs.GetFloat("MasterVolume", GameSettings.defaultMasterSound));
 
             onPressed.Invoke();
-            Debug.Log(gameObject.name + " Pressed.");
+            //Debug.Log(gameObject.name + " Pressed.");
 
             if (lockOnPress)
                 LockButton(true);

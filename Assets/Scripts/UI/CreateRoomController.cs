@@ -71,8 +71,6 @@ public class CreateRoomController : MonoBehaviour
     {
         matchLengthLabel.text = "Match Length: ";
 
-        Debug.Log("Match Length: " + customRoomSettings["RoundLength"].ToString());
-
         int currentRoundLength = (int)customRoomSettings["RoundLength"];
 
         if (currentRoundLength < 60)
