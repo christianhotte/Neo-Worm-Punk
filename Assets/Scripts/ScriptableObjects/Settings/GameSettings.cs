@@ -27,6 +27,7 @@ public static class GameSettings
     public static bool teamModeDefault = false;
     public static bool fatherFigure = false;
 
+    public static string startScene = "StartScene";
     public static string titleScreenScene = "DavidMenuScene";
     public static string roomScene = "NetworkLockerRoom";
     public static string arenaScene = "DM_0.17_Arena";

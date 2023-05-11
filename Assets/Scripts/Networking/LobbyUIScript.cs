@@ -170,8 +170,8 @@ public class LobbyUIScript : MonoBehaviour
 
         PlayerPrefs.SetInt("WormNoun", currentNoun);
 
-        Debug.Log("Worm Adjective: " + PlayerPrefs.GetInt("WormAdjective"));
-        Debug.Log("Worm Noun: " + PlayerPrefs.GetInt("WormNoun"));
+        //Debug.Log("Worm Adjective: " + PlayerPrefs.GetInt("WormAdjective"));
+        //Debug.Log("Worm Noun: " + PlayerPrefs.GetInt("WormNoun"));
 
         NetworkManagerScript.instance.SetPlayerNickname(NetworkManagerScript.instance.GetTotalWormAdjectives()[PlayerPrefs.GetInt("WormAdjective")], NetworkManagerScript.instance.GetTotalWormNouns()[currentNoun]);
         UpdateNameText(currentAdjective, currentNoun);
