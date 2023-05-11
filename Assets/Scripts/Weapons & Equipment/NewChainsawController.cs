@@ -65,6 +65,10 @@ public class NewChainsawController : PlayerEquipment
     private float bladeBackOriginSize; //Initial length of rear blade extender
     private float afterKillCountdown;
 
+    private int currentRapidDeflects;
+    private float currentDeflectCooldown;
+    private bool rapidDeflectCheckActive;
+
     //RUNTIME METHODS:
     /// <summary>
     /// lmao nerd
@@ -143,6 +147,21 @@ public class NewChainsawController : PlayerEquipment
             }
         }
         if (grinding) grindTime += Time.deltaTime; //Update grind time tracker
+
+        //If the rapid deflect check is active
+        if (rapidDeflectCheckActive)
+        {
+            if(currentDeflectCooldown > settings.rapidDeflectCooldown)
+            {
+                rapidDeflectCheckActive = false;
+                currentDeflectCooldown = 0;
+                currentRapidDeflects = 0;
+            }
+            else
+            {
+                currentDeflectCooldown += Time.deltaTime;
+            }
+        }
 
         //Move deflect needle:
         if (deflectChargeNeedle != null && !inStasis)
@@ -460,10 +479,12 @@ public class NewChainsawController : PlayerEquipment
             }
         }
     }
+    
     private protected override void FixedUpdate()
     {
         base.FixedUpdate(); //Call base equipment update method
     }
+
     private protected override void InputActionTriggered(InputAction.CallbackContext context)
     {
         //Determine input target:
@@ -555,6 +576,25 @@ public class NewChainsawController : PlayerEquipment
             {
                 if (!AchievementListener.Instance.IsAchievementUnlocked(1))
                     AchievementListener.Instance.UnlockAchievement(1);
+
+                NetworkManagerScript.localNetworkPlayer.networkPlayerStats.successfulDeflects++;
+
+                rapidDeflectCheckActive = true;
+                currentRapidDeflects++;
+
+                //If the player has deflected 5 projectiles in a rapid succession, unlock an achievement
+                if(currentRapidDeflects == 5)
+                {
+                    if (!AchievementListener.Instance.IsAchievementUnlocked(22))
+                        AchievementListener.Instance.UnlockAchievement(22);
+                }
+
+                //If the player has successfully deflected 22 times in a match, unlock an achievement
+                if (NetworkManagerScript.localNetworkPlayer.networkPlayerStats.successfulDeflects == 22)
+                {
+                    if (!AchievementListener.Instance.IsAchievementUnlocked(21))
+                        AchievementListener.Instance.UnlockAchievement(21);
+                }
             }
 
             return true; //Indicate that projectile was deflected

@@ -703,10 +703,33 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
             //Plays the sound of the worm's nickname when setting it
         }
 
-        if(currentName == "Moist Hole")
+        NameAchievementChecker(currentName);
+    }
+
+    private void NameAchievementChecker(string currentName)
+    {
+        switch (currentName)
         {
-            if (!AchievementListener.Instance.IsAchievementUnlocked(6))
-                AchievementListener.Instance.UnlockAchievement(6);
+            case "Moist Hole":
+                if (!AchievementListener.Instance.IsAchievementUnlocked(6))
+                    AchievementListener.Instance.UnlockAchievement(6);
+                break;
+            case "The Dink":
+                if (!AchievementListener.Instance.IsAchievementUnlocked(23))
+                    AchievementListener.Instance.UnlockAchievement(23);
+                break;
+            case "Pleading For You":
+                if (!AchievementListener.Instance.IsAchievementUnlocked(24))
+                    AchievementListener.Instance.UnlockAchievement(24);
+                break;
+            case "Goofy Fondler":
+                if (!AchievementListener.Instance.IsAchievementUnlocked(25))
+                    AchievementListener.Instance.UnlockAchievement(25);
+                break;
+            case "A Very Normal Rat":
+                if (!AchievementListener.Instance.IsAchievementUnlocked(26))
+                    AchievementListener.Instance.UnlockAchievement(26);
+                break;
         }
     }
 
