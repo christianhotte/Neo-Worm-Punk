@@ -10,6 +10,7 @@ public class ConveyerController : MonoBehaviour
     [SerializeField, Tooltip("How much time it takes for objects to get from conveyerbelt stop positions")] private float transportTime;
     [SerializeField, Tooltip("Reference to MenuStationController")] private MenuStationController menuStationControllerRef;
     [SerializeField, Tooltip("Indicates whether or not this is the player's conveyerbelt")] private bool isPlayerBelt;
+    [SerializeField, Tooltip("Conveyor Sounds")] private AudioClip[] myConveyorSounds;
 
     [Header("PLAYER Conveyer")]
     [SerializeField, Tooltip("Ref to the launch tube")] private Transform tube;
@@ -28,14 +29,16 @@ public class ConveyerController : MonoBehaviour
     private bool tutorialOption = false;
     private bool sandboxOption = false;
     private float saveTransportTime;
-
-
+    private AudioSource myAudioSource;
+    private bool soundisPlayingteehee;
+    
 
     /// <summary>
     /// Initialize and fill the storage of object index positioning
     /// </summary>
     private void Start()
     {
+        myAudioSource = transform.GetComponent<AudioSource>();
         saveTransportTime = 1f;
         //if this is not the conveyerbelt start repeatedely calling the conveyerbelt to move
         newConveyerObjectPositions = new int[conveyerBeltObjects.Length];
@@ -142,6 +145,10 @@ public class ConveyerController : MonoBehaviour
     /// <returns></returns>
     private IEnumerator MovingConveyerBelt(int[] nextBeltPositions)
     {
+        //PLAY STARTING CLIP
+        myAudioSource.PlayOneShot(myConveyorSounds[0]);
+
+
         //safety first folks
         conveyerBeltIsMoving = true;
 
@@ -172,6 +179,15 @@ public class ConveyerController : MonoBehaviour
         //lerp the objects from start to end positions
         while(timeElapsed < transportTime)
         {
+            //PLAY MOVING CLIP
+            if (!myAudioSource.isPlaying && !soundisPlayingteehee)
+            {
+                soundisPlayingteehee = true;
+                myAudioSource.clip = myConveyorSounds[1];
+                myAudioSource.Play(0);
+            }
+
+
             //just in case, stay safe :)
             if (GameManager.Instance.levelTransitionActive) { break; }
 
@@ -212,6 +228,9 @@ public class ConveyerController : MonoBehaviour
         transportTime = saveTransportTime;
         //sall gud to call this coroutine again :)
         conveyerBeltIsMoving = false;
+
+        //PLAY ENDING CLIP
+        myAudioSource.Stop();
 
         //If the player has moved to the credits section, move them immediately back to the starting area
         if (isPlayerBelt && nextBeltPositions[0] == 8 && creditsDoor != null)
