@@ -191,7 +191,7 @@ public class ReadyUpManager : MonoBehaviourPunCallbacks
 
             if (PhotonNetwork.CurrentRoom.PlayerCount < MINIMUM_PLAYERS_NEEDED && !GameSettings.debugMode)
             {
-                message += "\n<size=25>Not Enough Players To Start.</size>";
+                message += "\n<size=20><i>Not Enough Players To Start.</i></size>";
             }
 
             Debug.Log(message);
