@@ -29,7 +29,8 @@ public class ConveyerController : MonoBehaviour
     private bool sandboxOption = false;
     private float saveTransportTime;
 
-
+    private float creditsConveyorTime = 35f;
+    private float creditsDoorOpenTime = 31.5f;
 
     /// <summary>
     /// Initialize and fill the storage of object index positioning
@@ -129,9 +130,9 @@ public class ConveyerController : MonoBehaviour
         //If the player is teleported to the credits, move them immediately back to the starting area
         if (isPlayerBelt && nextBeltPosition == 8 && creditsDoor != null)
         {
-            transportTime = 12f;
+            transportTime = creditsConveyorTime;
             MoveConveyer(0);
-            creditsDoor.EnableDoors(10);
+            creditsDoor.EnableDoors(creditsDoorOpenTime);
         }
     }
 
@@ -217,8 +218,8 @@ public class ConveyerController : MonoBehaviour
         if (isPlayerBelt && nextBeltPositions[0] == 8 && creditsDoor != null)
         {
             MoveConveyer(0);
-            creditsDoor.EnableDoors(10);
-            transportTime = 12f;
+            creditsDoor.EnableDoors(creditsDoorOpenTime);
+            transportTime = creditsConveyorTime;
         }
     }
 

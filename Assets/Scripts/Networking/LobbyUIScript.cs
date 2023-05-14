@@ -202,7 +202,7 @@ public class LobbyUIScript : MonoBehaviour
 
     private void UpdateFunnyText()
     {
-        explicitWordsText.text = "Explicit Words: " + (PlayerPrefs.GetInt("FunnyWords") == 1 ? "On" : "Off");
+        explicitWordsText.text = (PlayerPrefs.GetInt("FunnyWords") == 1 ? "Explicit Words: On" : "Off");
     }
 
     // Displays the error message to the player.

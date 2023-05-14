@@ -239,7 +239,7 @@ public class NewShotgunController : PlayerEquipment
         switch (context.action.name) //Determine behavior depending on action name
         {
             case "Trigger":
-                float triggerPosition = context.ReadValue<float>(); //Get current position of trigger as a value
+                float triggerPosition = context.ReadValue<float>() + GameSettings.inputSensitivityBuffer; //Get current position of trigger as a value
                 if (timeSinceFiring >= gunSettings.recoilTime) //Make sure weapon is able to wobble during recoil phase (also disincentivises firing rapidly)
                 {
                     //Tighten aim:

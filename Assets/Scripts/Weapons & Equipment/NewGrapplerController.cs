@@ -111,12 +111,13 @@ public class NewGrapplerController : PlayerEquipment
         switch (context.action.name) //Determine behavior depending on action name
         {
             case "Grip":
-                float gripValue = context.ReadValue<float>();                                                                                                                //Get current position of grip axis
+                float gripValue = context.ReadValue<float>() + GameSettings.inputSensitivityBuffer;                                                                                                                //Get current position of grip axis
                 if (hook == null) break;                                                                                                                                     //Do not try to launch hook before it has been spawned
-                if (hook.state == HookProjectile.HookState.Stowed && gripValue >= settings.deployThreshold) Launch();                                                        //Launch hook when grip is squeezed
+                if (hook.state == HookProjectile.HookState.Stowed && gripValue + GameSettings.inputSensitivityBuffer >= settings.deployThreshold) Launch();                                                        //Launch hook when grip is squeezed
                 if (hook.state != HookProjectile.HookState.Stowed && hook.state != HookProjectile.HookState.Retracting && gripValue <= settings.releaseThreshold&&!locked) Release(); //Begin retracting hook when grip is released
                 break;
-            default: break; //Ignore unrecognized actions
+            default:
+                break; //Ignore unrecognized actions
         }
     }
 
@@ -195,6 +196,8 @@ public class NewGrapplerController : PlayerEquipment
         if (hook == null) { print("Tried to launch without hook!"); return; }           //Do not try to launch hook if it does not exist yet (for some reason)
         if (hook.state != HookProjectile.HookState.Stowed) return;                      //Do not allow hook to be launched if it is not stowed
         if (hook.punchWhipped && hook.timeInState < settings.punchWhipCooldown) return; //Do not allow hook to be launched before punch-whip cooldown has ended
+
+        Debug.Log("Launching Grappling Hook.");
 
         //Fire hook:
         hook.Fire(barrel.position, hand.rotation, PlayerController.photonView != null ? PlayerController.photonView.ViewID : -1); //Fire using the position of barrel and rotation of hand (to allow for more directional flexibility)
