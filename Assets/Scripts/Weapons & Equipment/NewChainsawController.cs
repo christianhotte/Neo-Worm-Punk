@@ -491,7 +491,7 @@ public class NewChainsawController : PlayerEquipment
         switch (context.action.name) //Determine behavior depending on action name
         {
             case "Grip":
-                gripValue = context.ReadValue<float>(); //Get current amount by which player is squeezing the grip
+                gripValue = context.ReadValue<float>() + GameSettings.inputSensitivityBuffer; //Get current amount by which player is squeezing the grip
                 if (mode == BladeMode.Sheathed) //Blade is currently sheathed
                 {
                     float gripInterpolant = settings.bladePreRetractCurve.Evaluate(gripValue / settings.triggerThresholds.y);      //Get multiplier to apply to retraction distance in order to pull blade back slightly
@@ -499,7 +499,7 @@ public class NewChainsawController : PlayerEquipment
                 }
                 break;
             case "Trigger":
-                triggerValue = context.ReadValue<float>(); //Get current amount by which player is squeezing the trigger
+                triggerValue = context.ReadValue<float>() + GameSettings.inputSensitivityBuffer; //Get current amount by which player is squeezing the trigger
                 break;
             case "AButton":
                 if (context.started) reverseGrip = true;   //Indicate that player is pressing reverse grip button

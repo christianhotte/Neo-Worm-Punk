@@ -340,6 +340,15 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
+                    ""name"": ""GripHold"",
+                    ""type"": ""Value"",
+                    ""id"": ""ce866dd7-bf8b-42ca-b190-a42ed6eb63de"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
                     ""name"": ""AButton"",
                     ""type"": ""Button"",
                     ""id"": ""71eec4c2-1cf2-4b24-919d-d4de886a38b7"",
@@ -508,6 +517,17 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""Generic XR Controller"",
                     ""action"": ""Joystick"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""afe4e3eb-0b42-4b4d-b9af-45303a44b1a1"",
+                    ""path"": ""<XRController>{LeftHand}/grip"",
+                    ""interactions"": ""Hold"",
+                    ""processors"": """",
+                    ""groups"": ""Generic XR Controller"",
+                    ""action"": ""GripHold"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -762,6 +782,15 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
+                    ""name"": ""GripHold"",
+                    ""type"": ""Value"",
+                    ""id"": ""b637b59a-6a02-45fb-8ebb-7abec48f9197"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
                     ""name"": ""AButton"",
                     ""type"": ""Button"",
                     ""id"": ""9e116a63-6710-41a3-8929-2c51a1b974df"",
@@ -930,6 +959,17 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""Generic XR Controller"",
                     ""action"": ""Joystick"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""542d737c-f732-4eb0-a6f0-4679c47b45bf"",
+                    ""path"": ""<XRController>{RightHand}/grip"",
+                    ""interactions"": ""Hold"",
+                    ""processors"": """",
+                    ""groups"": ""Generic XR Controller"",
+                    ""action"": ""GripHold"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1678,6 +1718,7 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
         m_XRILeftHandInteraction_TranslateAnchor = m_XRILeftHandInteraction.FindAction("Translate Anchor", throwIfNotFound: true);
         m_XRILeftHandInteraction_Trigger = m_XRILeftHandInteraction.FindAction("Trigger", throwIfNotFound: true);
         m_XRILeftHandInteraction_Grip = m_XRILeftHandInteraction.FindAction("Grip", throwIfNotFound: true);
+        m_XRILeftHandInteraction_GripHold = m_XRILeftHandInteraction.FindAction("GripHold", throwIfNotFound: true);
         m_XRILeftHandInteraction_AButton = m_XRILeftHandInteraction.FindAction("AButton", throwIfNotFound: true);
         m_XRILeftHandInteraction_BButton = m_XRILeftHandInteraction.FindAction("BButton", throwIfNotFound: true);
         m_XRILeftHandInteraction_Joystick = m_XRILeftHandInteraction.FindAction("Joystick", throwIfNotFound: true);
@@ -1699,6 +1740,7 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
         m_XRIRightHandInteraction_TranslateAnchor = m_XRIRightHandInteraction.FindAction("Translate Anchor", throwIfNotFound: true);
         m_XRIRightHandInteraction_Trigger = m_XRIRightHandInteraction.FindAction("Trigger", throwIfNotFound: true);
         m_XRIRightHandInteraction_Grip = m_XRIRightHandInteraction.FindAction("Grip", throwIfNotFound: true);
+        m_XRIRightHandInteraction_GripHold = m_XRIRightHandInteraction.FindAction("GripHold", throwIfNotFound: true);
         m_XRIRightHandInteraction_AButton = m_XRIRightHandInteraction.FindAction("AButton", throwIfNotFound: true);
         m_XRIRightHandInteraction_BButton = m_XRIRightHandInteraction.FindAction("BButton", throwIfNotFound: true);
         m_XRIRightHandInteraction_Joystick = m_XRIRightHandInteraction.FindAction("Joystick", throwIfNotFound: true);
@@ -1924,6 +1966,7 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_XRILeftHandInteraction_TranslateAnchor;
     private readonly InputAction m_XRILeftHandInteraction_Trigger;
     private readonly InputAction m_XRILeftHandInteraction_Grip;
+    private readonly InputAction m_XRILeftHandInteraction_GripHold;
     private readonly InputAction m_XRILeftHandInteraction_AButton;
     private readonly InputAction m_XRILeftHandInteraction_BButton;
     private readonly InputAction m_XRILeftHandInteraction_Joystick;
@@ -1941,6 +1984,7 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
         public InputAction @TranslateAnchor => m_Wrapper.m_XRILeftHandInteraction_TranslateAnchor;
         public InputAction @Trigger => m_Wrapper.m_XRILeftHandInteraction_Trigger;
         public InputAction @Grip => m_Wrapper.m_XRILeftHandInteraction_Grip;
+        public InputAction @GripHold => m_Wrapper.m_XRILeftHandInteraction_GripHold;
         public InputAction @AButton => m_Wrapper.m_XRILeftHandInteraction_AButton;
         public InputAction @BButton => m_Wrapper.m_XRILeftHandInteraction_BButton;
         public InputAction @Joystick => m_Wrapper.m_XRILeftHandInteraction_Joystick;
@@ -1983,6 +2027,9 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
             @Grip.started += instance.OnGrip;
             @Grip.performed += instance.OnGrip;
             @Grip.canceled += instance.OnGrip;
+            @GripHold.started += instance.OnGripHold;
+            @GripHold.performed += instance.OnGripHold;
+            @GripHold.canceled += instance.OnGripHold;
             @AButton.started += instance.OnAButton;
             @AButton.performed += instance.OnAButton;
             @AButton.canceled += instance.OnAButton;
@@ -2026,6 +2073,9 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
             @Grip.started -= instance.OnGrip;
             @Grip.performed -= instance.OnGrip;
             @Grip.canceled -= instance.OnGrip;
+            @GripHold.started -= instance.OnGripHold;
+            @GripHold.performed -= instance.OnGripHold;
+            @GripHold.canceled -= instance.OnGripHold;
             @AButton.started -= instance.OnAButton;
             @AButton.performed -= instance.OnAButton;
             @AButton.canceled -= instance.OnAButton;
@@ -2136,6 +2186,7 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_XRIRightHandInteraction_TranslateAnchor;
     private readonly InputAction m_XRIRightHandInteraction_Trigger;
     private readonly InputAction m_XRIRightHandInteraction_Grip;
+    private readonly InputAction m_XRIRightHandInteraction_GripHold;
     private readonly InputAction m_XRIRightHandInteraction_AButton;
     private readonly InputAction m_XRIRightHandInteraction_BButton;
     private readonly InputAction m_XRIRightHandInteraction_Joystick;
@@ -2153,6 +2204,7 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
         public InputAction @TranslateAnchor => m_Wrapper.m_XRIRightHandInteraction_TranslateAnchor;
         public InputAction @Trigger => m_Wrapper.m_XRIRightHandInteraction_Trigger;
         public InputAction @Grip => m_Wrapper.m_XRIRightHandInteraction_Grip;
+        public InputAction @GripHold => m_Wrapper.m_XRIRightHandInteraction_GripHold;
         public InputAction @AButton => m_Wrapper.m_XRIRightHandInteraction_AButton;
         public InputAction @BButton => m_Wrapper.m_XRIRightHandInteraction_BButton;
         public InputAction @Joystick => m_Wrapper.m_XRIRightHandInteraction_Joystick;
@@ -2195,6 +2247,9 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
             @Grip.started += instance.OnGrip;
             @Grip.performed += instance.OnGrip;
             @Grip.canceled += instance.OnGrip;
+            @GripHold.started += instance.OnGripHold;
+            @GripHold.performed += instance.OnGripHold;
+            @GripHold.canceled += instance.OnGripHold;
             @AButton.started += instance.OnAButton;
             @AButton.performed += instance.OnAButton;
             @AButton.canceled += instance.OnAButton;
@@ -2238,6 +2293,9 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
             @Grip.started -= instance.OnGrip;
             @Grip.performed -= instance.OnGrip;
             @Grip.canceled -= instance.OnGrip;
+            @GripHold.started -= instance.OnGripHold;
+            @GripHold.performed -= instance.OnGripHold;
+            @GripHold.canceled -= instance.OnGripHold;
             @AButton.started -= instance.OnAButton;
             @AButton.performed -= instance.OnAButton;
             @AButton.canceled -= instance.OnAButton;
@@ -2534,6 +2592,7 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
         void OnTranslateAnchor(InputAction.CallbackContext context);
         void OnTrigger(InputAction.CallbackContext context);
         void OnGrip(InputAction.CallbackContext context);
+        void OnGripHold(InputAction.CallbackContext context);
         void OnAButton(InputAction.CallbackContext context);
         void OnBButton(InputAction.CallbackContext context);
         void OnJoystick(InputAction.CallbackContext context);
@@ -2557,6 +2616,7 @@ public partial class @HotteInputActions: IInputActionCollection2, IDisposable
         void OnTranslateAnchor(InputAction.CallbackContext context);
         void OnTrigger(InputAction.CallbackContext context);
         void OnGrip(InputAction.CallbackContext context);
+        void OnGripHold(InputAction.CallbackContext context);
         void OnAButton(InputAction.CallbackContext context);
         void OnBButton(InputAction.CallbackContext context);
         void OnJoystick(InputAction.CallbackContext context);

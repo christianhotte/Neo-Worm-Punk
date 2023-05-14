@@ -18,10 +18,10 @@ public class GrabbableUI : MonoBehaviour
     protected virtual void Awake()
     {
         inputActions = new HotteInputActions();
-        inputActions.XRILeftHandInteraction.Grip.started += _ => OnGrab();
-        inputActions.XRIRightHandInteraction.Grip.started += _ => OnGrab();
-        inputActions.XRILeftHandInteraction.Grip.canceled += _ => OnRelease();
-        inputActions.XRIRightHandInteraction.Grip.canceled += _ => OnRelease();
+        inputActions.XRILeftHandInteraction.GripHold.started += _ => OnGrab();
+        inputActions.XRIRightHandInteraction.GripHold.started += _ => OnGrab();
+        inputActions.XRILeftHandInteraction.GripHold.canceled += _ => OnRelease();
+        inputActions.XRIRightHandInteraction.GripHold.canceled += _ => OnRelease();
 
         handleRenderers = GetComponentsInChildren<MeshRenderer>();
         for (int i = 0; i < handleRenderers.Length; i++)
@@ -49,12 +49,14 @@ public class GrabbableUI : MonoBehaviour
     /// <param name="other">The object colliding with the trigger.</param>
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("PlayerHand") && !isGrabbable)
+        if (other.CompareTag("PlayerHand") && other.transform.name.Contains("Controller") && !isGrabbable)
         {
             isGrabbable = true;
             followObject = other.transform;
             SetAllMaterials(inRangeMat);
             SendHapticsFeedback(0.3f, 0.2f);
+
+            Debug.Log("Enter UI Object Trigger With " + followObject.name);
         }
     }
 
@@ -64,10 +66,11 @@ public class GrabbableUI : MonoBehaviour
     /// <param name="other">The object colliding with the trigger.</param>
     private void OnTriggerStay(Collider other)
     {
-        if (other.CompareTag("PlayerHand") && followObject == null)
+        if (other.CompareTag("PlayerHand") && other.transform.name.Contains("Controller") && followObject == null)
         {
             followObject = other.transform;
             SetAllMaterials(inRangeMat);
+            Debug.Log("Staying In UI Object Trigger With " + followObject.name);
         }
     }
 
@@ -77,10 +80,11 @@ public class GrabbableUI : MonoBehaviour
     /// <param name="other">The object colliding with the trigger.</param>
     private void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag("PlayerHand") && isGrabbable && !isGrabbed)
+        if (other.CompareTag("PlayerHand") && other.transform.name.Contains("Controller") && isGrabbable && !isGrabbed)
         {
             isGrabbable = false;
             SetDefaultMaterials();
+            Debug.Log("Exiting UI Object Trigger With " + other.transform.name);
         }
     }
 
@@ -89,9 +93,9 @@ public class GrabbableUI : MonoBehaviour
     /// </summary>
     public virtual void OnGrab()
     {
-        if (isGrabbable && !isGrabbed)
+        if (isGrabbable && !isGrabbed && followObject != null)
         {
-            //Debug.Log("Grabbing Object...");
+            Debug.Log("Grabbing UI Object With " + followObject.name);
             isGrabbed = true;
             SetAllMaterials(grabbedMat);
             SendHapticsFeedback(0.4f, 0.15f);
@@ -105,7 +109,7 @@ public class GrabbableUI : MonoBehaviour
     {
         if (isGrabbed)
         {
-            //Debug.Log("Releasing Object...");
+            Debug.Log("Releasing UI Object With " + followObject.name);
             SendHapticsFeedback(0.1f, 0.2f);
             isGrabbed = false;
             followObject = null;

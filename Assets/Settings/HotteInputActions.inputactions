@@ -318,6 +318,15 @@
                     "initialStateCheck": true
                 },
                 {
+                    "name": "GripHold",
+                    "type": "Value",
+                    "id": "ce866dd7-bf8b-42ca-b190-a42ed6eb63de",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
                     "name": "AButton",
                     "type": "Button",
                     "id": "71eec4c2-1cf2-4b24-919d-d4de886a38b7",
@@ -486,6 +495,17 @@
                     "processors": "",
                     "groups": "Generic XR Controller",
                     "action": "Joystick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "afe4e3eb-0b42-4b4d-b9af-45303a44b1a1",
+                    "path": "<XRController>{LeftHand}/grip",
+                    "interactions": "Hold",
+                    "processors": "",
+                    "groups": "Generic XR Controller",
+                    "action": "GripHold",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
@@ -740,6 +760,15 @@
                     "initialStateCheck": true
                 },
                 {
+                    "name": "GripHold",
+                    "type": "Value",
+                    "id": "b637b59a-6a02-45fb-8ebb-7abec48f9197",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
                     "name": "AButton",
                     "type": "Button",
                     "id": "9e116a63-6710-41a3-8929-2c51a1b974df",
@@ -908,6 +937,17 @@
                     "processors": "",
                     "groups": "Generic XR Controller",
                     "action": "Joystick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "542d737c-f732-4eb0-a6f0-4679c47b45bf",
+                    "path": "<XRController>{RightHand}/grip",
+                    "interactions": "Hold",
+                    "processors": "",
+                    "groups": "Generic XR Controller",
+                    "action": "GripHold",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
