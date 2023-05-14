@@ -13,7 +13,7 @@ public static class GameSettings
     public static string presetsDirectoryPath = Application.streamingAssetsPath + "/Presets";
     public static int maxPresetFiles = 3;
 
-    public static float inputSensitivityBuffer = 0.025f;
+    public static float inputSensitivityBuffer = 0.05f;
 
     //Default Room Settings
     public static int[] matchLengths = { 60, 120, 180, 300, 420, 600 };

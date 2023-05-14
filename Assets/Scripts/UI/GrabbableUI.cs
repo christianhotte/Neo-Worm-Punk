@@ -55,8 +55,7 @@ public class GrabbableUI : MonoBehaviour
             followObject = other.transform;
             SetAllMaterials(inRangeMat);
             SendHapticsFeedback(0.3f, 0.2f);
-
-            Debug.Log("Enter UI Object Trigger With " + followObject.name);
+            //Debug.Log("Enter UI Object Trigger With " + followObject.name);
         }
     }
 
@@ -70,7 +69,7 @@ public class GrabbableUI : MonoBehaviour
         {
             followObject = other.transform;
             SetAllMaterials(inRangeMat);
-            Debug.Log("Staying In UI Object Trigger With " + followObject.name);
+            //Debug.Log("Staying In UI Object Trigger With " + followObject.name);
         }
     }
 
@@ -84,7 +83,7 @@ public class GrabbableUI : MonoBehaviour
         {
             isGrabbable = false;
             SetDefaultMaterials();
-            Debug.Log("Exiting UI Object Trigger With " + other.transform.name);
+            //Debug.Log("Exiting UI Object Trigger With " + other.transform.name);
         }
     }
 
@@ -95,7 +94,7 @@ public class GrabbableUI : MonoBehaviour
     {
         if (isGrabbable && !isGrabbed && followObject != null)
         {
-            Debug.Log("Grabbing UI Object With " + followObject.name);
+            //Debug.Log("Grabbing UI Object With " + followObject.name);
             isGrabbed = true;
             SetAllMaterials(grabbedMat);
             SendHapticsFeedback(0.4f, 0.15f);
@@ -109,7 +108,7 @@ public class GrabbableUI : MonoBehaviour
     {
         if (isGrabbed)
         {
-            Debug.Log("Releasing UI Object With " + followObject.name);
+            //Debug.Log("Releasing UI Object With " + followObject.name);
             SendHapticsFeedback(0.1f, 0.2f);
             isGrabbed = false;
             followObject = null;
