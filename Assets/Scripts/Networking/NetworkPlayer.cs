@@ -759,11 +759,22 @@ public class NetworkPlayer : MonoBehaviour
                 photonView.RPC("RPC_UpdateLeaderboard", RpcTarget.All, PhotonNetwork.GetPhotonView(enemyID).Owner.NickName, PhotonNetwork.LocalPlayer.NickName, GetOtherNetworkPlayer(PhotonNetwork.GetPhotonView(enemyID)).networkPlayerStats.killStreak);
                 if (enemyID != photonView.ViewID) PhotonNetwork.GetPhotonView(enemyID).RPC("RPC_KilledEnemy", RpcTarget.AllBuffered, photonView.ViewID, deathCause);
 
-                //If the player dies from a trap, give them an achievement
-                if(deathCause == (int)DeathCause.TRAP)
+                //Get player cause of death for achievements
+                switch (deathCause)
                 {
-                    if (!AchievementListener.Instance.IsAchievementUnlocked(10))
-                        AchievementListener.Instance.UnlockAchievement(10);
+                    case (int)DeathCause.CHAINSAW:
+                        //If the user is named Goofy Fondler, give them the Goofily Fondled achievement
+                        if (PhotonNetwork.GetPhotonView(enemyID).Owner.NickName == "Goofy Fondler")
+                        {
+                            if (!AchievementListener.Instance.IsAchievementUnlocked(28))
+                                AchievementListener.Instance.UnlockAchievement(28);
+                        }
+                        break;
+                    case (int)DeathCause.TRAP:
+                        //If the player is killed by a trap, give them an achievement
+                        if (!AchievementListener.Instance.IsAchievementUnlocked(10))
+                            AchievementListener.Instance.UnlockAchievement(10);
+                        break;
                 }
             }
 
