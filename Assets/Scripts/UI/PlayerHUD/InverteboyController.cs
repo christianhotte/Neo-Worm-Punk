@@ -66,7 +66,8 @@ public class InverteboyController : MonoBehaviour
     [SerializeField, Tooltip("Start screen music.")] private AudioClip startScreenMusic;
     [SerializeField, Tooltip("Main menu music.")] private AudioClip mainMenuMusic;
     [SerializeField, Tooltip("Lobby music.")] private AudioClip lobbyMusic;
-    [SerializeField, Tooltip("Arens music.")] private AudioClip arenaMusic;
+    [SerializeField, Tooltip("Arena music intro.")] private AudioClip arenaMusicIntro;
+    [SerializeField, Tooltip("Arena music.")] private AudioClip arenaMusic;
     [Space(10)]
 
     private Canvas currentMainCanvas;
@@ -129,7 +130,7 @@ public class InverteboyController : MonoBehaviour
 
         if (SceneManager.GetActiveScene().name == GameSettings.arenaScene)
         {
-            PlayMusic(arenaMusic);
+            StartCoroutine(PlayArenaMusic());
             SwitchMainCanvas(InverteboyMainScreens.ARENA);
             hideHologram = true;
         }
@@ -153,6 +154,28 @@ public class InverteboyController : MonoBehaviour
             audioSource.clip = audioClip;
             audioSource.Play();
         }
+    }
+
+    /// <summary>
+    /// Plays the arena music with an intro that only plays once.
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerator PlayArenaMusic()
+    {
+        double introTimer = 0;
+        double introTime = 0;
+
+        //Play the intro to the arena music
+        if (arenaMusicIntro != null)
+        {
+            PlayMusic(arenaMusicIntro);
+            audioSource.loop = false;
+            yield return new WaitUntil(() => !audioSource.isPlaying);
+        }
+
+        //Play the arena music once the intro is over
+        PlayMusic(arenaMusic);
+        audioSource.loop = true;
     }
 
     /// <summary>
