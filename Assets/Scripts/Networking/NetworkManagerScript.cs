@@ -726,7 +726,7 @@ public class NetworkManagerScript : MonoBehaviourPunCallbacks
                 if (!AchievementListener.Instance.IsAchievementUnlocked(25))
                     AchievementListener.Instance.UnlockAchievement(25);
                 break;
-            case "A Very Normal Rat":
+            case "Wet Rat":
                 if (!AchievementListener.Instance.IsAchievementUnlocked(26))
                     AchievementListener.Instance.UnlockAchievement(26);
                 break;
